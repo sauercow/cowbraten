@@ -843,10 +843,7 @@ namespace game
                    (int)(from.x*DMF), (int)(from.y*DMF), (int)(from.z*DMF),
                    (int)(to.x*DMF), (int)(to.y*DMF), (int)(to.z*DMF),
                    hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
-            if(demorecord) recordmsg(N_SHOTFX, "rci9", d,
-                d->clientnum, d->gunselect, lastmillis-maptime,
-                int(from.x*DMF), int(from.y*DMF), int(from.z*DMF),
-                int(to.x*DMF), int(to.y*DMF), int(to.z*DMF));
+            if(demorecord) recorddemoshot(d, from, to);
         }
 
 		d->gunwait = guns[d->gunselect].attackdelay;

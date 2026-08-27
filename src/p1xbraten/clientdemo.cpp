@@ -20,6 +20,60 @@ namespace game {
     stream *demo = NULL, *demorecord = NULL;
     int demostartmillis = 0;
 
+    void recorddemoaim(fpsent *d)
+    {
+        if(!demorecord || !d) return;
+
+        packetbuf p(32, ENET_PACKET_FLAG_RELIABLE);
+        putint(p, N_P1X_DEMO_AIM);
+        putuint(p, d->clientnum);
+        putfloat(p, d->yaw);
+        putfloat(p, d->pitch);
+        putfloat(p, d->roll);
+
+        recordpacket(1, p.buf, p.length());
+    }
+
+    void recorddemoposition(fpsent *d, uchar *data, int len)
+    {
+        if(!demorecord || !d || !data || len <= 0) return;
+
+        // Preserve the standard positional stream on channel 0. Record the
+        // exact angles immediately afterwards so N_POS's integer angles can
+        // never be the final orientation for this timestamp.
+        recordpacket(0, data, len);
+        recorddemoaim(d);
+    }
+
+    void recorddemoshot(fpsent *d, const vec &from, const vec &to)
+    {
+        if(!demorecord || !d) return;
+
+        // Store the regular shot effect and its exact, pre-spread view angles
+        // in one reliable demo packet. Keeping both messages together makes
+        // their order deterministic even when playback processes multiple
+        // records in a single render frame.
+        packetbuf p(128, ENET_PACKET_FLAG_RELIABLE);
+        putint(p, N_SHOTFX);
+        putint(p, d->clientnum);
+        putint(p, d->gunselect);
+        putint(p, lastmillis-maptime);
+        putint(p, int(from.x*DMF));
+        putint(p, int(from.y*DMF));
+        putint(p, int(from.z*DMF));
+        putint(p, int(to.x*DMF));
+        putint(p, int(to.y*DMF));
+        putint(p, int(to.z*DMF));
+
+        putint(p, N_P1X_DEMO_SHOT_AIM);
+        putuint(p, d->clientnum);
+        putfloat(p, d->yaw);
+        putfloat(p, d->pitch);
+        putfloat(p, d->roll);
+
+        recordpacket(1, p.buf, p.length());
+    }
+
     void enddemorecord(bool send)
     {
         if(!demorecord) return;

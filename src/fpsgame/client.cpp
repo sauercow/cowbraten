@@ -1055,7 +1055,13 @@ namespace game
                 q.put((falldir>>8)&0xFF);
             }
         }
-        if(demorecord && (d==player1 || d->ai)) recordpacket(0, q.buf+offset, q.length()-offset);
+        if(demorecord && (d==player1 || d->ai))
+        {
+            uchar *pos = q.buf + offset;
+            int len = q.length() - offset;
+            if(d == player1) recorddemoposition(d, pos, len);
+            else recordpacket(0, pos, len);
+        }
     }
 
     void sendposition(fpsent *d, bool reliable)
@@ -1127,6 +1133,10 @@ namespace game
     {
         static int lastupdate = -1000;
         static int lastdemopos = -1000;
+        // Mouse input can update the camera faster than the positional/network
+        // cadence. Capture the local view every game update; recorddemoposition
+        // also repeats it after N_POS to undo that message's integer angles.
+        if(demorecord && (player1->state==CS_ALIVE || player1->state==CS_EDITING)) recorddemoaim(player1);
         if(totalmillis - lastupdate < 33 && !force)
         {
             if(demorecord && player1->state==CS_ALIVE && totalmillis-lastdemopos>=8) // 125pps player1 positions
@@ -1199,12 +1209,51 @@ namespace game
         }
     }
 
+    static void setdemoaim(fpsent *d, float yaw, float pitch)
+    {
+        while(yaw < 0) yaw += 360;
+        while(yaw >= 360) yaw -= 360;
+        d->yaw = d->newyaw = yaw;
+        d->pitch = d->newpitch = pitch;
+        d->deltayaw = d->deltapitch = 0;
+    }
+
+    static void parsedemoaim(ucharbuf &p)
+    {
+        int cn = getuint(p);
+        if(!p.check(3*sizeof(float)))
+        {
+            p.forceoverread();
+            return;
+        }
+
+        float yaw = getfloat(p), pitch = getfloat(p), roll = getfloat(p);
+        // Besides rejecting corrupt samples, these comparisons reject NaNs.
+        if(!(yaw >= -720 && yaw <= 720 && pitch >= -90 && pitch <= 90 && roll >= -90 && roll <= 90)) return;
+
+        fpsent *d = getclient(cn);
+        if(!d || !demoplayback) return;
+
+        // Demo records are already chronological. Several timestamps can be
+        // consumed in one render frame, so every sample must be applied; using
+        // lastmillis to suppress one would incorrectly discard later records.
+        setdemoaim(d, yaw, pitch);
+        d->highfidemoaim = true;
+    }
+
     void parsepositions(ucharbuf &p)
     {
         int type;
         while(p.remaining()) switch(type = getint(p))
         {
             case N_DEMOPACKET: break;
+
+            case N_P1X_DEMO_AIM:
+            {
+                parsedemoaim(p);
+                break;
+            }
+
             case N_POS:                        // position of another client
             {
                 int cn = getuint(p), physstate = p.get(), flags = getuint(p);
@@ -1239,8 +1288,14 @@ namespace game
                 fpsent *d = getclient(cn);
                 if(!d || d->lifesequence < 0 || seqcolor!=(d->lifesequence&1) || d->state==CS_DEAD) continue;
                 float oldyaw = d->yaw, oldpitch = d->pitch, oldroll = d->roll;
-                d->yaw = yaw;
-                d->pitch = pitch;
+                // Once a demo supplies full-precision angles, N_POS remains a
+                // movement source only. Its integer yaw/pitch must never win
+                // because packets on different channels may be reordered.
+                if(!(demoplayback && d->highfidemoaim))
+                {
+                    d->yaw = yaw;
+                    d->pitch = pitch;
+                }
                 d->roll = roll;
                 d->move = (physstate>>4)&2 ? -1 : (physstate>>4)&1;
                 d->strafe = (physstate>>6)&2 ? -1 : (physstate>>6)&1;
@@ -1591,10 +1646,33 @@ namespace game
                 int prevaction = s->lastaction;
                 s->lastaction = lastmillis;
                 s->lastattackgun = s->gunselect;
+                // Use the shot ray to preserve fast flicks that occur between
+                // periodic aim samples. Multi-ray weapons keep `to` as their
+                // original crosshair target; single-ray spread weapons do not.
+                if(demoplayback && (!guns[s->gunselect].spread || guns[s->gunselect].rays > 1))
+                {
+                    vec dir = vec(to).sub(from);
+                    float yaw, pitch;
+                    vectoyawpitch(dir, yaw, pitch);
+                    setdemoaim(s, yaw, pitch);
+                }
                 shoteffects(s->gunselect, from, to, s, false, id, prevaction);
                 recordpotentialdamage(s);
                 break;
             }
+
+            case N_P1X_DEMO_AIM:
+            {
+                parsedemoaim(p);
+                break;
+            }
+
+            case N_P1X_DEMO_SHOT_AIM:
+            {
+                parsedemoaim(p);
+                break;
+            }
+
 
             case N_EXPLODEFX:
             {

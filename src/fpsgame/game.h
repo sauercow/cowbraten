@@ -248,6 +248,10 @@ enum
     N_P1X_SETIP = 900, // only from proxy to server (see addtrustedproxyip cmd)
     // N_P1X_CLIENT_DEMO_UPLOAD_SUPPORTED = 1000, N_P1X_RECORDDEMO, // legacy
     N_P1X_CLIENT_DEMO_UPLOAD_SUPPORTED = 1002, N_P1X_RECORDDEMO, // guarded by CAP_PROBE_CLIENT_DEMO_UPLOAD
+
+    // local high-fidelity client-demo messages, never sent during live play
+    N_P1X_DEMO_AIM = 1100, N_P1X_DEMO_SHOT_AIM,
+
 #ifdef ANTICHEAT
     N_P1X_ANTICHEAT_SUPPORTED = 2000, N_P1X_ANTICHEAT_BEGINSESSION, N_P1X_ANTICHEAT_MESSAGE, N_P1X_ANTICHEAT_VIOLATION, N_P1X_ANTICHEAT_ENDSESSION, N_P1X_ANTICHEAT_VERIFIED, // guarded by CAP_PROBE_ANTICHEAT
 #endif
@@ -283,6 +287,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_DEMOPACKET, 0,
     N_P1X_SETIP, 2,
     N_P1X_CLIENT_DEMO_UPLOAD_SUPPORTED, 1, N_P1X_RECORDDEMO, 1,
+    N_P1X_DEMO_AIM, 0, N_P1X_DEMO_SHOT_AIM, 0,
 #ifdef ANTICHEAT
     N_P1X_ANTICHEAT_SUPPORTED, 1, N_P1X_ANTICHEAT_BEGINSESSION, 0, N_P1X_ANTICHEAT_MESSAGE, 0, N_P1X_ANTICHEAT_VIOLATION, 0, N_P1X_ANTICHEAT_ENDSESSION, 1, N_P1X_ANTICHEAT_VERIFIED, 3,
 #endif
@@ -578,10 +583,11 @@ struct fpsent : dynent, fpsstate
     int ownernum, lastnode;
     semver p1xbratenversion;
     bool anticheatverified;
+    bool highfidemoaim;
 
     vec muzzle;
 
-    fpsent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), attacksound(-1), attackchan(-1), idlesound(-1), idlechan(-1), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), suicides(0), edit(NULL), smoothmillis(-1), playermodel(-1), ai(NULL), ownernum(-1), p1xbratenversion(0, 0, 0), anticheatverified(false), muzzle(-1, -1, -1)
+    fpsent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), attacksound(-1), attackchan(-1), idlesound(-1), idlechan(-1), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), suicides(0), edit(NULL), smoothmillis(-1), playermodel(-1), ai(NULL), ownernum(-1), p1xbratenversion(0, 0, 0), anticheatverified(false), highfidemoaim(false), muzzle(-1, -1, -1)
     {
         name[0] = team[0] = info[0] = alphanumname[0] = 0;
         respawn();
@@ -886,6 +892,9 @@ namespace game
     extern void setupdemorecord();
     extern void recordpacket(int chan, uchar *data, int len);
     extern bool recordmsg(int type, const char *fmt = NULL, ...);
+    extern void recorddemoaim(fpsent *d);
+    extern void recorddemoposition(fpsent *d, uchar *data, int len);
+    extern void recorddemoshot(fpsent *d, const vec &from, const vec &to);
     extern void enddemorecord(bool send = false);
 
     // managed games
@@ -1301,4 +1310,3 @@ namespace server
 #define COL_ADMIN  COL_ORANGE
 
 #endif
-
