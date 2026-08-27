@@ -2179,7 +2179,57 @@ void drawcrosshair(int w, int h)
 
     hudshader->set();
     gle::color(color);
-    hudquad(x, y, chsize, chsize);
+    float angle = windowhit ? 0.0f : game::crosshairangle();
+
+    if(angle != 0.0f)
+      {
+	float rad = angle * RAD;
+	float c = cosf(rad);
+	float s = sinf(rad);
+
+	float half = chsize / 2.0f;
+	float mx = cx * w;
+	float my = cy * h;
+
+	gle::defvertex(2);
+	gle::deftexcoord0();
+	gle::begin(GL_TRIANGLE_STRIP);
+
+	// top-right
+	gle::attribf(
+        mx + half * (c + s),
+        my + half * (s - c)
+		     );
+	gle::attribf(1, 0);
+
+	// top-left
+	gle::attribf(
+		     mx + half * (-c + s),
+		     my + half * (-s - c)
+		     );
+	gle::attribf(0, 0);
+
+	// bottom-right
+
+	gle::attribf(
+		     mx + half * (c - s),
+		     my + half * (s + c)
+		     );
+	gle::attribf(1, 1);
+
+	// bottom-left
+	gle::attribf(
+		     mx - half * (c + s),
+		     my + half * (c - s)
+		     );
+	gle::attribf(0, 1);
+
+	gle::end();
+      }
+    else
+      {
+	hudquad(x, y, chsize, chsize);
+      }
 }
 
 VARP(wallclock, 0, 0, 1);

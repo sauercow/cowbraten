@@ -88,6 +88,7 @@ namespace game
     extern void showscores(bool on);
     extern const char *defaultcrosshair(int index);
     extern int selectcrosshair(vec &color);
+    extern float crosshairangle();
     extern void lighteffects(dynent *d, vec &color, vec &dir);
     extern void setupcamera();
     extern bool allowthirdperson(bool msg = false);

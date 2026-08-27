@@ -1172,8 +1172,9 @@ namespace game
             default: return "data/crosshair.png";
         }
     }
-
+  
     MOD(VARP, crosshairreloadfade, 0, 1, 1);
+    MOD(VARP, crosshairreloadrotate, 0, 1, 1);
 
     int selectcrosshair(vec &color)
     {
@@ -1199,9 +1200,49 @@ namespace game
             if(d->health<=25) color = vec(1, 0, 0);
             else if(d->health<=50) color = vec(1, 0.5f, 0);
         }
-        if(d->gunwait && crosshairreloadfade) color.mul(0.5f);
+        if(crosshairreloadfade && m_insta && d->lastattackgun == GUN_RIFLE)
+	  {
+	    int elapsed = lastmillis - d->lastaction;
+
+	    if(elapsed >= 0 && elapsed < d->gunwait)
+	      {
+		float progress = clamp(elapsed / float(d->gunwait), 0.0f, 1.0f);
+
+		vec readycolor(color);
+
+		color = vec(1.0f, 0.0f, 0.0f);
+		color.mul(1.0f - progress);
+		color.add(vec(readycolor).mul(progress));
+	      }
+	  }
+	
         return crosshair;
     }
+
+  float crosshairangle()
+  {
+    if(!crosshairreloadrotate || !m_insta) return 0.0f;
+
+    fpsent *d = hudplayer();
+
+    if(d->state != CS_ALIVE ||
+       d->lastattackgun != GUN_RIFLE ||
+       d->gunwait <= 0)
+      return 0.0f;
+
+    int elapsed = lastmillis - d->lastaction;
+
+    if(elapsed < 0 || elapsed >= d->gunwait)
+        return 0.0f;
+
+    float progress = clamp(
+        elapsed / float(d->gunwait),
+        0.0f,
+        1.0f
+    );
+
+    return 45.0f * (1.0f - progress);
+}
 
     void lighteffects(dynent *e, vec &color, vec &dir)
     {

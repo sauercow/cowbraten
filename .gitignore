@@ -32,3 +32,5 @@ fly.io
 
 Dockertrigger
 !/**/.gitkeep
+
+*.bak
