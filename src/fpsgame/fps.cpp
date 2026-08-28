@@ -511,6 +511,111 @@ namespace game
 
     VARP(teamcolorfrags, 0, 1, 1);
 
+    // Local player's current kill streak.
+
+    static int killstreak = 0;
+    static int streakmilestonevalue = 0;
+    static int streakmilestonemillis = 0;
+
+    // Reuse the existing frag-message HUD settings.
+    extern float hudfragmessageduration;
+    extern float hudfragmessagex;
+    extern float hudfragmessagey;
+    extern float hudfragmessagescale;
+    extern int hudfragmessagefade;
+
+    FVARP(streakmilestonescale, 1.0f, 1.25f, 2.0f);
+
+    static bool killstreakmilestone(int streak)
+    {
+        switch(streak)
+        {
+            case 5:
+            case 10:
+            case 15:
+            case 20:
+            case 25:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    static void resetkillstreak()
+    {
+        killstreak = 0;
+        streakmilestonevalue = 0;
+        streakmilestonemillis = 0;
+    }
+
+    static int updatekillstreak(fpsent *victim, fpsent *actor)
+    {
+        // Any death of the local player ends the current streak.
+        if(victim == player1)
+        {
+            resetkillstreak();
+            return 0;
+        }
+
+        // Only enemy kills made by the local player count.
+        if(!actor || actor != player1 || victim == actor || actor->type == ENT_INANIMATE)
+            return -1;
+
+        // Team kills do not count toward the streak.
+        if(isteam(victim->team, actor->team))
+            return -1;
+
+        return ++killstreak;
+    }
+
+    static bool drawstreakmilestone(int w, int h)
+    {
+        if(!streakmilestonevalue || !streakmilestonemillis)
+            return false;
+
+        int showmillis = int(hudfragmessageduration * 1000.0f);
+        int elapsed = lastmillis - streakmilestonemillis;
+
+        if(elapsed > showmillis + (hudfragmessagefade ? 255 : 0))
+        {
+            streakmilestonevalue = 0;
+            streakmilestonemillis = 0;
+            return false;
+        }
+
+        int alpha = 255 - max(0, elapsed - showmillis);
+
+        defformatstring(text, "\fs\f2%d STREAK\fr", streakmilestonevalue);
+
+        float scale = hudfragmessagescale * streakmilestonescale;
+
+        int tw = 0, th = 0;
+        text_bounds(text, tw, th);
+
+        vec2 pos = vec2(hudfragmessagex, hudfragmessagey)
+            .mul(vec2(w, h).div(scale));
+
+        pos.x -= tw / 2.0f;
+        pos.y -= th / 2.0f;
+
+        pushhudmatrix();
+        hudmatrix.scale(scale, scale, 1);
+        flushhudmatrix();
+
+        draw_text(
+            text,
+            int(pos.x),
+            int(pos.y),
+            0xFF, 0xFF, 0xFF,
+            alpha
+        );
+
+        pophudmatrix();
+
+        return true;
+    }
+
     void killed(fpsent *d, fpsent *actor)
     {
         if(d->state==CS_EDITING)
@@ -521,6 +626,8 @@ namespace game
             return;
         }
         else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
+
+        int streakfrag = updatekillstreak(d, actor);
 
         if(cmode) cmode->died(d, actor);
 
@@ -563,8 +670,43 @@ namespace game
         }
         if(h==player1 && d==player1) dname = "\fs\f2you\fr";
         if(h==player1 && actor==player1) aname = "\fs\f2you\fr";
-        if(d==actor) addfragmessage(contype, NULL, dname, HICON_TOKEN-HICON_FIST);
-        else addfragmessage(contype, aname, dname, d->lasthitpushgun);
+        if(d==actor)
+        {
+            addfragmessage(contype, NULL, dname, HICON_TOKEN-HICON_FIST);
+        }
+        else if(streakfrag >= 2)
+        {
+            if(killstreakmilestone(streakfrag))
+            {
+                // Milestones replace the regular frag message.
+                clearfragmessages();
+
+                streakmilestonevalue = streakfrag;
+                streakmilestonemillis = lastmillis;
+            }
+            else
+            {
+                // A regular streak frag immediately replaces any active milestone.
+                streakmilestonevalue = 0;
+                streakmilestonemillis = 0;
+
+                string streakname;
+
+                // Use Sauerbraten's built-in yellow for streak counters.
+                formatstring(streakname, "\fs\f2x%d\fr", streakfrag);
+
+                addfragmessage(
+                    contype,
+                    streakname,
+                    dname,
+                    d->lasthitpushgun
+                );
+            }
+        }
+        else
+        {
+            addfragmessage(contype, aname, dname, d->lasthitpushgun);
+        }
         deathstate(d);
 		ai::killed(d, actor);
     }
@@ -724,6 +866,7 @@ namespace game
         showscores(false);
         disablezoom();
         lasthit = 0;
+        resetkillstreak();
     }
 
     void loadingmap(const char *name)
@@ -1146,11 +1289,17 @@ namespace game
             if(ammobar) drawammobar(w, h, d);
         }
 
-        if(!m_edit && !m_sp)
+                if(!m_edit && !m_sp)
         {
             if(gameclock) drawgameclock(w, h);
             if(hudscore) drawhudscore(w, h);
-            if(hudfragmessages==1 || (hudfragmessages==2 && !m_insta)) drawfragmessages(w, h);
+
+            if(hudfragmessages==1 || (hudfragmessages==2 && !m_insta))
+            {
+                // A milestone temporarily takes the place of regular frag messages.
+                if(!drawstreakmilestone(w, h))
+                    drawfragmessages(w, h);
+            }
         }
     }
 
