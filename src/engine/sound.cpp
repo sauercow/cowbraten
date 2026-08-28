@@ -422,6 +422,130 @@ static Mix_Chunk *loadwavscaled(const char *name)
 
 VARFP(fixwav, 0, 1, 1, initwarning("sound configuration", INIT_LOAD, CHANGE_SOUND));
 
+// Reload the selected sound pack without restarting the audio subsystem.
+static void reloadsoundpack();
+
+// Sound pack directory names are used as identifiers.
+// Keep them simple and safe for paths and CubeScript lists.
+static bool soundpacknamevalid(const char *name)
+{
+    if(!name || !name[0] || name[0] == '.' || !strcmp(name, "original"))
+        return false;
+
+    for(const char *p = name; *p; ++p)
+    {
+        char c = *p;
+
+        if(!((c >= 'a' && c <= 'z') ||
+             (c >= 'A' && c <= 'Z') ||
+             (c >= '0' && c <= '9') ||
+             c == '_' || c == '-' || c == '.'))
+            return false;
+    }
+
+    return true;
+}
+
+// A valid custom sound pack must contain both sounds.cfg and sounds/.
+static bool soundpackavailable(const char *name)
+{
+    if(!strcmp(name, "original"))
+        return true;
+
+    if(!soundpacknamevalid(name))
+        return false;
+
+    defformatstring(cfg, "soundpacks/%s/sounds.cfg", name);
+
+    stream *f = openfile(cfg, "rb");
+    if(!f)
+        return false;
+
+    delete f;
+
+    defformatstring(sounddir, "soundpacks/%s/sounds", name);
+
+    vector<char *> files;
+    int dirs = listfiles(sounddir, NULL, files);
+    files.deletearrays();
+
+    return dirs > 0;
+}
+
+// Return every valid sound pack as a CubeScript list.
+// "original" always exists and is always the first entry.
+static void listsoundpacks()
+{
+    vector<char *> entries, packs;
+
+    listfiles("soundpacks", NULL, entries);
+
+    loopv(entries)
+    {
+        const char *name = entries[i];
+
+        if(!soundpackavailable(name))
+            continue;
+
+        bool duplicate = false;
+
+        for(int j = 0; j < packs.length(); ++j)
+        {
+            if(!strcmp(packs[j], name))
+            {
+                duplicate = true;
+                break;
+            }
+        }
+
+        if(!duplicate)
+            packs.add(newstring(name));
+    }
+
+    vector<char> output;
+
+    const char *original = "original";
+    output.put(original, strlen(original));
+
+    loopv(packs)
+    {
+        output.add(' ');
+        output.put(packs[i], strlen(packs[i]));
+    }
+
+    output.add('\0');
+
+    char *result = newstring(output.getbuf());
+
+    entries.deletearrays();
+    packs.deletearrays();
+
+    stringret(result);
+}
+COMMAND(listsoundpacks, "");
+
+// Persist the selected pack by directory name.
+SVARFP(soundpack, "original", reloadsoundpack());
+
+static bool loadsoundpackfile(Mix_Chunk *&chunk, char *filename)
+{
+    path(filename);
+
+    if(fixwav)
+    {
+        size_t len = strlen(filename);
+
+        if(len >= 4 && !strcasecmp(filename + len - 4, ".wav"))
+        {
+            chunk = loadwavscaled(filename);
+            if(chunk) return true;
+        }
+    }
+
+    chunk = loadwav(filename);
+    return chunk != NULL;
+}
+
 bool soundsample::load(bool msg)
 {
     if(chunk) return true;
@@ -429,25 +553,43 @@ bool soundsample::load(bool msg)
 
     static const char * const exts[] = { "", ".wav", ".ogg" };
     string filename;
+
     loopi(sizeof(exts)/sizeof(exts[0]))
     {
-        formatstring(filename, "packages/sounds/%s%s", name, exts[i]);
-        if(msg && !i) renderprogress(0, filename);
-        path(filename);
-        if(fixwav)
+        // Try the selected custom pack first.
+        if(strcmp(soundpack, "original"))
         {
-            size_t len = strlen(filename);
-            if(len >= 4 && !strcasecmp(filename + len - 4, ".wav"))
-            {
-                chunk = loadwavscaled(filename);
-                if(chunk) return true;
-            }
+            formatstring(
+                filename,
+                "soundpacks/%s/sounds/%s%s",
+                soundpack,
+                name,
+                exts[i]
+            );
+
+            if(msg && !i)
+                renderprogress(0, filename);
+
+            if(loadsoundpackfile(chunk, filename))
+                return true;
         }
-        chunk = loadwav(filename);
-        if(chunk) return true;
+
+        // Fall back to the original Sauerbraten sound.
+        formatstring(
+            filename,
+            "packages/sounds/%s%s",
+            name,
+            exts[i]
+        );
+
+        if(msg && !i && !strcmp(soundpack, "original"))
+            renderprogress(0, filename);
+
+        if(loadsoundpackfile(chunk, filename))
+            return true;
     }
 
-    conoutf(CON_ERROR, "failed to load sample: packages/sounds/%s", name);
+    conoutf(CON_ERROR, "failed to load sample: %s", name);
     return false;
 }
 
@@ -571,6 +713,68 @@ void soundreset()
     gamesounds.reset();
 }
 COMMAND(soundreset, "");
+
+static void reloadsoundpack()
+{
+    // If the selected pack disappeared or is invalid, restore Original.
+    if(strcmp(soundpack, "original") && !soundpackavailable(soundpack))
+    {
+        conoutf(
+            CON_WARN,
+            "sound pack \"%s\" is unavailable; falling back to Original",
+            soundpack
+        );
+
+        char *oldpack = soundpack;
+        soundpack = newstring("original");
+        delete[] oldpack;
+    }
+
+    // Stop every active channel before releasing cached samples.
+    stopchannels();
+
+    // Rebuild all hardcoded game sound registrations from scratch.
+    gamesounds.reset();
+
+    // Force physical audio files to be loaded again from the selected pack.
+    cleanupsamples();
+
+    string cfg;
+
+    if(!strcmp(soundpack, "original"))
+        copystring(cfg, "data/sounds.cfg");
+    else
+        formatstring(cfg, "soundpacks/%s/sounds.cfg", soundpack);
+
+    if(!execfile(cfg, false))
+    {
+        conoutf(
+            CON_ERROR,
+            "could not load sound pack configuration: %s",
+            cfg
+        );
+
+        // A custom pack failing here should never leave game sounds empty.
+        if(strcmp(soundpack, "original"))
+        {
+            char *oldpack = soundpack;
+            soundpack = newstring("original");
+            delete[] oldpack;
+
+            gamesounds.reset();
+
+            if(!execfile("data/sounds.cfg", false))
+                conoutf(CON_ERROR, "could not restore original sounds");
+        }
+
+        return;
+    }
+
+    conoutf(
+        "sound pack: %s",
+        !strcmp(soundpack, "original") ? "Original" : soundpack
+    );
+}
 
 void mapsoundreset()
 {
