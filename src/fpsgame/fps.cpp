@@ -1269,6 +1269,44 @@ namespace game
         pophudmatrix();
     }
 
+    VARP(huddemorecording, 0, 1, 1);
+
+    static void drawdemorecording(int w, int h)
+    {
+        if(!huddemorecording || !demorecord) return;
+
+        const char *text = "\fs\f3REC\fr";
+
+        int tw = 0, th = 0;
+        text_bounds(text, tw, th);
+
+        const float scale = 0.5f;
+
+        // Place the indicator near the top-right corner.
+        vec2 pos = vec2(0.98f, 0.035f).mul(vec2(w, h).div(scale));
+
+        // Right-align the text.
+        pos.x -= tw;
+        pos.y -= th / 2.0f;
+
+        // Blink between full and reduced opacity.
+        int alpha = ((totalmillis / 500) % 2) ? 120 : 255;
+
+        pushhudmatrix();
+        hudmatrix.scale(scale, scale, 1);
+        flushhudmatrix();
+
+        draw_text(
+            text,
+            int(pos.x),
+            int(pos.y),
+            0xFF, 0xFF, 0xFF,
+            alpha
+        );
+
+        pophudmatrix();
+    }
+
     void gameplayhud(int w, int h)
     {
         pushhudmatrix();
@@ -1301,6 +1339,7 @@ namespace game
                     drawfragmessages(w, h);
             }
         }
+        drawdemorecording(w, h);
     }
 
     int clipconsole(int w, int h)
