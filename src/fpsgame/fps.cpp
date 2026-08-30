@@ -1331,6 +1331,36 @@ namespace game
             server::demoseekabsolute(*millis);
         });
 
+        bool keyevent(int code, bool isdown, int modstate)
+        {
+            if(!server::demoplaybackactive() || (modstate & KMOD_GUI)) return false;
+
+            switch(code)
+            {
+                case SDLK_SPACE:
+                    if(isdown) server::toggledemopause();
+                    return true;
+
+                case SDLK_RIGHT:
+                    if(isdown) server::demoforward((modstate & KMOD_SHIFT) ? 30000 : 5000);
+                    return true;
+
+                case SDLK_LEFT:
+                    if(isdown) server::demorewind((modstate & KMOD_SHIFT) ? 30000 : 5000);
+                    return true;
+
+                case SDLK_HOME:
+                    if(isdown) server::demoseekabsolute(0);
+                    return true;
+
+                case SDLK_END:
+                    if(isdown) server::demoseekabsolute(INT_MAX);
+                    return true;
+            }
+
+            return false;
+        }
+
         static void drawdemorect(
         float x,
         float y,

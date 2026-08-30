@@ -616,7 +616,7 @@ void processkey(int code, bool isdown, int modstate)
     if(haskey && haskey->pressed) execbind(*haskey, isdown); // allow pressed keys to release
     else if(!g3d_key(code, isdown)) // 3D GUI mouse button intercept   
     {
-        if(!consolekey(code, isdown))
+        if(!consolekey(code, isdown) && !game::keyevent(code, isdown, modstate))
         {
             if(modstate&KMOD_GUI) return;
             if(haskey) execbind(*haskey, isdown);
@@ -840,4 +840,3 @@ void writecompletions(stream *f)
         else f->printf("%s %s %s %s\n", v->type==FILES_VAR ? "varcomplete" : "complete", escapeid(k), escapestring(v->dir), escapestring(v->ext ? v->ext : "*"));
     }
 }
-
