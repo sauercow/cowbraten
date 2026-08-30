@@ -966,6 +966,58 @@ namespace server
         return duration;
     }
 
+    static int findpreviousdemotimestamp(const char *file, int millis)
+    {
+        stream *scan = NULL;
+
+        if(const char *buf = getdemofile(file, false))
+            scan = opengzfile(buf, "rb");
+        if(!scan)
+            scan = opengzfile(file, "rb");
+        if(!scan)
+            return -1;
+
+        demoheader hdr;
+        if(scan->read(&hdr, sizeof(demoheader)) != sizeof(demoheader) ||
+           memcmp(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic)))
+        {
+            DELETEP(scan);
+            return -1;
+        }
+
+        lilswap(&hdr.version, 2);
+        if(hdr.version != DEMO_VERSION || hdr.protocol != PROTOCOL_VERSION)
+        {
+            DELETEP(scan);
+            return -1;
+        }
+
+        int latest = -1, previous = -1;
+        for(;;)
+        {
+            int stamp[3];
+            if(scan->read(stamp, sizeof(stamp)) != sizeof(stamp))
+                break;
+
+            lilswap(stamp, 3);
+            int timestamp = stamp[0], len = stamp[2];
+            if(timestamp < 0 || len < 0 || timestamp > millis)
+                break;
+
+            if(timestamp != latest)
+            {
+                previous = latest;
+                latest = timestamp;
+            }
+
+            if(!scan->seek(len, SEEK_CUR))
+                break;
+        }
+
+        DELETEP(scan);
+        return previous >= 0 ? previous : 0;
+    }
+
     static stream *opendemoplayback(const char *file, string &msg)
     {
         stream *playback = NULL;
@@ -1202,6 +1254,19 @@ namespace server
         if(!demoplayback || millis <= 0) return;
 
         demoseekabsolute(gamemillis - min(millis, gamemillis));
+    }
+
+    bool demostep(int direction)
+    {
+        if(!demoplayback || !direction) return false;
+
+        if(!gamepaused) forcepaused(true);
+
+        if(direction > 0)
+            return demoseekabsolute(max(nextplayback, gamemillis + 1));
+
+        int target = findpreviousdemotimestamp(demoplaybackfile, gamemillis);
+        return target >= 0 && demoseekabsolute(target);
     }
 
     bool setdemoplaybackspeed(int speed)

@@ -1331,6 +1331,11 @@ namespace game
             server::demoseekabsolute(*millis);
         });
 
+        ICOMMAND(demostep, "i", (int *direction),
+        {
+            server::demostep(*direction);
+        });
+
         static const int demospeeds[] = { 25, 50, 100, 200, 400 };
 
         static void cycledemospeed(int direction)
@@ -1549,11 +1554,19 @@ namespace game
                     return true;
 
                 case SDLK_RIGHT:
-                    if(isdown) server::demoforward((modstate & KMOD_SHIFT) ? 30000 : 5000);
+                    if(isdown)
+                    {
+                        if(modstate & KMOD_ALT) server::demostep(1);
+                        else server::demoforward((modstate & KMOD_SHIFT) ? 30000 : 5000);
+                    }
                     return true;
 
                 case SDLK_LEFT:
-                    if(isdown) server::demorewind((modstate & KMOD_SHIFT) ? 30000 : 5000);
+                    if(isdown)
+                    {
+                        if(modstate & KMOD_ALT) server::demostep(-1);
+                        else server::demorewind((modstate & KMOD_SHIFT) ? 30000 : 5000);
+                    }
                     return true;
 
                 case SDLK_HOME:
@@ -1689,7 +1702,7 @@ namespace game
             220
         );
 
-        const char *hint = interactive ? "UP/DOWN: SPEED" : "HOLD ALT";
+        const char *hint = interactive ? "ARROWS: FRAME / SPEED" : "HOLD ALT";
         int hintw = 0, hinth = 0;
         text_bounds(hint, hintw, hinth);
         const float hintscale = 0.72f;
