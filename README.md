@@ -28,6 +28,7 @@ This repository contains the source for my client mod, as well as the patches ap
   - [clientdemo.patch](#clientdemopatch)
   - [colored\_weapon\_trails.patch](#colored_weapon_trailspatch)
   - [crosshairreloadfade.patch](#crosshairreloadfadepatch)
+  - [Dynamic sound packs](#dynamic-sound-packs)
   - [better\_console.patch](#better_consolepatch)
   - [nextfollowteam.patch](#nextfollowteampatch)
   - [anticheat.patch](#anticheatpatch)
@@ -169,6 +170,17 @@ Use `/usep1xbratenmenus 0` to use the default scoreboard.
 
 You can easily configure the hud frag messages using the [improved menu](#menu) (options → hud → adjust hud frag messages).
 
+#### Kill streak indicators
+
+The frag-message HUD also tracks the local player's consecutive enemy kills:
+
+- the second, third, fourth and subsequent kills replace the attacker name with a yellow `x2`, `x3`, `x4`, etc.;
+- milestones at 5, 10, 15, 20 and 25 kills temporarily replace the regular frag message with a larger `5 STREAK`, `10 STREAK`, etc.;
+- dying or starting a new game resets the streak;
+- suicides and team kills do not increase it.
+
+Streak messages reuse `hudfragmessageduration`, `hudfragmessagefade`, `hudfragmessagex`, `hudfragmessagey` and `hudfragmessagescale`, so they stay aligned with the rest of the p1xbraten frag HUD. `streakmilestonescale` controls the additional size multiplier used by milestone messages (1.25 by default). Setting `hudfragmessages` to `0` hides both regular frag and streak messages.
+
 ![fragmessages](https://i.imgur.com/K4GL6oB.png)
 
 ### [fullconsole.patch](./patches/fullconsole.patch)
@@ -307,7 +319,26 @@ You can also adjust the trail colors in the options menu.
 
 ### [crosshairreloadfade.patch](./patches/crosshairreloadfade.patch)
 
-- adds `crosshairreloadfade` variable: set to 0 to disable the "crosshair-goes-dark-while-weapon-reloads" effect
+- `crosshairreloadfade` uses red to indicate that the insta rifle is still reloading, then transitions back to the ready crosshair color as the reload completes; set it to `0` to disable the color transition
+- `crosshairreloadrotate` rotates the insta rifle's crosshair from 45 degrees back to its normal orientation during the same reload period; set it to `0` to disable the rotation
+
+The reload color is a weapon-readiness indicator; it does not represent player health. This is separate from p1xbraten's pre-existing health-based crosshair colors in non-insta modes. The transition returns to the selected ready color and requires `crosshairfx` and `crosshaircolors` to be enabled. Rotation is independent and can be used by itself. Together they provide a visual reload timer without adding another HUD element.
+
+### Dynamic sound packs
+
+p1xbraten can discover and switch game sound packs without restarting the client. Choose one from **options → sound → choose sound pack**, set it directly with `/soundpack <name>`, or return to Sauerbraten's sounds with `/soundpack original`. The selection is saved in the client configuration.
+
+Custom packs use this layout:
+
+```text
+soundpacks/
+└── <pack-name>/
+    ├── sounds.cfg
+    └── sounds/
+        └── ... .wav/.ogg files
+```
+
+`/listsoundpacks` returns every valid installed pack, with `original` first. A pack is listed only when it has both `sounds.cfg` and a non-empty `sounds/` directory. When a requested sample is absent from the selected pack, p1xbraten falls back to the matching file under Sauerbraten's original `packages/sounds/`. If the selected pack becomes invalid or cannot load its configuration, the client restores the original sounds automatically.
 
 ### [better_console.patch](./patches/better_console.patch)
 
