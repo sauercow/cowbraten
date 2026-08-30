@@ -1307,6 +1307,89 @@ namespace game
         pophudmatrix();
     }
 
+    VARP(huddemoplayback, 0, 1, 1);
+    FVARP(huddemoplaybackscale, 0.25f, 0.50f, 1.0f);
+
+    ICOMMAND(demoplaypause, "", (),
+    {
+        server::toggledemopause();
+    });
+
+    ICOMMAND(demoforward, "i", (int *seconds),
+    {
+        server::demoforward(max(*seconds, 1) * 1000);
+    });
+
+    static void drawdemoplayback(int w, int h)
+    {
+        if(!huddemoplayback || !server::demoplaybackactive()) return;
+
+        int current = max(server::gamemillis, 0);
+        int duration = max(server::gamelimit, current);
+
+        int currentsecs = current / 1000;
+        int durationsecs = duration / 1000;
+
+        defformatstring(
+            label,
+            "%s   %d:%02d / %d:%02d",
+            ispaused() ? "PAUSED" : "PLAY",
+            currentsecs / 60,
+            currentsecs % 60,
+            durationsecs / 60,
+            durationsecs % 60
+        );
+
+        // Text-mode progress bar for the first playback HUD implementation.
+        static const int segments = 40;
+        char bar[segments + 3];
+
+        int filled = duration > 0
+            ? clamp(int((long long)current * segments / duration), 0, segments)
+            : 0;
+
+        bar[0] = '[';
+
+        loopi(segments)
+            bar[i + 1] = i < filled ? '=' : '-';
+
+        bar[segments + 1] = ']';
+        bar[segments + 2] = '\0';
+
+        float scale = huddemoplaybackscale;
+
+        vec2 center = vec2(0.5f, 0.92f)
+            .mul(vec2(w, h).div(scale));
+
+        pushhudmatrix();
+        hudmatrix.scale(scale, scale, 1);
+        flushhudmatrix();
+
+        int tw = 0, th = 0;
+
+        text_bounds(label, tw, th);
+
+        draw_text(
+            label,
+            int(center.x - tw / 2.0f),
+            int(center.y - th),
+            0xFF, 0xFF, 0xFF,
+            220
+        );
+
+        text_bounds(bar, tw, th);
+
+        draw_text(
+            bar,
+            int(center.x - tw / 2.0f),
+            int(center.y + 8),
+            0xFF, 0xFF, 0xFF,
+            200
+        );
+
+        pophudmatrix();
+    }
+
     void gameplayhud(int w, int h)
     {
         pushhudmatrix();
@@ -1340,6 +1423,7 @@ namespace game
             }
         }
         drawdemorecording(w, h);
+        drawdemoplayback(w, h);
     }
 
     int clipconsole(int w, int h)

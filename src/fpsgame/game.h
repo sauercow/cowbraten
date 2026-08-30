@@ -1060,7 +1060,7 @@ namespace server
         }
     };
 
-    extern int gamemillis, nextexceeded;
+    extern int gamemillis, gamelimit, nextexceeded;
 
     struct clientinfo
     {
@@ -1226,6 +1226,9 @@ namespace server
     extern void startintermission();
     extern void stopdemo();
     extern void timeupdate(int secs);
+    extern bool demoplaybackactive();
+    extern void toggledemopause();
+    extern void demoforward(int millis);
     extern const char *getdemofile(const char *file, bool init);
     extern void forcemap(const char *map, int mode);
     extern void forcepaused(bool paused);

@@ -1045,6 +1045,29 @@ namespace server
         pausegame(paused);
     }
 
+    bool demoplaybackactive()
+    {
+        return demoplayback != NULL;
+    }
+
+    void toggledemopause()
+    {
+        if(!demoplayback) return;
+
+        forcepaused(!gamepaused);
+    }
+
+    void demoforward(int millis)
+    {
+        if(!demoplayback || millis <= 0) return;
+
+        int target = gamemillis + millis;
+
+        // seekdemo() accepts an absolute demo timestamp.
+        defformatstring(t, "%d.%03d", target / 1000, target % 1000);
+        seekdemo(t);
+    }
+
     bool ispaused() { return gamepaused; }
 
     void changegamespeed(int val, clientinfo *ci = NULL)
