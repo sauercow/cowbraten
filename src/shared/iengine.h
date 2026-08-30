@@ -323,6 +323,17 @@ extern void pophudmatrix(bool flush = true, bool flushparams = true);
 extern void pushhudscale(float sx, float sy = 0);
 extern void pushhudtranslate(float tx, float ty, float sx = 0, float sy = 0);
 
+extern void drawhudsolidrect(
+    float x,
+    float y,
+    float w,
+    float h,
+    uchar r,
+    uchar g,
+    uchar b,
+    uchar a
+);
+
 // renderparticles
 enum
 {

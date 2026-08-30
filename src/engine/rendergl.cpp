@@ -1130,6 +1130,50 @@ void hudquad(float x, float y, float w, float h, float tx, float ty, float tw, f
     HUDQUAD(x, y, x+w, y+h, tx, ty, tx+tw, ty+th);
 }
 
+void drawhudsolidrect(
+    float x,
+    float y,
+    float w,
+    float h,
+    uchar r,
+    uchar g,
+    uchar b,
+    uchar a
+)
+{
+    hudnotextureshader->set();
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    float rf = r / 255.0f;
+    float gf = g / 255.0f;
+    float bf = b / 255.0f;
+    float af = a / 255.0f;
+
+    gle::defvertex(2);
+    gle::defcolor(4);
+
+    gle::begin(GL_TRIANGLE_STRIP);
+
+    gle::attribf(x,     y);
+    gle::attribf(rf, gf, bf, af);
+
+    gle::attribf(x + w, y);
+    gle::attribf(rf, gf, bf, af);
+
+    gle::attribf(x,     y + h);
+    gle::attribf(rf, gf, bf, af);
+
+    gle::attribf(x + w, y + h);
+    gle::attribf(rf, gf, bf, af);
+
+    gle::end();
+
+    // Restore normal HUD rendering for text and textured elements.
+    hudshader->set();
+    gle::colorf(1, 1, 1, 1);
+}
+
 VARR(fog, 16, 4000, 1000024);
 bvec fogcolor(0x80, 0x99, 0xB3);
 HVARFR(fogcolour, 0, 0x8099B3, 0xFFFFFF,

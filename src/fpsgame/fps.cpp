@@ -1,6 +1,7 @@
 #include "game.h"
 #include "weaponstats.h"
 
+
 namespace game
 {
     bool intermission = false;
@@ -1272,63 +1273,86 @@ namespace game
     VARP(huddemorecording, 0, 1, 1);
 
     static void drawdemorecording(int w, int h)
+        {
+            if(!huddemorecording || !demorecord) return;
+
+            const char *text = "\fs\f3REC\fr";
+
+            int tw = 0, th = 0;
+            text_bounds(text, tw, th);
+
+            const float scale = 0.5f;
+
+            // Place the indicator near the top-right corner.
+            vec2 pos = vec2(0.98f, 0.035f).mul(vec2(w, h).div(scale));
+
+            // Right-align the text.
+            pos.x -= tw;
+            pos.y -= th / 2.0f;
+
+            // Blink between full and reduced opacity.
+            int alpha = ((totalmillis / 500) % 2) ? 120 : 255;
+
+            pushhudmatrix();
+            hudmatrix.scale(scale, scale, 1);
+            flushhudmatrix();
+
+            draw_text(
+                text,
+                int(pos.x),
+                int(pos.y),
+                0xFF, 0xFF, 0xFF,
+                alpha
+            );
+
+            pophudmatrix();
+        }
+
+        VARP(huddemoplayback, 0, 1, 1);
+        FVARP(huddemoplaybackscale, 0.25f, 0.50f, 1.0f);
+
+        ICOMMAND(demoplaypause, "", (),
+        {
+            server::toggledemopause();
+        });
+
+        ICOMMAND(demoforward, "i", (int *seconds),
+        {
+            server::demoforward(max(*seconds, 1) * 1000);
+        });
+
+        static void drawdemorect(
+        float x,
+        float y,
+        float width,
+        float height,
+        uchar r,
+        uchar g,
+        uchar b,
+        uchar a
+    )
     {
-        if(!huddemorecording || !demorecord) return;
-
-        const char *text = "\fs\f3REC\fr";
-
-        int tw = 0, th = 0;
-        text_bounds(text, tw, th);
-
-        const float scale = 0.5f;
-
-        // Place the indicator near the top-right corner.
-        vec2 pos = vec2(0.98f, 0.035f).mul(vec2(w, h).div(scale));
-
-        // Right-align the text.
-        pos.x -= tw;
-        pos.y -= th / 2.0f;
-
-        // Blink between full and reduced opacity.
-        int alpha = ((totalmillis / 500) % 2) ? 120 : 255;
-
-        pushhudmatrix();
-        hudmatrix.scale(scale, scale, 1);
-        flushhudmatrix();
-
-        draw_text(
-            text,
-            int(pos.x),
-            int(pos.y),
-            0xFF, 0xFF, 0xFF,
-            alpha
+        drawhudsolidrect(
+            x,
+            y,
+            width,
+            height,
+            r,
+            g,
+            b,
+            a
         );
-
-        pophudmatrix();
     }
-
-    VARP(huddemoplayback, 0, 1, 1);
-    FVARP(huddemoplaybackscale, 0.25f, 0.50f, 1.0f);
-
-    ICOMMAND(demoplaypause, "", (),
-    {
-        server::toggledemopause();
-    });
-
-    ICOMMAND(demoforward, "i", (int *seconds),
-    {
-        server::demoforward(max(*seconds, 1) * 1000);
-    });
 
     static void drawdemoplayback(int w, int h)
     {
         if(!huddemoplayback || !server::demoplaybackactive()) return;
 
         int current = max(server::gamemillis, 0);
-        
+
         int duration = server::demoplaybackduration > 0
-        ? server::demoplaybackduration
-        : max(server::gamelimit, current);
+            ? server::demoplaybackduration
+            : max(server::gamelimit, current);
 
         int currentsecs = current / 1000;
         int durationsecs = duration / 1000;
@@ -1343,52 +1367,81 @@ namespace game
             durationsecs % 60
         );
 
-        // Text-mode progress bar for the first playback HUD implementation.
-        static const int segments = 40;
-        char bar[segments + 3];
-
-        int filled = duration > 0
-            ? clamp(int((long long)current * segments / duration), 0, segments)
-            : 0;
-
-        bar[0] = '[';
-
-        loopi(segments)
-            bar[i + 1] = i < filled ? '=' : '-';
-
-        bar[segments + 1] = ']';
-        bar[segments + 2] = '\0';
+        float progress = duration > 0
+            ? clamp(current / float(duration), 0.0f, 1.0f)
+            : 0.0f;
 
         float scale = huddemoplaybackscale;
 
+        // Center the playback controls near the bottom of the screen.
         vec2 center = vec2(0.5f, 0.92f)
             .mul(vec2(w, h).div(scale));
 
         pushhudmatrix();
+
         hudmatrix.scale(scale, scale, 1);
         flushhudmatrix();
 
+        // Draw playback time/status.
         int tw = 0, th = 0;
-
         text_bounds(label, tw, th);
 
         draw_text(
             label,
             int(center.x - tw / 2.0f),
-            int(center.y - th),
+            int(center.y - th - 15),
             0xFF, 0xFF, 0xFF,
             220
         );
 
-        text_bounds(bar, tw, th);
+        // Graphical progress bar.
+        const float barwidth = 900.0f;
+        const float barheight = 18.0f;
 
-        draw_text(
-            bar,
-            int(center.x - tw / 2.0f),
-            int(center.y + 8),
-            0xFF, 0xFF, 0xFF,
-            200
+        float barx = center.x - barwidth / 2.0f;
+        float bary = center.y + 10.0f;
+
+        // Background.
+        drawdemorect(
+            barx,
+            bary,
+            barwidth,
+            barheight,
+            0x55, 0x55, 0x55,
+            180
         );
+
+        // Played portion.
+        float playedwidth = barwidth * progress;
+
+        if(playedwidth > 0)
+        {
+            drawdemorect(
+                barx,
+                bary,
+                playedwidth,
+                barheight,
+                0xEE, 0xEE, 0xEE,
+                255
+            );
+        }
+
+        // Current-position marker.
+        const float markerwidth = 12.0f;
+        const float markerheight = 30.0f;
+
+        float markerx = barx + playedwidth - markerwidth / 2.0f;
+        float markery = bary - (markerheight - barheight) / 2.0f;
+
+        drawdemorect(
+            markerx,
+            markery,
+            markerwidth,
+            markerheight,
+            0xFF, 0xFF, 0xFF,
+            255
+        );
+
 
         pophudmatrix();
     }
