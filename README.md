@@ -1,6 +1,8 @@
-# p1xbraten
+# p1xbraten-cow
 
-This repository contains the source for my client mod, as well as the patches applied to the vanilla Sauerbraten source to get there.
+This repository contains **p1xbraten-cow**, a personal fork of [p1xbraten](https://github.com/sauerbraten/p1xbraten) with additional demo playback, HUD, crosshair and sound features. It preserves p1xbraten compatibility while versioning the fork separately.
+
+Current fork version: **1.0.0-rc.1**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights.
 
 - [Installation](#installation)
   - [Windows](#windows)
@@ -54,26 +56,21 @@ This repository contains the source for my client mod, as well as the patches ap
 
 ## Installation
 
-The latest release is always at https://github.com/sauerbraten/p1xbraten/releases/latest.
+Source tags for p1xbraten-cow are published at https://github.com/sauercow/p1xbraten-cow/tags. This release candidate does not yet include prebuilt packages; install the normal Sauerbraten runtime/content, then follow [Building your own binary](#building-your-own-binary) to build the fork.
+
+Prebuilt packages from https://github.com/sauerbraten/p1xbraten/releases/latest contain upstream p1xbraten and do not include the p1xbraten-cow features.
 
 ### Windows
 
-Download and run p1xbraten_setup_\<version\>.exe from the link above. p1xbraten will be installed alongside your existing Sauerbraten installation.
+p1xbraten-cow 1.0.0-rc.1 does not provide a prebuilt Windows binary, and building on Windows is not currently supported by this repository. The upstream p1xbraten installer can provide the normal game runtime, but it does not contain the fork features.
 
 ### macOS
 
-1. Download macos.zip from the link above, open your Downloads folder in Finder and double-click the zip file to extract it.
-2. Navigate into sauerbraten.app
-3. Open a second Finder window
-4. Go to Applications, right click Sauerbraten.app, select "Show Package Contents"
-5. Make a copy of `Contents/MacOS/` (in case you want to go back to the vanilla client in the future)
-6. Drag the `Contents` folder from the zip file into the Finder window, merging it with the existing folder and replacing any existing files.
-
-Try launching Sauerbraten normally. If it doesn't work, make sure `Contents/MacOS/sauerbraten`, `Contents/MacOS/p1xbraten_x86_64_client` and `Contents/MacOS/start_protected_game_x86-64.app/Contents/MacOS/start_protected_game` are marked executable. Use `chmod +x` if they aren't. Ask ChatGPT if you don't know what that means.
+Install the normal Sauerbraten application/content, install the build dependencies, then follow [Building your own binary](#building-your-own-binary). Keep a backup of `Sauerbraten.app/Contents/MacOS/` before replacing its client binary.
 
 ### Linux
 
-Download and extract linux.zip from the link above and put its contents into your Sauerbraten directory, then `chmod +x bin_unix/p1xbraten_x86_64_client bin_unix/start_protected_game`. Use p1xbraten.sh/anticheat.sh to launch.
+Install the normal Sauerbraten runtime/content and the build dependencies, then follow [Building your own binary](#building-your-own-binary). From this repository, `make install` places the client in `bin_unix/`, and `./start.sh` launches it using the configured Sauerbraten content directory.
 
 
 ## Menu
@@ -248,6 +245,7 @@ Using `maxfps` and `maxtps`, you can optimize for different goals:
 ### [modversion.patch](./patches/modversion.patch)
 
 - adds the `p1xbratenversion` variable (read-only): contains the version of your installation as a string
+- adds the `p1xbratencowversion` variable (read-only): contains the separate p1xbraten-cow release version
 - adds the `getclientp1xbratenversion <cn>` command: returns the version of p1xbraten the player is running
 - adds the `enablep1xbratendetection` variable: set to 0 to disable broadcasting your p1xbraten version (and detecting other p1xbraten players yourself)
 

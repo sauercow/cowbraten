@@ -1,17 +1,19 @@
 #include "cube.h"
 
 MOD(SVARP, p1xbratenversion, "");
+MOD(SVARP, p1xbratencowversion, "");
 
-void lockversion()
+static void lockversion(const char *name)
 {
-    ident *id = getident("p1xbratenversion");
-    if(!id) { conoutf(CON_ERROR, "p1xbratenversion is undefined!"); return; }
+    ident *id = getident(name);
+    if(!id) { conoutf(CON_ERROR, "%s is undefined!", name); return; }
     if(!(id->flags&IDF_READONLY)) id->flags += IDF_READONLY;
 }
 
 void migratep1xbraten()
 {
     const char *version = "9.0.0"; // replaced in CI build
+    const char *cowversion = "1.0.0-rc.1";
     if(naturalsort(p1xbratenversion, version) == -1)
     {
         // we're newer, run migrations
@@ -26,6 +28,8 @@ void migratep1xbraten()
         }
     }
     setsvar("p1xbratenversion", version);
-    lockversion();
-    conoutf("p1xbraten version: %s", version);
+    setsvar("p1xbratencowversion", cowversion);
+    lockversion("p1xbratenversion");
+    lockversion("p1xbratencowversion");
+    conoutf("p1xbraten-cow version: %s (based on p1xbraten %s)", cowversion, version);
 }
