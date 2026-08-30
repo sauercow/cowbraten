@@ -875,6 +875,9 @@ namespace server
         demoplaybackduration = 0;
         demoplaybackfile[0] = '\0';
 
+        // Playback speed is local to demos and must not leak into the next map.
+        forcegamespeed(100);
+
         loopv(clients) sendf(clients[i]->clientnum, 1, "ri3", N_DEMOPLAYBACK, 0, clients[i]->clientnum);
 
         sendservmsg("demo playback finished");
@@ -1199,6 +1202,14 @@ namespace server
         if(!demoplayback || millis <= 0) return;
 
         demoseekabsolute(gamemillis - min(millis, gamemillis));
+    }
+
+    bool setdemoplaybackspeed(int speed)
+    {
+        if(!demoplayback) return false;
+
+        forcegamespeed(speed);
+        return true;
     }
 
     bool ispaused() { return gamepaused; }

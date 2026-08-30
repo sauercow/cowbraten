@@ -1331,6 +1331,42 @@ namespace game
             server::demoseekabsolute(*millis);
         });
 
+        static const int demospeeds[] = { 25, 50, 100, 200, 400 };
+
+        static void cycledemospeed(int direction)
+        {
+            if(!server::demoplaybackactive() || !direction) return;
+
+            if(direction > 0)
+            {
+                loopi(sizeof(demospeeds) / sizeof(demospeeds[0]))
+                    if(demospeeds[i] > gamespeed)
+                    {
+                        server::setdemoplaybackspeed(demospeeds[i]);
+                        return;
+                    }
+                server::setdemoplaybackspeed(demospeeds[0]);
+            }
+            else
+            {
+                for(int i = int(sizeof(demospeeds) / sizeof(demospeeds[0])) - 1; i >= 0; --i)
+                    if(demospeeds[i] < gamespeed)
+                    {
+                        server::setdemoplaybackspeed(demospeeds[i]);
+                        return;
+                    }
+                server::setdemoplaybackspeed(demospeeds[sizeof(demospeeds) / sizeof(demospeeds[0]) - 1]);
+            }
+        }
+
+        ICOMMAND(demospeed, "i", (int *speed),
+        {
+            server::setdemoplaybackspeed(*speed);
+        });
+
+        ICOMMAND(demospeedup, "", (), cycledemospeed(1));
+        ICOMMAND(demospeeddown, "", (), cycledemospeed(-1));
+
         struct demohudrect
         {
             float x, y, w, h;
@@ -1356,7 +1392,7 @@ namespace game
             int screenw, screenh, duration;
             float scale;
             bool valid;
-            demohudrect bar, marker, rewind, playpause, forward;
+            demohudrect bar, marker, rewind, playpause, forward, speed;
 
             demohudlayout() : screenw(0), screenh(0), duration(0), scale(1), valid(false) {}
 
@@ -1386,15 +1422,17 @@ namespace game
                 bar.set((hudw - barwidth) / 2.0f, bottom - buttonheight - controlgap - barheight, barwidth, barheight);
                 setmarker(progress);
 
-                float buttonspan = min(barwidth, 600.0f);
-                float buttongap = buttonspan * 0.03f;
-                float sidewidth = buttonspan * 0.27f;
-                float middlewidth = buttonspan - 2 * sidewidth - 2 * buttongap;
+                float buttonspan = min(barwidth, 720.0f);
+                float buttongap = buttonspan * 0.025f;
+                float sidewidth = buttonspan * 0.20f;
+                float middlewidth = buttonspan * 0.275f;
+                float speedwidth = buttonspan - 2 * sidewidth - middlewidth - 3 * buttongap;
                 float buttonx = (hudw - buttonspan) / 2.0f, buttony = bottom - buttonheight;
 
                 rewind.set(buttonx, buttony, sidewidth, buttonheight);
                 playpause.set(rewind.x + rewind.w + buttongap, buttony, middlewidth, buttonheight);
                 forward.set(playpause.x + playpause.w + buttongap, buttony, sidewidth, buttonheight);
+                speed.set(forward.x + forward.w + buttongap, buttony, speedwidth, buttonheight);
                 valid = true;
             }
 
@@ -1411,7 +1449,8 @@ namespace game
             DEMO_BUTTON_NONE = 0,
             DEMO_BUTTON_REWIND,
             DEMO_BUTTON_PLAYPAUSE,
-            DEMO_BUTTON_FORWARD
+            DEMO_BUTTON_FORWARD,
+            DEMO_BUTTON_SPEED
         };
 
         static demohudlayout demohud;
@@ -1451,6 +1490,7 @@ namespace game
             if(demohud.rewind.contains(x, y)) return DEMO_BUTTON_REWIND;
             if(demohud.playpause.contains(x, y)) return DEMO_BUTTON_PLAYPAUSE;
             if(demohud.forward.contains(x, y)) return DEMO_BUTTON_FORWARD;
+            if(demohud.speed.contains(x, y)) return DEMO_BUTTON_SPEED;
             return DEMO_BUTTON_NONE;
         }
 
@@ -1480,6 +1520,7 @@ namespace game
                     case DEMO_BUTTON_REWIND: server::demorewind(5000); break;
                     case DEMO_BUTTON_PLAYPAUSE: server::toggledemopause(); break;
                     case DEMO_BUTTON_FORWARD: server::demoforward(5000); break;
+                    case DEMO_BUTTON_SPEED: cycledemospeed(1); break;
                 }
                 demopressedbutton = DEMO_BUTTON_NONE;
             }
@@ -1521,6 +1562,14 @@ namespace game
 
                 case SDLK_END:
                     if(isdown) server::demoseekabsolute(INT_MAX);
+                    return true;
+
+                case SDLK_RIGHTBRACKET:
+                    if(isdown) cycledemospeed(1);
+                    return true;
+
+                case SDLK_LEFTBRACKET:
+                    if(isdown) cycledemospeed(-1);
                     return true;
             }
 
@@ -1701,6 +1750,9 @@ namespace game
             DEMO_BUTTON_PLAYPAUSE
         );
         drawdemobutton(demohud.forward, "+5s", hoveredbutton == DEMO_BUTTON_FORWARD, DEMO_BUTTON_FORWARD);
+
+        defformatstring(speedlabel, "%d.%02dx", gamespeed / 100, gamespeed % 100);
+        drawdemobutton(demohud.speed, speedlabel, hoveredbutton == DEMO_BUTTON_SPEED, DEMO_BUTTON_SPEED);
 
         pophudmatrix();
     }
