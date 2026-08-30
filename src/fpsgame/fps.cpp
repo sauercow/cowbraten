@@ -1310,6 +1310,21 @@ namespace game
 
         VARP(huddemoplayback, 0, 1, 1);
         FVARP(huddemoplaybackscale, 0.25f, 0.50f, 1.0f);
+        VARP(demoplaybackkeys, 0, 1, 1);
+
+        ICOMMAND(demoplaybackhelp, "", (),
+        {
+            conoutf("demo playback controls:");
+            conoutf("  Space: play/pause");
+            conoutf("  Left/Right: rewind/forward 5 seconds (Shift: 30 seconds)");
+            conoutf("  Home/End: beginning/end");
+            conoutf("  Alt+Left/Right: previous/next recorded frame");
+            conoutf("  Alt+Up/Down: increase/decrease playback speed");
+            conoutf("  Hold Alt: use the playback HUD with the mouse");
+            conoutf("set demoplaybackkeys to 0 to replace keyboard shortcuts with custom binds");
+            conoutf("bind commands: demoplaypause, demoforward, demorewind, demoseek,");
+            conoutf("               demostep, demospeed, demospeedup, demospeeddown");
+        });
 
         ICOMMAND(demoplaypause, "", (),
         {
@@ -1546,6 +1561,7 @@ namespace game
 
             if(code == -1 && cursoractive()) return handledemomouse(isdown);
             if(code < 0 && cursoractive()) return true;
+            if(!demoplaybackkeys) return false;
 
             switch(code)
             {
@@ -1715,7 +1731,9 @@ namespace game
             220
         );
 
-        const char *hint = interactive ? "ARROWS: FRAME / SPEED" : "HOLD ALT";
+        const char *hint = interactive
+            ? "LEFT/RIGHT: FRAME   UP/DOWN: SPEED"
+            : "HOLD ALT FOR PRECISION CONTROLS";
         int hintw = 0, hinth = 0;
         text_bounds(hint, hintw, hinth);
         const float hintscale = 0.72f;
