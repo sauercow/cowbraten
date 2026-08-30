@@ -1273,7 +1273,7 @@ bool g3d_key(int code, bool isdown)
 
 void g3d_cursorpos(float &x, float &y)
 {
-    if(guis2d.length()) { x = cursorx; y = cursory; }
+    if(guis2d.length() || game::cursoractive()) { x = cursorx; y = cursory; }
     else x = y = 0.5f;
 }
 
@@ -1286,7 +1286,7 @@ FVARP(guisens, 1e-3f, 1, 1e3f);
 
 bool g3d_movecursor(int dx, int dy)
 {
-    if(!guis2d.length() || !hascursor) return false;
+    if((!guis2d.length() || !hascursor) && !game::cursoractive()) return false;
     const float CURSORSCALE = 500.0f;
     cursorx = max(0.0f, min(1.0f, cursorx+guisens*dx*(screenh/(screenw*CURSORSCALE))));
     cursory = max(0.0f, min(1.0f, cursory+guisens*dy/CURSORSCALE));
@@ -1413,4 +1413,3 @@ void consolebox(int x1, int y1, int x2, int y2)
     gui::drawskin((-gui::skinx[1] + gui::skinx[2] - gui::skinx[5])*SKIN_SCALE, -gui::skiny[4]*SKIN_SCALE, int(bw), 0, 9, 1, 1, vec(1, 1, 1), 0.60f);
     pophudmatrix();
 }
-

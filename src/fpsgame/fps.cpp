@@ -1331,9 +1331,175 @@ namespace game
             server::demoseekabsolute(*millis);
         });
 
+        struct demohudrect
+        {
+            float x, y, w, h;
+
+            demohudrect() : x(0), y(0), w(0), h(0) {}
+
+            void set(float x, float y, float w, float h)
+            {
+                this->x = x;
+                this->y = y;
+                this->w = w;
+                this->h = h;
+            }
+
+            bool contains(float px, float py) const
+            {
+                return px >= x && px <= x + w && py >= y && py <= y + h;
+            }
+        };
+
+        struct demohudlayout
+        {
+            int screenw, screenh, duration;
+            float scale;
+            bool valid;
+            demohudrect bar, marker, rewind, playpause, forward;
+
+            demohudlayout() : screenw(0), screenh(0), duration(0), scale(1), valid(false) {}
+
+            void setmarker(float progress)
+            {
+                const float markerwidth = 12.0f, markerheight = 34.0f;
+                marker.set(
+                    bar.x + bar.w * clamp(progress, 0.0f, 1.0f) - markerwidth / 2.0f,
+                    bar.y - (markerheight - bar.h) / 2.0f,
+                    markerwidth,
+                    markerheight
+                );
+            }
+
+            void update(int w, int h, float curscale, int curduration, float progress)
+            {
+                screenw = w;
+                screenh = h;
+                duration = curduration;
+                scale = curscale;
+
+                float hudw = w / scale, hudh = h / scale;
+                float barwidth = min(900.0f, max(hudw - 80.0f, 240.0f));
+                const float barheight = 20.0f, buttonheight = 58.0f, controlgap = 46.0f;
+                float bottom = hudh * 0.96f;
+
+                bar.set((hudw - barwidth) / 2.0f, bottom - buttonheight - controlgap - barheight, barwidth, barheight);
+                setmarker(progress);
+
+                float buttonspan = min(barwidth, 600.0f);
+                float buttongap = buttonspan * 0.03f;
+                float sidewidth = buttonspan * 0.27f;
+                float middlewidth = buttonspan - 2 * sidewidth - 2 * buttongap;
+                float buttonx = (hudw - buttonspan) / 2.0f, buttony = bottom - buttonheight;
+
+                rewind.set(buttonx, buttony, sidewidth, buttonheight);
+                playpause.set(rewind.x + rewind.w + buttongap, buttony, middlewidth, buttonheight);
+                forward.set(playpause.x + playpause.w + buttongap, buttony, sidewidth, buttonheight);
+                valid = true;
+            }
+
+            int target(float cursorx) const
+            {
+                if(duration <= 0 || bar.w <= 0) return 0;
+                float progress = clamp((cursorx - bar.x) / bar.w, 0.0f, 1.0f);
+                return int(progress * duration + 0.5f);
+            }
+        };
+
+        enum
+        {
+            DEMO_BUTTON_NONE = 0,
+            DEMO_BUTTON_REWIND,
+            DEMO_BUTTON_PLAYPAUSE,
+            DEMO_BUTTON_FORWARD
+        };
+
+        static demohudlayout demohud;
+        static bool demodragging = false;
+        static int demodragmillis = 0, demopressedbutton = DEMO_BUTTON_NONE;
+
+        static bool democursorposition(float &x, float &y)
+        {
+            if(!demohud.valid || demohud.scale <= 0) return false;
+
+            float cursorx, cursory;
+            g3d_cursorpos(cursorx, cursory);
+            x = cursorx * demohud.screenw / demohud.scale;
+            y = cursory * demohud.screenh / demohud.scale;
+            return true;
+        }
+
+        static void finishdemodrag(bool apply)
+        {
+            if(!demodragging) return;
+
+            int target = demodragmillis;
+            float cursorx, cursory;
+            if(democursorposition(cursorx, cursory)) target = demohud.target(cursorx);
+
+            demodragging = false;
+            if(apply && server::demoplaybackactive()) server::demoseekabsolute(target);
+        }
+
+        bool cursoractive()
+        {
+            return huddemoplayback && server::demoplaybackactive() && (SDL_GetModState() & KMOD_ALT);
+        }
+
+        static int demobuttonat(float x, float y)
+        {
+            if(demohud.rewind.contains(x, y)) return DEMO_BUTTON_REWIND;
+            if(demohud.playpause.contains(x, y)) return DEMO_BUTTON_PLAYPAUSE;
+            if(demohud.forward.contains(x, y)) return DEMO_BUTTON_FORWARD;
+            return DEMO_BUTTON_NONE;
+        }
+
+        static bool handledemomouse(bool isdown)
+        {
+            if(!cursoractive()) return false;
+
+            float cursorx, cursory;
+            if(!democursorposition(cursorx, cursory)) return true;
+
+            if(isdown)
+            {
+                demopressedbutton = DEMO_BUTTON_NONE;
+                if(demohud.bar.contains(cursorx, cursory) || demohud.marker.contains(cursorx, cursory))
+                {
+                    demodragmillis = demohud.target(cursorx);
+                    demodragging = true;
+                }
+                else demopressedbutton = demobuttonat(cursorx, cursory);
+            }
+            else if(demodragging) finishdemodrag(true);
+            else
+            {
+                int button = demobuttonat(cursorx, cursory);
+                if(button == demopressedbutton) switch(button)
+                {
+                    case DEMO_BUTTON_REWIND: server::demorewind(5000); break;
+                    case DEMO_BUTTON_PLAYPAUSE: server::toggledemopause(); break;
+                    case DEMO_BUTTON_FORWARD: server::demoforward(5000); break;
+                }
+                demopressedbutton = DEMO_BUTTON_NONE;
+            }
+            return true;
+        }
+
         bool keyevent(int code, bool isdown, int modstate)
         {
-            if(!server::demoplaybackactive() || (modstate & KMOD_GUI)) return false;
+            if(!server::demoplaybackactive())
+            {
+                demodragging = false;
+                demopressedbutton = DEMO_BUTTON_NONE;
+                return false;
+            }
+
+            if(code == SDLK_LALT || code == SDLK_RALT) return true;
+            if(modstate & KMOD_GUI) return false;
+
+            if(code == -1 && cursoractive()) return handledemomouse(isdown);
+            if(code < 0 && cursoractive()) return true;
 
             switch(code)
             {
@@ -1384,17 +1550,68 @@ namespace game
         );
     }
 
+    static void drawdemobutton(const demohudrect &button, const char *label, bool hovered, int id)
+    {
+        bool pressed = demopressedbutton == id && hovered;
+        uchar shade = pressed ? 0x88 : (hovered ? 0x70 : 0x48);
+        drawdemorect(button.x, button.y, button.w, button.h, shade, shade, shade, 210);
+
+        if(hovered)
+            drawdemorect(button.x, button.y, button.w, 4.0f, 0xEE, 0xEE, 0xEE, 255);
+
+        int tw = 0, th = 0;
+        text_bounds(label, tw, th);
+        draw_text(
+            label,
+            int(button.x + (button.w - tw) / 2.0f),
+            int(button.y + (button.h - th) / 2.0f),
+            0xFF, 0xFF, 0xFF,
+            hovered ? 255 : 220
+        );
+    }
+
     static void drawdemoplayback(int w, int h)
     {
-        if(!huddemoplayback || !server::demoplaybackactive()) return;
+        if(!huddemoplayback || !server::demoplaybackactive())
+        {
+            demodragging = false;
+            demopressedbutton = DEMO_BUTTON_NONE;
+            demohud.valid = false;
+            return;
+        }
+
+        bool interactive = cursoractive();
+        if(!interactive)
+        {
+            demodragging = false;
+            demopressedbutton = DEMO_BUTTON_NONE;
+        }
 
         int current = max(server::gamemillis, 0);
-
         int duration = server::demoplaybackduration > 0
             ? server::demoplaybackduration
             : max(server::gamelimit, current);
 
-        int currentsecs = current / 1000;
+        float progress = duration > 0
+            ? clamp(current / float(duration), 0.0f, 1.0f)
+            : 0.0f;
+
+        float scale = huddemoplaybackscale;
+        demohud.update(w, h, scale, duration, progress);
+
+        float cursorx = 0, cursory = 0;
+        bool hascursor = interactive && democursorposition(cursorx, cursory);
+        if(demodragging && hascursor)
+        {
+            demodragmillis = demohud.target(cursorx);
+            progress = duration > 0
+                ? clamp(demodragmillis / float(duration), 0.0f, 1.0f)
+                : 0.0f;
+            demohud.setmarker(progress);
+        }
+
+        int displayed = demodragging ? demodragmillis : current;
+        int currentsecs = displayed / 1000;
         int durationsecs = duration / 1000;
 
         defformatstring(
@@ -1407,81 +1624,83 @@ namespace game
             durationsecs % 60
         );
 
-        float progress = duration > 0
-            ? clamp(current / float(duration), 0.0f, 1.0f)
-            : 0.0f;
-
-        float scale = huddemoplaybackscale;
-
-        // Center the playback controls near the bottom of the screen.
-        vec2 center = vec2(0.5f, 0.92f)
-            .mul(vec2(w, h).div(scale));
-
         pushhudmatrix();
-
         hudmatrix.scale(scale, scale, 1);
         flushhudmatrix();
 
-        // Draw playback time/status.
         int tw = 0, th = 0;
         text_bounds(label, tw, th);
-
         draw_text(
             label,
-            int(center.x - tw / 2.0f),
-            int(center.y - th - 15),
+            int(demohud.bar.x + (demohud.bar.w - tw) / 2.0f),
+            int(demohud.bar.y - th - 18.0f),
             0xFF, 0xFF, 0xFF,
             220
         );
 
-        // Graphical progress bar.
-        const float barwidth = 900.0f;
-        const float barheight = 18.0f;
+        const char *hint = interactive ? "ALT: CURSOR" : "HOLD ALT";
+        int hintw = 0, hinth = 0;
+        text_bounds(hint, hintw, hinth);
+        const float hintscale = 0.72f;
+        float hintx = demohud.bar.x + demohud.bar.w - hintw * hintscale;
+        float hinty = demohud.bar.y + demohud.bar.h +
+            (demohud.rewind.y - demohud.bar.y - demohud.bar.h - hinth * hintscale) / 2.0f;
 
-        float barx = center.x - barwidth / 2.0f;
-        float bary = center.y + 10.0f;
+        pushhudmatrix();
+        hudmatrix.translate(hintx, hinty, 0);
+        hudmatrix.scale(hintscale, hintscale, 1);
+        flushhudmatrix();
+        draw_text(
+            hint,
+            0,
+            0,
+            0xAA, 0xAA, 0xAA,
+            160
+        );
+        pophudmatrix();
 
-        // Background.
+        bool barhovered = hascursor &&
+            (demohud.bar.contains(cursorx, cursory) || demohud.marker.contains(cursorx, cursory));
         drawdemorect(
-            barx,
-            bary,
-            barwidth,
-            barheight,
-            0x55, 0x55, 0x55,
+            demohud.bar.x,
+            demohud.bar.y,
+            demohud.bar.w,
+            demohud.bar.h,
+            barhovered ? 0x68 : 0x55,
+            barhovered ? 0x68 : 0x55,
+            barhovered ? 0x68 : 0x55,
             180
         );
 
-        // Played portion.
-        float playedwidth = barwidth * progress;
-
+        float playedwidth = demohud.bar.w * progress;
         if(playedwidth > 0)
-        {
             drawdemorect(
-                barx,
-                bary,
+                demohud.bar.x,
+                demohud.bar.y,
                 playedwidth,
-                barheight,
+                demohud.bar.h,
                 0xEE, 0xEE, 0xEE,
                 255
             );
-        }
-
-        // Current-position marker.
-        const float markerwidth = 12.0f;
-        const float markerheight = 30.0f;
-
-        float markerx = barx + playedwidth - markerwidth / 2.0f;
-        float markery = bary - (markerheight - barheight) / 2.0f;
 
         drawdemorect(
-            markerx,
-            markery,
-            markerwidth,
-            markerheight,
+            demohud.marker.x,
+            demohud.marker.y,
+            demohud.marker.w,
+            demohud.marker.h,
             0xFF, 0xFF, 0xFF,
             255
         );
 
+        int hoveredbutton = hascursor ? demobuttonat(cursorx, cursory) : DEMO_BUTTON_NONE;
+        drawdemobutton(demohud.rewind, "-5s", hoveredbutton == DEMO_BUTTON_REWIND, DEMO_BUTTON_REWIND);
+        drawdemobutton(
+            demohud.playpause,
+            ispaused() ? "PLAY" : "PAUSE",
+            hoveredbutton == DEMO_BUTTON_PLAYPAUSE,
+            DEMO_BUTTON_PLAYPAUSE
+        );
+        drawdemobutton(demohud.forward, "+5s", hoveredbutton == DEMO_BUTTON_FORWARD, DEMO_BUTTON_FORWARD);
 
         pophudmatrix();
     }

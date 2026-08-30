@@ -2186,7 +2186,7 @@ void writecrosshairs(stream *f)
 
 void drawcrosshair(int w, int h)
 {
-    bool windowhit = g3d_windowhit(true, false);
+    bool windowhit = g3d_windowhit(true, false) || game::cursoractive();
     if(!windowhit && (hidehud || mainmenu)) return; //(hidehud || player->state==CS_SPECTATOR || player->state==CS_DEAD)) return;
 
     vec color(1, 1, 1);
@@ -2518,5 +2518,4 @@ void cleanupgl()
 
     gle::cleanup();
 }
-
 
