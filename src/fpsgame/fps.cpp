@@ -1564,11 +1564,13 @@ namespace game
                     if(isdown) server::demoseekabsolute(INT_MAX);
                     return true;
 
-                case SDLK_RIGHTBRACKET:
+                case SDLK_UP:
+                    if(!(modstate & KMOD_ALT)) break;
                     if(isdown) cycledemospeed(1);
                     return true;
 
-                case SDLK_LEFTBRACKET:
+                case SDLK_DOWN:
+                    if(!(modstate & KMOD_ALT)) break;
                     if(isdown) cycledemospeed(-1);
                     return true;
             }
@@ -1687,7 +1689,7 @@ namespace game
             220
         );
 
-        const char *hint = interactive ? "ALT: CURSOR" : "HOLD ALT";
+        const char *hint = interactive ? "UP/DOWN: SPEED" : "HOLD ALT";
         int hintw = 0, hinth = 0;
         text_bounds(hint, hintw, hinth);
         const float hintscale = 0.72f;
