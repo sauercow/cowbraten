@@ -270,6 +270,34 @@ For an overview of who uses p1xbraten, you can run `/showgui p1xbratenusage`.
 
 Client-side demos record the game as you experience it, and work independently of server-side demo recording. They also work locally, without being connected to any server. Your own position, movement and view is recorded at 125 frames per second.
 
+#### Demo status and playback controls
+
+`huddemorecording` enables the blinking `REC` indicator while recording a client demo. `huddemoplayback` enables the playback HUD, and `huddemoplaybackscale` controls its size. The playback HUD shows the current position, accurate demo duration, playback state and speed. While paused or dragging the timeline, it displays millisecond precision.
+
+The default playback controls are:
+
+| Input | Action |
+| --- | --- |
+| <kbd>Space</kbd> | Pause or resume playback |
+| <kbd>Left</kbd> / <kbd>Right</kbd> | Rewind or advance 5 seconds |
+| <kbd>Shift</kbd> + <kbd>Left</kbd> / <kbd>Right</kbd> | Rewind or advance 30 seconds |
+| <kbd>Home</kbd> / <kbd>End</kbd> | Seek to the beginning or end |
+| <kbd>Alt</kbd> + <kbd>Left</kbd> / <kbd>Right</kbd> | Step to the previous or next recorded frame |
+| <kbd>Alt</kbd> + <kbd>Up</kbd> / <kbd>Down</kbd> | Increase or decrease playback speed |
+| Hold <kbd>Alt</kbd> | Use the timeline and playback buttons with the mouse |
+
+The speed button cycles through 0.25x, 0.50x, 1.00x, 2.00x and 4.00x. Playback speed returns to 1.00x when the demo ends. Rewinding and frame stepping preserve the currently followed player's point of view.
+
+Run `/demoplaybackhelp` to print the controls in-game. The following commands can also be used directly or in custom binds:
+
+- `demoplaypause`
+- `demoforward <seconds>` and `demorewind <seconds>`
+- `demoseek <milliseconds>`
+- `demostep <-1|1>`
+- `demospeed <percent>`, `demospeedup` and `demospeeddown`
+
+Set `demoplaybackkeys` to `0` to disable the built-in keyboard shortcuts before replacing them with custom binds. Mouse interaction with the playback HUD remains available.
+
 ### [colored_weapon_trails.patch](./patches/colored_weapon_trails.patch)
 
 - adds the `trailcolor[shotgun|chaingun|rocketlauncher|rifle|grenadelauncher|pistol]` vars that change the respective weapon's projectile/particle trail
