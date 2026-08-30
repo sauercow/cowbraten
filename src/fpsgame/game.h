@@ -1060,7 +1060,7 @@ namespace server
         }
     };
 
-    extern int gamemillis, gamelimit, nextexceeded;
+    extern int gamemillis, gamelimit, demoplaybackduration, nextexceeded;
 
     struct clientinfo
     {

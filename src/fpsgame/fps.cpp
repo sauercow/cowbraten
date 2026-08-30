@@ -1325,7 +1325,10 @@ namespace game
         if(!huddemoplayback || !server::demoplaybackactive()) return;
 
         int current = max(server::gamemillis, 0);
-        int duration = max(server::gamelimit, current);
+        
+        int duration = server::demoplaybackduration > 0
+        ? server::demoplaybackduration
+        : max(server::gamelimit, current);
 
         int currentsecs = current / 1000;
         int durationsecs = duration / 1000;

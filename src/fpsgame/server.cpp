@@ -81,7 +81,7 @@ namespace server
 
     bool notgotitems = true;        // true when map has changed and waiting for clients to send item
     int gamemode = 0;
-    int gamemillis = 0, gamelimit = 0, nextexceeded = 0, gamespeed = 100;
+    int gamemillis = 0, gamelimit = 0, demoplaybackduration = 0, nextexceeded = 0, gamespeed = 100;
     bool gamepaused = false, shouldstep = true;
 
     string smapname = "";
@@ -869,7 +869,9 @@ namespace server
     void enddemoplayback()
     {
         if(!demoplayback) return;
+
         DELETEP(demoplayback);
+        demoplaybackduration = 0;
 
         loopv(clients) sendf(clients[i]->clientnum, 1, "ri3", N_DEMOPLAYBACK, 0, clients[i]->clientnum);
 
@@ -896,9 +898,73 @@ namespace server
         return buf;
     }
 
+    static int scandemoduration(const char *file)
+    {
+        stream *scan = NULL;
+
+        // Open a second stream so the real playback stream remains untouched.
+        if(const char *buf = getdemofile(file, false))
+            scan = opengzfile(buf, "rb");
+
+        if(!scan)
+            scan = opengzfile(file, "rb");
+
+        if(!scan)
+            return 0;
+
+        demoheader hdr;
+
+        if(scan->read(&hdr, sizeof(demoheader)) != sizeof(demoheader) ||
+        memcmp(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic)))
+        {
+            DELETEP(scan);
+            return 0;
+        }
+
+        lilswap(&hdr.version, 2);
+
+        if(hdr.version != DEMO_VERSION ||
+        hdr.protocol != PROTOCOL_VERSION)
+        {
+            DELETEP(scan);
+            return 0;
+        }
+
+        int duration = 0;
+
+        for(;;)
+        {
+            int stamp[3];
+
+            // Every demo record contains:
+            // timestamp, channel, packet length.
+            if(scan->read(stamp, sizeof(stamp)) != sizeof(stamp))
+                break;
+
+            lilswap(stamp, 3);
+
+            int millis = stamp[0];
+            int len = stamp[2];
+
+            if(millis < 0 || len < 0)
+                break;
+
+            duration = max(duration, millis);
+
+            // Skip the packet itself; only timestamps matter here.
+            if(!scan->seek(len, SEEK_CUR))
+                break;
+        }
+
+        DELETEP(scan);
+
+        return duration;
+    }
+
     void setupdemoplayback()
     {
         if(demoplayback) return;
+        demoplaybackduration = 0;
         demoheader hdr;
         string msg;
         msg[0] = '\0';
@@ -923,6 +989,8 @@ namespace server
             sendservmsg(msg);
             return;
         }
+
+        demoplaybackduration = scandemoduration(file);
 
         sendservmsgf("playing demo \"%s\"", file);
 
