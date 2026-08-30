@@ -291,6 +291,7 @@ namespace server
     bool demonextmatch = false;
     stream *demotmp = NULL, *demorecord = NULL, *demoplayback = NULL;
     int nextplayback = 0;
+    static string demoplaybackfile = "";
 
     VAR(maxdemos, 0, 5, 25);
     VAR(maxdemosize, 0, 16, 31);
@@ -872,6 +873,7 @@ namespace server
 
         DELETEP(demoplayback);
         demoplaybackduration = 0;
+        demoplaybackfile[0] = '\0';
 
         loopv(clients) sendf(clients[i]->clientnum, 1, "ri3", N_DEMOPLAYBACK, 0, clients[i]->clientnum);
 
@@ -961,47 +963,67 @@ namespace server
         return duration;
     }
 
-    void setupdemoplayback()
+    static stream *opendemoplayback(const char *file, string &msg)
     {
-        if(demoplayback) return;
-        demoplaybackduration = 0;
+        stream *playback = NULL;
         demoheader hdr;
-        string msg;
+
         msg[0] = '\0';
-        string file;
-        copystring(file, smapname);
-        int len = strlen(file);
-        if(len < 4 || strcasecmp(&file[len-4], ".dmo")) concatstring(file, ".dmo");
-        if(const char *buf = getdemofile(file, false)) demoplayback = opengzfile(buf, "rb");
-        if(!demoplayback) demoplayback = opengzfile(file, "rb");
-        if(!demoplayback) formatstring(msg, "could not read demo \"%s\"", file);
-        else if(demoplayback->read(&hdr, sizeof(demoheader))!=sizeof(demoheader) || memcmp(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic)))
+        if(const char *buf = getdemofile(file, false)) playback = opengzfile(buf, "rb");
+        if(!playback) playback = opengzfile(file, "rb");
+        if(!playback) formatstring(msg, "could not read demo \"%s\"", file);
+        else if(playback->read(&hdr, sizeof(demoheader)) != sizeof(demoheader) ||
+                memcmp(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic)))
             formatstring(msg, "\"%s\" is not a demo file", file);
         else
         {
             lilswap(&hdr.version, 2);
-            if(hdr.version!=DEMO_VERSION) formatstring(msg, "demo \"%s\" requires an %s version of Cube 2: Sauerbraten", file, hdr.version<DEMO_VERSION ? "older" : "newer");
-            else if(hdr.protocol!=PROTOCOL_VERSION) formatstring(msg, "demo \"%s\" requires an %s version of Cube 2: Sauerbraten", file, hdr.protocol<PROTOCOL_VERSION ? "older" : "newer");
+            if(hdr.version != DEMO_VERSION)
+                formatstring(msg, "demo \"%s\" requires an %s version of Cube 2: Sauerbraten", file, hdr.version < DEMO_VERSION ? "older" : "newer");
+            else if(hdr.protocol != PROTOCOL_VERSION)
+                formatstring(msg, "demo \"%s\" requires an %s version of Cube 2: Sauerbraten", file, hdr.protocol < PROTOCOL_VERSION ? "older" : "newer");
         }
-        if(msg[0])
+
+        if(msg[0]) DELETEP(playback);
+        return playback;
+    }
+
+    static bool startdemoplayback(const char *file, bool scan, bool announce)
+    {
+        string msg;
+        demoplayback = opendemoplayback(file, msg);
+        if(!demoplayback)
         {
-            DELETEP(demoplayback);
+            demoplaybackduration = 0;
+            demoplaybackfile[0] = '\0';
             sendservmsg(msg);
-            return;
+            return false;
         }
 
-        demoplaybackduration = scandemoduration(file);
-
-        sendservmsgf("playing demo \"%s\"", file);
+        copystring(demoplaybackfile, file);
+        if(scan) demoplaybackduration = scandemoduration(file);
+        if(announce) sendservmsgf("playing demo \"%s\"", file);
 
         sendf(-1, 1, "ri3", N_DEMOPLAYBACK, 1, -1);
 
-        if(demoplayback->read(&nextplayback, sizeof(nextplayback))!=sizeof(nextplayback))
+        if(demoplayback->read(&nextplayback, sizeof(nextplayback)) != sizeof(nextplayback))
         {
             enddemoplayback();
-            return;
+            return false;
         }
         lilswap(&nextplayback, 1);
+        return true;
+    }
+
+    void setupdemoplayback()
+    {
+        if(demoplayback) return;
+        demoplaybackduration = 0;
+        string file;
+        copystring(file, smapname);
+        int len = strlen(file);
+        if(len < 4 || strcasecmp(&file[len-4], ".dmo")) concatstring(file, ".dmo");
+        startdemoplayback(file, true, true);
     }
 
     void readdemo()
@@ -1045,6 +1067,60 @@ namespace server
         else gamelimit = max(gamelimit, nextplayback + secs*1000);
     }
 
+    static bool restartdemoplayback()
+    {
+        if(!demoplayback || !demoplaybackfile[0]) return false;
+
+        string file;
+        copystring(file, demoplaybackfile);
+        int duration = demoplaybackduration;
+
+        DELETEP(demoplayback);
+        nextplayback = 0;
+        gamemillis = 0;
+
+        // Reset client-side demo state before replaying the initial snapshot.
+        sendf(-1, 1, "ri3", N_DEMOPLAYBACK, 0, -1);
+
+        demoplaybackduration = duration;
+        return startdemoplayback(file, false, false);
+    }
+
+    bool demoseekabsolute(int millis)
+    {
+        if(!demoplayback) return false;
+
+        int duration = demoplaybackduration > 0 ? demoplaybackduration : max(gamelimit, gamemillis);
+        int target = clamp(millis, 0, duration), previous = gamemillis;
+        bool waspaused = gamepaused;
+
+        if(target < gamemillis)
+        {
+            if(!restartdemoplayback()) return false;
+            gamemillis = target;
+            readdemo();
+
+            // N_DEMOPLAYBACK resets the client pause flag even though the
+            // server remains paused, so explicitly restore that state.
+            if(demoplayback && waspaused)
+                sendf(-1, 1, "riii", N_PAUSEGAME, 1, -1);
+        }
+        else if(target > gamemillis)
+        {
+            gamemillis = target;
+            readdemo();
+        }
+
+        if(demoplayback && gamemillis != previous)
+        {
+            if(!interm) sendf(-1, 1, "ri2", N_TIMEUP, max((gamelimit - gamemillis)/1000, 1));
+#ifndef STANDALONE
+            cleardamagescreen();
+#endif
+        }
+        return demoplayback != NULL;
+    }
+
     void seekdemo(char *t)
     {
         if(!demoplayback) return;
@@ -1054,24 +1130,9 @@ namespace server
         if(*t == ':') secs = strtoul(t+1, &t, 10);
         else { secs = mins; mins = 0; }
         if(*t == '.') millis = strtoul(t+1, &t, 10);
-        int offset = max(millis + (mins*60 + secs)*1000, 0), prevmillis = gamemillis;
-        if(rev) while(gamelimit - offset > gamemillis)
-        {
-            gamemillis = gamelimit - offset;
-            readdemo();
-        }
-        else if(offset > gamemillis)
-        {
-            gamemillis = offset;
-            readdemo();
-        }
-        if(gamemillis > prevmillis)
-        {
-            if(!interm) sendf(-1, 1, "ri2", N_TIMEUP, max((gamelimit - gamemillis)/1000, 1));
-#ifndef STANDALONE
-            cleardamagescreen();
-#endif
-        }
+        int offset = max(millis + (mins*60 + secs)*1000, 0);
+        int duration = demoplaybackduration > 0 ? demoplaybackduration : gamelimit;
+        demoseekabsolute(rev ? duration - offset : offset);
     }
 
     ICOMMAND(seekdemo, "sN$", (char *t, int *numargs, ident *id),
@@ -1129,11 +1190,15 @@ namespace server
     {
         if(!demoplayback || millis <= 0) return;
 
-        int target = gamemillis + millis;
+        int duration = demoplaybackduration > 0 ? demoplaybackduration : max(gamelimit, gamemillis);
+        demoseekabsolute(gamemillis + min(millis, duration - gamemillis));
+    }
 
-        // seekdemo() accepts an absolute demo timestamp.
-        defformatstring(t, "%d.%03d", target / 1000, target % 1000);
-        seekdemo(t);
+    void demorewind(int millis)
+    {
+        if(!demoplayback || millis <= 0) return;
+
+        demoseekabsolute(gamemillis - min(millis, gamemillis));
     }
 
     bool ispaused() { return gamepaused; }
@@ -3788,4 +3853,3 @@ namespace server
 
     #include "aiman.h"
 }
-

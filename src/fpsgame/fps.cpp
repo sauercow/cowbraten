@@ -1318,7 +1318,17 @@ namespace game
 
         ICOMMAND(demoforward, "i", (int *seconds),
         {
-            server::demoforward(max(*seconds, 1) * 1000);
+            server::demoforward(min(max(*seconds, 1), INT_MAX / 1000) * 1000);
+        });
+
+        ICOMMAND(demorewind, "i", (int *seconds),
+        {
+            server::demorewind(min(max(*seconds, 1), INT_MAX / 1000) * 1000);
+        });
+
+        ICOMMAND(demoseek, "i", (int *millis),
+        {
+            server::demoseekabsolute(*millis);
         });
 
         static void drawdemorect(

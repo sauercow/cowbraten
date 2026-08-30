@@ -1228,7 +1228,9 @@ namespace server
     extern void timeupdate(int secs);
     extern bool demoplaybackactive();
     extern void toggledemopause();
+    extern bool demoseekabsolute(int millis);
     extern void demoforward(int millis);
+    extern void demorewind(int millis);
     extern const char *getdemofile(const char *file, bool init);
     extern void forcemap(const char *map, int mode);
     extern void forcepaused(bool paused);
