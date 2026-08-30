@@ -122,6 +122,7 @@ namespace game
 
     bool connected = false, remote = false, demoplayback = false, gamepaused = false;
     int sessionid = 0, mastermode = MM_OPEN, gamespeed = 100;
+    static int demorestartfollowing = -1, demorestartfollowdir = 0;
     string servdesc = "", servauth = "", connectpass = "";
 
     VARP(deadpush, 1, 2, 20);
@@ -1964,11 +1965,41 @@ namespace game
             case N_DEMOPLAYBACK:
             {
                 int on = getint(p);
+                int cn = getint(p);
+                bool restarting = !on && demoplayback && cn < 0;
+
                 if(on) player1->state = CS_SPECTATOR;
-                else clearclients();
+                else
+                {
+                    if(restarting)
+                    {
+                        demorestartfollowing = following;
+                        demorestartfollowdir = followdir;
+
+                        // Avoid treating the temporary playback reset as the
+                        // followed player disconnecting from the demo.
+                        following = -1;
+                        followdir = 0;
+                    }
+                    else
+                    {
+                        demorestartfollowing = -1;
+                        demorestartfollowdir = 0;
+                    }
+                    clearclients();
+                }
                 demoplayback = on!=0;
-                player1->clientnum = getint(p);
+                player1->clientnum = cn;
                 gamepaused = false;
+
+                if(on && demorestartfollowing >= 0)
+                {
+                    following = demorestartfollowing;
+                    followdir = demorestartfollowdir;
+                    demorestartfollowing = -1;
+                    demorestartfollowdir = 0;
+                }
+
                 execident(on ? "demostart" : "demoend");
                 break;
             }

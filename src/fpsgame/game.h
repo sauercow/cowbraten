@@ -743,7 +743,7 @@ namespace game
     extern int lastspawnattempt;
     extern int lasthit;
     extern int respawnent;
-    extern int following;
+    extern int following, followdir;
     extern int smoothmove, smoothdist;
 
     extern bool clientoption(const char *arg);

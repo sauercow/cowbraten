@@ -1678,15 +1678,28 @@ namespace game
         int currentsecs = displayed / 1000;
         int durationsecs = duration / 1000;
 
-        defformatstring(
-            label,
-            "%s   %d:%02d / %d:%02d",
-            ispaused() ? "PAUSED" : "PLAY",
-            currentsecs / 60,
-            currentsecs % 60,
-            durationsecs / 60,
-            durationsecs % 60
-        );
+        string label;
+        if(ispaused() || demodragging)
+            formatstring(
+                label,
+                "%s   %d:%02d.%03d / %d:%02d.%03d",
+                ispaused() ? "PAUSED" : "SEEK",
+                currentsecs / 60,
+                currentsecs % 60,
+                displayed % 1000,
+                durationsecs / 60,
+                durationsecs % 60,
+                duration % 1000
+            );
+        else
+            formatstring(
+                label,
+                "PLAY   %d:%02d / %d:%02d",
+                currentsecs / 60,
+                currentsecs % 60,
+                durationsecs / 60,
+                durationsecs % 60
+            );
 
         pushhudmatrix();
         hudmatrix.scale(scale, scale, 1);
