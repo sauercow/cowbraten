@@ -77,17 +77,17 @@ apply-patches:
 	$(PATCH) < patches/enet_fragment_flood.patch
 	cd src && make depend
 
-gzip-cfgs embed-cfgs: DATA=data/p1xbraten
+gzip-cfgs embed-cfgs: DATA=data/cowbraten
 gzip-cfgs: GZIP=gzip --keep --force --best --no-name
 gzip-cfgs: # to avoid C code surrounding the bytes, use: xxd -i - outfile < [infile]
 	for f in $(DATA)/*.cfg; do $(GZIP) $${f} && xxd -i - $${f}.gz.xxd < $${f}.gz; done
 
 embed-cfgs: EMBEDS=menus master keymap gamehud
-embed-cfgs: TARGET=src/p1xbraten/embedded_cfgs.cpp
+embed-cfgs: TARGET=src/cowbraten/embedded_cfgs.cpp
 embed-cfgs: gzip-cfgs
 	for f in $(EMBEDS); do \
-		sed -i "s/0,\/\/$${f}_crc/0x$$(crc32 $(DATA)/$${f}.cfg),/" $(TARGET) && \
-		sed -i "s/embeddedfile<0> $${f}_cfg/embeddedfile<$$(stat --printf="%s" $(DATA)/$${f}.cfg.gz)> $${f}_cfg/" $(TARGET) \
+		sed -i "/embeddedfile<.*> $${f}_cfg = {/{n;s/0x[0-9a-fA-F]*,/0x$$(crc32 $(DATA)/$${f}.cfg),/;}" $(TARGET) && \
+		sed -i -E "s/embeddedfile<[0-9]+> $${f}_cfg/embeddedfile<$$(stat --printf="%s" $(DATA)/$${f}.cfg.gz)> $${f}_cfg/" $(TARGET) \
 	; done
 	cd src && make depend
 
@@ -105,16 +105,16 @@ clean-sauer: ensure-sauer-dir
 	cd $(SAUER_DIR)/src && make clean
 
 VANILLA_SOURCE_FILES=enet,engine,fpsgame,shared
-P1XBRATEN_SOURCE_FILES=$(VANILLA_SOURCE_FILES),p1xbraten
+COWBRATEN_SOURCE_FILES=$(VANILLA_SOURCE_FILES),cowbraten
 
 update-src: clean-sauer
-	rm --recursive --force src/{$(P1XBRATEN_SOURCE_FILES)}
+	rm --recursive --force src/{$(COWBRATEN_SOURCE_FILES)}
 	rsync --recursive --ignore-times --times --exclude=".*" $(SAUER_DIR)/src/{$(VANILLA_SOURCE_FILES)} src/
 
 from-patches: | update-src apply-patches embed-cfgs build
 
 changes-to-patch:
-	git diff --no-prefix --ignore-all-space --staged data/p1xbraten src/{$(P1XBRATEN_SOURCE_FILES)} src/Makefile > patches/new_changes.patch
+	git diff --no-prefix --ignore-all-space --staged data/cowbraten src/{$(COWBRATEN_SOURCE_FILES)} src/Makefile > patches/new_changes.patch
 
 ensure-sauer-dir:
 ifndef SAUER_DIR

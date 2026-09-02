@@ -1,8 +1,8 @@
 # Changelog
 
-## p1xbraten-cow 1.0.0-rc.1 — 2026-08-30
+## cowbraten 1.0.0 — 2026-09-01
 
-First release candidate of p1xbraten-cow, based on p1xbraten 9.0.0.
+Initial cowbraten release, based on p1xbraten 9.0.0.
 
 ### Highlights
 
@@ -19,7 +19,7 @@ First release candidate of p1xbraten-cow, based on p1xbraten 9.0.0.
 ### Compatibility
 
 - Keeps `p1xbratenversion` at 9.0.0 for existing p1xbraten client detection.
-- Adds the separate read-only `p1xbratencowversion` variable for fork releases.
+- Adds the separate read-only `cowbratenversion` variable for fork releases.
 - Does not change the Sauerbraten network protocol or demo format version.
 
 ### Validation

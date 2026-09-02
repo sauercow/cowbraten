@@ -563,7 +563,7 @@ menu *guiserversmenu = NULL;
 
 namespace game
 {
-    extern int usep1xbratenmenus;
+    extern int usecowbratenmenus;
     namespace mod { extern const char *showservers(g3d_gui *cgui, uint *header, int pagemin, int pagemax); }
 }
 
@@ -572,7 +572,7 @@ void guiservers(uint *header, int *pagemin, int *pagemax)
     extern const char *showservers(g3d_gui *cgui, uint *header, int pagemin, int pagemax);
     if(cgui) 
     {
-        const char *command = game::usep1xbratenmenus ?
+        const char *command = game::usecowbratenmenus ?
             game::mod::showservers(cgui, header, *pagemin, *pagemax > 0 ? *pagemax : INT_MAX) :
             showservers(cgui, header, *pagemin, *pagemax > 0 ? *pagemax : INT_MAX);
         if(command)

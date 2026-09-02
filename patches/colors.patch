@@ -723,10 +723,10 @@ Index: src/fpsgame/weapon.cpp
          }
      }
 
-Index: src/p1xbraten/colors.h
+Index: src/cowbraten/colors.h
 ===================================================================
---- src/p1xbraten/colors.h	(nonexistent)
-+++ src/p1xbraten/colors.h	(working copy)
+--- src/cowbraten/colors.h	(nonexistent)
++++ src/cowbraten/colors.h	(working copy)
 @@ -0,0 +1,12 @@
 +#define COL_WHITE       0xFFFFFF
 +#define COL_LIGHTERGRAY 0xB5B5B5

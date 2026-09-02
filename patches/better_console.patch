@@ -139,11 +139,11 @@ index 843dc15..49ad01b 100644
 
      // monster
      struct monster;
-diff --git src/p1xbraten/namecomplete.cpp src/p1xbraten/namecomplete.cpp
+diff --git src/cowbraten/namecomplete.cpp src/cowbraten/namecomplete.cpp
 new file mode 100644
 index 0000000..90dc855
 --- /dev/null
-+++ src/p1xbraten/namecomplete.cpp
++++ src/cowbraten/namecomplete.cpp
 @@ -0,0 +1,92 @@
 +#include "game.h"
 +

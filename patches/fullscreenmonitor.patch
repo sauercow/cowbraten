@@ -21,11 +21,11 @@ index 1270a20..fc485a3 100644
          if(fullscreendesktop)
          {
              winw = desktopw;
-diff --git src/p1xbraten/fullscreenmonitor.cpp src/p1xbraten/fullscreenmonitor.cpp
+diff --git src/cowbraten/fullscreenmonitor.cpp src/cowbraten/fullscreenmonitor.cpp
 new file mode 100644
 index 0000000..90179d9
 --- /dev/null
-+++ src/p1xbraten/fullscreenmonitor.cpp
++++ src/cowbraten/fullscreenmonitor.cpp
 @@ -0,0 +1,27 @@
 +#include "engine.h"
 +

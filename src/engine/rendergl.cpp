@@ -2446,7 +2446,7 @@ void gl_drawhud()
                     DELETEA(editinfo);
                 }
             }
-            else if(char *gameinfo = execidentstr("p1xbratengamehud"))
+            else if(char *gameinfo = execidentstr("cowbratengamehud"))
             {
                 if(gameinfo[0])
                 {

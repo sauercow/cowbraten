@@ -1,6 +1,6 @@
-# p1xbraten-cow
+# cowbraten
 
-This repository contains **p1xbraten-cow**, a personal fork of [p1xbraten](https://github.com/sauerbraten/p1xbraten) with additional demo playback, HUD, crosshair and sound features. It preserves p1xbraten compatibility while versioning the fork separately.
+This repository contains **cowbraten**, a standalone-branded fork of [p1xbraten](https://github.com/sauerbraten/p1xbraten) with additional demo playback, HUD, crosshair, and sound features. It retains p1xbraten network detection compatibility while versioning and packaging cowbraten separately.
 
 Current fork version: **1.0.0**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights.
 
@@ -44,6 +44,7 @@ Current fork version: **1.0.0**, based on **p1xbraten 9.0.0**. See the [changelo
   - [server\_proxy\_setip.patch](#server_proxy_setippatch)
   - [server\_botbalanceearly.patch](#server_botbalanceearlypatch)
   - [server\_bans.patch](#server_banspatch)
+- [Credits](#credits)
 - [Project Structure](#project-structure)
 - [Building your own binary](#building-your-own-binary)
   - [Build dependencies](#build-dependencies)
@@ -54,13 +55,13 @@ Current fork version: **1.0.0**, based on **p1xbraten 9.0.0**. See the [changelo
 
 ## Installation
 
-Source tags for p1xbraten-cow are published at https://github.com/sauercow/p1xbraten-cow/tags. This release candidate does not yet include prebuilt packages; install the normal Sauerbraten runtime/content, then follow [Building your own binary](#building-your-own-binary) to build the fork.
+Source tags for cowbraten are published at https://github.com/sauercow/cowbraten/tags. cowbraten uses the normal Sauerbraten game content, which must already be installed or otherwise available.
 
-Prebuilt packages from https://github.com/sauerbraten/p1xbraten/releases/latest contain upstream p1xbraten and do not include the p1xbraten-cow features.
+Packages from https://github.com/sauerbraten/p1xbraten/releases/latest contain upstream p1xbraten and do not include cowbraten-specific features or branding.
 
 ### Windows
 
-p1xbraten-cow 1.0.0 does not provide a prebuilt Windows binary, and building on Windows is not currently supported by this repository. The upstream p1xbraten installer can provide the normal game runtime, but it does not contain the fork features.
+The Windows target can be cross-compiled on Linux with Zig. With Zig and NSIS installed, run `./package.sh windows` to build `cowbraten_x86_64_client.exe` and create `dist/cowbraten_setup_<version>.exe`. The installer adds cowbraten alongside an existing Sauerbraten installation so the original game content remains available.
 
 ### macOS
 
@@ -73,9 +74,9 @@ Install the normal Sauerbraten runtime/content and the build dependencies, then 
 
 ## Menu
 
-For easy configuration of the new features, an updated version of the `menus.cfg` file is automatically installed when you start p1xbraten for the first time. The new file brings UI options for added features and also includes various cleanups of the vanilla GUI.
+For easy configuration of the new features, an updated version of the `menus.cfg` file is automatically installed when you start cowbraten for the first time. The new file brings UI options for added features and also includes various cleanups of the vanilla GUI.
 
-If you do not want to use the p1xbraten menus, run `/usep1xbratenmenus 0`.
+If you do not want to use the cowbraten menus, run `/usecowbratenmenus 0`.
 
 
 ## Patches
@@ -146,7 +147,7 @@ a.k.a. Features
       round (divf (getfrags) (max (getdeaths) 1)) 0.1	)
   ]
   ```
-Use `/usep1xbratenmenus 0` to use the default scoreboard.
+Use `/usecowbratenmenus 0` to use the default scoreboard.
 
 ### [hudfragmessages.patch](./patches/hudfragmessages.patch)
 
@@ -174,7 +175,7 @@ The frag-message HUD also tracks the local player's consecutive enemy kills:
 - dying or starting a new game resets the streak;
 - suicides and team kills do not increase it.
 
-Streak messages reuse `hudfragmessageduration`, `hudfragmessagefade`, `hudfragmessagex`, `hudfragmessagey` and `hudfragmessagescale`, so they stay aligned with the rest of the p1xbraten frag HUD. `streakmilestonescale` controls the additional size multiplier used by milestone messages (1.25 by default). Setting `hudfragmessages` to `0` hides both regular frag and streak messages.
+Streak messages reuse `hudfragmessageduration`, `hudfragmessagefade`, `hudfragmessagex`, `hudfragmessagey` and `hudfragmessagescale`, so they stay aligned with the rest of the cowbraten frag HUD. `streakmilestonescale` controls the additional size multiplier used by milestone messages (1.25 by default). Setting `hudfragmessages` to `0` hides both regular frag and streak messages.
 
 ![fragmessages](https://i.imgur.com/K4GL6oB.png)
 
@@ -197,7 +198,7 @@ Streak messages reuse `hudfragmessageduration`, `hudfragmessagefade`, `hudfragme
 - adds the `serverbrowsershow[ping|players|slots|mode|map|time|master|host|port|description]` variables: set to 0 to hide the respective column from the UI
 - adds the `filterservers` string variable to only show servers in the serverbrowser whose mode, map or description matches (using case-insensitive substring matching)
 
-The p1xbraten menu gives you a simple search field on the serverbrowser using this variable. Use `/p1xbratenmenus 0` to use the default serverbrowser.
+The cowbraten menu gives you a simple search field on the server browser using this variable. Use `/usecowbratenmenus 0` to use the default server browser.
 
 ### [listteams.patch](./patches/listteams.patch)
 
@@ -219,7 +220,7 @@ The p1xbraten menu gives you a simple search field on the serverbrowser using th
 
 This patch allows using `maxfps` without compromising on the frequency of input polling and network event processing. In vanilla Sauerbraten, `maxfps` limits the whole game's main loop. This patch removes the main loop limiting and instead skips only frame drawing until a new frame is needed, but still processes network events and player input on every main loop iteration.
 
-While vanilla Sauerbraten is truly unlimited after `/maxfps 0`, p1xbraten's mainloop can additionally be limited using the `maxtps` variable. Setting `maxfps` to any value other than 0 also forces a maximum tick frequency of 1000 (but respects lower settings), even if you set `maxtps 0`, so that p1xbraten can prioritise frame draw timing. Set both `maxfps` and `maxtps` to 0 to get vanilla's unlimited behavior back.
+While vanilla Sauerbraten is truly unlimited after `/maxfps 0`, cowbraten's main loop can additionally be limited using the `maxtps` variable. Setting `maxfps` to any value other than 0 also forces a maximum tick frequency of 1000 (but respects lower settings), even if you set `maxtps 0`, so that cowbraten can prioritize frame draw timing. Set both `maxfps` and `maxtps` to 0 to get vanilla's unlimited behavior back.
 
 Using `maxfps` and `maxtps`, you can optimize for different goals:
 
@@ -242,14 +243,14 @@ Using `maxfps` and `maxtps`, you can optimize for different goals:
 
 ### [modversion.patch](./patches/modversion.patch)
 
-- adds the `p1xbratenversion` variable (read-only): contains the version of your installation as a string
-- adds the `p1xbratencowversion` variable (read-only): contains the separate p1xbraten-cow release version
-- adds the `getclientp1xbratenversion <cn>` command: returns the version of p1xbraten the player is running
-- adds the `enablep1xbratendetection` variable: set to 0 to disable broadcasting your p1xbraten version (and detecting other p1xbraten players yourself)
+- retains the `p1xbratenversion` variable (read-only) for compatibility with upstream p1xbraten detection
+- adds the `cowbratenversion` variable (read-only): contains the separate cowbraten release version
+- retains the `getclientp1xbratenversion <cn>` command: returns the compatible p1xbraten protocol version advertised by a player
+- retains the `enablep1xbratendetection` variable: set to 0 to disable broadcasting the compatible version and detecting other compatible clients
 
-This lets you see wether a player connected to the same server as you is using p1xbraten, and what version. It relies on p1xbraten clients sending additional packets to the server, which the server then broadcasts to all other clients. This means other players can tell you're using p1xbraten (and what version). No information other than "I use p1xbraten, version X.Y.Z" is sent. No information is sent to me (p1x) or any third party. Opt out if you are firefly!
+This compatibility layer lets clients recognize cowbraten and p1xbraten users on the same server. It uses the existing p1xbraten packet prefix so cowbraten does not fragment the established protocol. Only the compatible client version is broadcast through the game server; it is not sent directly to the cowbraten or p1xbraten maintainers.
 
-For an overview of who uses p1xbraten, you can run `/showgui p1xbratenusage`.
+For an overview of compatible clients, run `/showgui cowbratenusage`.
 
 ### [ignoreminimize.patch](./patches/ignoreminimize.patch)
 
@@ -318,11 +319,11 @@ You can also adjust the trail colors in the options menu.
 - `crosshairreloadfade` uses red to indicate that the insta rifle is still reloading, then transitions back to the ready crosshair color as the reload completes; set it to `0` to disable the color transition
 - `crosshairreloadrotate` rotates the insta rifle's crosshair from 45 degrees back to its normal orientation during the same reload period; set it to `0` to disable the rotation
 
-The reload color is a weapon-readiness indicator; it does not represent player health. This is separate from p1xbraten's pre-existing health-based crosshair colors in non-insta modes. The transition returns to the selected ready color and requires `crosshairfx` and `crosshaircolors` to be enabled. Rotation is independent and can be used by itself. Together they provide a visual reload timer without adding another HUD element.
+The reload color is a weapon-readiness indicator; it does not represent player health. This is separate from cowbraten's inherited health-based crosshair colors in non-insta modes. The transition returns to the selected ready color and requires `crosshairfx` and `crosshaircolors` to be enabled. Rotation is independent and can be used by itself. Together they provide a visual reload timer without adding another HUD element.
 
 ### Dynamic sound packs
 
-p1xbraten can discover and switch game sound packs without restarting the client. Choose one from **options → sound → choose sound pack**, set it directly with `/soundpack <name>`, or return to Sauerbraten's sounds with `/soundpack original`. The selection is saved in the client configuration.
+cowbraten can discover and switch game sound packs without restarting the client. Choose one from **options → sound → choose sound pack**, set it directly with `/soundpack <name>`, or return to Sauerbraten's sounds with `/soundpack original`. The selection is saved in the client configuration.
 
 Custom packs use this layout:
 
@@ -334,7 +335,7 @@ soundpacks/
         └── ... .wav/.ogg files
 ```
 
-`/listsoundpacks` returns every valid installed pack, with `original` first. A pack is listed only when it has both `sounds.cfg` and a non-empty `sounds/` directory. When a requested sample is absent from the selected pack, p1xbraten falls back to the matching file under Sauerbraten's original `packages/sounds/`. If the selected pack becomes invalid or cannot load its configuration, the client restores the original sounds automatically.
+`/listsoundpacks` returns every valid installed pack, with `original` first. A pack is listed only when it has both `sounds.cfg` and a non-empty `sounds/` directory. When a requested sample is absent from the selected pack, cowbraten falls back to the matching file under Sauerbraten's original `packages/sounds/`. If the selected pack becomes invalid or cannot load its configuration, the client restores the original sounds automatically.
 
 ### [better_console.patch](./patches/better_console.patch)
 
@@ -444,14 +445,19 @@ This is a more aggressive form of auto-balance than vanilla's `serverbotbalance`
 All of these commands are admin-only. You can use these from cubescript or as a remote command (e.g. `#listbans`).
 
 
+## Credits
+
+cowbraten is derived from [p1xbraten](https://github.com/sauerbraten/p1xbraten), created and maintained by **p1x**. The p1xbraten project provides the core client and server improvements on which cowbraten is built. cowbraten also depends on [Cube 2: Sauerbraten](http://sauerbraten.org/) for the engine and game content. All credit for those upstream projects remains with their respective authors and contributors.
+
+
 ## Project Structure
 
-- `patches/` has all the patch files that turn vanilla Sauerbraten into p1xbraten
-- `src/` has the p1xbraten source tree
+- `patches/` contains the patches that build cowbraten on top of vanilla Sauerbraten
+- `src/` contains the cowbraten source tree
 - `Makefile` has commands to work with the patches and an SVN checkout of vanilla
-- `data/` contains p1xbraten specific cubescript files: each files exist as plain text .cfg file as well as gzipped, xxd'ed file for embedding during compilation
+- `data/` contains cowbraten-specific CubeScript files; each file exists as plain text and as gzipped, xxd-generated data for embedding during compilation
 - `bin_unix/`, `bin64/`, and `sauerbraten.app/` contain OS-specific runtime dependencies
-- `p1xbraten.bat` and `p1xbraten.sh` are launch scripts for Windows/Linux
+- `cowbraten.bat` and `cowbraten.sh` are launch scripts for Windows/Linux
 - `server.sh` and `start.sh` are custom launch scripts that use content from a separate Sauerbraten installation
 
 ## Building your own binary
@@ -460,15 +466,17 @@ All of these commands are admin-only. You can use these from cubescript or as a 
 
 ### Build dependencies
 
-- development headers of the ususal Sauerbraten build dependencies like libz, libSDL2[-image|-mixer]
+- development headers for the usual Sauerbraten build dependencies, including zlib and SDL2, SDL2_image, and SDL2_mixer
 - libarchive-zip-perl / perl-Archive-Zip
 - development headers of libcurl (when checkupdate.patch is included and you're building targets other than linux64)
+- Zig for cross-compiling Windows or macOS targets
+- NSIS for creating the Windows installer
 
 ### Building
 
-On Linux or macOS, just run `make install` (given you installed the usual Sauerbraten dependencies). Building on Windows is not supported.
+On Linux or macOS, run `make install` after installing the usual Sauerbraten dependencies. Native compilation on Windows is not supported, but the Windows target can be cross-compiled from Linux with `make windows`.
 
-This will put the resulting binary into the usual place inside this repo. To use it, you have to copy it over to the same place in your actual Sauerbraten installation. On Linux, the [start.sh](./start.sh) script will launch the new binary from inside this repository, using the Sauerbraten files in $SAUER_DIR and `~/.p1xbraten` as user data directory.
+This will put the resulting binary into the usual place inside this repo. To use it, you have to copy it over to the same place in your actual Sauerbraten installation. On Linux, the [start.sh](./start.sh) script will launch the new binary from inside this repository, using the Sauerbraten files in $SAUER_DIR and `~/.cowbraten` as user data directory.
 
 ### Using fresh upstream sources
 
@@ -491,4 +499,4 @@ make clean && make && make install
 ./start.sh
 ```
 
-In gdb, typing `run` starts p1xbraten.
+In gdb, typing `run` starts cowbraten.

@@ -5,7 +5,7 @@ Index: src/engine/main.cpp
 --- src/engine/main.cpp	(revision 6496)
 +++ src/engine/main.cpp	(working copy)
 @@ -1299,3 +1299,4 @@
-+    execfile("data/p1xbraten/gamehud.cfg.gz");
++    execfile("data/cowbraten/gamehud.cfg.gz");
 
      identflags |= IDF_PERSIST;
 
@@ -60,7 +60,7 @@ Index: src/engine/rendergl.cpp
                  }
              }
 -            else if(char *gameinfo = execidentstr("gamehud"))
-+            else if(char *gameinfo = execidentstr("p1xbratengamehud"))
++            else if(char *gameinfo = execidentstr("cowbratengamehud"))
              {
                  if(gameinfo[0])
                  {

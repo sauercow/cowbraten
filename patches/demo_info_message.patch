@@ -18,10 +18,10 @@ index ae9528d..0bde4c8 100644
          writedemo(1, p.buf, p.len);
      }
 
-diff --git src/p1xbraten/clientdemo.cpp src/p1xbraten/clientdemo.cpp
+diff --git src/cowbraten/clientdemo.cpp src/cowbraten/clientdemo.cpp
 index 48e29ec..e5c44f7 100644
---- src/p1xbraten/clientdemo.cpp
-+++ src/p1xbraten/clientdemo.cpp
+--- src/cowbraten/clientdemo.cpp
++++ src/cowbraten/clientdemo.cpp
 @@ -161,6 +161,8 @@ namespace game {
          return 1;
      }
@@ -39,11 +39,11 @@ index 48e29ec..e5c44f7 100644
          recordpacket(1, p.buf, p.len);
      }
 
-diff --git src/p1xbraten/demo_info_message.cpp src/p1xbraten/demo_info_message.cpp
+diff --git src/cowbraten/demo_info_message.cpp src/cowbraten/demo_info_message.cpp
 new file mode 100644
 index 0000000..5cdab5a
 --- /dev/null
-+++ src/p1xbraten/demo_info_message.cpp
++++ src/cowbraten/demo_info_message.cpp
 @@ -0,0 +1,53 @@
 +#include "game.h"
 +

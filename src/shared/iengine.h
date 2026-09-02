@@ -600,7 +600,7 @@ extern void g3d_cursorpos(float &x, float &y);
 extern void g3d_resetcursor();
 extern void g3d_limitscale(float scale);
 
-// p1xbraten
+// Upstream p1xbraten protocol compatibility
 extern char *p1xbratenversion;
 extern int naturalsort(const char *a, const char *b); // from command.cpp
-extern void migratep1xbraten();
+extern void migratecowbraten();

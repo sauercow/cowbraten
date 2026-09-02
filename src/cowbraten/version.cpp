@@ -1,7 +1,7 @@
 #include "cube.h"
 
 MOD(SVARP, p1xbratenversion, "");
-MOD(SVARP, p1xbratencowversion, "");
+MOD(SVARP, cowbratenversion, "");
 
 static void lockversion(const char *name)
 {
@@ -10,9 +10,9 @@ static void lockversion(const char *name)
     if(!(id->flags&IDF_READONLY)) id->flags += IDF_READONLY;
 }
 
-void migratep1xbraten()
+void migratecowbraten()
 {
-    const char *version = "9.0.0"; // replaced in CI build
+    const char *version = "9.0.0"; // upstream p1xbraten compatibility version
     const char *cowversion = "1.0.0";
     if(naturalsort(p1xbratenversion, version) == -1)
     {
@@ -28,8 +28,8 @@ void migratep1xbraten()
         }
     }
     setsvar("p1xbratenversion", version);
-    setsvar("p1xbratencowversion", cowversion);
+    setsvar("cowbratenversion", cowversion);
     lockversion("p1xbratenversion");
-    lockversion("p1xbratencowversion");
-    conoutf("p1xbraten-cow version: %s (based on p1xbraten %s)", cowversion, version);
+    lockversion("cowbratenversion");
+    conoutf("cowbraten version: %s (based on p1xbraten %s)", cowversion, version);
 }

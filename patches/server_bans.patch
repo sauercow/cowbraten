@@ -71,11 +71,11 @@ index c153591..b7b63a4 100644
    #ifndef _WINDOWS
      #define _WINDOWS
    #endif
-diff --git src/p1xbraten/bans.cpp src/p1xbraten/bans.cpp
+diff --git src/cowbraten/bans.cpp src/cowbraten/bans.cpp
 new file mode 100644
 index 0000000..c82c4d3
 --- /dev/null
-+++ src/p1xbraten/bans.cpp
++++ src/cowbraten/bans.cpp
 @@ -0,0 +1,78 @@
 +#include "game.h"
 +
@@ -155,10 +155,10 @@ index 0000000..c82c4d3
 +    }
 +
 +}
-diff --git src/p1xbraten/remote_commands.cpp src/p1xbraten/remote_commands.cpp
+diff --git src/cowbraten/remote_commands.cpp src/cowbraten/remote_commands.cpp
 index cafe106..cef1b76 100644
---- src/p1xbraten/remote_commands.cpp
-+++ src/p1xbraten/remote_commands.cpp
+--- src/cowbraten/remote_commands.cpp
++++ src/cowbraten/remote_commands.cpp
 @@ -27,6 +27,11 @@ namespace server {
          else if(!strcmp(cmd, "mutespec") || !strcmp(cmd, "mutespecs") || !strcmp(cmd, "specmute"))
                                                                { queryspecmute(sender); return true; }

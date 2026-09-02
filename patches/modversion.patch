@@ -6,7 +6,7 @@ index d79944d..9811024 100644
 
      identflags |= IDF_PERSIST;
 
-+    migratep1xbraten();
++    migratecowbraten();
 +
      logoutf("init: mainloop");
 
@@ -19,36 +19,40 @@ index d79944d..9811024 100644
  #ifdef WIN32
          setupwindow("Cube 2: Sauerbraten server");
  #endif
-+        migratep1xbraten();
++        migratecowbraten();
      }
 
      execfile("server-init.cfg", false);
-Index: src/p1xbraten/version.cpp
+Index: src/cowbraten/version.cpp
 ===================================================================
---- src/p1xbraten/version.cpp	(nonexistent)
-+++ src/p1xbraten/version.cpp	(working copy)
-@@ -0,0 +1,22 @@
+--- src/cowbraten/version.cpp	(nonexistent)
++++ src/cowbraten/version.cpp	(working copy)
+@@ -0,0 +1,26 @@
 +#include "cube.h"
 +
 +MOD(SVARP, p1xbratenversion, "");
++MOD(SVARP, cowbratenversion, "");
 +
-+void lockversion()
++static void lockversion(const char *name)
 +{
-+    ident *id = getident("p1xbratenversion");
-+    if(!id) { conoutf(CON_ERROR, "p1xbratenversion is undefined!"); return; }
++    ident *id = getident(name);
++    if(!id) { conoutf(CON_ERROR, "%s is undefined!", name); return; }
 +    if(!(id->flags&IDF_READONLY)) id->flags += IDF_READONLY;
 +}
 +
-+void migratep1xbraten()
++void migratecowbraten()
 +{
-+    const char *version = "<git-dev>"; // replaced in CI build
++    const char *version = "9.0.0"; // upstream p1xbraten compatibility version
++    const char *cowversion = "1.0.0";
 +    if(naturalsort(p1xbratenversion, version) == -1)
 +    {
 +        // we're newer, run migrations
 +    }
 +    setsvar("p1xbratenversion", version);
-+    lockversion();
-+    conoutf("p1xbraten version: %s", version);
++    setsvar("cowbratenversion", cowversion);
++    lockversion("p1xbratenversion");
++    lockversion("cowbratenversion");
++    conoutf("cowbraten version: %s (based on p1xbraten %s)", cowversion, version);
 +}
 Index: src/fpsgame/client.cpp
 ===================================================================
@@ -119,10 +123,10 @@ Index: src/fpsgame/game.h
 
      // monster
      struct monster;
-Index: src/p1xbraten/detection.cpp
+Index: src/cowbraten/detection.cpp
 ===================================================================
---- src/p1xbraten/detection.cpp	(nonexistent)
-+++ src/p1xbraten/detection.cpp	(working copy)
+--- src/cowbraten/detection.cpp	(nonexistent)
++++ src/cowbraten/detection.cpp	(working copy)
 @@ -0,0 +1,23 @@
 +#include "game.h"
 +
@@ -155,15 +159,15 @@ Index: src/shared/iengine.h
  extern void g3d_resetcursor();
  extern void g3d_limitscale(float scale);
 
-+// p1xbraten
++// Upstream p1xbraten protocol compatibility
 +extern char *p1xbratenversion;
 +extern int naturalsort(const char *a, const char *b); // from command.cpp
-+extern void migratep1xbraten();
++extern void migratecowbraten();
 Index: src/shared/tools.h
 ===================================================================
 --- src/shared/tools.h	(revision 6502)
 +++ src/shared/tools.h	(working copy)
-@@ -1404,5 +1404,45 @@
+@@ -1404,4 +1404,44 @@
      bool check(enet_uint32 host) const { return (host & mask) == ip; }
  };
 
@@ -208,4 +212,3 @@ Index: src/shared/tools.h
 +};
 +
  #endif
-

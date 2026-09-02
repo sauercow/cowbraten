@@ -272,11 +272,11 @@ index f495ed6..4810e0d 100644
          }
 
  		d->gunwait = guns[d->gunselect].attackdelay;
-diff --git src/p1xbraten/clientdemo.cpp src/p1xbraten/clientdemo.cpp
+diff --git src/cowbraten/clientdemo.cpp src/cowbraten/clientdemo.cpp
 new file mode 100644
 index 0000000..839b0a9
 --- /dev/null
-+++ src/p1xbraten/clientdemo.cpp
++++ src/cowbraten/clientdemo.cpp
 @@ -0,0 +1,314 @@
 +#include "game.h"
 +

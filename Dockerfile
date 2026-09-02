@@ -10,19 +10,19 @@ COPY ./src /src
 
 RUN cd src && \
     make server && \
-    strip sauer_server
+    strip cowbraten_server
 
 
 FROM alpine:latest
 
 RUN apk add --upgrade libstdc++
 
-COPY --from=builder /src/sauer_server /server
+COPY --from=builder /src/cowbraten_server /server
 
 # make sure you have a config!
 COPY ./server-init.cfg /server-init.cfg
 
-# remove the next line when you don't use p1xbraten sources or `/checkmaps` will fail
+# Remove the next line when the server does not support p1xbraten-compatible slim maps or `/checkmaps` will fail.
 RUN wget -O - https://static.p1x.pw/slim_ogzs.tar.gz | tar -xzof -
 
 # remove -i part when not running on fly.io

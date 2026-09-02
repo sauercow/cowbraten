@@ -1,7 +1,7 @@
-Index: src/p1xbraten/version.cpp
+Index: src/cowbraten/version.cpp
 ===================================================================
---- src/p1xbraten/version.cpp	(nonexistent)
-+++ src/p1xbraten/version.cpp	(working copy)
+--- src/cowbraten/version.cpp	(nonexistent)
++++ src/cowbraten/version.cpp	(working copy)
 @@ -15,6 +15,15 @@
      if(naturalsort(p1xbratenversion, version) == -1)
      {
@@ -17,4 +17,4 @@ Index: src/p1xbraten/version.cpp
 +        }
      }
      setsvar("p1xbratenversion", version);
-     lockversion();
+    setsvar("cowbratenversion", cowversion);

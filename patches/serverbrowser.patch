@@ -8,7 +8,7 @@ index 8e18447..ab081be 100644
 
 +namespace game
 +{
-+    extern int usep1xbratenmenus;
++    extern int usecowbratenmenus;
 +    namespace mod { extern const char *showservers(g3d_gui *cgui, uint *header, int pagemin, int pagemax); }
 +}
 +
@@ -18,7 +18,7 @@ index 8e18447..ab081be 100644
      if(cgui)
      {
 -        const char *command = showservers(cgui, header, *pagemin, *pagemax > 0 ? *pagemax : INT_MAX);
-+        const char *command = game::usep1xbratenmenus ?
++        const char *command = game::usecowbratenmenus ?
 +            game::mod::showservers(cgui, header, *pagemin, *pagemax > 0 ? *pagemax : INT_MAX) :
 +            showservers(cgui, header, *pagemin, *pagemax > 0 ? *pagemax : INT_MAX);
          if(command)
@@ -173,11 +173,11 @@ index c3e2068..982a38d 100644
 
  vector<serverinfo *> servers;
  ENetSocket pingsock = ENET_SOCKET_NULL;
-diff --git src/p1xbraten/serverbrowser.cpp src/p1xbraten/serverbrowser.cpp
+diff --git src/cowbraten/serverbrowser.cpp src/cowbraten/serverbrowser.cpp
 new file mode 100644
 index 0000000..e1ad208
 --- /dev/null
-+++ src/p1xbraten/serverbrowser.cpp
++++ src/cowbraten/serverbrowser.cpp
 @@ -0,0 +1,198 @@
 +#include "game.h"
 +#include "serverbrowser.h"
@@ -377,11 +377,11 @@ index 0000000..e1ad208
 +    }
 +
 +} }
-diff --git src/p1xbraten/serverbrowser.h src/p1xbraten/serverbrowser.h
+diff --git src/cowbraten/serverbrowser.h src/cowbraten/serverbrowser.h
 new file mode 100644
 index 0000000..f5297f8
 --- /dev/null
-+++ src/p1xbraten/serverbrowser.h
++++ src/cowbraten/serverbrowser.h
 @@ -0,0 +1,139 @@
 +#include "engine.h"
 +

@@ -92,10 +92,10 @@ index 4272bd7..8b407e5 100644
                  default:
                      disconnect_client(sender, DISC_MSGERR);
                      return;
-diff --git src/p1xbraten/clientdemo.cpp src/p1xbraten/clientdemo.cpp
+diff --git src/cowbraten/clientdemo.cpp src/cowbraten/clientdemo.cpp
 index 4272bd7..8b407e5 100644
---- src/p1xbraten/clientdemo.cpp
-+++ src/p1xbraten/clientdemo.cpp
+--- src/cowbraten/clientdemo.cpp
++++ src/cowbraten/clientdemo.cpp
 @@ -53,6 +53,7 @@ namespace game {
          switch (type) {
              case N_SENDDEMOLIST:
@@ -104,11 +104,11 @@ index 4272bd7..8b407e5 100644
              case N_P1X_RECORDDEMO:
                  return;
          }
-diff --git src/p1xbraten/proxy_real_ip.cpp src/p1xbraten/proxy_real_ip.cpp
+diff --git src/cowbraten/proxy_real_ip.cpp src/cowbraten/proxy_real_ip.cpp
 new file mode 100644
 index 0000000..bd130e3
 --- /dev/null
-+++ src/p1xbraten/proxy_real_ip.cpp
++++ src/cowbraten/proxy_real_ip.cpp
 @@ -0,0 +1,22 @@
 +#include "game.h"
 +

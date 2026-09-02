@@ -350,11 +350,11 @@ index 7d25726..4f4d1a4 100644
 
      #include "extinfo.h"
 
-diff --git src/p1xbraten/capability_probing.cpp src/p1xbraten/capability_probing.cpp
+diff --git src/cowbraten/capability_probing.cpp src/cowbraten/capability_probing.cpp
 new file mode 100644
 index 0000000..232c554
 --- /dev/null
-+++ src/p1xbraten/capability_probing.cpp
++++ src/cowbraten/capability_probing.cpp
 @@ -0,0 +1,10 @@
 +#include "game.h"
 +
@@ -366,10 +366,10 @@ index 0000000..232c554
 +    }
 +
 +}
-diff --git src/p1xbraten/clientdemo.cpp src/p1xbraten/clientdemo.cpp
+diff --git src/cowbraten/clientdemo.cpp src/cowbraten/clientdemo.cpp
 index 839b0a9..48e29ec 100644
---- src/p1xbraten/clientdemo.cpp
-+++ src/p1xbraten/clientdemo.cpp
+--- src/cowbraten/clientdemo.cpp
++++ src/cowbraten/clientdemo.cpp
 @@ -22,11 +22,12 @@ namespace game {
      int demostartmillis = 0;
 
@@ -392,11 +392,11 @@ index 839b0a9..48e29ec 100644
                  return;
          }
          int stamp[3] = { totalmillis-demostartmillis, chan, len };
-diff --git src/p1xbraten/managed_games.cpp src/p1xbraten/managed_games.cpp
+diff --git src/cowbraten/managed_games.cpp src/cowbraten/managed_games.cpp
 new file mode 100644
 index 0000000..1c1b1d7
 --- /dev/null
-+++ src/p1xbraten/managed_games.cpp
++++ src/cowbraten/managed_games.cpp
 @@ -0,0 +1,254 @@
 +#include "game.h"
 +
@@ -652,11 +652,11 @@ index 0000000..1c1b1d7
 +        mapevents.add(r);
 +    }
 +}
-diff --git src/p1xbraten/remote_commands.cpp src/p1xbraten/remote_commands.cpp
+diff --git src/cowbraten/remote_commands.cpp src/cowbraten/remote_commands.cpp
 new file mode 100644
 index 0000000..e71f710
 --- /dev/null
-+++ src/p1xbraten/remote_commands.cpp
++++ src/cowbraten/remote_commands.cpp
 @@ -0,0 +1,30 @@
 +#include "game.h"
 +

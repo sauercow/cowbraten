@@ -3,8 +3,8 @@
 # SAUER_OPTIONS contains any command line options you would like to start Sauerbraten with.
 SAUER_OPTIONS=""
 
-# SAUER_HOME is where Sauerbraten should store user files.
-SAUER_HOME="${HOME}/Library/Application Support/Sauerbraten"
+# COWBRATEN_HOME is where cowbraten should store user files.
+COWBRATEN_HOME="${HOME}/Library/Application Support/cowbraten"
 
 cd "$(dirname "$0")"
 
@@ -23,4 +23,4 @@ else
     exit 1
 fi
 
-./p1xbraten_x86_64_client -k"${CONTENT_DIR}" -q"${SAUER_HOME}" -glog.txt ${SAUER_OPTIONS} "$@"
+./cowbraten_x86_64_client -k"${CONTENT_DIR}" -q"${COWBRATEN_HOME}" -glog.txt ${SAUER_OPTIONS} "$@"

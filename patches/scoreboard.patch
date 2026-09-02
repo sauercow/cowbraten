@@ -123,7 +123,7 @@ index 1457f19..0c93387 100644
              g.space(.25f);
          }
 
-+    extern int usep1xbratenmenus;
++    extern int usecowbratenmenus;
 +    namespace mod { extern void renderscoreboard(g3d_gui &g, bool firstpass); }
 +
      struct scoreboardgui : g3d_callback
@@ -134,7 +134,7 @@ index 1457f19..0c93387 100644
          {
              g.start(menustart, 0.03f, NULL, false);
 -            renderscoreboard(g, firstpass);
-+            if(usep1xbratenmenus) mod::renderscoreboard(g, firstpass);
++            if(usecowbratenmenus) mod::renderscoreboard(g, firstpass);
 +            else renderscoreboard(g, firstpass);
              g.end();
          }
@@ -167,11 +167,11 @@ Index: src/fpsgame/weapon.cpp
      }
 
      void adddynlights()
-diff --git src/p1xbraten/scoreboard.cpp src/p1xbraten/scoreboard.cpp
+diff --git src/cowbraten/scoreboard.cpp src/cowbraten/scoreboard.cpp
 new file mode 100644
 index 0000000..8da7701
 --- /dev/null
-+++ src/p1xbraten/scoreboard.cpp
++++ src/cowbraten/scoreboard.cpp
 @@ -0,0 +1,324 @@
 +#include "game.h"
 +#include "weaponstats.h"
@@ -497,10 +497,10 @@ index 0000000..8da7701
 +
 +    }
 +}
-Index: src/p1xbraten/weaponstats.cpp
+Index: src/cowbraten/weaponstats.cpp
 ===================================================================
---- src/p1xbraten/weaponstats.cpp	(nonexistent)
-+++ src/p1xbraten/weaponstats.cpp	(working copy)
+--- src/cowbraten/weaponstats.cpp	(nonexistent)
++++ src/cowbraten/weaponstats.cpp	(working copy)
 @@ -0,0 +1,60 @@
 +#include "game.h"
 +#include "weaponstats.h"
@@ -562,10 +562,10 @@ Index: src/p1xbraten/weaponstats.cpp
 +    }
 +    DAMAGECOMMAND(getaccuracy, floatret(playeraccuracy(p, gun)))
 +}
-Index: src/p1xbraten/weaponstats.h
+Index: src/cowbraten/weaponstats.h
 ===================================================================
---- src/p1xbraten/weaponstats.h	(nonexistent)
-+++ src/p1xbraten/weaponstats.h	(working copy)
+--- src/cowbraten/weaponstats.h	(nonexistent)
++++ src/cowbraten/weaponstats.h	(working copy)
 @@ -0,0 +1,27 @@
 +#ifndef __WEAPONSTATS_H__
 +#define __WEAPONSTATS_H__
@@ -594,10 +594,10 @@ Index: src/p1xbraten/weaponstats.h
 +}
 +
 +#endif
-Index: src/p1xbraten/weaponstats_type.h
+Index: src/cowbraten/weaponstats_type.h
 ===================================================================
---- src/p1xbraten/weaponstats_type.h	(nonexistent)
-+++ src/p1xbraten/weaponstats_type.h	(working copy)
+--- src/cowbraten/weaponstats_type.h	(nonexistent)
++++ src/cowbraten/weaponstats_type.h	(working copy)
 @@ -0,0 +1,59 @@
 +#ifndef __WEAPONSTATS_TYPE_H__
 +#define __WEAPONSTATS_TYPE_H__
