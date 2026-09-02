@@ -45,6 +45,7 @@ ifneq (,$(findstring windows,$(TARGET)))
 	LIBS+= -L../bin64 -Lwindows/lib64 -lzlib1 -lws2_32 -lwinmm
 	CLIENT_INCLUDES= -Iwindows/include/SDL2
 	CLIENT_LIBS= -lSDL2 -lSDL2_image -lSDL2_mixer -lopengl32
+	CLIENT_RESOURCES= windows/cowbraten.manifest
 endif
 
 ifneq (,$(findstring macos,$(TARGET)))
@@ -172,7 +173,7 @@ OUTBIN=cowbraten_x86_64
 
 client:	libenet
 client: $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) $(LINKERFLAGS) -o cowbraten_client $(CLIENT_OBJS) $(LIBS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) $(LINKERFLAGS) -o cowbraten_client $(CLIENT_OBJS) $(CLIENT_RESOURCES) $(LIBS) $(CLIENT_LIBS)
 
 server:	libenet
 server: $(SERVER_OBJS)
