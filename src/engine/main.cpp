@@ -526,6 +526,20 @@ void inputgrab(bool on, bool delay = false)
 
 bool initwindowpos = false;
 
+static bool restoregammapending = false;
+static Uint32 restoregammanext = 0, restoregammauntil = 0;
+
+static const Uint32 RESTORE_GAMMA_INTERVAL = 100;
+static const Uint32 RESTORE_GAMMA_DURATION = 3000;
+
+static void schedulerestoregamma()
+{
+    Uint32 now = SDL_GetTicks();
+    restoregammapending = true;
+    restoregammanext = now;
+    restoregammauntil = now + RESTORE_GAMMA_DURATION;
+}
+
 void setfullscreen(bool enable)
 {
     if(!screen) return;
@@ -542,6 +556,8 @@ void setfullscreen(bool enable)
             initwindowpos = false;
         }
     }
+
+    schedulerestoregamma();
 }
 
 #ifdef _DEBUG
@@ -580,6 +596,7 @@ void screenres(int w, int h)
             SDL_SetWindowSize(screen, scr_w, scr_h);
             SDL_SetWindowPosition(screen, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
             initwindowpos = false;
+            schedulerestoregamma();
         }
     }
     else
@@ -608,6 +625,22 @@ void restoregamma()
     if(initing || reqgamma == 100) return;
     curgamma = reqgamma;
     setgamma(curgamma);
+}
+
+ICOMMAND(reapplygamma, "", (), restoregamma());
+
+static void restoregammaafterpresent()
+{
+    // SDL silently caches the ramp while unfocused, and the display driver can
+    // keep overwriting it while an asynchronous mode change settles.
+    if(!restoregammapending || initing || !screen || !(SDL_GetWindowFlags(screen) & SDL_WINDOW_INPUT_FOCUS)) return;
+
+    Uint32 now = SDL_GetTicks();
+    if(!SDL_TICKS_PASSED(now, restoregammanext)) return;
+
+    restoregamma();
+    if(SDL_TICKS_PASSED(now, restoregammauntil)) restoregammapending = false;
+    else restoregammanext = now + RESTORE_GAMMA_INTERVAL;
 }
 
 void cleargamma()
@@ -957,6 +990,7 @@ void checkinput()
 
                     case SDL_WINDOWEVENT_FOCUS_GAINED:
                         shouldgrab = true;
+                        schedulerestoregamma();
                         break;
                     case SDL_WINDOWEVENT_ENTER:
                         shouldgrab = false;
@@ -976,9 +1010,12 @@ void checkinput()
                     case SDL_WINDOWEVENT_MAXIMIZED:
                     case SDL_WINDOWEVENT_RESTORED:
                         minimized = false;
+                        schedulerestoregamma();
                         break;
 
+                    case SDL_WINDOWEVENT_EXPOSED:
                     case SDL_WINDOWEVENT_RESIZED:
+                        schedulerestoregamma();
                         break;
 
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
@@ -990,6 +1027,7 @@ void checkinput()
                             scr_h = clamp(screenh, SCR_MINH, SCR_MAXH);
                         }
                         gl_resize();
+                        schedulerestoregamma();
                         break;
                     }
                 }
@@ -1041,6 +1079,7 @@ void swapbuffers(bool overlay)
     recorder::capture(overlay);
     gle::disable();
     SDL_GL_SwapWindow(screen);
+    restoregammaafterpresent();
 }
  
 VARP(menufps, 0, 60, 1000);
