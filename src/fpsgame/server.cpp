@@ -1538,11 +1538,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_INVISFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_EXPIRETOKENS, N_DROPTOKENS, N_STEALTOKENS, N_DEMOPACKET, N_P1X_RECORDDEMO, -2, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS,
-#ifdef ANTICHEAT
-        -1, N_P1X_ANTICHEAT_VERIFIED, N_P1X_ANTICHEAT_ENDSESSION,
-#endif
-      NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_INVISFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_EXPIRETOKENS, N_DROPTOKENS, N_STEALTOKENS, N_DEMOPACKET, N_P1X_RECORDDEMO, -2, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, N_P1X_SETIP, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -1776,9 +1772,6 @@ namespace server
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         int chan = welcomepacket(p, ci);
         if(!ci->local) probeforclientdemoupload(p);
-#ifdef ANTICHEAT
-        if(!ci->local && anticheatenabled) probeforanticheatclient(p);
-#endif
         sendpacket(ci->clientnum, chan, p.finalize());
     }
 
@@ -2597,17 +2590,6 @@ namespace server
             }
             return true;
         }
-#ifdef ANTICHEAT
-        if(anticheatenabled && forceanticheatclient && !ci->anticheatverified)
-    {
-            if(requester)
-            {
-                defformatstring(msg, "%s is not running an anti-cheat client", colorname(ci));
-                sendf(requester->clientnum, 1, "ris", N_SERVMSG, msg);
-            }
-            return true;
-        }
-#endif
         return false;
     }
 
@@ -2676,9 +2658,6 @@ namespace server
             ci->state.timeplayed += lastmillis - ci->state.lasttimeplayed;
             savescore(ci);
             sendf(-1, 1, "ri2", N_CDIS, n);
-#ifdef ANTICHEAT
-            if(anticheatenabled && ci->supportsanticheat) unregisteranticheatclient(ci);
-#endif
             if(managedgame && ci->state.state!=CS_SPECTATOR) pausegame(true);
             clients.removeobj(ci);
             aiman::removeai(ci);
@@ -2994,9 +2973,6 @@ namespace server
         if(restorescore(ci)) sendresume(ci);
         sendinitclient(ci);
         if(isdedicatedserver()) logoutf("join: %s (cn %d)", ci->name, ci->clientnum);
-#ifdef ANTICHEAT
-        if(anticheatenabled && forceanticheatclient && !ci->local) forcespectator(ci);
-#endif
         if(!ci->local) loopv(autoauthdomains) sendf(ci->clientnum, 1, "ris", N_REQAUTH, autoauthdomains[i]);
 
         aiman::addclient(ci);
@@ -3823,42 +3799,6 @@ namespace server
                 conoutf("client %d supports the client demo upload protocol extension!", ci->clientnum);
                 ci->supportsclientdemoupload = true;
                 break;
-#ifdef ANTICHEAT
-            case N_P1X_ANTICHEAT_SUPPORTED:
-                if(!anticheatenabled || !ci || ci->local) return;
-                conoutf("client %d supports our anti-cheat protocol extension!", ci->clientnum);
-                loopv(clients) if(clients[i]->anticheatverified==2)
-                    sendf(sender, 1, "ri2", N_P1X_ANTICHEAT_VERIFIED, clients[i]->clientnum, 1);
-                ci->supportsanticheat = true;
-                sendf(sender, 1, "ris", N_SERVMSG, "\fs\f8[anti-cheat]\fr verifying your client ...");
-                sendf(sender, 1, "ri", N_P1X_ANTICHEAT_BEGINSESSION);
-                break;
-
-            case N_P1X_ANTICHEAT_BEGINSESSION:
-                string useridstring;
-                getstring(useridstring, p, sizeof(useridstring));
-                if(!anticheatenabled || !ci || ci->local) return;
-                registeranticheatclient(ci, useridstring);
-                break;
-                     
-            case N_P1X_ANTICHEAT_MESSAGE:
-            {
-                int len = getuint(p);
-                ucharbuf q = p.subbuf(len);
-                if(!anticheatenabled || !ci || ci->local) return;
-                receiveanticheatmessage(ci, q);
-                break;
-            }
-
-            case N_P1X_ANTICHEAT_VIOLATION:
-            {
-                string details;
-                int code = getint(p);
-                getstring(details, p);
-                if(!anticheatenabled || !ci || ci->local) return;
-                handleviolation(ci, code, details);
-            }
-#endif
             #define PARSEMESSAGES 1
             #include "capture.h"
             #include "ctf.h"

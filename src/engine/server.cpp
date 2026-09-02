@@ -171,9 +171,6 @@ void delclient(client *c)
 
 void cleanupserver()
 {
-#ifdef ANTICHEAT
-    server::shutdownanticheat();
-#endif
     if(serverhost) enet_host_destroy(serverhost);
     serverhost = NULL;
 
@@ -495,10 +492,6 @@ void updatetime()
 
 void serverslice(bool dedicated, uint timeout)   // main server update, called from main loop in sp, or from below in dedicated server
 {
-#ifdef ANTICHEAT
-    anticheattick();
-#endif
-
     if(!serverhost) 
     {
         server::serverupdate();
@@ -968,10 +961,6 @@ bool setuplistenserver(bool dedicated)
     return true;
 }
 
-#ifdef ANTICHEAT
-MOD(VAR, anticheatenabled, 1, 0, 0);
-#endif
-
 void initserver(bool listen, bool dedicated)
 {
     if(dedicated) 
@@ -990,9 +979,6 @@ void initserver(bool listen, bool dedicated)
 
     if(listen)
     {
-#ifdef ANTICHEAT
-        if(anticheatenabled) server::initializeanticheat();
-#endif
         dedicatedserver = dedicated;
         updatemasterserver();
         if(dedicated) rundedicatedserver(); // never returns
@@ -1044,9 +1030,6 @@ bool serveroption(char *opt)
         case 'q': logoutf("Using home directory: %s", opt); sethomedir(opt+2); return true;
         case 'k': logoutf("Adding package directory: %s", opt); addpackagedir(opt+2); return true;
         case 'g': logoutf("Setting log file: %s", opt); setlogfile(opt+2); return true;
-#ifdef ANTICHEAT
-        case 'e': anticheatenabled = 1; return true;
-#endif
 #endif
         default: return false;
     }

@@ -13,7 +13,7 @@ static void lockversion(const char *name)
 void migratep1xbraten()
 {
     const char *version = "9.0.0"; // replaced in CI build
-    const char *cowversion = "1.0.0-rc.1";
+    const char *cowversion = "1.0.0";
     if(naturalsort(p1xbratenversion, version) == -1)
     {
         // we're newer, run migrations

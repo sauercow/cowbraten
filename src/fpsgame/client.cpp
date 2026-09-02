@@ -960,10 +960,6 @@ namespace game
 
     void gamedisconnect(bool cleanup)
     {
-#ifdef ANTICHEAT
-        endanticheatsession();
-        player1->anticheatverified = false;
-#endif
         if(remote) stopfollowing();
         ignores.setsize(0);
         connected = remote = false;
@@ -2171,32 +2167,6 @@ namespace game
                     setupdemorecord();
                 }
                 break;
-#ifdef ANTICHEAT
-            case N_P1X_ANTICHEAT_BEGINSESSION:
-                triggeranticheatsession();
-                break;
-
-            case N_P1X_ANTICHEAT_MESSAGE:
-            {
-                int len = getuint(p);
-                ucharbuf q = p.subbuf(len);
-                receiveanticheatmessage(q);
-                break;
-            }
-
-            case N_P1X_ANTICHEAT_ENDSESSION:
-                endanticheatsession();
-                break;
-
-            case N_P1X_ANTICHEAT_VERIFIED:
-            {
-                int vn = getint(p), val = getint(p);
-                fpsent *v = getclient(vn);
-                if(!v) return;
-                v->anticheatverified = val>0;
-                break;
-            }
-#endif
             default:
                 neterr("type", cn < 0);
                 return;

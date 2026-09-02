@@ -19,14 +19,6 @@ bin_macos/p1xbraten*
 sauerbraten.app/Contents/MacOS/p1xbraten*
 data/p1xbraten/*.gz
 
-**/EasyAntiCheat/Certificates
-integritytool/anticheat_integritytool
-integritytool/base_private.key
-integritytool/base_public.cer
-secrets.env
-encrypt_credentials.go
-src/anticheat/*credentials*
-src/anticheat/key*
 dist
 fly.io
 
@@ -34,3 +26,4 @@ Dockertrigger
 !/**/.gitkeep
 
 *.bak
+ui-ux

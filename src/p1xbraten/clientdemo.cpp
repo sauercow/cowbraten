@@ -108,9 +108,6 @@ namespace game {
             case N_AUTHTRY: case N_AUTHCHAL: case N_AUTHANS: case N_REQAUTH:
             case N_P1X_SETIP:
             case N_P1X_RECORDDEMO:
-#ifdef ANTICHEAT
-            case N_P1X_ANTICHEAT_BEGINSESSION: case N_P1X_ANTICHEAT_MESSAGE: case N_P1X_ANTICHEAT_VERIFIED: case N_P1X_ANTICHEAT_ENDSESSION:
-#endif
                 return;
         }
         int stamp[3] = { lastmillis-demostartmillis, chan, len };

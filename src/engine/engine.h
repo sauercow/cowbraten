@@ -4,11 +4,6 @@
 #include "cube.h"
 #include "world.h"
 
-#ifdef ANTICHEAT
-// anticheat
-extern void anticheattick();
-#endif
-
 #ifndef STANDALONE
 
 #include "octa.h"
@@ -615,4 +610,3 @@ namespace recorder
 #endif
 
 #endif
-

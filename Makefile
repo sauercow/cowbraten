@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: build install clean anticheat linux macos windows apply-patches gzip-cfgs embed-cfgs clean-sauer update-src from-patches changes-to-patch ensure-sauer-dir
+.PHONY: build install clean linux macos windows apply-patches gzip-cfgs embed-cfgs clean-sauer update-src from-patches changes-to-patch ensure-sauer-dir
 
 # build install: export DEBUG=1
 build:
@@ -13,14 +13,8 @@ clean:
 	cd src && make clean
 	cd src/enet && make clean
 
-key:
-	dd if=/dev/random bs=1 count=256 of=src/anticheat/key
-	xxd -i src/anticheat/key src/anticheat/key.h
-
-linux macos windows: export ANTICHEAT=1
 # linux macos windows: export DEBUG=1
-linux macos windows: | clean key
-	source secrets.env && go run encrypt_credentials.go < src/anticheat/key && \
+linux macos windows: | clean
 	cd src && \
 	export TARGET="x86_64-$@" && \
 	make -j install
@@ -76,7 +70,6 @@ apply-patches:
 	$(PATCH) < patches/spec_teleports.patch
 	$(PATCH) < patches/demo_info_message.patch
 	$(PATCH) < patches/server_extinfo_mod_id.patch
-	$(PATCH) < patches/anticheat.patch
 	$(PATCH) < patches/setfont.patch
 	$(PATCH) < patches/server_botbalanceearly.patch
 	$(PATCH) < patches/server_bans.patch
@@ -112,7 +105,7 @@ clean-sauer: ensure-sauer-dir
 	cd $(SAUER_DIR)/src && make clean
 
 VANILLA_SOURCE_FILES=enet,engine,fpsgame,shared
-P1XBRATEN_SOURCE_FILES=$(VANILLA_SOURCE_FILES),p1xbraten,anticheat/anticheat.cpp
+P1XBRATEN_SOURCE_FILES=$(VANILLA_SOURCE_FILES),p1xbraten
 
 update-src: clean-sauer
 	rm --recursive --force src/{$(P1XBRATEN_SOURCE_FILES)}

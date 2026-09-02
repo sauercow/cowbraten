@@ -2,7 +2,7 @@
 
 This repository contains **p1xbraten-cow**, a personal fork of [p1xbraten](https://github.com/sauerbraten/p1xbraten) with additional demo playback, HUD, crosshair and sound features. It preserves p1xbraten compatibility while versioning the fork separately.
 
-Current fork version: **1.0.0-rc.1**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights.
+Current fork version: **1.0.0**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights.
 
 - [Installation](#installation)
   - [Windows](#windows)
@@ -33,7 +33,6 @@ Current fork version: **1.0.0-rc.1**, based on **p1xbraten 9.0.0**. See the [cha
   - [Dynamic sound packs](#dynamic-sound-packs)
   - [better\_console.patch](#better_consolepatch)
   - [nextfollowteam.patch](#nextfollowteampatch)
-  - [anticheat.patch](#anticheatpatch)
   - [setfont.patch](#setfontpatch)
   - [fullscreenmonitor.patch](#fullscreenmonitorpatch)
 - [Server Patches](#server-patches)
@@ -43,7 +42,6 @@ Current fork version: **1.0.0-rc.1**, based on **p1xbraten 9.0.0**. See the [cha
   - [server\_managed\_games.patch](#server_managed_gamespatch)
   - [server\_autoauthdomains.patch](#server_autoauthdomainspatch)
   - [server\_proxy\_setip.patch](#server_proxy_setippatch)
-  - [anticheat.patch](#anticheatpatch-1)
   - [server\_botbalanceearly.patch](#server_botbalanceearlypatch)
   - [server\_bans.patch](#server_banspatch)
 - [Project Structure](#project-structure)
@@ -62,7 +60,7 @@ Prebuilt packages from https://github.com/sauerbraten/p1xbraten/releases/latest 
 
 ### Windows
 
-p1xbraten-cow 1.0.0-rc.1 does not provide a prebuilt Windows binary, and building on Windows is not currently supported by this repository. The upstream p1xbraten installer can provide the normal game runtime, but it does not contain the fork features.
+p1xbraten-cow 1.0.0 does not provide a prebuilt Windows binary, and building on Windows is not currently supported by this repository. The upstream p1xbraten installer can provide the normal game runtime, but it does not contain the fork features.
 
 ### macOS
 
@@ -368,13 +366,6 @@ specbind "MOUSE1" [nextfollowteam]
 specbind "MOUSE2" [nextfollowteam -1]
 ```
 
-### [anticheat.patch](./patches/anticheat.patch)
-
-Integrates Epic's Online Services SDK and Anti-Cheat framework to provide protected game sessions on p1xbraten anticheat servers.
-
-- adds the `-e` command line flag to enable anticheat support (anticheat launchers set this for you)
-- adds the `anticheatenabled` read-only variable (only available when using the anticheat launcher, and should never be 0)
-
 ### [setfont.patch](./patches/setfont.patch)
 
 - adds the `setfont <name>` command to set the UI font after registering the font using `font <name> ...` (`setfont "default"` to reset)
@@ -437,11 +428,6 @@ Improves logging when running a dedicated server:
 
 This patch adds support for the [SauerDuels proxy](https://github.com/sauerduels/sauer-proxy) which can be used to obfuscate the IP of tournament servers. The `setip` protocol extension allows the proxy to forward the client's real IP, replacing the proxy's IP.
 
-### [anticheat.patch](./patches/anticheat.patch)
-
-- adds the `-e` command line flag to enable anticheat support
-- adds the `forceanticheatclient` toggle: if enabled, players are forced-to-spec on connect, and have to be using a p1xbraten anticheat client in order to play
-
 ### [server_botbalanceearly.patch](./patches/server_botbalanceearly.patch)
 
 - adds the `serverbotbalanceearly` variable: if 1 (and `serverbotbalance` is also enabled), the server will equalize the player count of all teams by adding/reassigning/removing bots
@@ -466,8 +452,7 @@ All of these commands are admin-only. You can use these from cubescript or as a 
 - `data/` contains p1xbraten specific cubescript files: each files exist as plain text .cfg file as well as gzipped, xxd'ed file for embedding during compilation
 - `bin_unix/`, `bin64/`, and `sauerbraten.app/` contain OS-specific runtime dependencies
 - `p1xbraten.bat` and `p1xbraten.sh` are launch scripts for Windows/Linux
-- `anticheat.bat`/`anticheat.sh` launch p1xbraten with anti-cheat support enabled
-- `server.sh`, `start.sh` and `start_anticheat.sh` are my custom launch scripts (to facilitate launching the binary in this repo, but using content from ~/sauerbraten-code)
+- `server.sh` and `start.sh` are custom launch scripts that use content from a separate Sauerbraten installation
 
 ## Building your own binary
 

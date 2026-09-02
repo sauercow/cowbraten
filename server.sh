@@ -6,4 +6,4 @@ cd $(dirname $0) # change into script directory in case it's called from somewhe
 #SAUER_OPTIONS="-f"
 SAUER_OPTIONS="-q${HOME}/.p1xbraten -k${HOME}/sauerbraten-code"
 
-exec "./bin_unix/p1xbraten_x86_64_server" -e ${SAUER_OPTIONS} "$@"
+exec "./bin_unix/p1xbraten_x86_64_server" ${SAUER_OPTIONS} "$@"

@@ -604,7 +604,3 @@ extern void g3d_limitscale(float scale);
 extern char *p1xbratenversion;
 extern int naturalsort(const char *a, const char *b); // from command.cpp
 extern void migratep1xbraten();
-
-#ifdef ANTICHEAT
-extern int anticheatenabled; // toggled by -e CLI flag
-#endif

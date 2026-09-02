@@ -5,7 +5,7 @@ ifneq (,$(findstring Darwin,$(shell uname -s)))
 endif
 
 ifndef TARGET
-	# 32-bit platforms are not supported, and we can't build for arm64/aarch64 (yet) because of SDL2/EOS
+	# Only x86-64 targets are currently supported.
 	TARGET=x86_64-$(HOSTOS)
 endif
 
@@ -31,34 +31,18 @@ endif
 
 override CXXFLAGS+= -Wall -fsigned-char -fno-exceptions -fno-rtti
 ifneq (,$(findstring macos,$(TARGET)))
-	OSXMIN=10.12 # lowest supported by EOS
+	OSXMIN=10.12 # minimum supported macOS version
 	override CFLAGS+= -mmacosx-version-min=$(OSXMIN)
 	override CXXFLAGS+= -mmacosx-version-min=$(OSXMIN)
 	override LINKERFLAGS+= -Wl,-rpath,@executable_path/../Frameworks
 endif
 
-ifdef ANTICHEAT
-	override CXXFLAGS+= -DANTICHEAT
-	ifneq (,$(findstring macos,$(TARGET)))
-		override LINKERFLAGS+= -Wl,-rpath,@executable_path/../Libraries
-	endif
-	ifneq (,$(findstring linux,$(TARGET)))
-		override LINKERFLAGS+= -Wl,-rpath,'$$ORIGIN'
-	endif
-endif
-
 INCLUDES= -Ishared -Iengine -Ifpsgame -Ip1xbraten -Ienet/include
-ifdef ANTICHEAT
-	INCLUDES+= -Ianticheat -IEOS/include
-endif
 LIBS= -Lenet -lenet
 
 ifneq (,$(findstring windows,$(TARGET)))
 	INCLUDES+= -Iwindows/include/zlib
 	LIBS+= -L../bin64 -Lwindows/lib64 -lzlib1 -lws2_32 -lwinmm
-	ifdef ANTICHEAT
-		LIBS+= -lEOSSDK-Win64-Shipping
-	endif
 	CLIENT_INCLUDES= -Iwindows/include/SDL2
 	CLIENT_LIBS= -lSDL2 -lSDL2_image -lSDL2_mixer -lopengl32
 endif
@@ -66,9 +50,6 @@ endif
 ifneq (,$(findstring macos,$(TARGET)))
 	INCLUDES+= -Imacos/sdk_11.3/usr/include
 	LIBS+= -Lmacos/sdk_11.3/usr/lib -lz
-	ifdef ANTICHEAT
-		LIBS+= -L../sauerbraten.app/Contents/Libraries -lEOSSDK-Mac-Shipping
-	endif
 	CLIENT_INCLUDES= -Imacos/include
 	CLIENT_LIBS= -F./macos/sdk_11.3/System/Library/Frameworks -framework OpenGL
 	CLIENT_LIBS+= -F../sauerbraten.app/Contents/Frameworks -framework SDL2 -framework SDL2_image -framework SDL2_mixer
@@ -77,9 +58,6 @@ endif
 ifneq (,$(findstring linux,$(TARGET)))
 	INCLUDES+= -I/usr/include
 	LIBS+= -L/usr/lib64 -lz
-	ifdef ANTICHEAT
-		LIBS+= -L../bin_unix -lEOSSDK-Linux-Shipping
-	endif
 	CLIENT_INCLUDES= `sdl2-config --cflags`
 	CLIENT_LIBS= -lX11 `sdl2-config --libs` -lSDL2_image -lSDL2_mixer -lGL -lrt
 endif
@@ -160,10 +138,6 @@ CLIENT_OBJS= \
 	p1xbraten/serverbrowser.o \
 	p1xbraten/version.o \
 	p1xbraten/weaponstats.o
-ifdef ANTICHEAT
-	override CLIENT_OBJS+= anticheat/anticheat.o
-endif
-
 SERVER_OBJS= \
 	shared/crypto-standalone.o \
 	shared/stream-standalone.o \
@@ -179,10 +153,6 @@ SERVER_OBJS= \
 	p1xbraten/proxy_real_ip-standalone.o \
 	p1xbraten/remote_commands-standalone.o \
 	p1xbraten/version-standalone.o
-ifdef ANTICHEAT
-	override SERVER_OBJS+= anticheat/anticheat-standalone.o
-endif
-
 default: all
 
 all: client server

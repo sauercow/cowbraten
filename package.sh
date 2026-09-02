@@ -1,18 +1,5 @@
 #!/bin/bash
 
-productId="36e0587a4c3544e8b635f7f55e7ccbfe"
-
-function createHashCatalogue() {
-    local binDir=$1
-    local configFile=$2
-    # clean up hash catalogue
-    rm -rf "$binDir/EasyAntiCheat/Certificates"
-    pushd integritytool || exit
-    echo ./anticheat_integritytool -productid "$productId" -target_game_dir "../$binDir" "$configFile"
-    ./anticheat_integritytool -productid "$productId" -target_game_dir "../$binDir" "$configFile"
-    popd || exit
-}
-
 function build() {
     local platform=$1
     local target="$platform"
@@ -21,43 +8,28 @@ function build() {
         target=$1
     fi
 
-    # set version in source
+    # Set the version in the source for release builds.
     cp src/p1xbraten/version.cpp src/p1xbraten/version.cpp.orig
-    local version=$(git describe)
+    local version
+    version=$(git describe)
     sed -i "s/<git-dev>/$version/" src/p1xbraten/version.cpp
 
-    # make binaries
+    # Build the binaries.
     make "$target" || exit
 
-    # restore git-dev version
+    # Restore the development version marker.
     rm src/p1xbraten/version.cpp
     mv src/p1xbraten/version.cpp.orig src/p1xbraten/version.cpp
 }
 
 function pack() {
     local platform=$1
-    local version=$(git describe)
+    local version
+    version=$(git describe)
 
-    # create hash catalogue
-    local binDir="bin_unix"
-    local configFile="linux.cfg"
-    case "$platform" in
-        windows)
-            binDir="bin64"
-            configFile="windows.cfg"
-            ;;
-        macos)
-            binDir="bin_macos"
-            configFile="macos.cfg"
-            ;;
-    esac
-    createHashCatalogue $binDir $configFile
-
-    # zip up files
     local files=(
         "bin_unix"
         "p1xbraten.sh"
-        "anticheat.sh"
     )
     case "$platform" in
         windows)
@@ -68,14 +40,13 @@ function pack() {
             mv p1xbraten_setup_* dist/
             rm src/windows/p1xbraten.nsi
             mv src/windows/p1xbraten.nsi.orig src/windows/p1xbraten.nsi
-            ;; # break
+            ;;
         macos)
             files=(
                 "sauerbraten.app/Contents/MacOS"
-                "sauerbraten.app/Contents/Libraries"
             )
-            ;& # fallthrough
-        *) # macos & linux
+            ;&
+        *)
             mkdir -p dist
             rm -rf dist/p1xbraten_"$platform"_*.zip
             zip -r dist/p1xbraten_"$platform"_"$version".zip "${files[@]}"
@@ -90,11 +61,7 @@ case "$platform" in
         build "$platform" "debian"
         pack "$platform"
         ;;
-    windows)
-        build "$platform"
-        pack "$platform"
-        ;;
-    macos)
+    windows | macos)
         build "$platform"
         pack "$platform"
         ;;

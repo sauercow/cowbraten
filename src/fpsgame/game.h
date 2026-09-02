@@ -214,7 +214,6 @@ enum
 
 // protocol extensions
 static const char * const CAP_PROBE_CLIENT_DEMO_UPLOAD = "capability_probe_protocol_extension_p1x_client_demo_upload_v2";
-static const char * const CAP_PROBE_ANTICHEAT          = "capability_probe_protocol_extension_p1x_anticheat_v3";
 
 // network messages codes, c2s, c2c, s2c
 
@@ -252,9 +251,6 @@ enum
     // local high-fidelity client-demo messages, never sent during live play
     N_P1X_DEMO_AIM = 1100, N_P1X_DEMO_SHOT_AIM,
 
-#ifdef ANTICHEAT
-    N_P1X_ANTICHEAT_SUPPORTED = 2000, N_P1X_ANTICHEAT_BEGINSESSION, N_P1X_ANTICHEAT_MESSAGE, N_P1X_ANTICHEAT_VIOLATION, N_P1X_ANTICHEAT_ENDSESSION, N_P1X_ANTICHEAT_VERIFIED, // guarded by CAP_PROBE_ANTICHEAT
-#endif
     NUMMSG
 };
 
@@ -288,9 +284,6 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_P1X_SETIP, 2,
     N_P1X_CLIENT_DEMO_UPLOAD_SUPPORTED, 1, N_P1X_RECORDDEMO, 1,
     N_P1X_DEMO_AIM, 0, N_P1X_DEMO_SHOT_AIM, 0,
-#ifdef ANTICHEAT
-    N_P1X_ANTICHEAT_SUPPORTED, 1, N_P1X_ANTICHEAT_BEGINSESSION, 0, N_P1X_ANTICHEAT_MESSAGE, 0, N_P1X_ANTICHEAT_VIOLATION, 0, N_P1X_ANTICHEAT_ENDSESSION, 1, N_P1X_ANTICHEAT_VERIFIED, 3,
-#endif
     -1
 };
 
@@ -582,12 +575,11 @@ struct fpsent : dynent, fpsstate
     ai::aiinfo *ai;
     int ownernum, lastnode;
     semver p1xbratenversion;
-    bool anticheatverified;
     bool highfidemoaim;
 
     vec muzzle;
 
-    fpsent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), attacksound(-1), attackchan(-1), idlesound(-1), idlechan(-1), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), suicides(0), edit(NULL), smoothmillis(-1), playermodel(-1), ai(NULL), ownernum(-1), p1xbratenversion(0, 0, 0), anticheatverified(false), highfidemoaim(false), muzzle(-1, -1, -1)
+    fpsent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), attacksound(-1), attackchan(-1), idlesound(-1), idlechan(-1), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), suicides(0), edit(NULL), smoothmillis(-1), playermodel(-1), ai(NULL), ownernum(-1), p1xbratenversion(0, 0, 0), highfidemoaim(false), muzzle(-1, -1, -1)
     {
         name[0] = team[0] = info[0] = alphanumname[0] = 0;
         respawn();
@@ -901,13 +893,6 @@ namespace game
     extern void handlecapprobe(const char *msg);
     extern void sendclientdemo(stream *demo);
 
-#ifdef ANTICHEAT
-    // anticheat
-    extern bool anticheatready();
-    extern void triggeranticheatsession();
-    extern void receiveanticheatmessage(ucharbuf &p);
-    extern bool endanticheatsession();
-#endif
 }
 
 #include "fragmessages.h"
@@ -1090,8 +1075,6 @@ namespace server
         int authkickvictim;
         char *authkickreason;
         bool supportsclientdemoupload;
-        bool supportsanticheat;
-        int anticheatverified; // 0 = no anti-cheat, 1 = locally verified, 2 = verified by Epic's backend
 
         clientinfo() : getdemo(NULL), getmap(NULL), clipboard(NULL), authchallenge(NULL), authkickreason(NULL) { reset(); }
         ~clientinfo() { events.deletecontents(); cleanclipboard(); cleanauth(); }
@@ -1202,8 +1185,6 @@ namespace server
             cleanauth();
             mapchange();
             supportsclientdemoupload = false;
-            supportsanticheat = false;
-            anticheatverified = 0;
         }
 
         int geteventmillis(int servmillis, int clientmillis)
@@ -1289,20 +1270,6 @@ namespace server
 
     // proxy support
     extern void setip(clientinfo *sender, uint ip);
-
-#ifdef ANTICHEAT
-    // anticheat
-    extern int forceanticheatclient;
-    extern void probeforanticheatclient(packetbuf &p);
-    extern bool registeranticheatclient(clientinfo *ci, const char *useridstring);
-    extern void receiveanticheatmessage(clientinfo *c, ucharbuf &p);
-    extern void handleviolation(clientinfo *ci, int code, const char *details);
-    extern bool unregisteranticheatclient(clientinfo *c);
-    extern bool shouldspectate(clientinfo *ci, clientinfo *requester = NULL);
-    extern void forcespectator(clientinfo *ci);
-    extern void unspectate(clientinfo *ci, clientinfo *requester = NULL);
-    extern void notifyprivclients(int minpriv, char *msg);
-#endif
 
     // bans
     extern void getip(clientinfo *sender, int cn);
