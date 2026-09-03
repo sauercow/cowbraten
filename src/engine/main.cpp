@@ -467,6 +467,7 @@ VARNP(relativemouse, userelativemouse, 0, 1, 1);
 #endif
 
 bool shouldgrab = false, grabinput = false, minimized = false, canrelativemouse = true, relativemouse = false;
+static bool inputgrabinhibited = false;
 
 #ifdef SDL_VIDEO_DRIVER_X11
 VAR(sdl_xgrab_bug, 0, 0, 1);
@@ -477,6 +478,8 @@ void inputgrab(bool on, bool delay = false)
 #ifdef SDL_VIDEO_DRIVER_X11
     bool wasrelativemouse = relativemouse;
 #endif
+    on = on && !inputgrabinhibited;
+
     if(on)
     {
         SDL_ShowCursor(SDL_FALSE);
@@ -524,7 +527,22 @@ void inputgrab(bool on, bool delay = false)
         }
     }
 #endif
-}   
+}
+
+void setinputgrabinhibited(bool inhibit)
+{
+    if(inputgrabinhibited == inhibit)
+        return;
+
+    SDL_PumpEvents();
+    SDL_FlushEvent(SDL_MOUSEMOTION);
+
+    inputgrabinhibited = inhibit;
+    inputgrab(grabinput, shouldgrab);
+
+    SDL_PumpEvents();
+    SDL_FlushEvent(SDL_MOUSEMOTION);
+}
 
 bool initwindowpos = false;
 
@@ -1047,8 +1065,11 @@ void checkinput()
                 break;
 
             case SDL_MOUSEMOTION:
-                if(ui_visible && cowui::processevent(event))
+                if(ui_visible)
+                {
+                    cowui::processevent(event);
                     break;
+                }
 
                 if(grabinput)
                 {
@@ -1063,8 +1084,11 @@ void checkinput()
 
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
-                if(ui_visible && cowui::processevent(event))
+                if(ui_visible)
+                {
+                    cowui::processevent(event);
                     break;
+                }
 
                 //if(lasttype==event.type && lastbut==event.button.button) break; // why?? get event twice without it
                 switch(event.button.button)
@@ -1083,8 +1107,11 @@ void checkinput()
                 break;
 
             case SDL_MOUSEWHEEL:
-                if(ui_visible && cowui::processevent(event))
+                if(ui_visible)
+                {
+                    cowui::processevent(event);
                     break;
+                }
 
                 if(event.wheel.y > 0) { processkey(-4, true); processkey(-4, false); }
                 else if(event.wheel.y < 0) { processkey(-5, true); processkey(-5, false); }

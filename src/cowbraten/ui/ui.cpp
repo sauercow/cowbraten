@@ -314,7 +314,9 @@ namespace cowui
 
     void shutdown()
     {
-        shown = false;
+        if(shown)
+            close();
+
         test_document = nullptr;
 
         if(initialized)
@@ -630,15 +632,24 @@ namespace cowui
         }
 
         test_document->Show();
-        shown = true;
+
+        if(!shown)
+        {
+            shown = true;
+            sauerinput::beginmenu();
+        }
     }
 
     void close()
     {
+        if(!shown)
+            return;
+
         if(test_document)
             test_document->Hide();
 
         shown = false;
+        sauerinput::endmenu();
     }
 
     bool visible()
