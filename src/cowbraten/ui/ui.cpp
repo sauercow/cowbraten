@@ -1,6 +1,7 @@
 #include "ui.h"
 #include "rml_render.h"
 #include "rml_file.h"
+#include "sauer_input_bridge.h"
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/Context.h>
@@ -8,6 +9,8 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/EventListener.h>
+#include <RmlUi/Core/TextInputContext.h>
+#include <RmlUi/Core/TextInputHandler.h>
 
 #include <SDL.h>
 
@@ -56,6 +59,46 @@ namespace cowui
 
     static TestButtonListener test_button_listener;
 
+    class RmlTextInputHandler final : public Rml::TextInputHandler
+    {
+    public:
+        void OnActivate(Rml::TextInputContext *input_context) override
+        {
+            active_context = input_context;
+            sauerinput::textinput(true);
+            sauerinput::keyrepeat(true);
+        }
+
+        void OnDeactivate(Rml::TextInputContext *input_context) override
+        {
+            if(active_context == input_context)
+                deactivate();
+        }
+
+        void OnDestroy(Rml::TextInputContext *input_context) override
+        {
+            if(active_context == input_context)
+                deactivate();
+        }
+
+        bool active() const
+        {
+            return active_context != nullptr;
+        }
+
+        void deactivate()
+        {
+            active_context = nullptr;
+            sauerinput::keyrepeat(false);
+            sauerinput::textinput(false);
+        }
+
+    private:
+        Rml::TextInputContext *active_context = nullptr;
+    };
+
+    static RmlTextInputHandler text_input_handler;
+
     static int valid_dimension(int value)
     {
         return value > 0 ? value : 1;
@@ -91,6 +134,123 @@ namespace cowui
         }
     }
 
+    static Rml::Input::KeyIdentifier keyidentifier(SDL_Keycode key)
+    {
+        switch(key)
+        {
+            case SDLK_UNKNOWN: return Rml::Input::KI_UNKNOWN;
+            case SDLK_ESCAPE: return Rml::Input::KI_ESCAPE;
+            case SDLK_SPACE: return Rml::Input::KI_SPACE;
+            case SDLK_0: return Rml::Input::KI_0;
+            case SDLK_1: return Rml::Input::KI_1;
+            case SDLK_2: return Rml::Input::KI_2;
+            case SDLK_3: return Rml::Input::KI_3;
+            case SDLK_4: return Rml::Input::KI_4;
+            case SDLK_5: return Rml::Input::KI_5;
+            case SDLK_6: return Rml::Input::KI_6;
+            case SDLK_7: return Rml::Input::KI_7;
+            case SDLK_8: return Rml::Input::KI_8;
+            case SDLK_9: return Rml::Input::KI_9;
+            case SDLK_a: return Rml::Input::KI_A;
+            case SDLK_b: return Rml::Input::KI_B;
+            case SDLK_c: return Rml::Input::KI_C;
+            case SDLK_d: return Rml::Input::KI_D;
+            case SDLK_e: return Rml::Input::KI_E;
+            case SDLK_f: return Rml::Input::KI_F;
+            case SDLK_g: return Rml::Input::KI_G;
+            case SDLK_h: return Rml::Input::KI_H;
+            case SDLK_i: return Rml::Input::KI_I;
+            case SDLK_j: return Rml::Input::KI_J;
+            case SDLK_k: return Rml::Input::KI_K;
+            case SDLK_l: return Rml::Input::KI_L;
+            case SDLK_m: return Rml::Input::KI_M;
+            case SDLK_n: return Rml::Input::KI_N;
+            case SDLK_o: return Rml::Input::KI_O;
+            case SDLK_p: return Rml::Input::KI_P;
+            case SDLK_q: return Rml::Input::KI_Q;
+            case SDLK_r: return Rml::Input::KI_R;
+            case SDLK_s: return Rml::Input::KI_S;
+            case SDLK_t: return Rml::Input::KI_T;
+            case SDLK_u: return Rml::Input::KI_U;
+            case SDLK_v: return Rml::Input::KI_V;
+            case SDLK_w: return Rml::Input::KI_W;
+            case SDLK_x: return Rml::Input::KI_X;
+            case SDLK_y: return Rml::Input::KI_Y;
+            case SDLK_z: return Rml::Input::KI_Z;
+            case SDLK_SEMICOLON: return Rml::Input::KI_OEM_1;
+            case SDLK_PLUS: return Rml::Input::KI_OEM_PLUS;
+            case SDLK_COMMA: return Rml::Input::KI_OEM_COMMA;
+            case SDLK_MINUS: return Rml::Input::KI_OEM_MINUS;
+            case SDLK_PERIOD: return Rml::Input::KI_OEM_PERIOD;
+            case SDLK_SLASH: return Rml::Input::KI_OEM_2;
+            case SDLK_BACKQUOTE: return Rml::Input::KI_OEM_3;
+            case SDLK_LEFTBRACKET: return Rml::Input::KI_OEM_4;
+            case SDLK_BACKSLASH: return Rml::Input::KI_OEM_5;
+            case SDLK_RIGHTBRACKET: return Rml::Input::KI_OEM_6;
+            case SDLK_QUOTEDBL: return Rml::Input::KI_OEM_7;
+            case SDLK_KP_0: return Rml::Input::KI_NUMPAD0;
+            case SDLK_KP_1: return Rml::Input::KI_NUMPAD1;
+            case SDLK_KP_2: return Rml::Input::KI_NUMPAD2;
+            case SDLK_KP_3: return Rml::Input::KI_NUMPAD3;
+            case SDLK_KP_4: return Rml::Input::KI_NUMPAD4;
+            case SDLK_KP_5: return Rml::Input::KI_NUMPAD5;
+            case SDLK_KP_6: return Rml::Input::KI_NUMPAD6;
+            case SDLK_KP_7: return Rml::Input::KI_NUMPAD7;
+            case SDLK_KP_8: return Rml::Input::KI_NUMPAD8;
+            case SDLK_KP_9: return Rml::Input::KI_NUMPAD9;
+            case SDLK_KP_ENTER: return Rml::Input::KI_NUMPADENTER;
+            case SDLK_KP_MULTIPLY: return Rml::Input::KI_MULTIPLY;
+            case SDLK_KP_PLUS: return Rml::Input::KI_ADD;
+            case SDLK_KP_MINUS: return Rml::Input::KI_SUBTRACT;
+            case SDLK_KP_PERIOD: return Rml::Input::KI_DECIMAL;
+            case SDLK_KP_DIVIDE: return Rml::Input::KI_DIVIDE;
+            case SDLK_KP_EQUALS: return Rml::Input::KI_OEM_NEC_EQUAL;
+            case SDLK_BACKSPACE: return Rml::Input::KI_BACK;
+            case SDLK_TAB: return Rml::Input::KI_TAB;
+            case SDLK_CLEAR: return Rml::Input::KI_CLEAR;
+            case SDLK_RETURN: return Rml::Input::KI_RETURN;
+            case SDLK_PAUSE: return Rml::Input::KI_PAUSE;
+            case SDLK_CAPSLOCK: return Rml::Input::KI_CAPITAL;
+            case SDLK_PAGEUP: return Rml::Input::KI_PRIOR;
+            case SDLK_PAGEDOWN: return Rml::Input::KI_NEXT;
+            case SDLK_END: return Rml::Input::KI_END;
+            case SDLK_HOME: return Rml::Input::KI_HOME;
+            case SDLK_LEFT: return Rml::Input::KI_LEFT;
+            case SDLK_UP: return Rml::Input::KI_UP;
+            case SDLK_RIGHT: return Rml::Input::KI_RIGHT;
+            case SDLK_DOWN: return Rml::Input::KI_DOWN;
+            case SDLK_INSERT: return Rml::Input::KI_INSERT;
+            case SDLK_DELETE: return Rml::Input::KI_DELETE;
+            case SDLK_HELP: return Rml::Input::KI_HELP;
+            case SDLK_F1: return Rml::Input::KI_F1;
+            case SDLK_F2: return Rml::Input::KI_F2;
+            case SDLK_F3: return Rml::Input::KI_F3;
+            case SDLK_F4: return Rml::Input::KI_F4;
+            case SDLK_F5: return Rml::Input::KI_F5;
+            case SDLK_F6: return Rml::Input::KI_F6;
+            case SDLK_F7: return Rml::Input::KI_F7;
+            case SDLK_F8: return Rml::Input::KI_F8;
+            case SDLK_F9: return Rml::Input::KI_F9;
+            case SDLK_F10: return Rml::Input::KI_F10;
+            case SDLK_F11: return Rml::Input::KI_F11;
+            case SDLK_F12: return Rml::Input::KI_F12;
+            case SDLK_F13: return Rml::Input::KI_F13;
+            case SDLK_F14: return Rml::Input::KI_F14;
+            case SDLK_F15: return Rml::Input::KI_F15;
+            case SDLK_NUMLOCKCLEAR: return Rml::Input::KI_NUMLOCK;
+            case SDLK_SCROLLLOCK: return Rml::Input::KI_SCROLL;
+            case SDLK_LSHIFT: return Rml::Input::KI_LSHIFT;
+            case SDLK_RSHIFT: return Rml::Input::KI_RSHIFT;
+            case SDLK_LCTRL: return Rml::Input::KI_LCONTROL;
+            case SDLK_RCTRL: return Rml::Input::KI_RCONTROL;
+            case SDLK_LALT: return Rml::Input::KI_LMENU;
+            case SDLK_RALT: return Rml::Input::KI_RMENU;
+            case SDLK_LGUI: return Rml::Input::KI_LMETA;
+            case SDLK_RGUI: return Rml::Input::KI_RMETA;
+            default: return Rml::Input::KI_UNKNOWN;
+        }
+    }
+
     bool init(int width, int height)
     {
         if(initialized)
@@ -113,6 +273,10 @@ namespace cowui
 
         Rml::SetFileInterface(
             &file_interface
+        );
+
+        Rml::SetTextInputHandler(
+            &text_input_handler
         );
 
         if(!Rml::Initialise())
@@ -163,6 +327,8 @@ namespace cowui
         {
             context = nullptr;
         }
+
+        text_input_handler.deactivate();
 
         render_interface.shutdowngl();
     }
@@ -246,6 +412,45 @@ namespace cowui
                     ),
                     keymodifierstate()
                 );
+
+            case SDL_KEYDOWN:
+            {
+                const bool capture = text_input_handler.active();
+                bool propagate = context->ProcessKeyDown(
+                    keyidentifier(event.key.keysym.sym),
+                    keymodifierstate()
+                );
+
+                if(event.key.keysym.sym == SDLK_RETURN ||
+                   event.key.keysym.sym == SDLK_KP_ENTER)
+                {
+                    propagate = context->ProcessTextInput('\n') &&
+                        propagate;
+                }
+
+                return capture || !propagate;
+            }
+
+            case SDL_KEYUP:
+            {
+                const bool capture = text_input_handler.active();
+                const bool propagate = context->ProcessKeyUp(
+                    keyidentifier(event.key.keysym.sym),
+                    keymodifierstate()
+                );
+
+                return capture || !propagate;
+            }
+
+            case SDL_TEXTINPUT:
+            {
+                const bool capture = text_input_handler.active();
+                const bool propagate = context->ProcessTextInput(
+                    Rml::String(event.text.text)
+                );
+
+                return capture || !propagate;
+            }
         }
 
         return false;
@@ -301,7 +506,7 @@ namespace cowui
             left: 64px;
             top: 64px;
             width: 360px;
-            height: 180px;
+            height: 240px;
 
             background-color: rgba(28, 32, 40, 220);
 
@@ -315,7 +520,7 @@ namespace cowui
             left: 24px;
             top: 24px;
             width: 8px;
-            height: 132px;
+            height: 192px;
 
             background-color: rgb(70, 150, 220);
         }
@@ -351,11 +556,35 @@ namespace cowui
             border-color: rgb(255, 185, 120);
         }
 
+        #test-input
+        {
+            position: absolute;
+            left: 56px;
+            top: 112px;
+            width: 240px;
+            height: 40px;
+
+            padding-left: 12px;
+            background-color: rgba(18, 22, 28, 245);
+
+            border-width: 2px;
+            border-color: rgb(95, 105, 120);
+
+            font-family: Lato;
+            font-size: 18px;
+            color: #ffffff;
+        }
+
+        #test-input:focus
+        {
+            border-color: rgb(70, 150, 220);
+        }
+
         #title
         {
             position: absolute;
             left: 56px;
-            top: 124px;
+            top: 184px;
 
             font-family: Lato;
             font-size: 24px;
@@ -368,6 +597,7 @@ namespace cowui
     <div id="panel">
         <div id="accent"></div>
         <button id="test-button">TEST BUTTON</button>
+        <input id="test-input" type="text" maxlength="24" placeholder="TYPE HERE" />
         <div id="title">COWBRATEN UI</div>
     </div>
 </body>

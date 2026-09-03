@@ -973,6 +973,9 @@ void checkinput()
                 return;
 
             case SDL_TEXTINPUT:
+                if(ui_visible && cowui::processevent(event))
+                    break;
+
                 if(textinputmask && int(event.text.timestamp-textinputtime) >= textinputfilter)
                 {
                     uchar buf[SDL_TEXTINPUTEVENT_TEXT_SIZE+1];
@@ -983,6 +986,9 @@ void checkinput()
 
             case SDL_KEYDOWN:
             case SDL_KEYUP:
+                if(ui_visible && cowui::processevent(event))
+                    break;
+
                 if(keyrepeatmask || !event.key.repeat)
                     processkey(event.key.keysym.sym, event.key.state==SDL_PRESSED, event.key.keysym.mod | SDL_GetModState());
                 break;
