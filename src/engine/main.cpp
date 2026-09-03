@@ -564,8 +564,13 @@ void setfullscreen(bool enable)
 {
     if(!screen) return;
     //initwarning(enable ? "fullscreen" : "windowed");
-    extern int fullscreendesktop;
-    SDL_SetWindowFullscreen(screen, enable ? (fullscreendesktop ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN) : 0);
+    extern int fullscreen, fullscreendesktop;
+    Uint32 flags = enable ? (fullscreendesktop ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN) : 0;
+    if(SDL_SetWindowFullscreen(screen, flags) < 0)
+    {
+        conoutf(CON_ERROR, "could not switch to %s mode: %s", enable ? "fullscreen" : "windowed", SDL_GetError());
+        fullscreen = (SDL_GetWindowFlags(screen) & SDL_WINDOW_FULLSCREEN) != 0;
+    }
     if(!enable)
     {
         SDL_SetWindowSize(screen, scr_w, scr_h);
