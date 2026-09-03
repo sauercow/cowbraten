@@ -1041,8 +1041,8 @@ void checkinput()
                 break;
 
             case SDL_MOUSEMOTION:
-                if(ui_visible)
-                    cowui::processevent(event);
+                if(ui_visible && cowui::processevent(event))
+                    break;
 
                 if(grabinput)
                 {
@@ -1057,6 +1057,9 @@ void checkinput()
 
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
+                if(ui_visible && cowui::processevent(event))
+                    break;
+
                 //if(lasttype==event.type && lastbut==event.button.button) break; // why?? get event twice without it
                 switch(event.button.button)
                 {
@@ -1074,6 +1077,9 @@ void checkinput()
                 break;
 
             case SDL_MOUSEWHEEL:
+                if(ui_visible && cowui::processevent(event))
+                    break;
+
                 if(event.wheel.y > 0) { processkey(-4, true); processkey(-4, false); }
                 else if(event.wheel.y < 0) { processkey(-5, true); processkey(-5, false); }
                 else if(event.wheel.x > 0) { processkey(-8, true); processkey(-8, false); }

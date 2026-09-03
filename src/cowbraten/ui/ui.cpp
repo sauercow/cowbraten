@@ -4,9 +4,14 @@
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
+#include <RmlUi/Core/EventListener.h>
 
 #include <SDL.h>
+
+#include <cstdio>
 
 namespace cowui
 {
@@ -17,6 +22,39 @@ namespace cowui
 
     static bool initialized = false;
     static bool shown = false;
+
+    class TestButtonListener final : public Rml::EventListener
+    {
+    public:
+        void ProcessEvent(Rml::Event &event) override
+        {
+            Rml::Element *button = event.GetCurrentElement();
+
+            if(event == Rml::EventId::Click)
+            {
+                button->SetClass(
+                    "clicked",
+                    !button->IsClassSet("clicked")
+                );
+
+                std::fprintf(
+                    stderr,
+                    "Cowbraten UI: test button clicked\n"
+                );
+            }
+            else if(event == Rml::EventId::Mousescroll)
+            {
+                event.StopPropagation();
+
+                std::fprintf(
+                    stderr,
+                    "Cowbraten UI: test button received mouse wheel\n"
+                );
+            }
+        }
+    };
+
+    static TestButtonListener test_button_listener;
 
     static int valid_dimension(int value)
     {
@@ -40,6 +78,17 @@ namespace cowui
             result |= Rml::Input::KM_CAPSLOCK;
 
         return result;
+    }
+
+    static int mousebutton(int button)
+    {
+        switch(button)
+        {
+            case SDL_BUTTON_LEFT: return 0;
+            case SDL_BUTTON_RIGHT: return 1;
+            case SDL_BUTTON_MIDDLE: return 2;
+            default: return 3;
+        }
     }
 
     bool init(int width, int height)
@@ -168,13 +217,35 @@ namespace cowui
         if(!initialized || !context || !shown)
             return false;
 
-        if(event.type == SDL_MOUSEMOTION)
+        switch(event.type)
         {
-            return !context->ProcessMouseMove(
-                event.motion.x,
-                event.motion.y,
-                keymodifierstate()
-            );
+            case SDL_MOUSEMOTION:
+                return !context->ProcessMouseMove(
+                    event.motion.x,
+                    event.motion.y,
+                    keymodifierstate()
+                );
+
+            case SDL_MOUSEBUTTONDOWN:
+                return !context->ProcessMouseButtonDown(
+                    mousebutton(event.button.button),
+                    keymodifierstate()
+                );
+
+            case SDL_MOUSEBUTTONUP:
+                return !context->ProcessMouseButtonUp(
+                    mousebutton(event.button.button),
+                    keymodifierstate()
+                );
+
+            case SDL_MOUSEWHEEL:
+                return !context->ProcessMouseWheel(
+                    Rml::Vector2f(
+                        float(event.wheel.x),
+                        float(-event.wheel.y)
+                    ),
+                    keymodifierstate()
+                );
         }
 
         return false;
@@ -274,6 +345,12 @@ namespace cowui
             border-color: rgb(150, 210, 255);
         }
 
+        #test-button.clicked
+        {
+            background-color: rgb(210, 115, 55);
+            border-color: rgb(255, 185, 120);
+        }
+
         #title
         {
             position: absolute;
@@ -304,6 +381,22 @@ namespace cowui
 
             if(!test_document)
                 return;
+
+            Rml::Element *test_button = test_document->GetElementById(
+                "test-button"
+            );
+
+            if(test_button)
+            {
+                test_button->AddEventListener(
+                    Rml::EventId::Click,
+                    &test_button_listener
+                );
+                test_button->AddEventListener(
+                    Rml::EventId::Mousescroll,
+                    &test_button_listener
+                );
+            }
         }
 
         test_document->Show();
