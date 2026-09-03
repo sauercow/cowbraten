@@ -54,6 +54,7 @@ namespace cowui
     static Screen *active_screen = nullptr;
 
     static bool initialized = false;
+    static bool console_suspended = false;
 
     static Screen *findscreen(ScreenId id)
     {
@@ -73,6 +74,25 @@ namespace cowui
         // keyboard input.
         screen.document->Focus();
         screen.document->Hide();
+    }
+
+    static void syncconsoleownership()
+    {
+        const bool should_suspend = active_screen &&
+            sauerinput::consoleactive();
+
+        if(should_suspend == console_suspended)
+            return;
+
+        console_suspended = should_suspend;
+
+        if(!active_screen || !active_screen->document)
+            return;
+
+        if(console_suspended)
+            hidedocument(*active_screen);
+        else
+            active_screen->document->Show();
     }
 
     static void toggletestselection(Rml::Event &event)
@@ -476,6 +496,19 @@ namespace cowui
         if(!initialized || !context || !active_screen)
             return false;
 
+        syncconsoleownership();
+
+        if(console_suspended)
+            return false;
+
+        if(event.type == SDL_KEYDOWN &&
+           !event.key.repeat &&
+           sauerinput::openconsolefromkey(event.key.keysym.sym))
+        {
+            syncconsoleownership();
+            return true;
+        }
+
         switch(event.type)
         {
             case SDL_MOUSEMOTION:
@@ -564,6 +597,11 @@ namespace cowui
            context &&
            active_screen)
         {
+            syncconsoleownership();
+
+            if(console_suspended)
+                return;
+
             if(active_screen->id == ScreenId::Servers)
                 server_browser.update();
 
@@ -576,6 +614,7 @@ namespace cowui
         if(!initialized ||
            !context ||
            !active_screen ||
+           console_suspended ||
            !render_interface.ready())
         {
             return;
@@ -624,6 +663,8 @@ namespace cowui
 
         screen->document->Show();
         active_screen = screen;
+        console_suspended = false;
+        syncconsoleownership();
 
         if(opening)
             sauerinput::beginmenu();
@@ -653,6 +694,7 @@ namespace cowui
 
         hidedocument(*active_screen);
         active_screen = nullptr;
+        console_suspended = false;
 
         sauerinput::endmenu();
     }

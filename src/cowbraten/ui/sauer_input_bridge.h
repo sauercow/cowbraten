@@ -10,6 +10,9 @@ namespace cowui
 
         void keyrepeat(bool enabled);
         void textinput(bool enabled);
+
+        bool consoleactive();
+        bool openconsolefromkey(int key);
     }
 }
 

@@ -60,6 +60,14 @@ and returns cursor/grab ownership through the existing input bridge. Cached
 documents remain loaded until shutdown. Reopening is an explicit request for a
 screen rather than an implicit DOM operation.
 
+The legacy Sauer command line temporarily takes presentation and text-input
+ownership without closing the active RmlUi screen. Its normal `saycommand`,
+`sayteamcommand`, and `inputcommand` key bindings are recognized by the legacy
+input layer. RmlUi then releases control focus and hides its cached document so
+Sauer can render and operate the command line normally. Closing the command
+line reshows the same document while retaining the menu's existing cursor/grab
+ownership throughout the transition.
+
 Application behavior must not depend on element IDs. IDs remain acceptable for
 document-local relationships such as a label's `for` attribute. State reaches
 RML through event-driven data models and stable actions; documents are not

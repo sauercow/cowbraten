@@ -27,5 +27,15 @@ namespace cowui
         {
             ::textinput(enabled, TI_COWUI);
         }
+
+        bool consoleactive()
+        {
+            return commandlineactive();
+        }
+
+        bool openconsolefromkey(int key)
+        {
+            return processconsolebind(key);
+        }
     }
 }

@@ -373,6 +373,21 @@ void onrelease(const char *s)
 
 COMMAND(onrelease, "s");
 
+static char *&getbindaction(keym &key)
+{
+    int state = keym::ACTION_DEFAULT;
+    if(!mainmenu)
+    {
+        if(editmode) state = keym::ACTION_EDITING;
+        else if(player->state == CS_SPECTATOR)
+            state = keym::ACTION_SPECTATOR;
+    }
+
+    return key.actions[state][0]
+        ? key.actions[state]
+        : key.actions[keym::ACTION_DEFAULT];
+}
+
 void execbind(keym &k, bool isdown)
 {
     loopv(releaseactions)
@@ -387,20 +402,75 @@ void execbind(keym &k, bool isdown)
     }
     if(isdown)
     {
-        int state = keym::ACTION_DEFAULT;
-        if(!mainmenu)
-        {
-            if(editmode) state = keym::ACTION_EDITING;
-            else if(player->state==CS_SPECTATOR) state = keym::ACTION_SPECTATOR;
-        }
-        char *&action = k.actions[state][0] ? k.actions[state] : k.actions[keym::ACTION_DEFAULT];
+        char *&action = getbindaction(k);
         keyaction = action;
         keypressed = &k;
         execute(keyaction);
         keypressed = NULL;
-        if(keyaction!=action) delete[] keyaction;
+        if(keyaction != action) delete[] keyaction;
     }
     k.pressed = isdown;
+}
+
+bool commandlineactive()
+{
+    return commandmillis >= 0;
+}
+
+static bool isconsolebind(const char *action)
+{
+    while(iscubespace(*action)) ++action;
+
+    for(const char *character = action; *character; ++character)
+    {
+        if(*character == ';' ||
+           *character == '\n' ||
+           *character == '\r')
+        {
+            return false;
+        }
+    }
+
+    static const char * const commands[] =
+    {
+        "saycommand",
+        "sayteamcommand",
+        "inputcommand"
+    };
+
+    loopi(sizeof(commands)/sizeof(commands[0]))
+    {
+        const size_t length = strlen(commands[i]);
+        if(!strncmp(action, commands[i], length) &&
+           (!action[length] || iscubespace(action[length])))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool processconsolebind(int code)
+{
+    if(commandlineactive())
+        return false;
+
+    keym *key = keyms.access(code);
+    if(!key)
+        return false;
+
+    char *action = getbindaction(*key);
+
+    if(!isconsolebind(action))
+        return false;
+
+    execbind(*key, true);
+
+    if(!commandlineactive())
+        execbind(*key, false);
+
+    return true;
 }
 
 bool consoleinput(const char *str, int len)
