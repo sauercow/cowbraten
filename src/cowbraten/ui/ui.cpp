@@ -6,6 +6,8 @@
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
 
+#include <SDL.h>
+
 namespace cowui
 {
     static RmlRenderInterface render_interface;
@@ -19,6 +21,25 @@ namespace cowui
     static int valid_dimension(int value)
     {
         return value > 0 ? value : 1;
+    }
+
+    static int keymodifierstate()
+    {
+        const SDL_Keymod modifiers = SDL_GetModState();
+        int result = 0;
+
+        if(modifiers & KMOD_CTRL)
+            result |= Rml::Input::KM_CTRL;
+        if(modifiers & KMOD_SHIFT)
+            result |= Rml::Input::KM_SHIFT;
+        if(modifiers & KMOD_ALT)
+            result |= Rml::Input::KM_ALT;
+        if(modifiers & KMOD_NUM)
+            result |= Rml::Input::KM_NUMLOCK;
+        if(modifiers & KMOD_CAPS)
+            result |= Rml::Input::KM_CAPSLOCK;
+
+        return result;
     }
 
     bool init(int width, int height)
@@ -142,8 +163,20 @@ namespace cowui
         }
     }
 
-    bool processevent(const SDL_Event &)
+    bool processevent(const SDL_Event &event)
     {
+        if(!initialized || !context || !shown)
+            return false;
+
+        if(event.type == SDL_MOUSEMOTION)
+        {
+            return !context->ProcessMouseMove(
+                event.motion.x,
+                event.motion.y,
+                keymodifierstate()
+            );
+        }
+
         return false;
     }
 
@@ -216,26 +249,29 @@ namespace cowui
             background-color: rgb(70, 150, 220);
         }
 
-        #block
+        #test-button
         {
             position: absolute;
             left: 56px;
-            top: 42px;
+            top: 40px;
             width: 240px;
-            height: 28px;
+            height: 48px;
 
-            background-color: rgba(235, 238, 242, 220);
+            padding: 0;
+            background-color: rgba(45, 52, 64, 240);
+
+            border-width: 2px;
+            border-color: rgb(95, 105, 120);
+
+            font-family: Lato;
+            font-size: 20px;
+            color: #ffffff;
         }
 
-        #block2
+        #test-button:hover
         {
-            position: absolute;
-            left: 56px;
-            top: 92px;
-            width: 170px;
-            height: 18px;
-
-            background-color: rgba(145, 152, 165, 190);
+            background-color: rgb(70, 150, 220);
+            border-color: rgb(150, 210, 255);
         }
 
         #title
@@ -254,8 +290,7 @@ namespace cowui
 <body>
     <div id="panel">
         <div id="accent"></div>
-        <div id="block"></div>
-        <div id="block2"></div>
+        <button id="test-button">TEST BUTTON</button>
         <div id="title">COWBRATEN UI</div>
     </div>
 </body>

@@ -957,6 +957,7 @@ void checkinput()
 {
     if(interceptkeysym) clearinterceptkey();
     //int lasttype = 0, lastbut = 0;
+    const bool ui_visible = cowui::visible();
     bool mousemoved = false;
     int focused = 0;
     while(pumpevents(events))
@@ -1040,10 +1041,14 @@ void checkinput()
                 break;
 
             case SDL_MOUSEMOTION:
+                if(ui_visible)
+                    cowui::processevent(event);
+
                 if(grabinput)
                 {
                     int dx = event.motion.xrel, dy = event.motion.yrel;
-                    checkmousemotion(dx, dy);
+                    if(!ui_visible)
+                        checkmousemotion(dx, dy);
                     if(!g3d_movecursor(dx, dy)) mousemove(dx, dy);
                     mousemoved = true;
                 }
