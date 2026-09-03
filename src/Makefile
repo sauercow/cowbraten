@@ -80,6 +80,8 @@ endif
 UI_OBJS= \
 	cowbraten/ui/ui.o \
 	cowbraten/ui/rml_render.o \
+	cowbraten/ui/rml_file.o \
+	cowbraten/ui/sauer_file_bridge.o \
 	cowbraten/ui/ui_commands.o
 
 CLIENT_OBJS= \
@@ -183,7 +185,7 @@ clean:
 
 $(CLIENT_OBJS): CXXFLAGS += $(INCLUDES) $(CLIENT_INCLUDES)
 
-cowbraten/ui/ui.o cowbraten/ui/rml_render.o: CXXFLAGS += -Ithird_party/RmlUi/Include -DRMLUI_STATIC_LIB -fexceptions -frtti
+cowbraten/ui/ui.o cowbraten/ui/rml_render.o cowbraten/ui/rml_file.o: CXXFLAGS += -Ithird_party/RmlUi/Include -DRMLUI_STATIC_LIB -fexceptions -frtti
 
 $(SERVER_OBJS): CXXFLAGS += $(INCLUDES) -DSTANDALONE
 

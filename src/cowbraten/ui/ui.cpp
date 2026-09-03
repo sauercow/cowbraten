@@ -1,5 +1,6 @@
 #include "ui.h"
 #include "rml_render.h"
+#include "rml_file.h"
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/Context.h>
@@ -8,6 +9,7 @@
 namespace cowui
 {
     static RmlRenderInterface render_interface;
+    static RmlFileInterface file_interface;
     static Rml::Context *context = nullptr;
     static Rml::ElementDocument *test_document = nullptr;
 
@@ -39,8 +41,23 @@ namespace cowui
             &render_interface
         );
 
+        Rml::SetFileInterface(
+            &file_interface
+        );
+
         if(!Rml::Initialise())
         {
+            render_interface.shutdowngl();
+            return false;
+        }
+
+        if(!Rml::LoadFontFace(
+            "data/cowbraten/ui/default/fonts/LatoLatin-Regular.ttf",
+            "Lato",
+            Rml::Style::FontStyle::Normal,
+            Rml::Style::FontWeight::Normal))
+        {
+            Rml::Shutdown();
             render_interface.shutdowngl();
             return false;
         }
@@ -220,6 +237,17 @@ namespace cowui
 
             background-color: rgba(145, 152, 165, 190);
         }
+
+        #title
+        {
+            position: absolute;
+            left: 56px;
+            top: 124px;
+
+            font-family: Lato;
+            font-size: 24px;
+            color: #ffffff;
+        }
     </style>
 </head>
 
@@ -228,6 +256,7 @@ namespace cowui
         <div id="accent"></div>
         <div id="block"></div>
         <div id="block2"></div>
+        <div id="title">COWBRATEN UI</div>
     </div>
 </body>
 </rml>
