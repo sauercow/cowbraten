@@ -84,6 +84,7 @@ UI_OBJS= \
 	cowbraten/ui/rml_file.o \
 	cowbraten/ui/sauer_file_bridge.o \
 	cowbraten/ui/sauer_input_bridge.o \
+	cowbraten/ui/sauer_server_bridge.o \
 	cowbraten/ui/ui_commands.o
 
 CLIENT_OBJS= \
