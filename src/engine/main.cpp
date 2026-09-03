@@ -618,6 +618,8 @@ void screenres(int w, int h)
         } 
         else
         {
+            if(SDL_GetWindowFlags(screen) & SDL_WINDOW_MAXIMIZED)
+                SDL_RestoreWindow(screen);
             SDL_SetWindowSize(screen, scr_w, scr_h);
             SDL_SetWindowPosition(screen, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
             initwindowpos = false;
