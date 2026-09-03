@@ -27,3 +27,5 @@ Dockertrigger
 
 *.bak
 ui-ux
+
+/build/

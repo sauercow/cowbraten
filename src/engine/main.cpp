@@ -1,6 +1,7 @@
 // main.cpp: initialisation & main loop
 
 #include "engine.h"
+#include "ui/ui.h"
 
 #ifdef SDL_VIDEO_DRIVER_X11
 #include "SDL_syswm.h"
@@ -11,6 +12,7 @@ extern void cleargamma();
 void cleanup()
 {
     recorder::stop();
+    cowui::shutdown();
     cleanupserver();
     SDL_ShowCursor(SDL_TRUE);
     SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -775,6 +777,8 @@ void resetgl()
 
     renderbackground("resetting OpenGL");
 
+    cowui::beforeglreset();
+
     extern void cleanupva();
     extern void cleanupparticles();
     extern void cleanupdecals();
@@ -809,6 +813,7 @@ void resetgl()
     setupscreen();
     inputgrab(grabinput);
     gl_init();
+    cowui::afterglreset(screenw, screenh);
 
     inbetweenframes = false;
     if(!reloadtexture(*notexture) ||
@@ -1027,6 +1032,7 @@ void checkinput()
                             scr_h = clamp(screenh, SCR_MINH, SCR_MAXH);
                         }
                         gl_resize();
+                        cowui::resize(screenw, screenh);
                         schedulerestoregamma();
                         break;
                     }
@@ -1336,6 +1342,11 @@ int main(int argc, char **argv)
     logoutf("init: gl");
     gl_checkextensions();
     gl_init();
+
+    logoutf("init: cowbraten ui");
+    if(!cowui::init(screenw, screenh))
+        fatal("failed to initialize Cowbraten UI");
+
     notexture = textureload("packages/textures/notexture.png");
     if(!notexture) fatal("could not find core textures");
 
@@ -1462,6 +1473,10 @@ int main(int argc, char **argv)
             inbetweenframes = false;
             if(mainmenu) gl_drawmainmenu();
             else gl_drawframe();
+
+            cowui::update();
+            cowui::render();
+
             swapbuffers();
             renderedframe = inbetweenframes = true;
             lastdrawmillis = millis;

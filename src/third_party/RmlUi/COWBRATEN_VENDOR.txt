@@ -1,0 +1,8 @@
+RmlUi vendored dependency
+
+Upstream: https://github.com/mikke89/RmlUi
+Version: 6.3
+Commit: ba95ffe8bfb6370efb2cdcca927eaad4710c5413
+
+Vendored for Cowbraten.
+The upstream .git directory is intentionally not included.

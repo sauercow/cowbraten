@@ -24,9 +24,11 @@ LINKERFLAGS=
 ifdef DEBUG
 	override CFLAGS+= -g3
 	override CXXFLAGS+= -O0 -g3 -DDEBUG=$$DEBUG
+	RMLUI_BUILD_TYPE=Debug
 else
 	override CXXFLAGS+= -O3
 	override LINKERFLAGS+= -Wl,-s
+	RMLUI_BUILD_TYPE=Release
 endif
 
 override CXXFLAGS+= -Wall -fsigned-char -fno-exceptions -fno-rtti
@@ -39,6 +41,11 @@ endif
 
 INCLUDES= -Ishared -Iengine -Ifpsgame -Icowbraten -Ienet/include
 LIBS= -Lenet -lenet
+
+RMLUI_DIR=third_party/RmlUi
+RMLUI_BUILD=../build/rmlui-$(TARGET)-$(RMLUI_BUILD_TYPE)
+RMLUI_LIB=$(RMLUI_BUILD)/librmlui.a
+RMLUI_LINK=
 
 ifneq (,$(findstring windows,$(TARGET)))
 	INCLUDES+= -Iwindows/include/zlib
@@ -61,13 +68,21 @@ ifneq (,$(findstring linux,$(TARGET)))
 	LIBS+= -L/usr/lib64 -lz
 	CLIENT_INCLUDES= `sdl2-config --cflags`
 	CLIENT_LIBS= -lX11 `sdl2-config --libs` -lSDL2_image -lSDL2_mixer -lGL -lrt
+
+	RMLUI_ENABLED=1
+	RMLUI_LINK=$(RMLUI_LIB) $(shell pkg-config --libs freetype2)
 endif
 
 ifndef CLIENT_INCLUDES
 $(error unsupported target $(TARGET))
 endif
 
+UI_OBJS= \
+	cowbraten/ui/ui.o \
+	cowbraten/ui/rml_render.o
+
 CLIENT_OBJS= \
+	$(UI_OBJS) \
 	shared/crypto.o \
 	shared/geom.o \
 	shared/glemu.o \
@@ -167,13 +182,34 @@ clean:
 
 $(CLIENT_OBJS): CXXFLAGS += $(INCLUDES) $(CLIENT_INCLUDES)
 
+$(UI_OBJS): CXXFLAGS += -Ithird_party/RmlUi/Include -DRMLUI_STATIC_LIB -fexceptions -frtti
+
 $(SERVER_OBJS): CXXFLAGS += $(INCLUDES) -DSTANDALONE
 
 OUTBIN=cowbraten_x86_64
 
+ifdef RMLUI_ENABLED
+rmlui:
+	@if [ ! -f "$(RMLUI_BUILD)/CMakeCache.txt" ]; then \
+		cmake -S $(RMLUI_DIR) -B $(RMLUI_BUILD) \
+			-DCMAKE_C_COMPILER=clang \
+			-DCMAKE_CXX_COMPILER=clang++ \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DBUILD_TESTING=OFF \
+			-DRMLUI_SAMPLES=OFF \
+			-DRMLUI_LUA_BINDINGS=OFF \
+			-DRMLUI_FONT_ENGINE=freetype \
+			-DCMAKE_BUILD_TYPE=$(RMLUI_BUILD_TYPE); \
+	fi
+	cmake --build $(RMLUI_BUILD) --target rmlui_core --parallel
+
+client: rmlui
+.PHONY: rmlui
+endif
+
 client:	libenet
 client: $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) $(LINKERFLAGS) -o cowbraten_client $(CLIENT_OBJS) $(CLIENT_RESOURCES) $(LIBS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) $(LINKERFLAGS) -o cowbraten_client $(CLIENT_OBJS) $(CLIENT_RESOURCES) $(LIBS) $(CLIENT_LIBS) $(RMLUI_LINK)
 
 server:	libenet
 server: $(SERVER_OBJS)
