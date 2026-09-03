@@ -47,10 +47,10 @@
                             <span class="main-nav-label">Profile</span>
                             <span class="main-nav-state">Planned</span>
                         </button>
-                        <button class="nav-item main-nav-item" disabled="true">
+                        <button class="nav-item main-nav-item" onclick="navigation.settings">
                             <span class="main-nav-index">05</span>
                             <span class="main-nav-label">Settings</span>
-                            <span class="main-nav-state">Planned</span>
+                            <span class="main-nav-state">Configure</span>
                         </button>
                         <button class="nav-item main-nav-item" disabled="true">
                             <span class="main-nav-index">06</span>

@@ -83,9 +83,12 @@ UI_OBJS= \
 	cowbraten/ui/rml_render.o \
 	cowbraten/ui/rml_file.o \
 	cowbraten/ui/rml_server_browser.o \
+	cowbraten/ui/rml_settings.o \
+	cowbraten/ui/settings_api.o \
 	cowbraten/ui/sauer_file_bridge.o \
 	cowbraten/ui/sauer_input_bridge.o \
 	cowbraten/ui/sauer_server_bridge.o \
+	cowbraten/ui/sauer_settings_bridge.o \
 	cowbraten/ui/ui_commands.o
 
 CLIENT_OBJS= \
@@ -191,7 +194,7 @@ clean:
 
 $(CLIENT_OBJS): CXXFLAGS += $(INCLUDES) $(CLIENT_INCLUDES) -MMD -MP
 
-cowbraten/ui/ui.o cowbraten/ui/rml_action.o cowbraten/ui/rml_render.o cowbraten/ui/rml_file.o cowbraten/ui/rml_server_browser.o: CXXFLAGS += -Ithird_party/RmlUi/Include -DRMLUI_STATIC_LIB -fexceptions -frtti
+cowbraten/ui/ui.o cowbraten/ui/rml_action.o cowbraten/ui/rml_render.o cowbraten/ui/rml_file.o cowbraten/ui/rml_server_browser.o cowbraten/ui/rml_settings.o: CXXFLAGS += -Ithird_party/RmlUi/Include -DRMLUI_STATIC_LIB -fexceptions -frtti
 
 $(SERVER_OBJS): CXXFLAGS += $(INCLUDES) -DSTANDALONE -MMD -MP
 

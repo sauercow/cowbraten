@@ -9,7 +9,8 @@ namespace cowui
     {
         Test,
         Main,
-        Servers
+        Servers,
+        Settings
     };
 
     bool init(int width, int height);
@@ -28,6 +29,7 @@ namespace cowui
     bool show(ScreenId screen);
     void showmain();
     void showservers();
+    void showsettings();
     void showtest();
     void close();
     bool visible();

@@ -1,0 +1,142 @@
+<rml>
+<head>
+    <title>Cowbraten Settings</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/settings.rcss" />
+</head>
+
+<body data-model="settings">
+    <div class="settings-screen">
+        <div class="settings-shell panel">
+            <div class="settings-header">
+                <div class="settings-lockup">
+                    <div class="settings-mark">C</div>
+                    <div class="settings-heading">
+                        <div class="settings-product">Cowbraten</div>
+                        <div class="settings-title">Settings</div>
+                    </div>
+                </div>
+
+                <button class="button settings-back" onclick="navigation.main">
+                    Back&nbsp;&nbsp;/&nbsp;&nbsp;Main Menu
+                </button>
+            </div>
+
+            <div class="settings-content">
+                <div class="settings-navigation">
+                    <div class="settings-navigation-label">Categories</div>
+                    <div class="nav-list settings-nav-list">
+                        <button class="nav-item settings-nav-item is-selected">
+                            <span class="settings-nav-index">01</span>
+                            <span>Game</span>
+                        </button>
+                        <button class="nav-item settings-nav-item" disabled="true">
+                            <span class="settings-nav-index">02</span>
+                            <span>HUD</span>
+                        </button>
+                        <button class="nav-item settings-nav-item" disabled="true">
+                            <span class="settings-nav-index">03</span>
+                            <span>Graphics</span>
+                        </button>
+                        <button class="nav-item settings-nav-item" disabled="true">
+                            <span class="settings-nav-index">04</span>
+                            <span>Audio</span>
+                        </button>
+                        <button class="nav-item settings-nav-item" disabled="true">
+                            <span class="settings-nav-index">05</span>
+                            <span>Mouse / Keyboard</span>
+                        </button>
+                        <button class="nav-item settings-nav-item" disabled="true">
+                            <span class="settings-nav-index">06</span>
+                            <span>Crosshair</span>
+                        </button>
+                        <button class="nav-item settings-nav-item" disabled="true">
+                            <span class="settings-nav-index">07</span>
+                            <span>Advanced / Network</span>
+                        </button>
+                    </div>
+
+                    <div class="settings-scope-note">
+                        <div class="settings-scope-kicker">Foundation Slice</div>
+                        <div class="settings-scope-copy">
+                            Field of view is the first setting connected to the live engine.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-stage">
+                    <div class="settings-stage-header">
+                        <div class="eyebrow settings-eyebrow">Game / Camera</div>
+                        <div class="settings-stage-title">View</div>
+                        <div class="settings-stage-copy">
+                            Tune the horizontal field of view. Changes apply immediately and use Cowbraten's existing persistent setting.
+                        </div>
+                    </div>
+
+                    <div class="settings-section panel">
+                        <div class="settings-control-heading">
+                            <div class="settings-control-copy">
+                                <div class="settings-control-title">Field of View</div>
+                                <div class="settings-control-description">
+                                    A wider view exposes more of the scene while making distant targets appear smaller.
+                                </div>
+                            </div>
+                            <div class="settings-value">
+                                <span class="settings-value-number">{{ fov }}</span>
+                                <span class="settings-value-unit">degrees</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-range-row">
+                            <span class="settings-range-bound">{{ fov_minimum }}</span>
+                            <input class="settings-range"
+                                type="range"
+                                min="10"
+                                max="150"
+                                step="1"
+                                value="100"
+                                data-attr-min="fov_minimum"
+                                data-attr-max="fov_maximum"
+                                data-attr-value="fov"
+                                onchange="settings.fov" />
+                            <span class="settings-range-bound settings-range-maximum">{{ fov_maximum }}</span>
+                        </div>
+
+                        <div class="settings-control-footer">
+                            <span class="settings-live-indicator"></span>
+                            <span>Live value&nbsp;&nbsp;//&nbsp;&nbsp;Saved by the existing Sauer configuration system</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-info-row">
+                        <div class="settings-info-block">
+                            <div class="settings-info-label">Input</div>
+                            <div class="settings-info-value">Mouse, arrows, or keyboard</div>
+                        </div>
+                        <div class="settings-info-block">
+                            <div class="settings-info-label">Range</div>
+                            <div class="settings-info-value">{{ fov_minimum }} - {{ fov_maximum }} degrees</div>
+                        </div>
+                        <div class="settings-info-block">
+                            <div class="settings-info-label">Application</div>
+                            <div class="settings-info-value">Immediate</div>
+                        </div>
+                    </div>
+
+                    <div class="settings-stage-spacer"></div>
+                </div>
+            </div>
+
+            <div class="settings-footer">
+                <div>Settings&nbsp;&nbsp;//&nbsp;&nbsp;Game</div>
+                <div class="settings-footer-help">Escape returns to gameplay</div>
+                <div class="settings-footer-status">
+                    <span class="settings-live-indicator"></span>
+                    <span>Engine connected</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</rml>

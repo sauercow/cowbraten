@@ -42,10 +42,10 @@ The small C++ screen table owns explicit screen identifiers and asset paths. It
 lazily loads each document once, caches it for the RmlUi context lifetime, and
 shows or hides documents on transitions.
 
-Only implemented screens receive identifiers. Main and Servers are the first
-production identifiers, while Test remains a developer-only identifier. Later
-screens are added to the table when their documents and actions exist; disabled
-Main Menu items do not create placeholder screens.
+Only implemented screens receive identifiers. Main, Servers, and Settings are
+the current production identifiers, while Test remains a developer-only
+identifier. Later screens are added to the table when their documents and
+actions exist; disabled Main Menu items do not create placeholder screens.
 
 At most one normal screen is active. Switching screens hides the previous
 document without releasing menu input ownership, while closing the active
@@ -117,3 +117,29 @@ The registered actions are explicit and typed:
 There is no generic host command, ident lookup, or CubeScript evaluation in the
 model. Favorites and history are intentionally absent until their persistence
 and product semantics are designed.
+
+## Settings model
+
+Settings use a typed path for each supported value rather than exposing Sauer's
+ident table to RML:
+
+    screens/settings.rml
+        -> RmlSettings
+        -> settings_api
+        -> sauer_settings_bridge (legacy-only)
+        -> checked Sauer setter
+
+The first supported value is FOV. The legacy bridge alone knows the fixed
+`fov` ident name, verifies its integer type, exports its current value and
+limits, and writes it through `setvarchecked()`. Neither the document nor the
+RmlUi-facing model can supply an ident name or a CubeScript command. Additional
+settings should gain similarly explicit typed API functions rather than a
+generic ident setter.
+
+The `settings` data model owns the displayed FOV value and range. Opening or
+returning to the cached Settings document refreshes those values from Sauer.
+Changing the range control invokes the whitelisted `settings.fov` action; the
+handler writes through the typed API, immediately reads the accepted value
+back, and dirties only model variables that changed. When the legacy console
+temporarily suspends RmlUi, the model refreshes before Settings is shown again,
+so a normal `/fov` change is reflected without per-frame ident polling.

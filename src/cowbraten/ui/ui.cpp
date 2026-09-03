@@ -3,6 +3,7 @@
 #include "rml_render.h"
 #include "rml_file.h"
 #include "rml_server_browser.h"
+#include "rml_settings.h"
 #include "sauer_input_bridge.h"
 
 #include <RmlUi/Core.h>
@@ -23,6 +24,7 @@ namespace cowui
     static RmlFileInterface file_interface;
     static RmlActionRouter action_router;
     static RmlServerBrowser server_browser;
+    static RmlSettings settings_model;
     static Rml::Context *context = nullptr;
 
     struct Screen
@@ -47,6 +49,11 @@ namespace cowui
         {
             ScreenId::Servers,
             "data/cowbraten/ui/default/screens/servers.rml",
+            nullptr
+        },
+        {
+            ScreenId::Settings,
+            "data/cowbraten/ui/default/screens/settings.rml",
             nullptr
         }
     };
@@ -90,9 +97,16 @@ namespace cowui
             return;
 
         if(console_suspended)
+        {
             hidedocument(*active_screen);
+        }
         else
+        {
+            if(active_screen->id == ScreenId::Settings)
+                settings_model.activate();
+
             active_screen->document->Show();
+        }
     }
 
     static void toggletestselection(Rml::Event &event)
@@ -136,6 +150,12 @@ namespace cowui
     {
         event.StopPropagation();
         show(ScreenId::Servers);
+    }
+
+    static void showsettingsscreen(Rml::Event &event)
+    {
+        event.StopPropagation();
+        show(ScreenId::Settings);
     }
 
     class RmlTextInputHandler final : public Rml::TextInputHandler
@@ -404,8 +424,13 @@ namespace cowui
            !action_router.registeraction(
                "navigation.servers",
                showserverbrowser) ||
-           !server_browser.init(context, action_router))
+           !action_router.registeraction(
+               "navigation.settings",
+               showsettingsscreen) ||
+           !server_browser.init(context, action_router) ||
+           !settings_model.init(context, action_router))
         {
+            settings_model.shutdown(context);
             server_browser.shutdown(context);
             action_router.clear();
             Rml::Shutdown();
@@ -430,6 +455,7 @@ namespace cowui
 
         if(initialized)
         {
+            settings_model.shutdown(context);
             server_browser.shutdown(context);
             Rml::Shutdown();
             context = nullptr;
@@ -635,10 +661,17 @@ namespace cowui
             return false;
 
         if(active_screen == screen)
+        {
+            if(id == ScreenId::Settings)
+                settings_model.activate();
+
             return true;
+        }
 
         if(id == ScreenId::Servers)
             server_browser.activate();
+        else if(id == ScreenId::Settings)
+            settings_model.activate();
 
         if(!screen->document)
         {
@@ -685,6 +718,11 @@ namespace cowui
     void showservers()
     {
         show(ScreenId::Servers);
+    }
+
+    void showsettings()
+    {
+        show(ScreenId::Settings);
     }
 
     void close()
