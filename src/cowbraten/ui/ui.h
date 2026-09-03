@@ -5,6 +5,11 @@ union SDL_Event;
 
 namespace cowui
 {
+    enum class ScreenId
+    {
+        Test
+    };
+
     bool init(int width, int height);
     void shutdown();
 
@@ -18,6 +23,7 @@ namespace cowui
     void update();
     void render();
 
+    bool show(ScreenId screen);
     void showtest();
     void close();
     bool visible();

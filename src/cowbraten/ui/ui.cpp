@@ -22,10 +22,46 @@ namespace cowui
     static RmlFileInterface file_interface;
     static RmlActionRouter action_router;
     static Rml::Context *context = nullptr;
-    static Rml::ElementDocument *test_document = nullptr;
+
+    struct Screen
+    {
+        ScreenId id;
+        const char *path;
+        Rml::ElementDocument *document;
+    };
+
+    static Screen screens[] =
+    {
+        {
+            ScreenId::Test,
+            "data/cowbraten/ui/default/screens/test.rml",
+            nullptr
+        }
+    };
+
+    static Screen *active_screen = nullptr;
 
     static bool initialized = false;
-    static bool shown = false;
+
+    static Screen *findscreen(ScreenId id)
+    {
+        for(Screen &screen : screens)
+            if(screen.id == id)
+                return &screen;
+
+        return nullptr;
+    }
+
+    static void hidedocument(Screen &screen)
+    {
+        if(!screen.document)
+            return;
+
+        // Release focused controls before another screen or gameplay receives
+        // keyboard input.
+        screen.document->Focus();
+        screen.document->Hide();
+    }
 
     static void toggletestselection(Rml::Event &event)
     {
@@ -325,10 +361,11 @@ namespace cowui
 
     void shutdown()
     {
-        if(shown)
+        if(active_screen)
             close();
 
-        test_document = nullptr;
+        for(Screen &screen : screens)
+            screen.document = nullptr;
 
         if(initialized)
         {
@@ -394,7 +431,7 @@ namespace cowui
 
     bool processevent(const SDL_Event &event)
     {
-        if(!initialized || !context || !shown)
+        if(!initialized || !context || !active_screen)
             return false;
 
         switch(event.type)
@@ -483,7 +520,7 @@ namespace cowui
     {
         if(initialized &&
            context &&
-           shown)
+           active_screen)
         {
             context->Update();
         }
@@ -493,7 +530,7 @@ namespace cowui
     {
         if(!initialized ||
            !context ||
-           !shown ||
+           !active_screen ||
            !render_interface.ready())
         {
             return;
@@ -504,48 +541,59 @@ namespace cowui
         render_interface.endframe();
     }
 
-    void showtest()
+    bool show(ScreenId id)
     {
         if(!initialized || !context)
-            return;
+            return false;
 
-        if(!test_document)
+        Screen *screen = findscreen(id);
+        if(!screen)
+            return false;
+
+        if(active_screen == screen)
+            return true;
+
+        if(!screen->document)
         {
-            test_document = context->LoadDocument(
-                "data/cowbraten/ui/default/screens/test.rml"
+            screen->document = context->LoadDocument(
+                screen->path
             );
 
-            if(!test_document)
-                return;
+            if(!screen->document)
+                return false;
         }
 
-        test_document->Show();
+        const bool opening = active_screen == nullptr;
+        if(active_screen)
+            hidedocument(*active_screen);
 
-        if(!shown)
-        {
-            shown = true;
+        screen->document->Show();
+        active_screen = screen;
+
+        if(opening)
             sauerinput::beginmenu();
-        }
+
+        return true;
+    }
+
+    void showtest()
+    {
+        show(ScreenId::Test);
     }
 
     void close()
     {
-        if(!shown)
+        if(!active_screen)
             return;
 
-        if(test_document)
-        {
-            // Release focused controls before gameplay input resumes.
-            test_document->Focus();
-            test_document->Hide();
-        }
+        hidedocument(*active_screen);
+        active_screen = nullptr;
 
-        shown = false;
         sauerinput::endmenu();
     }
 
     bool visible()
     {
-        return shown;
+        return active_screen != nullptr;
     }
 }
