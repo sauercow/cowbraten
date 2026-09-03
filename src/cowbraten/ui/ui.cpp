@@ -417,6 +417,9 @@ namespace cowui
 
             case SDL_KEYDOWN:
             {
+                if(event.key.keysym.sym == SDLK_ESCAPE)
+                    return true;
+
                 const bool capture = text_input_handler.active();
                 bool propagate = context->ProcessKeyDown(
                     keyidentifier(event.key.keysym.sym),
@@ -435,6 +438,12 @@ namespace cowui
 
             case SDL_KEYUP:
             {
+                if(event.key.keysym.sym == SDLK_ESCAPE)
+                {
+                    close();
+                    return true;
+                }
+
                 const bool capture = text_input_handler.active();
                 const bool propagate = context->ProcessKeyUp(
                     keyidentifier(event.key.keysym.sym),
@@ -646,7 +655,11 @@ namespace cowui
             return;
 
         if(test_document)
+        {
+            // Release focused controls before gameplay input resumes.
+            test_document->Focus();
             test_document->Hide();
+        }
 
         shown = false;
         sauerinput::endmenu();
