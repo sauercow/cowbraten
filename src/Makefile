@@ -172,22 +172,26 @@ SERVER_OBJS= \
 	cowbraten/proxy_real_ip-standalone.o \
 	cowbraten/remote_commands-standalone.o \
 	cowbraten/version-standalone.o
+DEP_FILES=$(CLIENT_OBJS:.o=.d) $(SERVER_OBJS:.o=.d)
+
 default: all
 
 all: client server
 
 clean:
 	cd enet && make clean && cd ..
-	-$(RM) $(CLIENT_OBJS) $(SERVER_OBJS) cowbraten_client cowbraten_server
+	-$(RM) $(CLIENT_OBJS) $(SERVER_OBJS) $(DEP_FILES) cowbraten_client cowbraten_server
 
 %-standalone.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(CLIENT_OBJS): CXXFLAGS += $(INCLUDES) $(CLIENT_INCLUDES)
+$(CLIENT_OBJS): CXXFLAGS += $(INCLUDES) $(CLIENT_INCLUDES) -MMD -MP
 
 cowbraten/ui/ui.o cowbraten/ui/rml_render.o cowbraten/ui/rml_file.o: CXXFLAGS += -Ithird_party/RmlUi/Include -DRMLUI_STATIC_LIB -fexceptions -frtti
 
-$(SERVER_OBJS): CXXFLAGS += $(INCLUDES) -DSTANDALONE
+$(SERVER_OBJS): CXXFLAGS += $(INCLUDES) -DSTANDALONE -MMD -MP
+
+-include $(DEP_FILES)
 
 OUTBIN=cowbraten_x86_64
 

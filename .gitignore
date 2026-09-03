@@ -29,3 +29,5 @@ Dockertrigger
 ui-ux
 
 /build/
+
+src/**/*.d
