@@ -36,6 +36,11 @@ namespace cowui
             ScreenId::Test,
             "data/cowbraten/ui/default/screens/test.rml",
             nullptr
+        },
+        {
+            ScreenId::Main,
+            "data/cowbraten/ui/default/screens/main.rml",
+            nullptr
         }
     };
 
@@ -86,6 +91,12 @@ namespace cowui
             stderr,
             "Cowbraten UI: test control received mouse wheel\n"
         );
+    }
+
+    static void closeui(Rml::Event &event)
+    {
+        event.StopPropagation();
+        close();
     }
 
     class RmlTextInputHandler final : public Rml::TextInputHandler
@@ -344,7 +355,10 @@ namespace cowui
                toggletestselection) ||
            !action_router.registeraction(
                "test.log-wheel",
-               logtestwheel))
+               logtestwheel) ||
+           !action_router.registeraction(
+               "navigation.close",
+               closeui))
         {
             action_router.clear();
             Rml::Shutdown();
@@ -560,7 +574,14 @@ namespace cowui
             );
 
             if(!screen->document)
+            {
+                std::fprintf(
+                    stderr,
+                    "Cowbraten UI: failed to load screen '%s'\n",
+                    screen->path
+                );
                 return false;
+            }
         }
 
         const bool opening = active_screen == nullptr;
@@ -579,6 +600,11 @@ namespace cowui
     void showtest()
     {
         show(ScreenId::Test);
+    }
+
+    void showmain()
+    {
+        show(ScreenId::Main);
     }
 
     void close()

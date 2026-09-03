@@ -1,0 +1,114 @@
+<rml>
+<head>
+    <title>Cowbraten Main Menu</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/main_menu.rcss" />
+</head>
+
+<body>
+    <div class="main-screen">
+        <div class="main-shell panel">
+            <div class="main-header">
+                <div class="main-lockup">
+                    <div class="main-mark">C</div>
+                    <div class="main-lockup-copy">
+                        <div class="main-lockup-name">Cowbraten</div>
+                        <div class="main-lockup-subtitle">Native Cube 2 client</div>
+                    </div>
+                </div>
+
+                <button class="button main-close" onclick="navigation.close">
+                    Esc&nbsp;&nbsp;/&nbsp;&nbsp;Return
+                </button>
+            </div>
+
+            <div class="main-content">
+                <div class="main-navigation">
+                    <div class="main-section-label">Main Menu</div>
+                    <div class="main-nav-list">
+                        <button class="nav-item main-nav-item is-selected" onclick="navigation.close">
+                            <span class="main-nav-index">01</span>
+                            <span class="main-nav-label">Return to Game</span>
+                            <span class="main-nav-state">Ready</span>
+                        </button>
+                        <button class="nav-item main-nav-item" disabled="true">
+                            <span class="main-nav-index">02</span>
+                            <span class="main-nav-label">Servers</span>
+                            <span class="main-nav-state">Planned</span>
+                        </button>
+                        <button class="nav-item main-nav-item" disabled="true">
+                            <span class="main-nav-index">03</span>
+                            <span class="main-nav-label">Demos</span>
+                            <span class="main-nav-state">Planned</span>
+                        </button>
+                        <button class="nav-item main-nav-item" disabled="true">
+                            <span class="main-nav-index">04</span>
+                            <span class="main-nav-label">Profile</span>
+                            <span class="main-nav-state">Planned</span>
+                        </button>
+                        <button class="nav-item main-nav-item" disabled="true">
+                            <span class="main-nav-index">05</span>
+                            <span class="main-nav-label">Settings</span>
+                            <span class="main-nav-state">Planned</span>
+                        </button>
+                        <button class="nav-item main-nav-item" disabled="true">
+                            <span class="main-nav-index">06</span>
+                            <span class="main-nav-label">Console</span>
+                            <span class="main-nav-state">Planned</span>
+                        </button>
+                        <button class="nav-item main-nav-item" disabled="true">
+                            <span class="main-nav-index">07</span>
+                            <span class="main-nav-label">Credits / About</span>
+                            <span class="main-nav-state">Planned</span>
+                        </button>
+                        <button class="nav-item main-nav-item main-nav-exit" disabled="true">
+                            <span class="main-nav-index">08</span>
+                            <span class="main-nav-label">Exit</span>
+                            <span class="main-nav-state">Unavailable</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="main-stage">
+                    <div class="main-stage-copy">
+                        <div class="eyebrow main-eyebrow">Cube 2 / Refined</div>
+                        <div class="main-brand-title">Cowbraten</div>
+                        <div class="main-brand-rule">
+                            <div class="main-brand-accent"></div>
+                        </div>
+                        <div class="main-brand-subtitle">A focused native client for Cube 2: Sauerbraten.</div>
+                        <div class="main-brand-description">
+                            Fast navigation. Clear information. Competitive play without clutter.
+                        </div>
+                    </div>
+
+                    <div class="main-details">
+                        <div class="main-detail">
+                            <div class="main-detail-label">Engine</div>
+                            <div class="main-detail-value">Cube 2</div>
+                        </div>
+                        <div class="main-detail">
+                            <div class="main-detail-label">Compatibility Base</div>
+                            <div class="main-detail-value">p1xbraten 9.0.0</div>
+                        </div>
+                        <div class="main-detail">
+                            <div class="main-detail-label">Interface</div>
+                            <div class="main-detail-value">Native / RmlUi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-footer">
+                <div class="main-footer-product">Cowbraten</div>
+                <div class="main-footer-help">Select with mouse&nbsp;&nbsp;//&nbsp;&nbsp;Escape returns to gameplay</div>
+                <div class="main-footer-status">
+                    <span class="main-status-dot"></span>
+                    <span class="main-status-text">Interface active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</rml>

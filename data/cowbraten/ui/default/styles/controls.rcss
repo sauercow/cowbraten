@@ -288,6 +288,7 @@ input.checkbox:disabled
 
 .nav-item:disabled
 {
+    background-color: transparent;
     color: var(--color-disabled);
     opacity: 0.65;
 }

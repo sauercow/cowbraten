@@ -7,7 +7,8 @@ namespace cowui
 {
     enum class ScreenId
     {
-        Test
+        Test,
+        Main
     };
 
     bool init(int width, int height);
@@ -24,6 +25,7 @@ namespace cowui
     void render();
 
     bool show(ScreenId screen);
+    void showmain();
     void showtest();
     void close();
     bool visible();

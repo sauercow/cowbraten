@@ -31,24 +31,29 @@ New actions should use a stable group prefix:
 - `demos.*`
 - `console.*`
 
-Only test actions are registered during this foundation phase.
+The first production action is `navigation.close`. It uses the same typed
+`cowui::close()` path as Escape and `/ui_close`, including Sauer input-state
+restoration. Test-only actions retain the `test.*` prefix.
 
 ## Documents and navigation
 
-Each top-level screen should be a separate RML document sharing the foundation
-styles. A small C++ screen manager should own explicit screen identifiers and
-asset paths. It should lazily load each document once, cache it for the RmlUi
-context lifetime, and show or hide documents on transitions.
+Each top-level screen is a separate RML document sharing the foundation styles.
+The small C++ screen table owns explicit screen identifiers and asset paths. It
+lazily loads each document once, caches it for the RmlUi context lifetime, and
+shows or hides documents on transitions.
 
-The initial screen identifiers will cover Main, Servers, Demos, Profile,
-Settings, Console, and Credits. Test remains a developer-only screen. Defining
-an identifier does not require loading its document.
+Only implemented screens receive identifiers. Main is the first production
+identifier and Test remains a developer-only identifier. Later screens are
+added to the table when their documents and actions exist; disabled Main Menu
+items do not create placeholder screens.
 
-The manager, not the DOM, should own a history of screen identifiers. At most
-one normal screen is active. Modal documents are separate cached documents in a
-small modal stack above the active screen. Escape should first allow a focused
-control to handle a local action, then close the top modal, then navigate back
-or close the UI to gameplay.
+At most one normal screen is active. Switching screens hides the previous
+document without releasing menu input ownership, while closing the active
+screen returns directly to gameplay. Navigation history and a modal stack will
+belong to C++ when a production screen first needs them; they are intentionally
+not generalized ahead of that requirement. Escape should eventually allow a
+focused control to handle a local action, then close the top modal, then
+navigate back or close the UI to gameplay.
 
 Closing the UI hides the active document and all modals, releases RmlUi focus,
 and returns cursor/grab ownership through the existing input bridge. Cached
