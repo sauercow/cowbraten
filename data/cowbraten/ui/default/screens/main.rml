@@ -32,10 +32,10 @@
                             <span class="main-nav-label">Return to Game</span>
                             <span class="main-nav-state">Ready</span>
                         </button>
-                        <button class="nav-item main-nav-item" disabled="true">
+                        <button class="nav-item main-nav-item" onclick="navigation.servers">
                             <span class="main-nav-index">02</span>
                             <span class="main-nav-label">Servers</span>
-                            <span class="main-nav-state">Planned</span>
+                            <span class="main-nav-state">Browse</span>
                         </button>
                         <button class="nav-item main-nav-item" disabled="true">
                             <span class="main-nav-index">03</span>

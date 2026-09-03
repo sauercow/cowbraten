@@ -42,10 +42,10 @@ The small C++ screen table owns explicit screen identifiers and asset paths. It
 lazily loads each document once, caches it for the RmlUi context lifetime, and
 shows or hides documents on transitions.
 
-Only implemented screens receive identifiers. Main is the first production
-identifier and Test remains a developer-only identifier. Later screens are
-added to the table when their documents and actions exist; disabled Main Menu
-items do not create placeholder screens.
+Only implemented screens receive identifiers. Main and Servers are the first
+production identifiers, while Test remains a developer-only identifier. Later
+screens are added to the table when their documents and actions exist; disabled
+Main Menu items do not create placeholder screens.
 
 At most one normal screen is active. Switching screens hides the previous
 document without releasing menu input ownership, while closing the active
@@ -65,3 +65,41 @@ document-local relationships such as a label's `for` attribute. State reaches
 RML through event-driven data models and stable actions; documents are not
 rebuilt or copied every frame. When the UI is closed, the manager must preserve
 the existing no-update/no-render fast path.
+
+## Server Browser model
+
+The production Server Browser keeps legacy networking and RmlUi presentation
+on opposite sides of two narrow layers:
+
+    Sauer serverinfo list
+        -> sauer_server_bridge (legacy-only snapshot)
+        -> RmlServerBrowser (owned view model)
+        -> server_browser data model
+        -> screens/servers.rml
+
+The legacy bridge remains responsible for calling the existing master-list,
+resolver, ping, and connection functions. It exports plain value snapshots and
+accepts a stable `host:port` identifier for connection; an RmlUi document never
+sees a `serverinfo` pointer. The Rml-facing model owns all strings used by the
+document, retains selection by stable identifier, and applies presentation-only
+filtering and sorting to its copy without reordering Sauer's global list.
+
+While Servers is active, Sauer's existing `refreshservers()` path continues to
+drain ping responses. Snapshot comparison is throttled to 10 Hz, and the RmlUi
+row variable is dirtied only when backend values, the filter, the sort order, or
+selection actually change. Navigating away stops this work; the cached document
+and owned snapshot remain available for the next visit.
+
+The registered actions are explicit and typed:
+
+- `navigation.servers` and `navigation.main` switch cached documents.
+- `servers.select` selects the stable identifier attached to a generated row.
+- `servers.filter` reads the text control's value.
+- `servers.sort.*` changes a known sort key and direction.
+- `servers.refresh` invokes the existing master-list refresh path.
+- `servers.connect` resolves the selected identifier in the live Sauer list and
+  uses the normal `cowui::close()` input-ownership path after connecting.
+
+There is no generic host command, ident lookup, or CubeScript evaluation in the
+model. Favorites and history are intentionally absent until their persistence
+and product semantics are designed.

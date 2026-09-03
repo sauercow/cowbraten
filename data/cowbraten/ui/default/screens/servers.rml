@@ -1,0 +1,132 @@
+<rml>
+<head>
+    <title>Cowbraten Server Browser</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/server_browser.rcss" />
+</head>
+
+<body data-model="server_browser">
+    <div class="servers-screen">
+        <div class="servers-shell panel">
+            <div class="servers-header">
+                <div class="servers-lockup">
+                    <div class="servers-mark">C</div>
+                    <div class="servers-heading">
+                        <div class="servers-product">Cowbraten</div>
+                        <div class="servers-title">Server Browser</div>
+                    </div>
+                </div>
+
+                <button class="button servers-back" onclick="navigation.main">
+                    Back&nbsp;&nbsp;/&nbsp;&nbsp;Main Menu
+                </button>
+            </div>
+
+            <div class="servers-toolbar">
+                <div class="servers-source">
+                    <div class="servers-source-kicker">Network</div>
+                    <div class="servers-source-name">Internet Servers</div>
+                </div>
+
+                <div class="servers-search">
+                    <div class="servers-search-label">Filter</div>
+                    <input class="text-input servers-search-input"
+                        type="text"
+                        placeholder="Server, host, mode, or map"
+                        onchange="servers.filter" />
+                </div>
+
+                <button class="button button-secondary servers-refresh"
+                    onclick="servers.refresh">
+                    Refresh List
+                </button>
+            </div>
+
+            <div class="servers-table">
+                <div class="server-grid servers-columns">
+                    <button class="server-heading-button server-cell-name"
+                        data-class-is-selected="sort_name"
+                        onclick="servers.sort.name">
+                        Server
+                    </button>
+                    <button class="server-heading-button server-cell-mode"
+                        data-class-is-selected="sort_mode"
+                        onclick="servers.sort.mode">
+                        Mode
+                    </button>
+                    <button class="server-heading-button server-cell-map"
+                        data-class-is-selected="sort_map"
+                        onclick="servers.sort.map">
+                        Map
+                    </button>
+                    <button class="server-heading-button server-cell-players"
+                        data-class-is-selected="sort_players"
+                        onclick="servers.sort.players">
+                        Players
+                    </button>
+                    <button class="server-heading-button server-cell-ping"
+                        data-class-is-selected="sort_ping"
+                        onclick="servers.sort.ping">
+                        Ping
+                    </button>
+                    <div class="server-heading-label server-cell-status">Status</div>
+                </div>
+
+                <div class="server-rows">
+                    <button class="server-grid server-row"
+                        data-for="server : servers"
+                        data-attr-data-server-id="server.id"
+                        data-class-is-selected="server.selected"
+                        data-class-is-unavailable="!server.selectable"
+                        data-class-is-full="server.full"
+                        data-class-is-waiting="server.waiting"
+                        data-class-is-incompatible="server.incompatible"
+                        onclick="servers.select">
+                        <span class="server-cell-name">
+                            <span class="server-name">{{ server.description }}</span>
+                            <span class="server-host">{{ server.host }}</span>
+                        </span>
+                        <span class="server-cell-mode">{{ server.mode }}</span>
+                        <span class="server-cell-map">{{ server.map }}</span>
+                        <span class="server-cell-players">{{ server.players }}</span>
+                        <span class="server-cell-ping server-ping"
+                            data-class-ping-good="server.ping_good"
+                            data-class-ping-medium="server.ping_medium"
+                            data-class-ping-slow="server.ping_slow">
+                            {{ server.ping }}
+                        </span>
+                        <span class="server-cell-status server-status">{{ server.status }}</span>
+                    </button>
+
+                    <div class="servers-empty" data-if="visible_count == 0">
+                        <div class="servers-empty-title">No servers to display</div>
+                        <div class="servers-empty-copy">{{ list_status }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="servers-selection">
+                <div class="servers-selection-copy">
+                    <div class="servers-selection-label">Selected Server</div>
+                    <div class="servers-selection-name">{{ selected_name }}</div>
+                    <div class="servers-selection-details">{{ selected_details }}</div>
+                </div>
+
+                <button class="button button-primary servers-connect"
+                    data-attrif-disabled="!can_connect"
+                    data-class-is-disabled="!can_connect"
+                    onclick="servers.connect">
+                    Connect
+                </button>
+            </div>
+
+            <div class="servers-footer">
+                <div>{{ list_status }}</div>
+                <div>Sort&nbsp;&nbsp;//&nbsp;&nbsp;{{ sort_status }}</div>
+                <div class="servers-footer-help">Escape returns to gameplay</div>
+            </div>
+        </div>
+    </div>
+</body>
+</rml>

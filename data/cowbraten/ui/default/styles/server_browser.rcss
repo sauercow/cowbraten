@@ -1,0 +1,480 @@
+body
+{
+    background-color: transparent;
+}
+
+.servers-screen
+{
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: var(--space-4);
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #0E101238;
+}
+
+.servers-shell
+{
+    display: flex;
+    flex-direction: column;
+    width: 1600px;
+    max-width: 100%;
+    height: 880px;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.servers-header
+{
+    box-sizing: border-box;
+    display: flex;
+    flex: none;
+    height: 72px;
+    padding: 0 var(--space-3);
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--color-surface);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+}
+
+.servers-lockup
+{
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.servers-mark
+{
+    box-sizing: border-box;
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-secondary);
+    border-width: 1px;
+    border-color: var(--color-secondary-hover);
+    border-radius: var(--radius-control);
+    color: var(--color-background);
+    font-size: 24px;
+    line-height: 38px;
+    letter-spacing: 1px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.servers-heading
+{
+    display: block;
+}
+
+.servers-product
+{
+    display: block;
+    color: var(--color-text);
+    font-size: 18px;
+    line-height: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.servers-title
+{
+    display: block;
+    color: var(--color-primary);
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.servers-back
+{
+    min-width: 184px;
+}
+
+.servers-toolbar
+{
+    box-sizing: border-box;
+    display: flex;
+    flex: none;
+    height: 72px;
+    padding: var(--space-2) var(--space-3);
+    align-items: center;
+    gap: var(--space-2);
+    background-color: var(--color-background);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+}
+
+.servers-source
+{
+    display: block;
+    flex: none;
+    width: 208px;
+}
+
+.servers-source-kicker,
+.servers-search-label,
+.servers-selection-label
+{
+    display: block;
+    color: var(--color-disabled);
+    font-size: 9px;
+    line-height: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.servers-source-name
+{
+    display: block;
+    color: var(--color-primary);
+    font-size: 13px;
+    line-height: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.servers-search
+{
+    display: block;
+    flex: 1;
+    min-width: 240px;
+}
+
+.servers-search-input
+{
+    height: 36px;
+    line-height: 34px;
+}
+
+.servers-refresh
+{
+    flex: none;
+    width: 152px;
+}
+
+.servers-table
+{
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    background-color: var(--color-surface);
+}
+
+.server-grid
+{
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+}
+
+.servers-columns
+{
+    flex: none;
+    height: 40px;
+    padding: 0 var(--space-2);
+    background-color: var(--color-surface-2);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+}
+
+.server-heading-button,
+.server-heading-label
+{
+    box-sizing: border-box;
+    display: block;
+    height: 39px;
+    padding: 0 var(--space-1);
+    background-color: transparent;
+    border-width: 0 0 2px 0;
+    border-color: transparent;
+    color: var(--color-text-muted);
+    font-family: Lato;
+    font-size: 10px;
+    line-height: 37px;
+    letter-spacing: 1px;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.server-heading-button:hover,
+.server-heading-button:focus-visible
+{
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+.server-heading-button.is-selected
+{
+    border-bottom-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.server-rows
+{
+    display: block;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.server-row
+{
+    display: flex;
+    width: 1598px;
+    min-width: 1598px;
+    max-width: 100%;
+    height: 48px;
+    padding: 0 var(--space-2);
+    align-items: center;
+    background-color: var(--color-surface);
+    border-width: 0 0 1px 3px;
+    border-color: var(--color-border) var(--color-border) var(--color-border) transparent;
+    color: var(--color-text-muted);
+    font-family: Lato;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: left;
+    tab-index: auto;
+}
+
+.server-row:hover,
+.server-row:focus-visible
+{
+    background-color: var(--color-surface-2);
+    border-left-color: var(--color-primary-pressed);
+    color: var(--color-text);
+}
+
+.server-row:active
+{
+    background-color: var(--color-primary-pressed);
+}
+
+.server-row.is-selected
+{
+    background-color: var(--color-surface-2);
+    border-left-color: var(--color-primary);
+    color: var(--color-text);
+}
+
+.server-row.is-unavailable
+{
+    color: var(--color-disabled);
+}
+
+.server-cell-name
+{
+    box-sizing: border-box;
+    flex: 0 0 42%;
+    min-width: 0;
+    padding: 0 var(--space-1);
+    overflow: hidden;
+}
+
+.server-cell-mode
+{
+    box-sizing: border-box;
+    flex: 0 0 14%;
+    min-width: 0;
+    padding: 0 var(--space-1);
+    overflow: hidden;
+}
+
+.server-cell-map
+{
+    box-sizing: border-box;
+    flex: 0 0 16%;
+    min-width: 0;
+    padding: 0 var(--space-1);
+    overflow: hidden;
+}
+
+.server-cell-players
+{
+    box-sizing: border-box;
+    flex: 0 0 10%;
+    min-width: 0;
+    padding: 0 var(--space-1);
+    overflow: hidden;
+}
+
+.server-cell-ping
+{
+    box-sizing: border-box;
+    flex: 0 0 8%;
+    min-width: 0;
+    padding: 0 var(--space-1);
+    overflow: hidden;
+}
+
+.server-cell-status
+{
+    box-sizing: border-box;
+    flex: 0 0 10%;
+    min-width: 0;
+    padding: 0 var(--space-1);
+    overflow: hidden;
+}
+
+.server-name
+{
+    display: block;
+    overflow: hidden;
+    color: var(--color-text);
+    font-size: 13px;
+    line-height: 17px;
+    white-space: nowrap;
+}
+
+.server-host
+{
+    display: block;
+    overflow: hidden;
+    color: var(--color-disabled);
+    font-size: 9px;
+    line-height: 13px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.server-ping.ping-good
+{
+    color: var(--color-success);
+}
+
+.server-ping.ping-medium
+{
+    color: var(--color-warning);
+}
+
+.server-ping.ping-slow,
+.server-row.is-incompatible .server-status
+{
+    color: var(--color-error);
+}
+
+.server-row.is-full .server-status
+{
+    color: var(--color-warning);
+}
+
+.server-row.is-waiting .server-status
+{
+    color: var(--color-disabled);
+}
+
+.servers-empty
+{
+    box-sizing: border-box;
+    display: block;
+    margin: var(--space-5) auto 0 auto;
+    padding: var(--space-3);
+    width: 440px;
+    max-width: 90%;
+    background-color: var(--color-background);
+    border-left-width: 3px;
+    border-left-color: var(--color-primary);
+}
+
+.servers-empty-title
+{
+    color: var(--color-text);
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.servers-empty-copy
+{
+    margin-top: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: 12px;
+}
+
+.servers-selection
+{
+    box-sizing: border-box;
+    display: flex;
+    flex: none;
+    min-height: 88px;
+    padding: var(--space-2) var(--space-3);
+    align-items: center;
+    gap: var(--space-3);
+    background-color: var(--color-background);
+    border-top-width: 1px;
+    border-top-color: var(--color-border);
+}
+
+.servers-selection-copy
+{
+    display: block;
+    flex: 1;
+    min-width: 0;
+}
+
+.servers-selection-name
+{
+    display: block;
+    overflow: hidden;
+    color: var(--color-text);
+    font-size: 15px;
+    line-height: 22px;
+    white-space: nowrap;
+}
+
+.servers-selection-details
+{
+    display: block;
+    overflow: hidden;
+    color: var(--color-text-muted);
+    font-size: 10px;
+    line-height: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.servers-connect
+{
+    flex: none;
+    width: 168px;
+}
+
+.servers-connect.is-disabled
+{
+    background-color: var(--color-surface-2);
+    border-color: var(--color-disabled);
+    color: var(--color-disabled);
+    opacity: 0.65;
+}
+
+.servers-footer
+{
+    box-sizing: border-box;
+    display: flex;
+    flex: none;
+    height: 40px;
+    padding: 0 var(--space-3);
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--color-surface-2);
+    border-top-width: 1px;
+    border-top-color: var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.servers-footer-help
+{
+    color: var(--color-disabled);
+}

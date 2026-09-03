@@ -2,6 +2,7 @@
 #include "rml_action.h"
 #include "rml_render.h"
 #include "rml_file.h"
+#include "rml_server_browser.h"
 #include "sauer_input_bridge.h"
 
 #include <RmlUi/Core.h>
@@ -21,6 +22,7 @@ namespace cowui
     static RmlRenderInterface render_interface;
     static RmlFileInterface file_interface;
     static RmlActionRouter action_router;
+    static RmlServerBrowser server_browser;
     static Rml::Context *context = nullptr;
 
     struct Screen
@@ -40,6 +42,11 @@ namespace cowui
         {
             ScreenId::Main,
             "data/cowbraten/ui/default/screens/main.rml",
+            nullptr
+        },
+        {
+            ScreenId::Servers,
+            "data/cowbraten/ui/default/screens/servers.rml",
             nullptr
         }
     };
@@ -97,6 +104,18 @@ namespace cowui
     {
         event.StopPropagation();
         close();
+    }
+
+    static void showmainmenu(Rml::Event &event)
+    {
+        event.StopPropagation();
+        show(ScreenId::Main);
+    }
+
+    static void showserverbrowser(Rml::Event &event)
+    {
+        event.StopPropagation();
+        show(ScreenId::Servers);
     }
 
     class RmlTextInputHandler final : public Rml::TextInputHandler
@@ -358,8 +377,16 @@ namespace cowui
                logtestwheel) ||
            !action_router.registeraction(
                "navigation.close",
-               closeui))
+               closeui) ||
+           !action_router.registeraction(
+               "navigation.main",
+               showmainmenu) ||
+           !action_router.registeraction(
+               "navigation.servers",
+               showserverbrowser) ||
+           !server_browser.init(context, action_router))
         {
+            server_browser.shutdown(context);
             action_router.clear();
             Rml::Shutdown();
             context = nullptr;
@@ -383,6 +410,7 @@ namespace cowui
 
         if(initialized)
         {
+            server_browser.shutdown(context);
             Rml::Shutdown();
             context = nullptr;
             initialized = false;
@@ -536,6 +564,9 @@ namespace cowui
            context &&
            active_screen)
         {
+            if(active_screen->id == ScreenId::Servers)
+                server_browser.update();
+
             context->Update();
         }
     }
@@ -566,6 +597,9 @@ namespace cowui
 
         if(active_screen == screen)
             return true;
+
+        if(id == ScreenId::Servers)
+            server_browser.activate();
 
         if(!screen->document)
         {
@@ -605,6 +639,11 @@ namespace cowui
     void showmain()
     {
         show(ScreenId::Main);
+    }
+
+    void showservers()
+    {
+        show(ScreenId::Servers);
     }
 
     void close()
