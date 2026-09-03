@@ -264,6 +264,46 @@ body
     overflow-y: auto;
 }
 
+.server-rows scrollbarvertical
+{
+    width: 12px;
+    background-color: var(--color-background);
+    border-left-width: 1px;
+    border-left-color: var(--color-border);
+}
+
+.server-rows scrollbarvertical slidertrack
+{
+    width: 11px;
+    background-color: var(--color-background);
+}
+
+.server-rows scrollbarvertical sliderbar
+{
+    width: 7px;
+    min-height: 40px;
+    margin-left: 2px;
+    background-color: var(--color-disabled);
+    border-radius: var(--radius-control);
+}
+
+.server-rows scrollbarvertical sliderbar:hover
+{
+    background-color: var(--color-primary-pressed);
+}
+
+.server-rows scrollbarvertical sliderbar:active
+{
+    background-color: var(--color-primary);
+}
+
+.server-rows scrollbarvertical sliderarrowdec,
+.server-rows scrollbarvertical sliderarrowinc
+{
+    width: 0;
+    height: 0;
+}
+
 .server-row-repeat
 {
     display: block;
