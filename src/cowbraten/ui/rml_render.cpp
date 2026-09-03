@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <climits>
 #include <cstdio>
+#include <cstring>
 #include <new>
 
 extern int glslversion;
@@ -24,6 +25,7 @@ namespace cowui
     {
         constexpr GLuint ATTR_POSITION = 0;
         constexpr GLuint ATTR_COLOR = 1;
+        constexpr GLuint ATTR_TEXCOORD = 2;
 
         static bool canusevao()
         {
@@ -74,9 +76,11 @@ namespace cowui
                 "#version 330 core\n"
                 "in vec2 a_position;\n"
                 "in vec4 a_color;\n"
+                "in vec2 a_tex_coord;\n"
                 "uniform vec2 u_viewport;\n"
                 "uniform vec2 u_translation;\n"
                 "out vec4 v_color;\n"
+                "out vec2 v_tex_coord;\n"
                 "void main()\n"
                 "{\n"
                 "    vec2 position = a_position + u_translation;\n"
@@ -86,24 +90,33 @@ namespace cowui
                 "    );\n"
                 "    gl_Position = vec4(ndc, 0.0, 1.0);\n"
                 "    v_color = a_color;\n"
+                "    v_tex_coord = a_tex_coord;\n"
                 "}\n";
 
             static const char *fragment_330 =
                 "#version 330 core\n"
                 "in vec4 v_color;\n"
+                "in vec2 v_tex_coord;\n"
+                "uniform sampler2D u_texture;\n"
+                "uniform int u_use_texture;\n"
                 "layout(location = 0) out vec4 frag_color;\n"
                 "void main()\n"
                 "{\n"
-                "    frag_color = v_color;\n"
+                "    vec4 color = v_color;\n"
+                "    if(u_use_texture != 0)\n"
+                "        color *= texture(u_texture, v_tex_coord);\n"
+                "    frag_color = color;\n"
                 "}\n";
 
             static const char *vertex_150 =
                 "#version 150\n"
                 "in vec2 a_position;\n"
                 "in vec4 a_color;\n"
+                "in vec2 a_tex_coord;\n"
                 "uniform vec2 u_viewport;\n"
                 "uniform vec2 u_translation;\n"
                 "out vec4 v_color;\n"
+                "out vec2 v_tex_coord;\n"
                 "void main()\n"
                 "{\n"
                 "    vec2 position = a_position + u_translation;\n"
@@ -113,24 +126,33 @@ namespace cowui
                 "    );\n"
                 "    gl_Position = vec4(ndc, 0.0, 1.0);\n"
                 "    v_color = a_color;\n"
+                "    v_tex_coord = a_tex_coord;\n"
                 "}\n";
 
             static const char *fragment_150 =
                 "#version 150\n"
                 "in vec4 v_color;\n"
+                "in vec2 v_tex_coord;\n"
+                "uniform sampler2D u_texture;\n"
+                "uniform int u_use_texture;\n"
                 "out vec4 frag_color;\n"
                 "void main()\n"
                 "{\n"
-                "    frag_color = v_color;\n"
+                "    vec4 color = v_color;\n"
+                "    if(u_use_texture != 0)\n"
+                "        color *= texture(u_texture, v_tex_coord);\n"
+                "    frag_color = color;\n"
                 "}\n";
 
             static const char *vertex_130 =
                 "#version 130\n"
                 "in vec2 a_position;\n"
                 "in vec4 a_color;\n"
+                "in vec2 a_tex_coord;\n"
                 "uniform vec2 u_viewport;\n"
                 "uniform vec2 u_translation;\n"
                 "out vec4 v_color;\n"
+                "out vec2 v_tex_coord;\n"
                 "void main()\n"
                 "{\n"
                 "    vec2 position = a_position + u_translation;\n"
@@ -140,24 +162,33 @@ namespace cowui
                 "    );\n"
                 "    gl_Position = vec4(ndc, 0.0, 1.0);\n"
                 "    v_color = a_color;\n"
+                "    v_tex_coord = a_tex_coord;\n"
                 "}\n";
 
             static const char *fragment_130 =
                 "#version 130\n"
                 "in vec4 v_color;\n"
+                "in vec2 v_tex_coord;\n"
+                "uniform sampler2D u_texture;\n"
+                "uniform int u_use_texture;\n"
                 "out vec4 frag_color;\n"
                 "void main()\n"
                 "{\n"
-                "    frag_color = v_color;\n"
+                "    vec4 color = v_color;\n"
+                "    if(u_use_texture != 0)\n"
+                "        color *= texture(u_texture, v_tex_coord);\n"
+                "    frag_color = color;\n"
                 "}\n";
 
             static const char *vertex_120 =
                 "#version 120\n"
                 "attribute vec2 a_position;\n"
                 "attribute vec4 a_color;\n"
+                "attribute vec2 a_tex_coord;\n"
                 "uniform vec2 u_viewport;\n"
                 "uniform vec2 u_translation;\n"
                 "varying vec4 v_color;\n"
+                "varying vec2 v_tex_coord;\n"
                 "void main()\n"
                 "{\n"
                 "    vec2 position = a_position + u_translation;\n"
@@ -167,14 +198,21 @@ namespace cowui
                 "    );\n"
                 "    gl_Position = vec4(ndc, 0.0, 1.0);\n"
                 "    v_color = a_color;\n"
+                "    v_tex_coord = a_tex_coord;\n"
                 "}\n";
 
             static const char *fragment_120 =
                 "#version 120\n"
                 "varying vec4 v_color;\n"
+                "varying vec2 v_tex_coord;\n"
+                "uniform sampler2D u_texture;\n"
+                "uniform int u_use_texture;\n"
                 "void main()\n"
                 "{\n"
-                "    gl_FragColor = v_color;\n"
+                "    vec4 color = v_color;\n"
+                "    if(u_use_texture != 0)\n"
+                "        color *= texture2D(u_texture, v_tex_coord);\n"
+                "    gl_FragColor = color;\n"
                 "}\n";
 
             const char *vertex_source = nullptr;
@@ -227,17 +265,9 @@ namespace cowui
             glAttachShader_(result, vertex_shader);
             glAttachShader_(result, fragment_shader);
 
-            glBindAttribLocation_(
-                result,
-                ATTR_POSITION,
-                "a_position"
-            );
-
-            glBindAttribLocation_(
-                result,
-                ATTR_COLOR,
-                "a_color"
-            );
+            glBindAttribLocation_(result, ATTR_POSITION, "a_position");
+            glBindAttribLocation_(result, ATTR_COLOR, "a_color");
+            glBindAttribLocation_(result, ATTR_TEXCOORD, "a_tex_coord");
 
             if(glBindFragDataLocation_)
                 glBindFragDataLocation_(result, 0, "frag_color");
@@ -291,6 +321,25 @@ namespace cowui
         Geometry *next = nullptr;
     };
 
+
+    struct RmlRenderInterface::Texture
+    {
+        Rml::byte *pixels = nullptr;
+        size_t data_size = 0;
+
+        int width = 0;
+        int height = 0;
+
+        GLuint id = 0;
+
+        Texture *next = nullptr;
+
+        ~Texture()
+        {
+            delete[] pixels;
+        }
+    };
+
     bool RmlRenderInterface::initgl()
     {
         if(gl_ready) return true;
@@ -316,6 +365,22 @@ namespace cowui
             }
         }
 
+        for(Texture *texture = textures;
+            texture;
+            texture = texture->next)
+        {
+            if(!uploadtexture(texture))
+            {
+                std::fprintf(
+                    stderr,
+                    "Cowbraten UI failed to restore texture\n"
+                );
+
+                beforeglreset();
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -330,6 +395,13 @@ namespace cowui
             releasegpu(geometry);
         }
 
+        for(Texture *texture = textures;
+            texture;
+            texture = texture->next)
+        {
+            releasegputexture(texture);
+        }
+
         deletesystemresources();
         gl_ready = false;
     }
@@ -341,6 +413,13 @@ namespace cowui
             geometry = geometry->next)
         {
             releasegpu(geometry);
+        }
+
+        for(Texture *texture = textures;
+            texture;
+            texture = texture->next)
+        {
+            releasegputexture(texture);
         }
 
         deletesystemresources();
@@ -373,7 +452,16 @@ namespace cowui
         uniform_translation =
             glGetUniformLocation_(program, "u_translation");
 
-        if(uniform_viewport < 0 || uniform_translation < 0)
+        uniform_texture =
+            glGetUniformLocation_(program, "u_texture");
+
+        uniform_use_texture =
+            glGetUniformLocation_(program, "u_use_texture");
+
+        if(uniform_viewport < 0 ||
+           uniform_translation < 0 ||
+           uniform_texture < 0 ||
+           uniform_use_texture < 0)
         {
             std::fprintf(
                 stderr,
@@ -397,6 +485,8 @@ namespace cowui
 
         uniform_viewport = -1;
         uniform_translation = -1;
+        uniform_texture = -1;
+        uniform_use_texture = -1;
     }
 
     bool RmlRenderInterface::uploadgeometry(Geometry *geometry)
@@ -449,23 +539,13 @@ namespace cowui
             if(use_vao)
                 glBindVertexArray_(old_vao);
 
-            glBindBuffer_(
-                GL_ARRAY_BUFFER,
-                old_array_buffer
-            );
-
-            glBindBuffer_(
-                GL_ELEMENT_ARRAY_BUFFER,
-                old_element_buffer
-            );
+            glBindBuffer_(GL_ARRAY_BUFFER, old_array_buffer);
+            glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, old_element_buffer);
 
             return false;
         }
 
-        glBindBuffer_(
-            GL_ARRAY_BUFFER,
-            geometry->vbo
-        );
+        glBindBuffer_(GL_ARRAY_BUFFER, geometry->vbo);
 
         glBufferData_(
             GL_ARRAY_BUFFER,
@@ -496,6 +576,7 @@ namespace cowui
         {
             glEnableVertexAttribArray_(ATTR_POSITION);
             glEnableVertexAttribArray_(ATTR_COLOR);
+            glEnableVertexAttribArray_(ATTR_TEXCOORD);
 
             glVertexAttribPointer_(
                 ATTR_POSITION,
@@ -519,18 +600,22 @@ namespace cowui
                 )
             );
 
+            glVertexAttribPointer_(
+                ATTR_TEXCOORD,
+                2,
+                GL_FLOAT,
+                GL_FALSE,
+                sizeof(Rml::Vertex),
+                reinterpret_cast<const void *>(
+                    offsetof(Rml::Vertex, tex_coord)
+                )
+            );
+
             glBindVertexArray_(old_vao);
         }
 
-        glBindBuffer_(
-            GL_ARRAY_BUFFER,
-            old_array_buffer
-        );
-
-        glBindBuffer_(
-            GL_ELEMENT_ARRAY_BUFFER,
-            old_element_buffer
-        );
+        glBindBuffer_(GL_ARRAY_BUFFER, old_array_buffer);
+        glBindBuffer_(GL_ELEMENT_ARRAY_BUFFER, old_element_buffer);
 
         return true;
     }
@@ -568,6 +653,126 @@ namespace cowui
 
             geometry->ibo = 0;
         }
+    }
+
+
+    bool RmlRenderInterface::uploadtexture(Texture *texture)
+    {
+        if(!texture ||
+           !texture->pixels ||
+           texture->data_size == 0 ||
+           texture->width <= 0 ||
+           texture->height <= 0)
+        {
+            return false;
+        }
+
+        releasegputexture(texture);
+
+        GLint old_active_texture = 0;
+        GLint old_texture = 0;
+        GLint old_unpack_alignment = 0;
+
+        glGetIntegerv(
+            GL_ACTIVE_TEXTURE,
+            &old_active_texture
+        );
+
+        glActiveTexture_(GL_TEXTURE0);
+
+        glGetIntegerv(
+            GL_TEXTURE_BINDING_2D,
+            &old_texture
+        );
+
+        glGetIntegerv(
+            GL_UNPACK_ALIGNMENT,
+            &old_unpack_alignment
+        );
+
+        glGenTextures(1, &texture->id);
+
+        if(!texture->id)
+        {
+            glActiveTexture_(old_active_texture);
+            return false;
+        }
+
+        glBindTexture(
+            GL_TEXTURE_2D,
+            texture->id
+        );
+
+        glPixelStorei(
+            GL_UNPACK_ALIGNMENT,
+            1
+        );
+
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA8,
+            texture->width,
+            texture->height,
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            texture->pixels
+        );
+
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MIN_FILTER,
+            GL_LINEAR
+        );
+
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MAG_FILTER,
+            GL_LINEAR
+        );
+
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_WRAP_S,
+            GL_REPEAT
+        );
+
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_WRAP_T,
+            GL_REPEAT
+        );
+
+        glPixelStorei(
+            GL_UNPACK_ALIGNMENT,
+            old_unpack_alignment
+        );
+
+        glBindTexture(
+            GL_TEXTURE_2D,
+            old_texture
+        );
+
+        glActiveTexture_(
+            old_active_texture
+        );
+
+        return true;
+    }
+
+    void RmlRenderInterface::releasegputexture(
+        Texture *texture)
+    {
+        if(!texture || !texture->id)
+            return;
+
+        glDeleteTextures(
+            1,
+            &texture->id
+        );
+
+        texture->id = 0;
     }
 
     Rml::CompiledGeometryHandle
@@ -616,13 +821,9 @@ namespace cowui
     void RmlRenderInterface::RenderGeometry(
         Rml::CompiledGeometryHandle handle,
         Rml::Vector2f translation,
-        Rml::TextureHandle texture)
+        Rml::TextureHandle texture_handle)
     {
         if(!gl_ready || !handle)
-            return;
-
-        // Textured geometry is added in the next renderer stage.
-        if(texture)
             return;
 
         Geometry *geometry =
@@ -631,15 +832,38 @@ namespace cowui
         if(!geometry->vbo || !geometry->ibo)
             return;
 
+        Texture *texture =
+            texture_handle
+                ? reinterpret_cast<Texture *>(texture_handle)
+                : nullptr;
+
+        if(texture && !texture->id)
+            return;
+
         glUniform2f_(
             uniform_translation,
             translation.x,
             translation.y
         );
 
+        glUniform1i_(
+            uniform_use_texture,
+            texture ? 1 : 0
+        );
+
+        if(texture)
+        {
+            glBindTexture(
+                GL_TEXTURE_2D,
+                texture->id
+            );
+        }
+
         if(geometry->vao)
         {
-            glBindVertexArray_(geometry->vao);
+            glBindVertexArray_(
+                geometry->vao
+            );
         }
         else
         {
@@ -657,6 +881,7 @@ namespace cowui
 
             glEnableVertexAttribArray_(ATTR_POSITION);
             glEnableVertexAttribArray_(ATTR_COLOR);
+            glEnableVertexAttribArray_(ATTR_TEXCOORD);
 
             glVertexAttribPointer_(
                 ATTR_POSITION,
@@ -679,6 +904,17 @@ namespace cowui
                     offsetof(Rml::Vertex, colour)
                 )
             );
+
+            glVertexAttribPointer_(
+                ATTR_TEXCOORD,
+                2,
+                GL_FLOAT,
+                GL_FALSE,
+                sizeof(Rml::Vertex),
+                reinterpret_cast<const void *>(
+                    offsetof(Rml::Vertex, tex_coord)
+                )
+            );
         }
 
         glDrawElements(
@@ -692,6 +928,7 @@ namespace cowui
         {
             glDisableVertexAttribArray_(ATTR_POSITION);
             glDisableVertexAttribArray_(ATTR_COLOR);
+            glDisableVertexAttribArray_(ATTR_TEXCOORD);
             gle::forcedisable();
         }
     }
@@ -732,15 +969,97 @@ namespace cowui
     }
 
     Rml::TextureHandle RmlRenderInterface::GenerateTexture(
-        Rml::Span<const Rml::byte>,
-        Rml::Vector2i)
+        Rml::Span<const Rml::byte> source,
+        Rml::Vector2i source_dimensions)
     {
-        return 0;
+        if(source_dimensions.x <= 0 ||
+           source_dimensions.y <= 0)
+        {
+            return 0;
+        }
+
+        const size_t pixel_count =
+            size_t(source_dimensions.x) *
+            size_t(source_dimensions.y);
+
+        if(pixel_count > size_t(-1) / 4)
+            return 0;
+
+        const size_t data_size =
+            pixel_count * 4;
+
+        if(!source.data() ||
+           source.size() != data_size)
+        {
+            return 0;
+        }
+
+        Texture *texture =
+            new (std::nothrow) Texture;
+
+        if(!texture)
+            return 0;
+
+        texture->pixels =
+            new (std::nothrow) Rml::byte[data_size];
+
+        if(!texture->pixels)
+        {
+            delete texture;
+            return 0;
+        }
+
+        std::memcpy(
+            texture->pixels,
+            source.data(),
+            data_size
+        );
+
+        texture->data_size = data_size;
+        texture->width = source_dimensions.x;
+        texture->height = source_dimensions.y;
+
+        texture->next = textures;
+        textures = texture;
+
+        if(gl_ready && !uploadtexture(texture))
+        {
+            textures = texture->next;
+            delete texture;
+            return 0;
+        }
+
+        return reinterpret_cast<
+            Rml::TextureHandle
+        >(texture);
     }
 
     void RmlRenderInterface::ReleaseTexture(
-        Rml::TextureHandle)
+        Rml::TextureHandle handle)
     {
+        if(!handle)
+            return;
+
+        Texture *texture =
+            reinterpret_cast<Texture *>(handle);
+
+        Texture **current = &textures;
+
+        while(*current)
+        {
+            if(*current == texture)
+            {
+                *current = texture->next;
+                break;
+            }
+
+            current = &((*current)->next);
+        }
+
+        if(gl_ready)
+            releasegputexture(texture);
+
+        delete texture;
     }
 
     void RmlRenderInterface::EnableScissorRegion(bool enable)
@@ -822,6 +1141,18 @@ namespace cowui
         }
 
         glGetIntegerv(
+            GL_ACTIVE_TEXTURE,
+            &saved_state.active_texture
+        );
+
+        glActiveTexture_(GL_TEXTURE0);
+
+        glGetIntegerv(
+            GL_TEXTURE_BINDING_2D,
+            &saved_state.texture_binding_2d
+        );
+
+        glGetIntegerv(
             GL_BLEND_SRC_RGB,
             &saved_state.blend_src_rgb
         );
@@ -894,6 +1225,16 @@ namespace cowui
             0.0f,
             0.0f
         );
+
+        glUniform1i_(
+            uniform_texture,
+            0
+        );
+
+        glUniform1i_(
+            uniform_use_texture,
+            0
+        );
     }
 
     void RmlRenderInterface::endframe()
@@ -924,6 +1265,17 @@ namespace cowui
 
         glUseProgram_(
             saved_state.program
+        );
+
+        glActiveTexture_(GL_TEXTURE0);
+
+        glBindTexture(
+            GL_TEXTURE_2D,
+            saved_state.texture_binding_2d
+        );
+
+        glActiveTexture_(
+            saved_state.active_texture
         );
 
         if(glBlendFuncSeparate_)

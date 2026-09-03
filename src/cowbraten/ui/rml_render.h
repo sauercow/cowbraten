@@ -54,6 +54,7 @@ namespace cowui
 
     private:
         struct Geometry;
+        struct Texture;
 
         bool createsystemresources();
         void deletesystemresources();
@@ -61,12 +62,18 @@ namespace cowui
         bool uploadgeometry(Geometry *geometry);
         void releasegpu(Geometry *geometry);
 
+        bool uploadtexture(Texture *texture);
+        void releasegputexture(Texture *texture);
+
         Geometry *geometries = nullptr;
+        Texture *textures = nullptr;
 
         unsigned int program = 0;
 
         int uniform_viewport = -1;
         int uniform_translation = -1;
+        int uniform_texture = -1;
+        int uniform_use_texture = -1;
 
         int viewport_width = 1;
         int viewport_height = 1;
@@ -86,6 +93,9 @@ namespace cowui
             int vao = 0;
             int array_buffer = 0;
             int element_array_buffer = 0;
+
+            int active_texture = 0;
+            int texture_binding_2d = 0;
 
             int blend_src_rgb = 0;
             int blend_dst_rgb = 0;
