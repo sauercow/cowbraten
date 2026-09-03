@@ -24,7 +24,10 @@
                 <div class="component-card panel">
                     <div class="section-title">Buttons</div>
                     <div class="control-row">
-                        <button id="test-button" class="button button-primary">Primary</button>
+                        <button
+                            class="button button-primary"
+                            onclick="test.toggle-selection"
+                            onmousescroll="test.log-wheel">Primary</button>
                         <button class="button button-secondary">Secondary</button>
                         <button class="button button-destructive">Danger</button>
                         <button class="button" disabled="true">Disabled</button>

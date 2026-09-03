@@ -1,4 +1,5 @@
 #include "ui.h"
+#include "rml_action.h"
 #include "rml_render.h"
 #include "rml_file.h"
 #include "sauer_input_bridge.h"
@@ -8,7 +9,6 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
-#include <RmlUi/Core/EventListener.h>
 #include <RmlUi/Core/TextInputContext.h>
 #include <RmlUi/Core/TextInputHandler.h>
 
@@ -20,44 +20,37 @@ namespace cowui
 {
     static RmlRenderInterface render_interface;
     static RmlFileInterface file_interface;
+    static RmlActionRouter action_router;
     static Rml::Context *context = nullptr;
     static Rml::ElementDocument *test_document = nullptr;
 
     static bool initialized = false;
     static bool shown = false;
 
-    class TestButtonListener final : public Rml::EventListener
+    static void toggletestselection(Rml::Event &event)
     {
-    public:
-        void ProcessEvent(Rml::Event &event) override
-        {
-            Rml::Element *button = event.GetCurrentElement();
+        Rml::Element *element = event.GetCurrentElement();
 
-            if(event == Rml::EventId::Click)
-            {
-                button->SetClass(
-                    "clicked",
-                    !button->IsClassSet("clicked")
-                );
+        element->SetClass(
+            "is-selected",
+            !element->IsClassSet("is-selected")
+        );
 
-                std::fprintf(
-                    stderr,
-                    "Cowbraten UI: test button clicked\n"
-                );
-            }
-            else if(event == Rml::EventId::Mousescroll)
-            {
-                event.StopPropagation();
+        std::fprintf(
+            stderr,
+            "Cowbraten UI: test selection toggled\n"
+        );
+    }
 
-                std::fprintf(
-                    stderr,
-                    "Cowbraten UI: test button received mouse wheel\n"
-                );
-            }
-        }
-    };
+    static void logtestwheel(Rml::Event &event)
+    {
+        event.StopPropagation();
 
-    static TestButtonListener test_button_listener;
+        std::fprintf(
+            stderr,
+            "Cowbraten UI: test control received mouse wheel\n"
+        );
+    }
 
     class RmlTextInputHandler final : public Rml::TextInputHandler
     {
@@ -308,6 +301,24 @@ namespace cowui
             return false;
         }
 
+        action_router.clear();
+
+        if(!action_router.registeraction(
+               "test.toggle-selection",
+               toggletestselection) ||
+           !action_router.registeraction(
+               "test.log-wheel",
+               logtestwheel))
+        {
+            action_router.clear();
+            Rml::Shutdown();
+            context = nullptr;
+            render_interface.shutdowngl();
+            return false;
+        }
+
+        action_router.install();
+
         initialized = true;
         return true;
     }
@@ -331,6 +342,7 @@ namespace cowui
         }
 
         text_input_handler.deactivate();
+        action_router.clear();
 
         render_interface.shutdowngl();
     }
@@ -505,22 +517,6 @@ namespace cowui
 
             if(!test_document)
                 return;
-
-            Rml::Element *test_button = test_document->GetElementById(
-                "test-button"
-            );
-
-            if(test_button)
-            {
-                test_button->AddEventListener(
-                    Rml::EventId::Click,
-                    &test_button_listener
-                );
-                test_button->AddEventListener(
-                    Rml::EventId::Mousescroll,
-                    &test_button_listener
-                );
-            }
         }
 
         test_document->Show();

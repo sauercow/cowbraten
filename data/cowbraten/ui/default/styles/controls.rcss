@@ -94,12 +94,11 @@
     cursor: unavailable;
 }
 
-.button.is-selected,
-.button.clicked
+.button.is-selected
 {
-    background-color: var(--color-secondary);
-    border-color: var(--color-secondary-hover);
-    color: var(--color-background);
+    background-color: var(--color-primary-pressed);
+    border-color: var(--color-primary-hover);
+    color: var(--color-text);
 }
 
 .text-input
