@@ -225,6 +225,12 @@ body
     overflow-y: auto;
 }
 
+.server-row-repeat
+{
+    display: block;
+    width: 100%;
+}
+
 .server-row
 {
     display: flex;

@@ -74,30 +74,31 @@
                 </div>
 
                 <div class="server-rows">
-                    <button class="server-grid server-row"
-                        data-for="server : servers"
-                        data-attr-data-server-id="server.id"
-                        data-class-is-selected="server.selected"
-                        data-class-is-unavailable="!server.selectable"
-                        data-class-is-full="server.full"
-                        data-class-is-waiting="server.waiting"
-                        data-class-is-incompatible="server.incompatible"
-                        onclick="servers.select">
-                        <span class="server-cell-name">
-                            <span class="server-name">{{ server.description }}</span>
-                            <span class="server-host">{{ server.host }}</span>
-                        </span>
-                        <span class="server-cell-mode">{{ server.mode }}</span>
-                        <span class="server-cell-map">{{ server.map }}</span>
-                        <span class="server-cell-players">{{ server.players }}</span>
-                        <span class="server-cell-ping server-ping"
-                            data-class-ping-good="server.ping_good"
-                            data-class-ping-medium="server.ping_medium"
-                            data-class-ping-slow="server.ping_slow">
-                            {{ server.ping }}
-                        </span>
-                        <span class="server-cell-status server-status">{{ server.status }}</span>
-                    </button>
+                    <div class="server-row-repeat"
+                        data-for="server : servers">
+                        <button class="server-grid server-row"
+                            data-class-is-selected="server.id == selected_id"
+                            data-class-is-unavailable="!server.selectable"
+                            data-class-is-full="server.full"
+                            data-class-is-waiting="server.waiting"
+                            data-class-is-incompatible="server.incompatible"
+                            data-event-click="select_server(server.id)">
+                            <span class="server-cell-name">
+                                <span class="server-name">{{ server.description }}</span>
+                                <span class="server-host">{{ server.host }}</span>
+                            </span>
+                            <span class="server-cell-mode">{{ server.mode }}</span>
+                            <span class="server-cell-map">{{ server.map }}</span>
+                            <span class="server-cell-players">{{ server.players }}</span>
+                            <span class="server-cell-ping server-ping"
+                                data-class-ping-good="server.ping_good"
+                                data-class-ping-medium="server.ping_medium"
+                                data-class-ping-slow="server.ping_slow">
+                                {{ server.ping }}
+                            </span>
+                            <span class="server-cell-status server-status">{{ server.status }}</span>
+                        </button>
+                    </div>
 
                     <div class="servers-empty" data-if="visible_count == 0">
                         <div class="servers-empty-title">No servers to display</div>

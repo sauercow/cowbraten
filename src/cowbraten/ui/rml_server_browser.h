@@ -43,7 +43,6 @@ namespace cowui
             int ping_value = -1;
 
             bool selectable = false;
-            bool selected = false;
             bool full = false;
             bool waiting = false;
             bool incompatible = false;
@@ -69,7 +68,10 @@ namespace cowui
         static void appendentry(
             const sauerservers::Entry &entry,
             void *);
-        static void selectaction(Rml::Event &event);
+        void selectaction(
+            Rml::DataModelHandle,
+            Rml::Event &event,
+            const Rml::VariantList &arguments);
         static void connectaction(Rml::Event &event);
         static void refreshaction(Rml::Event &event);
         static void filteraction(Rml::Event &event);

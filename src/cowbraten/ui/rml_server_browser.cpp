@@ -56,7 +56,6 @@ namespace cowui
                 row.RegisterMember("ping", &Row::ping) &&
                 row.RegisterMember("status", &Row::status) &&
                 row.RegisterMember("selectable", &Row::selectable) &&
-                row.RegisterMember("selected", &Row::selected) &&
                 row.RegisterMember("full", &Row::full) &&
                 row.RegisterMember("waiting", &Row::waiting) &&
                 row.RegisterMember("incompatible", &Row::incompatible) &&
@@ -73,6 +72,7 @@ namespace cowui
             constructor.RegisterArray<std::vector<Row>>() &&
             constructor.Bind("servers", &visible_rows) &&
             constructor.Bind("filter", &filter) &&
+            constructor.Bind("selected_id", &selected_id) &&
             constructor.Bind("selected_name", &selected_name) &&
             constructor.Bind("selected_details", &selected_details) &&
             constructor.Bind("list_status", &list_status) &&
@@ -85,10 +85,14 @@ namespace cowui
             constructor.Bind("sort_map", &sort_map) &&
             constructor.Bind("sort_players", &sort_players) &&
             constructor.Bind("sort_ping", &sort_ping) &&
-            constructor.Bind("sort_ascending", &sort_ascending);
+            constructor.Bind("sort_ascending", &sort_ascending) &&
+            constructor.BindEventCallback(
+                "select_server",
+                &RmlServerBrowser::selectaction,
+                this
+            );
 
         valid = valid &&
-            router.registeraction("servers.select", selectaction) &&
             router.registeraction("servers.connect", connectaction) &&
             router.registeraction("servers.refresh", refreshaction) &&
             router.registeraction("servers.filter", filteraction) &&
@@ -323,10 +327,7 @@ namespace cowui
 
         for(Row &row : all_rows)
         {
-            row.selected = !selected_id.empty() &&
-                row.id == selected_id;
-
-            if(row.selected)
+            if(!selected_id.empty() && row.id == selected_id)
                 selected = &row;
         }
 
@@ -354,6 +355,7 @@ namespace cowui
         model.DirtyVariable("selected_name");
         model.DirtyVariable("selected_details");
         model.DirtyVariable("can_connect");
+        model.DirtyVariable("selected_id");
     }
 
     void RmlServerBrowser::setsort(SortKey key)
@@ -401,22 +403,21 @@ namespace cowui
         model.DirtyVariable("sort_status");
     }
 
-    void RmlServerBrowser::selectaction(Rml::Event &event)
+    void RmlServerBrowser::selectaction(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
     {
-        if(!instance)
+        if(arguments.size() != 1)
             return;
 
-        const Rml::String id = event.GetCurrentElement()->GetAttribute(
-            "data-server-id",
-            Rml::String()
-        );
+        const Rml::String id = arguments[0].Get<Rml::String>();
 
         if(id.empty())
             return;
 
-        instance->selected_id = id;
-        instance->updateselection();
-        instance->rebuildvisible();
+        selected_id = id;
+        updateselection();
         event.StopPropagation();
     }
 
