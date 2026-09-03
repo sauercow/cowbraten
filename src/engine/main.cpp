@@ -680,8 +680,13 @@ void restorevsync()
 {
     if(initing || !glcontext) return;
     extern int vsync, vsynctear;
-    if(!SDL_GL_SetSwapInterval(vsync ? (vsynctear ? -1 : 1) : 0))
-        curvsync = vsync;
+    if(SDL_GL_SetSwapInterval(vsync ? (vsynctear ? -1 : 1) : 0) < 0)
+    {
+        conoutf(CON_WARN, "could not change vertical synchronization: %s", SDL_GetError());
+        curvsync = SDL_GL_GetSwapInterval() != 0;
+        vsync = curvsync;
+    }
+    else curvsync = vsync;
 }
 
 VARFP(vsync, 0, 0, 1, restorevsync());
