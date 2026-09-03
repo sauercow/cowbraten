@@ -157,6 +157,45 @@ body
     width: 152px;
 }
 
+.servers-filter-options
+{
+    box-sizing: border-box;
+    display: flex;
+    flex: none;
+    height: 48px;
+    padding: var(--space-1) var(--space-3);
+    align-items: center;
+    gap: var(--space-3);
+    background-color: var(--color-surface);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+}
+
+.servers-filter-kicker
+{
+    flex: none;
+    width: 56px;
+    color: var(--color-disabled);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.servers-filter-toggle
+{
+    flex: none;
+    height: 32px;
+    color: var(--color-text-muted);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.servers-filter-toggle:hover
+{
+    color: var(--color-text);
+}
+
 .servers-table
 {
     display: flex;
@@ -266,7 +305,7 @@ body
 
 .server-row.is-selected
 {
-    background-color: var(--color-surface-2);
+    background-color: #1B2A38;
     border-left-color: var(--color-primary);
     color: var(--color-text);
 }
@@ -338,6 +377,11 @@ body
     font-size: 13px;
     line-height: 17px;
     white-space: nowrap;
+}
+
+.server-row.is-selected .server-name
+{
+    color: var(--color-primary);
 }
 
 .server-host

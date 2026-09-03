@@ -90,19 +90,25 @@ resolver, ping, and connection functions. It exports plain value snapshots and
 accepts a stable `host:port` identifier for connection; an RmlUi document never
 sees a `serverinfo` pointer. The Rml-facing model owns all strings used by the
 document, retains selection by stable identifier, and applies presentation-only
-filtering and sorting to its copy without reordering Sauer's global list.
+filtering and sorting to its copy without reordering Sauer's global list. Text,
+empty-server, and protocol-compatibility filters compose before the current
+sort. Their state remains owned by the cached model for the process lifetime.
 
 While Servers is active, Sauer's existing `refreshservers()` path continues to
 drain ping responses. Snapshot comparison is throttled to 10 Hz, and the RmlUi
-row variable is dirtied only when backend values, the filter, the sort order, or
-selection actually change. Navigating away stops this work; the cached document
-and owned snapshot remain available for the next visit.
+row variable is dirtied only when backend values, a filter, or the sort order
+actually changes. Selection dirties only its stable identity and summary
+variables. Navigating away stops backend work; the cached document and owned
+snapshot remain available for the next visit.
 
 The registered actions are explicit and typed:
 
 - `navigation.servers` and `navigation.main` switch cached documents.
-- `servers.select` selects the stable identifier attached to a generated row.
+- `select_server(server.id)` is a model-bound generated-row callback that
+  selects the row's stable value identity without reading DOM element IDs.
 - `servers.filter` reads the text control's value.
+- `servers.toggle.hide-empty` and `servers.toggle.compatible-only` change known
+  model-owned filters.
 - `servers.sort.*` changes a known sort key and direction.
 - `servers.refresh` invokes the existing master-list refresh path.
 - `servers.connect` resolves the selected identifier in the live Sauer list and

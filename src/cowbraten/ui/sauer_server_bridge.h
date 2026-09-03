@@ -27,6 +27,7 @@ namespace cowui
             int ping;
 
             bool selectable;
+            bool compatible;
             bool full;
             bool passworded;
             bool waiting;

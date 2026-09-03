@@ -56,6 +56,7 @@ namespace cowui
                 row.RegisterMember("ping", &Row::ping) &&
                 row.RegisterMember("status", &Row::status) &&
                 row.RegisterMember("selectable", &Row::selectable) &&
+                row.RegisterMember("compatible", &Row::compatible) &&
                 row.RegisterMember("full", &Row::full) &&
                 row.RegisterMember("waiting", &Row::waiting) &&
                 row.RegisterMember("incompatible", &Row::incompatible) &&
@@ -80,6 +81,8 @@ namespace cowui
             constructor.Bind("total_count", &total_count) &&
             constructor.Bind("visible_count", &visible_count) &&
             constructor.Bind("can_connect", &can_connect) &&
+            constructor.Bind("hide_empty", &hide_empty) &&
+            constructor.Bind("compatible_only", &compatible_only) &&
             constructor.Bind("sort_name", &sort_name) &&
             constructor.Bind("sort_mode", &sort_mode) &&
             constructor.Bind("sort_map", &sort_map) &&
@@ -96,6 +99,14 @@ namespace cowui
             router.registeraction("servers.connect", connectaction) &&
             router.registeraction("servers.refresh", refreshaction) &&
             router.registeraction("servers.filter", filteraction) &&
+            router.registeraction(
+                "servers.toggle.hide-empty",
+                hideemptyaction
+            ) &&
+            router.registeraction(
+                "servers.toggle.compatible-only",
+                compatibleonlyaction
+            ) &&
             router.registeraction("servers.sort.name", sortnameaction) &&
             router.registeraction("servers.sort.mode", sortmodeaction) &&
             router.registeraction("servers.sort.map", sortmapaction) &&
@@ -135,6 +146,8 @@ namespace cowui
         total_count = 0;
         visible_count = 0;
         can_connect = false;
+        hide_empty = false;
+        compatible_only = false;
         sort_name = false;
         sort_mode = false;
         sort_map = false;
@@ -204,6 +217,7 @@ namespace cowui
         row.player_count = entry.players;
         row.ping_value = entry.ping;
         row.selectable = entry.selectable;
+        row.compatible = entry.compatible;
         row.full = entry.full;
         row.waiting = entry.waiting;
         row.incompatible = entry.incompatible;
@@ -234,13 +248,19 @@ namespace cowui
 
         for(const Row &row : all_rows)
         {
-            if(contains(row.description, needle) ||
-               contains(row.host, needle) ||
-               contains(row.mode, needle) ||
-               contains(row.map, needle))
-            {
-                visible_rows.push_back(row);
-            }
+            if(hide_empty && row.player_count == 0)
+                continue;
+
+            if(compatible_only && !row.compatible)
+                continue;
+
+            if(!contains(row.description, needle) &&
+               !contains(row.host, needle) &&
+               !contains(row.mode, needle) &&
+               !contains(row.map, needle))
+                continue;
+
+            visible_rows.push_back(row);
         }
 
         const SortKey key = sort_key;
@@ -308,7 +328,7 @@ namespace cowui
         if(total_count == 0)
             list_status = "No servers discovered";
         else if(visible_count == 0)
-            list_status = "No servers match this filter";
+            list_status = "No servers match the active filters";
         else
             list_status = Rml::CreateString(
                 "%d of %d servers shown",
@@ -464,6 +484,34 @@ namespace cowui
             "value",
             Rml::String()
         );
+        instance->rebuildvisible();
+        event.StopPropagation();
+    }
+
+    void RmlServerBrowser::hideemptyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        instance->hide_empty = event.GetParameter<bool>(
+            "checked",
+            false
+        );
+        instance->model.DirtyVariable("hide_empty");
+        instance->rebuildvisible();
+        event.StopPropagation();
+    }
+
+    void RmlServerBrowser::compatibleonlyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        instance->compatible_only = event.GetParameter<bool>(
+            "checked",
+            false
+        );
+        instance->model.DirtyVariable("compatible_only");
         instance->rebuildvisible();
         event.StopPropagation();
     }

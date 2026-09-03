@@ -43,6 +43,26 @@
                 </button>
             </div>
 
+            <div class="servers-filter-options">
+                <div class="servers-filter-kicker">Display</div>
+
+                <label class="checkbox-row servers-filter-toggle">
+                    <input class="checkbox"
+                        type="checkbox"
+                        data-checked="hide_empty"
+                        onchange="servers.toggle.hide-empty" />
+                    <span>Hide empty servers</span>
+                </label>
+
+                <label class="checkbox-row servers-filter-toggle">
+                    <input class="checkbox"
+                        type="checkbox"
+                        data-checked="compatible_only"
+                        onchange="servers.toggle.compatible-only" />
+                    <span>Compatible protocol only</span>
+                </label>
+            </div>
+
             <div class="servers-table">
                 <div class="server-grid servers-columns">
                     <button class="server-heading-button server-cell-name"

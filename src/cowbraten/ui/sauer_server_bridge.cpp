@@ -72,6 +72,7 @@ namespace cowui
                 server_info.attr[0] == PROTOCOL_VERSION;
 
             entry.selectable = compatible;
+            entry.compatible = compatible;
             entry.full = compatible &&
                 entry.capacity >= 0 &&
                 entry.players >= entry.capacity;

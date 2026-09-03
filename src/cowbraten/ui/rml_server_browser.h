@@ -43,6 +43,7 @@ namespace cowui
             int ping_value = -1;
 
             bool selectable = false;
+            bool compatible = false;
             bool full = false;
             bool waiting = false;
             bool incompatible = false;
@@ -75,6 +76,8 @@ namespace cowui
         static void connectaction(Rml::Event &event);
         static void refreshaction(Rml::Event &event);
         static void filteraction(Rml::Event &event);
+        static void hideemptyaction(Rml::Event &event);
+        static void compatibleonlyaction(Rml::Event &event);
         static void sortnameaction(Rml::Event &event);
         static void sortmodeaction(Rml::Event &event);
         static void sortmapaction(Rml::Event &event);
@@ -96,6 +99,8 @@ namespace cowui
         int visible_count = 0;
 
         bool can_connect = false;
+        bool hide_empty = false;
+        bool compatible_only = false;
         bool sort_name = false;
         bool sort_mode = false;
         bool sort_map = false;
