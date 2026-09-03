@@ -1,114 +1,77 @@
 <rml>
 <head>
-    <title>Cowbraten UI Test</title>
-    <style>
-        body
-        {
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            background-color: transparent;
-        }
-
-        #panel
-        {
-            position: absolute;
-            left: 64px;
-            top: 64px;
-            width: 360px;
-            height: 240px;
-
-            background-color: rgba(28, 32, 40, 220);
-
-            border-width: 3px;
-            border-color: rgb(70, 150, 220);
-        }
-
-        #accent
-        {
-            position: absolute;
-            left: 24px;
-            top: 24px;
-            width: 8px;
-            height: 192px;
-
-            background-color: rgb(70, 150, 220);
-        }
-
-        #test-button
-        {
-            position: absolute;
-            left: 56px;
-            top: 40px;
-            width: 240px;
-            height: 48px;
-
-            padding: 0;
-            background-color: rgba(45, 52, 64, 240);
-
-            border-width: 2px;
-            border-color: rgb(95, 105, 120);
-
-            font-family: Lato;
-            font-size: 20px;
-            color: #ffffff;
-        }
-
-        #test-button:hover
-        {
-            background-color: rgb(70, 150, 220);
-            border-color: rgb(150, 210, 255);
-        }
-
-        #test-button.clicked
-        {
-            background-color: rgb(210, 115, 55);
-            border-color: rgb(255, 185, 120);
-        }
-
-        #test-input
-        {
-            position: absolute;
-            left: 56px;
-            top: 112px;
-            width: 240px;
-            height: 40px;
-
-            padding-left: 12px;
-            background-color: rgba(18, 22, 28, 245);
-
-            border-width: 2px;
-            border-color: rgb(95, 105, 120);
-
-            font-family: Lato;
-            font-size: 18px;
-            color: #ffffff;
-        }
-
-        #test-input:focus
-        {
-            border-color: rgb(70, 150, 220);
-        }
-
-        #title
-        {
-            position: absolute;
-            left: 56px;
-            top: 184px;
-
-            font-family: Lato;
-            font-size: 24px;
-            color: #ffffff;
-        }
-    </style>
+    <title>Cowbraten UI Foundation</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
 </head>
 
 <body>
-    <div id="panel">
-        <div id="accent"></div>
-        <button id="test-button">TEST BUTTON</button>
-        <input id="test-input" type="text" maxlength="24" placeholder="TYPE HERE" />
-        <div id="title">COWBRATEN UI</div>
+    <div class="screen">
+        <div class="workbench panel">
+            <div class="workbench-header">
+                <div class="eyebrow">Cowbraten UI Foundation</div>
+                <div class="display-title">Component System</div>
+                <div class="body-copy">Compact native controls for a competitive Cube 2 interface.</div>
+            </div>
+
+            <div class="tab-bar">
+                <button class="tab is-selected">Controls</button>
+                <button class="tab">Typography</button>
+                <button class="tab" disabled="true">Planned</button>
+            </div>
+
+            <div class="component-grid">
+                <div class="component-card panel">
+                    <div class="section-title">Buttons</div>
+                    <div class="control-row">
+                        <button id="test-button" class="button button-primary">Primary</button>
+                        <button class="button button-secondary">Secondary</button>
+                        <button class="button button-destructive">Danger</button>
+                        <button class="button" disabled="true">Disabled</button>
+                    </div>
+                    <div class="status-row">
+                        <div class="status status-success">Connected</div>
+                        <div class="status status-warning">Warning</div>
+                        <div class="status status-error">Error</div>
+                    </div>
+                </div>
+
+                <div class="component-card panel">
+                    <div class="section-title">Input</div>
+                    <div class="control-stack">
+                        <label class="field-label" for="test-input">Player alias</label>
+                        <input id="test-input" class="text-input" type="text" maxlength="24" placeholder="TYPE HERE" />
+                        <label class="checkbox-row">
+                            <input class="checkbox" type="checkbox" checked="true" />
+                            <span>Enable interface option</span>
+                        </label>
+                        <label class="checkbox-row">
+                            <input class="checkbox" type="checkbox" disabled="true" />
+                            <span>Unavailable option</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="component-card panel">
+                    <div class="section-title">Navigation</div>
+                    <div class="nav-list">
+                        <button class="nav-item is-selected">Foundation</button>
+                        <button class="nav-item">Components</button>
+                        <button class="nav-item" disabled="true">Production screens</button>
+                    </div>
+                </div>
+
+                <div class="component-card panel">
+                    <div class="section-title">Type Hierarchy</div>
+                    <div class="control-stack">
+                        <div class="display-title">Display / Title</div>
+                        <div class="section-title">Section Title</div>
+                        <div class="body-copy">Interface body text remains compact and highly legible.</div>
+                        <div class="data-text">SERVER_NAME_01  142.132.184.249:6070</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </rml>
