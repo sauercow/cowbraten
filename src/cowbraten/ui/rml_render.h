@@ -11,6 +11,17 @@ namespace cowui
         RmlRenderInterface() = default;
         ~RmlRenderInterface() override = default;
 
+        bool initgl();
+        void shutdowngl();
+
+        void beforeglreset();
+        void afterglreset();
+
+        void beginframe();
+        void endframe();
+
+        bool ready() const { return gl_ready; }
+
         Rml::CompiledGeometryHandle CompileGeometry(
             Rml::Span<const Rml::Vertex> vertices,
             Rml::Span<const int> indices) override;
@@ -41,12 +52,51 @@ namespace cowui
 
         void setviewport(int width, int height);
 
-        int width() const { return viewport_width; }
-        int height() const { return viewport_height; }
-
     private:
+        struct Geometry;
+
+        bool createsystemresources();
+        void deletesystemresources();
+
+        bool uploadgeometry(Geometry *geometry);
+        void releasegpu(Geometry *geometry);
+
+        Geometry *geometries = nullptr;
+
+        unsigned int program = 0;
+
+        int uniform_viewport = -1;
+        int uniform_translation = -1;
+
         int viewport_width = 1;
         int viewport_height = 1;
+
+        bool gl_ready = false;
+
+        struct SavedState
+        {
+            bool valid = false;
+
+            bool blend = false;
+            bool depth_test = false;
+            bool cull_face = false;
+            bool scissor_test = false;
+
+            int program = 0;
+            int vao = 0;
+            int array_buffer = 0;
+            int element_array_buffer = 0;
+
+            int blend_src_rgb = 0;
+            int blend_dst_rgb = 0;
+            int blend_src_alpha = 0;
+            int blend_dst_alpha = 0;
+
+            int viewport[4] = {0, 0, 0, 0};
+            int scissor_box[4] = {0, 0, 0, 0};
+        };
+
+        SavedState saved_state;
     };
 }
 

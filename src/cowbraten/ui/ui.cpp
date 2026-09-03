@@ -19,17 +19,29 @@ namespace cowui
 
     bool init(int width, int height)
     {
-        if(initialized) return true;
+        if(initialized)
+            return true;
 
         width = valid_dimension(width);
         height = valid_dimension(height);
 
-        render_interface.setviewport(width, height);
+        render_interface.setviewport(
+            width,
+            height
+        );
 
-        Rml::SetRenderInterface(&render_interface);
+        if(!render_interface.initgl())
+            return false;
+
+        Rml::SetRenderInterface(
+            &render_interface
+        );
 
         if(!Rml::Initialise())
+        {
+            render_interface.shutdowngl();
             return false;
+        }
 
         context = Rml::CreateContext(
             "cowbraten",
@@ -39,6 +51,7 @@ namespace cowui
         if(!context)
         {
             Rml::Shutdown();
+            render_interface.shutdowngl();
             return false;
         }
 
@@ -50,37 +63,63 @@ namespace cowui
     {
         shown = false;
 
-        if(!initialized)
+        if(initialized)
+        {
+            Rml::Shutdown();
+            context = nullptr;
+            initialized = false;
+        }
+        else
         {
             context = nullptr;
-            return;
         }
 
-        context = nullptr;
-        Rml::Shutdown();
-
-        initialized = false;
+        render_interface.shutdowngl();
     }
 
     void resize(int width, int height)
     {
-        if(!initialized || !context) return;
+        if(!initialized || !context)
+            return;
 
         width = valid_dimension(width);
         height = valid_dimension(height);
 
-        render_interface.setviewport(width, height);
-        context->SetDimensions(Rml::Vector2i(width, height));
+        render_interface.setviewport(
+            width,
+            height
+        );
+
+        context->SetDimensions(
+            Rml::Vector2i(width, height)
+        );
     }
 
     void beforeglreset()
     {
-        // GPU resource invalidation will be implemented with the renderer.
+        if(initialized)
+            render_interface.beforeglreset();
     }
 
     void afterglreset(int width, int height)
     {
-        resize(width, height);
+        width = valid_dimension(width);
+        height = valid_dimension(height);
+
+        render_interface.setviewport(
+            width,
+            height
+        );
+
+        if(initialized)
+            render_interface.afterglreset();
+
+        if(initialized && context)
+        {
+            context->SetDimensions(
+                Rml::Vector2i(width, height)
+            );
+        }
     }
 
     bool processevent(const SDL_Event &)
@@ -90,14 +129,27 @@ namespace cowui
 
     void update()
     {
-        if(initialized && context && shown)
+        if(initialized &&
+           context &&
+           shown)
+        {
             context->Update();
+        }
     }
 
     void render()
     {
-        if(initialized && context && shown)
-            context->Render();
+        if(!initialized ||
+           !context ||
+           !shown ||
+           !render_interface.ready())
+        {
+            return;
+        }
+
+        render_interface.beginframe();
+        context->Render();
+        render_interface.endframe();
     }
 
     void showtest()
