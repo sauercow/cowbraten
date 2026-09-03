@@ -488,6 +488,9 @@ namespace cowui
         context->SetDimensions(
             Rml::Vector2i(width, height)
         );
+
+        if(active_screen && active_screen->id == ScreenId::Settings)
+            settings_model.videochanged();
     }
 
     void beforeglreset()
@@ -514,6 +517,9 @@ namespace cowui
             context->SetDimensions(
                 Rml::Vector2i(width, height)
             );
+
+            if(active_screen && active_screen->id == ScreenId::Settings)
+                settings_model.videochanged();
         }
     }
 

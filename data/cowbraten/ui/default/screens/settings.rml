@@ -27,7 +27,9 @@
                 <div class="settings-navigation">
                     <div class="settings-navigation-label">Categories</div>
                     <div class="nav-list settings-nav-list">
-                        <button class="nav-item settings-nav-item is-selected">
+                        <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_game"
+                            onclick="settings.category.game">
                             <span class="settings-nav-index">01</span>
                             <span>Game</span>
                         </button>
@@ -35,7 +37,9 @@
                             <span class="settings-nav-index">02</span>
                             <span>HUD</span>
                         </button>
-                        <button class="nav-item settings-nav-item" disabled="true">
+                        <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_graphics"
+                            onclick="settings.category.graphics">
                             <span class="settings-nav-index">03</span>
                             <span>Graphics</span>
                         </button>
@@ -57,70 +61,143 @@
                         </button>
                     </div>
 
-                    <div class="settings-scope-note">
-                        <div class="settings-scope-kicker">Foundation Slice</div>
+                    <div class="settings-scope-note" data-if="category_game">
+                        <div class="settings-scope-kicker">Live Setting</div>
                         <div class="settings-scope-copy">
-                            Field of view is the first setting connected to the live engine.
+                            Field of view is connected directly to the existing Sauer configuration system.
+                        </div>
+                    </div>
+                    <div class="settings-scope-note" data-if="category_graphics">
+                        <div class="settings-scope-kicker">Display State</div>
+                        <div class="settings-scope-copy">
+                            Resolution choices come from the current display rather than a hardcoded list.
                         </div>
                     </div>
                 </div>
 
                 <div class="settings-stage">
-                    <div class="settings-stage-header">
-                        <div class="eyebrow settings-eyebrow">Game / Camera</div>
-                        <div class="settings-stage-title">View</div>
-                        <div class="settings-stage-copy">
-                            Tune the horizontal field of view. Changes apply immediately and use Cowbraten's existing persistent setting.
+                    <div class="settings-page" data-if="category_game">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Camera</div>
+                            <div class="settings-stage-title">View</div>
+                            <div class="settings-stage-copy">
+                                Tune the horizontal field of view. Changes apply immediately and use Cowbraten's existing persistent setting.
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="settings-section panel">
-                        <div class="settings-control-heading">
-                            <div class="settings-control-copy">
-                                <div class="settings-control-title">Field of View</div>
-                                <div class="settings-control-description">
-                                    A wider view exposes more of the scene while making distant targets appear smaller.
+                        <div class="settings-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Field of View</div>
+                                    <div class="settings-control-description">
+                                        A wider view exposes more of the scene while making distant targets appear smaller.
+                                    </div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ fov }}</span>
+                                    <span class="settings-value-unit">degrees</span>
                                 </div>
                             </div>
-                            <div class="settings-value">
-                                <span class="settings-value-number">{{ fov }}</span>
-                                <span class="settings-value-unit">degrees</span>
+
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ fov_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="10"
+                                    max="150"
+                                    step="1"
+                                    value="100"
+                                    data-attr-min="fov_minimum"
+                                    data-attr-max="fov_maximum"
+                                    data-attr-value="fov"
+                                    onchange="settings.fov" />
+                                <span class="settings-range-bound settings-range-maximum">{{ fov_maximum }}</span>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>Live value&nbsp;&nbsp;//&nbsp;&nbsp;Saved by the existing Sauer configuration system</span>
                             </div>
                         </div>
 
-                        <div class="settings-range-row">
-                            <span class="settings-range-bound">{{ fov_minimum }}</span>
-                            <input class="settings-range"
-                                type="range"
-                                min="10"
-                                max="150"
-                                step="1"
-                                value="100"
-                                data-attr-min="fov_minimum"
-                                data-attr-max="fov_maximum"
-                                data-attr-value="fov"
-                                onchange="settings.fov" />
-                            <span class="settings-range-bound settings-range-maximum">{{ fov_maximum }}</span>
-                        </div>
-
-                        <div class="settings-control-footer">
-                            <span class="settings-live-indicator"></span>
-                            <span>Live value&nbsp;&nbsp;//&nbsp;&nbsp;Saved by the existing Sauer configuration system</span>
+                        <div class="settings-info-row">
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Input</div>
+                                <div class="settings-info-value">Mouse, arrows, or keyboard</div>
+                            </div>
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Range</div>
+                                <div class="settings-info-value">{{ fov_minimum }} - {{ fov_maximum }} degrees</div>
+                            </div>
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Application</div>
+                                <div class="settings-info-value">Immediate</div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="settings-info-row">
-                        <div class="settings-info-block">
-                            <div class="settings-info-label">Input</div>
-                            <div class="settings-info-value">Mouse, arrows, or keyboard</div>
+                    <div class="settings-page" data-if="category_graphics">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">System / Display</div>
+                            <div class="settings-stage-title">Graphics</div>
+                            <div class="settings-stage-copy">
+                                Control the active window mode and choose a resolution supported by the current display.
+                            </div>
                         </div>
-                        <div class="settings-info-block">
-                            <div class="settings-info-label">Range</div>
-                            <div class="settings-info-value">{{ fov_minimum }} - {{ fov_maximum }} degrees</div>
+
+                        <div class="settings-section settings-display-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Fullscreen</div>
+                                    <div class="settings-control-description">
+                                        Use the existing Sauer fullscreen mode for the current display.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox"
+                                        type="checkbox"
+                                        data-attrif-checked="fullscreen"
+                                        onclick="settings.fullscreen" />
+                                    <span data-if="fullscreen">Enabled</span>
+                                    <span data-if="!fullscreen">Windowed</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ video_status }}</span>
+                            </div>
                         </div>
-                        <div class="settings-info-block">
-                            <div class="settings-info-label">Application</div>
-                            <div class="settings-info-value">Immediate</div>
+
+                        <div class="settings-section settings-resolution-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Resolution</div>
+                                    <div class="settings-control-description">
+                                        Available modes are reported by SDL for the display containing the game window.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current">
+                                    <span class="settings-info-label">Current</span>
+                                    <span class="settings-resolution-current-value">{{ resolution_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-resolution-grid">
+                                <div class="settings-resolution-repeat"
+                                    data-for="resolution : resolutions">
+                                    <button class="button settings-resolution-button"
+                                        data-class-is-selected="resolution.selected"
+                                        data-attrif-disabled="!resolution_enabled || !resolution.supported"
+                                        data-event-click="select_resolution(resolution.width, resolution.height)">
+                                        {{ resolution.label }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="settings-resolution-note" data-if="desktop_fullscreen">
+                                Desktop fullscreen uses the display's native size. Resolution selection is unavailable in this mode.
+                            </div>
                         </div>
                     </div>
 
@@ -129,7 +206,10 @@
             </div>
 
             <div class="settings-footer">
-                <div>Settings&nbsp;&nbsp;//&nbsp;&nbsp;Game</div>
+                <div>
+                    <span data-if="category_game">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Game</span>
+                    <span data-if="category_graphics">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Graphics</span>
+                </div>
                 <div class="settings-footer-help">Escape returns to gameplay</div>
                 <div class="settings-footer-status">
                     <span class="settings-live-indicator"></span>

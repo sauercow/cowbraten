@@ -129,12 +129,24 @@ ident table to RML:
         -> sauer_settings_bridge (legacy-only)
         -> checked Sauer setter
 
-The first supported value is FOV. The legacy bridge alone knows the fixed
-`fov` ident name, verifies its integer type, exports its current value and
-limits, and writes it through `setvarchecked()`. Neither the document nor the
-RmlUi-facing model can supply an ident name or a CubeScript command. Additional
-settings should gain similarly explicit typed API functions rather than a
-generic ident setter.
+The first supported value is FOV. The first Graphics slice adds fullscreen and
+resolution through the same boundary. The legacy bridge alone knows the fixed
+`fov` and `fullscreen` ident names, verifies their integer types, and writes
+them through `setvarchecked()`. Resolution changes call the existing
+`screenres()` path with checked integer dimensions. Neither the document nor
+the RmlUi-facing model can supply an ident name or a CubeScript command.
+Additional settings should gain similarly explicit typed API functions rather
+than a generic ident setter.
+
+Resolution choices are value snapshots enumerated from SDL for the display
+containing the game window. The Rml model owns, sorts, and de-duplicates those
+values, then accepts clicks only for an advertised width/height pair. A current
+custom window size may be displayed but cannot be selected as a fullscreen
+mode. Desktop fullscreen keeps its existing Sauer semantics and disables the
+resolution choices because that mode always uses the display's native size.
+The fullscreen and current-resolution presentation values are read from the
+actual SDL window state, not inferred from markup or requested `scr_w/scr_h`
+values.
 
 The `settings` data model owns the displayed FOV value and range. Opening or
 returning to the cached Settings document refreshes those values from Sauer.
@@ -143,3 +155,8 @@ handler writes through the typed API, immediately reads the accepted value
 back, and dirties only model variables that changed. When the legacy console
 temporarily suspends RmlUi, the model refreshes before Settings is shown again,
 so a normal `/fov` change is reflected without per-frame ident polling.
+The same activation and console-resume refresh updates fullscreen, current
+resolution, and the supported-mode snapshot. Category selection remains owned
+by the cached model and only the active page subtree is presented. Existing
+window resize and GL-reset callbacks refresh the video model when Settings is
+active, keeping it event-driven without per-frame polling.
