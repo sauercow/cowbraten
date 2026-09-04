@@ -428,13 +428,20 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Mouse Sensitivity</div>
                                     <div class="settings-control-description">
-                                        Changes the relative mouse scale used for camera movement. Adjustments apply immediately in steps of 0.10.
+                                        Changes the relative mouse scale used for camera movement. Buttons adjust by 0.01; type an exact value and press Enter.
                                     </div>
                                 </div>
                                 <div class="settings-stepper">
                                     <button class="button settings-stepper-button"
                                         onclick="settings.input.sensitivity.decrease">-</button>
-                                    <div class="settings-stepper-value">{{ mouse_sensitivity_label }}</div>
+                                    <input class="text-input settings-stepper-value"
+                                        type="text"
+                                        maxlength="16"
+                                        data-value="mouse_sensitivity_input"
+                                        data-class-is-invalid="mouse_sensitivity_invalid"
+                                        onfocus="settings.input.sensitivity.focus"
+                                        onblur="settings.input.sensitivity.blur"
+                                        onkeyup="settings.input.sensitivity.commit" />
                                     <button class="button settings-stepper-button"
                                         onclick="settings.input.sensitivity.increase">+</button>
                                 </div>
@@ -442,6 +449,7 @@
 
                             <div class="settings-control-footer">
                                 <span class="settings-live-indicator"></span>
+                                <span data-if="mouse_sensitivity_status != ''">{{ mouse_sensitivity_status }}&nbsp;&nbsp;//&nbsp;&nbsp;</span>
                                 <span>Engine range&nbsp;&nbsp;{{ mouse_sensitivity_minimum }} - {{ mouse_sensitivity_maximum }}</span>
                             </div>
                         </div>

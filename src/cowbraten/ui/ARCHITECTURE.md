@@ -202,9 +202,13 @@ fallback/readback policy, or separate asset-selection semantics.
 The first Mouse / Keyboard slice exposes only gameplay sensitivity and
 vertical-look inversion. The bridge targets the fixed persistent
 `sensitivity` float and `invmouse` integer idents; both affect camera input
-immediately and require no SDL or renderer reset. Sensitivity uses explicit
-0.10 decrement/increment actions while retaining Sauer's full declared range
-and reflecting externally supplied values. It does not alter `guisens`, which
+immediately and require no SDL or renderer reset. Sensitivity retains the
+legacy 0.01 decrement/increment behavior and adds a local text edit buffer for
+exact values. Enter or loss of focus parses the buffer, invokes only the typed
+sensitivity writer, reads the effective float back, and restores canonical
+text. Invalid or out-of-range input never reaches the ident. External refresh
+does not rewrite a temporary value while the field is focused. The control
+retains Sauer's full declared range and does not alter `guisens`, which
 belongs to the legacy 3D GUI and does not control RmlUi's absolute pointer.
 Mouse acceleration, zoom-specific response, and sensitivity scaling remain
 outside this basic slice.

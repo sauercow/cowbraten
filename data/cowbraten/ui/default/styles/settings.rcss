@@ -757,7 +757,9 @@ body
 {
     box-sizing: border-box;
     flex: 1;
+    width: auto;
     height: 40px;
+    padding: 0;
     background-color: var(--color-surface-2);
     border-width: 1px;
     border-color: var(--color-border);
@@ -766,6 +768,12 @@ body
     line-height: 38px;
     letter-spacing: 1px;
     text-align: center;
+}
+
+.settings-stepper-value.is-invalid
+{
+    border-color: var(--color-error);
+    color: var(--color-error);
 }
 
 .settings-unavailable-note

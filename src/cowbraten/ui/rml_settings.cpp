@@ -5,9 +5,14 @@
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Event.h>
+#include <RmlUi/Core/Input.h>
 
 #include <algorithm>
+#include <cerrno>
+#include <cmath>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 namespace cowui
 {
@@ -37,6 +42,49 @@ namespace cowui
     {
         return left.width == right.width &&
             left.height == right.height;
+    }
+
+    static Rml::String formatsensitivity(float value)
+    {
+        char text[32];
+        std::snprintf(text, sizeof(text), "%.6f", double(value));
+
+        char *decimal = std::strchr(text, '.');
+        if(decimal)
+        {
+            char *end = text + std::strlen(text);
+            while(end > decimal + 3 && end[-1] == '0')
+                *--end = '\0';
+        }
+        return text;
+    }
+
+    static bool parsesensitivity(const Rml::String &text, float &value)
+    {
+        if(text.empty())
+            return false;
+
+        char *end = nullptr;
+        errno = 0;
+        const float parsed = std::strtof(text.c_str(), &end);
+        if(end == text.c_str() || errno == ERANGE)
+            return false;
+
+        while(*end == ' ' || *end == '\t' || *end == '\r' || *end == '\n')
+            ++end;
+        if(*end)
+            return false;
+
+        value = parsed;
+        return true;
+    }
+
+    static float stepsensitivity(float value, int direction)
+    {
+        const double stepped = std::round(
+            (double(value) + double(direction) * 0.01) * 100.0
+        ) / 100.0;
+        return float(stepped);
     }
 
     bool RmlSettings::init(
@@ -168,6 +216,18 @@ namespace cowui
                 "mouse_sensitivity_label",
                 &mouse_sensitivity_label
             ) &&
+            constructor.Bind(
+                "mouse_sensitivity_input",
+                &mouse_sensitivity_input
+            ) &&
+            constructor.Bind(
+                "mouse_sensitivity_status",
+                &mouse_sensitivity_status
+            ) &&
+            constructor.Bind(
+                "mouse_sensitivity_invalid",
+                &mouse_sensitivity_invalid
+            ) &&
             constructor.Bind("inverted_mouse", &inverted_mouse) &&
             constructor.Bind(
                 "mouse_input_status",
@@ -255,6 +315,18 @@ namespace cowui
                 increasesensitivityaction
             ) &&
             router.registeraction(
+                "settings.input.sensitivity.focus",
+                focussensitivityaction
+            ) &&
+            router.registeraction(
+                "settings.input.sensitivity.blur",
+                blursensitivityaction
+            ) &&
+            router.registeraction(
+                "settings.input.sensitivity.commit",
+                commitsensitivityaction
+            ) &&
+            router.registeraction(
                 "settings.input.inverted-mouse",
                 invertedmouseaction
             );
@@ -323,6 +395,10 @@ namespace cowui
         mouse_sensitivity_minimum = 0.001f;
         mouse_sensitivity_maximum = 1000.0f;
         mouse_sensitivity_label.clear();
+        mouse_sensitivity_input.clear();
+        mouse_sensitivity_status.clear();
+        mouse_sensitivity_invalid = false;
+        mouse_sensitivity_editing = false;
         inverted_mouse = false;
         mouse_input_status.clear();
         category_game = true;
@@ -408,7 +484,7 @@ namespace cowui
             return false;
         if(!refreshaudio())
             return false;
-        return refreshmouseinput();
+        return refreshmouseinput(!mouse_sensitivity_editing);
     }
 
     bool RmlSettings::refreshvideo()
@@ -762,7 +838,7 @@ namespace cowui
         return true;
     }
 
-    bool RmlSettings::refreshmouseinput()
+    bool RmlSettings::refreshmouseinput(bool update_edit_buffer)
     {
         settings::MouseInput current;
         if(!settings::readmouseinput(current))
@@ -789,12 +865,16 @@ namespace cowui
             model.DirtyVariable("inverted_mouse");
         }
 
-        char label[32];
-        std::snprintf(label, sizeof(label), "%.2f", current.sensitivity);
+        const Rml::String label = formatsensitivity(current.sensitivity);
         if(mouse_sensitivity_label != label)
         {
             mouse_sensitivity_label = label;
             model.DirtyVariable("mouse_sensitivity_label");
+        }
+        if(update_edit_buffer && mouse_sensitivity_input != label)
+        {
+            mouse_sensitivity_input = label;
+            model.DirtyVariable("mouse_sensitivity_input");
         }
 
         const char *status = current.inverted
@@ -806,6 +886,24 @@ namespace cowui
             model.DirtyVariable("mouse_input_status");
         }
         return true;
+    }
+
+    void RmlSettings::commitsensitivity()
+    {
+        float requested = 0.0f;
+        const bool accepted = parsesensitivity(
+                mouse_sensitivity_input,
+                requested
+            ) &&
+            settings::writesensitivity(requested);
+
+        mouse_sensitivity_invalid = !accepted;
+        model.DirtyVariable("mouse_sensitivity_invalid");
+        mouse_sensitivity_status = accepted
+            ? "Exact value applied"
+            : "Invalid value; restored the last effective setting";
+        model.DirtyVariable("mouse_sensitivity_status");
+        refreshmouseinput(true);
     }
 
     void RmlSettings::setcategory(Category category)
@@ -1117,7 +1215,7 @@ namespace cowui
 
         const float requested = std::max(
             instance->mouse_sensitivity_minimum,
-            instance->mouse_sensitivity - 0.1f
+            stepsensitivity(instance->mouse_sensitivity, -1)
         );
         if(!settings::writesensitivity(requested))
         {
@@ -1128,7 +1226,11 @@ namespace cowui
             );
         }
 
-        instance->refreshmouseinput();
+        instance->mouse_sensitivity_invalid = false;
+        instance->model.DirtyVariable("mouse_sensitivity_invalid");
+        instance->mouse_sensitivity_status = "Adjusted by 0.01";
+        instance->model.DirtyVariable("mouse_sensitivity_status");
+        instance->refreshmouseinput(true);
         event.StopPropagation();
     }
 
@@ -1139,7 +1241,7 @@ namespace cowui
 
         const float requested = std::min(
             instance->mouse_sensitivity_maximum,
-            instance->mouse_sensitivity + 0.1f
+            stepsensitivity(instance->mouse_sensitivity, 1)
         );
         if(!settings::writesensitivity(requested))
         {
@@ -1150,8 +1252,50 @@ namespace cowui
             );
         }
 
-        instance->refreshmouseinput();
+        instance->mouse_sensitivity_invalid = false;
+        instance->model.DirtyVariable("mouse_sensitivity_invalid");
+        instance->mouse_sensitivity_status = "Adjusted by 0.01";
+        instance->model.DirtyVariable("mouse_sensitivity_status");
+        instance->refreshmouseinput(true);
         event.StopPropagation();
+    }
+
+    void RmlSettings::focussensitivityaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->mouse_sensitivity_editing = true;
+            if(instance->mouse_sensitivity_invalid)
+            {
+                instance->mouse_sensitivity_invalid = false;
+                instance->model.DirtyVariable("mouse_sensitivity_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blursensitivityaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitsensitivity();
+            instance->mouse_sensitivity_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitsensitivityaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitsensitivity();
+            event.StopPropagation();
+        }
     }
 
     void RmlSettings::invertedmouseaction(Rml::Event &event)

@@ -61,7 +61,8 @@ namespace cowui
         bool refresh();
         bool refreshvideo();
         bool refreshaudio();
-        bool refreshmouseinput();
+        bool refreshmouseinput(bool update_edit_buffer = false);
+        void commitsensitivity();
         void setcategory(Category category);
         void setpresentation(
             settings::PresentationMode presentation,
@@ -91,6 +92,9 @@ namespace cowui
         static void changemusicvolumeaction(Rml::Event &event);
         static void decreasesensitivityaction(Rml::Event &event);
         static void increasesensitivityaction(Rml::Event &event);
+        static void focussensitivityaction(Rml::Event &event);
+        static void blursensitivityaction(Rml::Event &event);
+        static void commitsensitivityaction(Rml::Event &event);
         static void invertedmouseaction(Rml::Event &event);
 
         Rml::DataModelHandle model;
@@ -137,6 +141,10 @@ namespace cowui
         float mouse_sensitivity_minimum = 0.001f;
         float mouse_sensitivity_maximum = 1000.0f;
         Rml::String mouse_sensitivity_label;
+        Rml::String mouse_sensitivity_input;
+        Rml::String mouse_sensitivity_status;
+        bool mouse_sensitivity_invalid = false;
+        bool mouse_sensitivity_editing = false;
         bool inverted_mouse = false;
         Rml::String mouse_input_status;
         bool category_game = true;
