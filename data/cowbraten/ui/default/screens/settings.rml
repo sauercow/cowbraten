@@ -644,10 +644,58 @@
                             </div>
                         </div>
 
-                        <div class="settings-unavailable-note">
-                            <div class="settings-info-label">Key bindings</div>
-                            <div class="settings-info-value">
-                                Not included in this slice. Capture, conflicts, multiple bindings, cancellation, and readable key names require a dedicated design.
+                        <div class="settings-section settings-keybindings-panel panel">
+                            <div class="settings-control-title">Key Bindings</div>
+                            <div class="settings-control-description">
+                                Current native Sauer bindings. This view is read-only; key capture and conflict handling will be added separately.
+                            </div>
+
+                            <div class="settings-keybinding-group">
+                                <div class="settings-keybinding-group-title">Movement</div>
+                                <div class="settings-keybinding-list">
+                                    <div class="settings-keybinding-row"
+                                        data-for="binding : keybindings_movement">
+                                        <span class="settings-keybinding-label">{{ binding.label }}</span>
+                                        <div class="settings-keybinding-values">
+                                            <span class="settings-key-chip"
+                                                data-for="key : binding.keys">{{ key }}</span>
+                                            <span class="settings-key-unbound"
+                                                data-if="!binding.bound">Unbound</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-keybinding-group">
+                                <div class="settings-keybinding-group-title">Combat</div>
+                                <div class="settings-keybinding-list">
+                                    <div class="settings-keybinding-row"
+                                        data-for="binding : keybindings_combat">
+                                        <span class="settings-keybinding-label">{{ binding.label }}</span>
+                                        <div class="settings-keybinding-values">
+                                            <span class="settings-key-chip"
+                                                data-for="key : binding.keys">{{ key }}</span>
+                                            <span class="settings-key-unbound"
+                                                data-if="!binding.bound">Unbound</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-keybinding-group">
+                                <div class="settings-keybinding-group-title">Interface</div>
+                                <div class="settings-keybinding-list">
+                                    <div class="settings-keybinding-row"
+                                        data-for="binding : keybindings_interface">
+                                        <span class="settings-keybinding-label">{{ binding.label }}</span>
+                                        <div class="settings-keybinding-values">
+                                            <span class="settings-key-chip"
+                                                data-for="key : binding.keys">{{ key }}</span>
+                                            <span class="settings-key-unbound"
+                                                data-if="!binding.bound">Unbound</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

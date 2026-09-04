@@ -1,5 +1,6 @@
 #include "rml_settings.h"
 
+#include "keybindings_api.h"
 #include "rml_action.h"
 #include "settings_api.h"
 
@@ -43,6 +44,16 @@ namespace cowui
     {
         return left.width == right.width &&
             left.height == right.height;
+    }
+
+    static void appendkeyname(const char *key_name, void *data)
+    {
+        if(!key_name || !data)
+            return;
+
+        std::vector<Rml::String> &keys =
+            *static_cast<std::vector<Rml::String> *>(data);
+        keys.push_back(key_name);
     }
 
     static Rml::String formatsensitivity(float value)
@@ -164,10 +175,10 @@ namespace cowui
         if(!constructor)
             return false;
 
-        bool valid = true;
+        bool valid = constructor.RegisterArray<std::vector<Rml::String>>();
         if(auto resolution = constructor.RegisterStruct<Resolution>())
         {
-            valid =
+            valid = valid &&
                 resolution.RegisterMember("label", &Resolution::label) &&
                 resolution.RegisterMember("width", &Resolution::width) &&
                 resolution.RegisterMember("height", &Resolution::height) &&
@@ -219,6 +230,15 @@ namespace cowui
         }
         else valid = false;
 
+        if(auto row = constructor.RegisterStruct<KeyBindingRow>())
+        {
+            valid = valid &&
+                row.RegisterMember("label", &KeyBindingRow::label) &&
+                row.RegisterMember("keys", &KeyBindingRow::keys) &&
+                row.RegisterMember("bound", &KeyBindingRow::bound);
+        }
+        else valid = false;
+
         if(valid)
         {
             valid = settings::visitcrosshairs(
@@ -231,9 +251,22 @@ namespace cowui
             constructor.RegisterArray<std::vector<Resolution>>() &&
             constructor.RegisterArray<std::vector<CrosshairChoice>>() &&
             constructor.RegisterArray<std::vector<SoundpackChoice>>() &&
+            constructor.RegisterArray<std::vector<KeyBindingRow>>() &&
             constructor.Bind("resolutions", &resolutions) &&
             constructor.Bind("crosshair_choices", &crosshair_choices) &&
             constructor.Bind("soundpack_choices", &soundpack_choices) &&
+            constructor.Bind(
+                "keybindings_movement",
+                &keybindings_movement
+            ) &&
+            constructor.Bind(
+                "keybindings_combat",
+                &keybindings_combat
+            ) &&
+            constructor.Bind(
+                "keybindings_interface",
+                &keybindings_interface
+            ) &&
             constructor.Bind("fov", &fov) &&
             constructor.Bind("fov_minimum", &fov_minimum) &&
             constructor.Bind("fov_maximum", &fov_maximum) &&
@@ -698,6 +731,9 @@ namespace cowui
         resolutions.clear();
         crosshair_choices.clear();
         soundpack_choices.clear();
+        keybindings_movement.clear();
+        keybindings_combat.clear();
+        keybindings_interface.clear();
         fov = 100;
         fov_minimum = 10;
         fov_maximum = 150;
@@ -871,7 +907,9 @@ namespace cowui
             return false;
         if(!refreshhud(!streak_milestone_scale_editing))
             return false;
-        return refreshchat();
+        if(!refreshchat())
+            return false;
+        return refreshkeybindings();
     }
 
     bool RmlSettings::refreshvideo()
@@ -1549,6 +1587,102 @@ namespace cowui
         {
             team_colored_chat_names = current.team_colored_names;
             model.DirtyVariable("team_colored_chat_names");
+        }
+        return true;
+    }
+
+    bool RmlSettings::refreshkeybindings()
+    {
+        std::vector<KeyBindingRow> movement;
+        std::vector<KeyBindingRow> combat;
+        std::vector<KeyBindingRow> interface_rows;
+
+        const auto append = [](keybindings::Action action,
+                               const char *label,
+                               std::vector<KeyBindingRow> &rows)
+        {
+            KeyBindingRow row;
+            row.label = label;
+            if(!keybindings::visit(action, appendkeyname, &row.keys))
+                return false;
+            row.bound = !row.keys.empty();
+            rows.push_back(row);
+            return true;
+        };
+
+        if(!append(
+                keybindings::Action::MoveForward,
+                "Move Forward",
+                movement
+            ) ||
+           !append(
+                keybindings::Action::MoveBackward,
+                "Move Backward",
+                movement
+            ) ||
+           !append(
+                keybindings::Action::MoveLeft,
+                "Move Left",
+                movement
+            ) ||
+           !append(
+                keybindings::Action::MoveRight,
+                "Move Right",
+                movement
+            ) ||
+           !append(
+                keybindings::Action::Jump,
+                "Jump",
+                movement
+            ) ||
+           !append(
+                keybindings::Action::Attack,
+                "Attack",
+                combat
+            ) ||
+           !append(
+                keybindings::Action::Zoom,
+                "Zoom",
+                combat
+            ) ||
+           !append(
+                keybindings::Action::WeaponAction,
+                "Weapon Action",
+                combat
+            ) ||
+           !append(
+                keybindings::Action::Scoreboard,
+                "Scoreboard",
+                interface_rows
+            ) ||
+           !append(
+                keybindings::Action::PublicChat,
+                "Public Chat",
+                interface_rows
+            ) ||
+           !append(
+                keybindings::Action::TeamChat,
+                "Team Chat",
+                interface_rows
+            ))
+        {
+            return false;
+        }
+
+        if(keybindings_movement != movement)
+        {
+            keybindings_movement.swap(movement);
+            model.DirtyVariable("keybindings_movement");
+        }
+        if(keybindings_combat != combat)
+        {
+            keybindings_combat.swap(combat);
+            model.DirtyVariable("keybindings_combat");
+        }
+        if(keybindings_interface != interface_rows)
+        {
+            keybindings_interface.swap(interface_rows);
+            model.DirtyVariable("keybindings_interface");
         }
         return true;
     }

@@ -966,6 +966,89 @@ body
     border-left-color: var(--color-disabled);
 }
 
+.settings-keybindings-panel
+{
+    margin-top: var(--space-3);
+}
+
+.settings-keybinding-group
+{
+    display: block;
+    margin-top: var(--space-3);
+}
+
+.settings-keybinding-group-title
+{
+    display: block;
+    margin-bottom: var(--space-1);
+    color: var(--color-primary);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.settings-keybinding-list
+{
+    display: block;
+    border-top-width: 1px;
+    border-top-color: var(--color-border);
+}
+
+.settings-keybinding-row
+{
+    box-sizing: border-box;
+    display: flex;
+    min-height: 36px;
+    padding: var(--space-1) 0;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+}
+
+.settings-keybinding-label
+{
+    display: block;
+    min-width: 0;
+    color: var(--color-text);
+    font-size: 12px;
+}
+
+.settings-keybinding-values
+{
+    display: flex;
+    flex: none;
+    min-width: 180px;
+    margin-left: var(--space-3);
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-1);
+}
+
+.settings-key-chip
+{
+    display: block;
+    min-width: 32px;
+    padding: 0 var(--space-1);
+    background-color: var(--color-surface-2);
+    border-width: 1px;
+    border-color: var(--color-border);
+    color: var(--color-primary);
+    font-size: 10px;
+    line-height: 24px;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.settings-key-unbound
+{
+    display: block;
+    color: var(--color-disabled);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
 .settings-footer
 {
     box-sizing: border-box;

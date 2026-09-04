@@ -82,6 +82,20 @@ namespace cowui
             }
         };
 
+        struct KeyBindingRow
+        {
+            Rml::String label;
+            std::vector<Rml::String> keys;
+            bool bound = false;
+
+            bool operator==(const KeyBindingRow &other) const
+            {
+                return label == other.label &&
+                    keys == other.keys &&
+                    bound == other.bound;
+            }
+        };
+
         enum class Category
         {
             Game,
@@ -100,6 +114,7 @@ namespace cowui
         bool refreshcrosshair(bool update_edit_buffer = false);
         bool refreshhud(bool update_edit_buffer = false);
         bool refreshchat();
+        bool refreshkeybindings();
         void commitsensitivity();
         void commitcrosshairsize();
         void commitstreakscale();
@@ -187,6 +202,9 @@ namespace cowui
         std::vector<Resolution> resolutions;
         std::vector<CrosshairChoice> crosshair_choices;
         std::vector<SoundpackChoice> soundpack_choices;
+        std::vector<KeyBindingRow> keybindings_movement;
+        std::vector<KeyBindingRow> keybindings_combat;
+        std::vector<KeyBindingRow> keybindings_interface;
 
         int fov = 100;
         int fov_minimum = 10;
