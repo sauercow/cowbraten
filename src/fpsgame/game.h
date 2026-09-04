@@ -759,7 +759,8 @@ namespace game
     extern void spawnplayer(fpsent *d);
     extern void deathstate(fpsent *d, bool restore = false);
     extern void damaged(int damage, fpsent *d, fpsent *actor, bool local = true);
-    extern void killed(fpsent *d, fpsent *actor);
+    extern void resetkillstreak();
+    extern void killed(fpsent *d, fpsent *actor, int fragdelta = 1);
     extern void timeupdate(int timeremain);
     extern void msgsound(int n, physent *d = NULL);
     extern void drawicon(int icon, float x, float y, float sz = 120);
