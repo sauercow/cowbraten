@@ -1502,6 +1502,7 @@ namespace game
                 if(!d) break;
                 if(d==player1)
                 {
+                    resetkillstreak();
                     if(editmode) toggleedit();
                     stopfollowing();
                     if(deathscore) showscores(true);
@@ -1712,7 +1713,9 @@ namespace game
                 fpsent *victim = getclient(vcn),
                        *actor = getclient(acn);
                 if(!actor) break;
+                int oldfrags = actor->frags;
                 actor->frags = frags;
+                int fragdelta = frags - oldfrags;
                 if(m_teammode) setteaminfo(actor->team, tfrags);
                 extern int hidefrags;
                 if(actor!=player1 && (!cmode || !cmode->hidefrags() || !hidefrags))
@@ -1721,7 +1724,7 @@ namespace game
                     particle_textcopy(actor->abovehead(), ds, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
                 }
                 if(!victim) break;
-                killed(victim, actor);
+                killed(victim, actor, fragdelta);
                 break;
             }
 

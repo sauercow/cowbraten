@@ -543,14 +543,14 @@ namespace game
         }
     }
 
-    static void resetkillstreak()
+    void resetkillstreak()
     {
         killstreak = 0;
         streakmilestonevalue = 0;
         streakmilestonemillis = 0;
     }
 
-    static int updatekillstreak(fpsent *victim, fpsent *actor)
+    static int updatekillstreak(fpsent *victim, fpsent *actor, int fragdelta)
     {
         // Any death of the local player ends the current streak.
         if(victim == player1)
@@ -565,6 +565,11 @@ namespace game
 
         // Team kills do not count toward the streak.
         if(isteam(victim->team, actor->team))
+            return -1;
+
+        // In multiplayer, only count the kill if the server actually
+        // increased the actor's authoritative frag score.
+        if(fragdelta <= 0)
             return -1;
 
         return ++killstreak;
@@ -617,7 +622,7 @@ namespace game
         return true;
     }
 
-    void killed(fpsent *d, fpsent *actor)
+    void killed(fpsent *d, fpsent *actor, int fragdelta)
     {
         if(d->state==CS_EDITING)
         {
@@ -628,7 +633,7 @@ namespace game
         }
         else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
-        int streakfrag = updatekillstreak(d, actor);
+        int streakfrag = updatekillstreak(d, actor, fragdelta);
 
         if(cmode) cmode->died(d, actor);
 
