@@ -89,7 +89,8 @@ namespace cowui
             Graphics,
             Audio,
             MouseKeyboard,
-            Crosshair
+            Crosshair,
+            Chat
         };
 
         bool refresh();
@@ -98,6 +99,7 @@ namespace cowui
         bool refreshmouseinput(bool update_edit_buffer = false);
         bool refreshcrosshair(bool update_edit_buffer = false);
         bool refreshhud(bool update_edit_buffer = false);
+        bool refreshchat();
         void commitsensitivity();
         void commitcrosshairsize();
         void commitstreakscale();
@@ -141,6 +143,7 @@ namespace cowui
         static void audiocategoryaction(Rml::Event &event);
         static void mousekeyboardcategoryaction(Rml::Event &event);
         static void crosshaircategoryaction(Rml::Event &event);
+        static void chatcategoryaction(Rml::Event &event);
         static void windowedaction(Rml::Event &event);
         static void exclusivefullscreenaction(Rml::Event &event);
         static void desktopfullscreenaction(Rml::Event &event);
@@ -174,6 +177,11 @@ namespace cowui
         static void focusstreakscaleaction(Rml::Event &event);
         static void blurstreakscaleaction(Rml::Event &event);
         static void commitstreakscaleaction(Rml::Event &event);
+        static void publicchatintopfeedaction(Rml::Event &event);
+        static void teamchatintopfeedaction(Rml::Event &event);
+        static void publicchatinbottomboxaction(Rml::Event &event);
+        static void teamchatinbottomboxaction(Rml::Event &event);
+        static void teamcoloredchatnamesaction(Rml::Event &event);
 
         Rml::DataModelHandle model;
         std::vector<Resolution> resolutions;
@@ -257,12 +265,18 @@ namespace cowui
         Rml::String hud_status;
         bool streak_milestone_scale_invalid = false;
         bool streak_milestone_scale_editing = false;
+        bool public_chat_in_top_feed = true;
+        bool team_chat_in_top_feed = true;
+        bool public_chat_in_bottom_box = false;
+        bool team_chat_in_bottom_box = false;
+        bool team_colored_chat_names = true;
         bool category_game = true;
         bool category_hud = false;
         bool category_graphics = false;
         bool category_audio = false;
         bool category_mouse_keyboard = false;
         bool category_crosshair = false;
+        bool category_chat = false;
 
         static RmlSettings *instance;
     };

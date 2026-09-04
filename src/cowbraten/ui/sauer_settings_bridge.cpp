@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "game.h"
 
 #include "sauer_settings_bridge.h"
 
@@ -203,6 +204,30 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *consolefilterident()
+        {
+            ident *id = getident("confilter");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *miniconsolefilterident()
+        {
+            ident *id = getident("miniconfilter");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *teamcolorchatident()
+        {
+            ident *id = getident("teamcolorchat");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         struct CrosshairCatalogEntry
         {
             const char *label;
@@ -264,6 +289,23 @@ namespace cowui
 
             setvarchecked(id, enabled ? 1 : 0);
             return (*id->storage.i != 0) == enabled;
+        }
+
+        static bool writefilterbit(ident *id, int bit, bool enabled)
+        {
+            if(!id || !id->storage.i || bit <= 0)
+                return false;
+
+            const int current = *id->storage.i;
+            const int value = enabled
+                ? current | bit
+                : current & ~bit;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(value != current)
+                setvarchecked(id, value);
+            return ((*id->storage.i & bit) != 0) == enabled;
         }
 
         static bool validantialiasing(int samples)
@@ -861,6 +903,67 @@ namespace cowui
 
             setfvarchecked(id, value);
             return *id->storage.f == value;
+        }
+
+        bool readchat(Chat &result)
+        {
+            ident *top_id = consolefilterident();
+            ident *bottom_id = miniconsolefilterident();
+            ident *colors_id = teamcolorchatident();
+            if(!top_id || !top_id->storage.i ||
+               !bottom_id || !bottom_id->storage.i ||
+               !colors_id || !colors_id->storage.i)
+            {
+                return false;
+            }
+
+            result.public_messages_in_top_feed =
+                (*top_id->storage.i & CON_CHAT) != 0;
+            result.team_messages_in_top_feed =
+                (*top_id->storage.i & CON_TEAMCHAT) != 0;
+            result.public_messages_in_bottom_box =
+                (*bottom_id->storage.i & CON_CHAT) != 0;
+            result.team_messages_in_bottom_box =
+                (*bottom_id->storage.i & CON_TEAMCHAT) != 0;
+            result.team_colored_names = *colors_id->storage.i != 0;
+            return true;
+        }
+
+        bool writepublicchatintopfeed(bool enabled)
+        {
+            return writefilterbit(consolefilterident(), CON_CHAT, enabled);
+        }
+
+        bool writeteamchatintopfeed(bool enabled)
+        {
+            return writefilterbit(
+                consolefilterident(),
+                CON_TEAMCHAT,
+                enabled
+            );
+        }
+
+        bool writepublicchatinbottombox(bool enabled)
+        {
+            return writefilterbit(
+                miniconsolefilterident(),
+                CON_CHAT,
+                enabled
+            );
+        }
+
+        bool writeteamchatinbottombox(bool enabled)
+        {
+            return writefilterbit(
+                miniconsolefilterident(),
+                CON_TEAMCHAT,
+                enabled
+            );
+        }
+
+        bool writeteamcoloredchatnames(bool enabled)
+        {
+            return writeboolean(teamcolorchatident(), enabled);
         }
     }
 }

@@ -63,8 +63,14 @@
                             <span class="settings-nav-index">06</span>
                             <span>Crosshair</span>
                         </button>
-                        <button class="nav-item settings-nav-item" disabled="true">
+                        <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_chat"
+                            onclick="settings.category.chat">
                             <span class="settings-nav-index">07</span>
+                            <span>Chat</span>
+                        </button>
+                        <button class="nav-item settings-nav-item" disabled="true">
+                            <span class="settings-nav-index">08</span>
                             <span>Advanced / Network</span>
                         </button>
                     </div>
@@ -103,6 +109,12 @@
                         <div class="settings-scope-kicker">Gameplay Reticle</div>
                         <div class="settings-scope-copy">
                             Selection loads Sauer's existing normal and hit textures. Dynamic effects remain controlled by the gameplay renderer.
+                        </div>
+                    </div>
+                    <div class="settings-scope-note" data-if="category_chat">
+                        <div class="settings-scope-kicker">Message Routing</div>
+                        <div class="settings-scope-copy">
+                            Public and team chat remain in Sauer's console buffer. These controls choose which live feeds present each message type.
                         </div>
                     </div>
                 </div>
@@ -807,6 +819,123 @@
 
                     </div>
 
+                    <div class="settings-page" data-if="category_chat">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Communications</div>
+                            <div class="settings-stage-title">Chat</div>
+                            <div class="settings-stage-copy">
+                                Control where public and team messages appear without changing message delivery, input, or the full console history.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-control-title">Top-left Feed</div>
+                            <div class="settings-control-description">
+                                The normal in-game console feed. Hidden messages remain available in the full console.
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Public Messages</div>
+                                    <div class="settings-control-description">
+                                        Show normal player chat in the top-left feed.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="public_chat_in_top_feed"
+                                        onclick="settings.chat.top.public" />
+                                    <span data-if="public_chat_in_top_feed">Shown</span>
+                                    <span data-if="!public_chat_in_top_feed">Hidden</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Team Messages</div>
+                                    <div class="settings-control-description">
+                                        Show team and spectator-team chat in the top-left feed.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="team_chat_in_top_feed"
+                                        onclick="settings.chat.top.team" />
+                                    <span data-if="team_chat_in_top_feed">Shown</span>
+                                    <span data-if="!team_chat_in_top_feed">Hidden</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-control-title">Bottom-left Chat Box</div>
+                            <div class="settings-control-description">
+                                Sauer's compact lower message feed. Public and team message types can be routed independently.
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Public Messages</div>
+                                    <div class="settings-control-description">
+                                        Mirror normal player chat in the bottom-left box.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="public_chat_in_bottom_box"
+                                        onclick="settings.chat.bottom.public" />
+                                    <span data-if="public_chat_in_bottom_box">Shown</span>
+                                    <span data-if="!public_chat_in_bottom_box">Hidden</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Team Messages</div>
+                                    <div class="settings-control-description">
+                                        Mirror team and spectator-team chat in the bottom-left box.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="team_chat_in_bottom_box"
+                                        onclick="settings.chat.bottom.team" />
+                                    <span data-if="team_chat_in_bottom_box">Shown</span>
+                                    <span data-if="!team_chat_in_bottom_box">Hidden</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Team-colored Names</div>
+                                    <div class="settings-control-description">
+                                        Use each player's team color for their name in public and team chat.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="team_colored_chat_names"
+                                        onclick="settings.chat.team-colors" />
+                                    <span data-if="team_colored_chat_names">Enabled</span>
+                                    <span data-if="!team_colored_chat_names">Disabled</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-info-row">
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Application</div>
+                                <div class="settings-info-value">Immediate</div>
+                            </div>
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Full Console</div>
+                                <div class="settings-info-value">Filter unchanged</div>
+                            </div>
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Persistence</div>
+                                <div class="settings-info-value">Existing Sauer config</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -818,6 +947,7 @@
                     <span data-if="category_audio">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Audio</span>
                     <span data-if="category_mouse_keyboard">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Mouse / Keyboard</span>
                     <span data-if="category_crosshair">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Crosshair</span>
+                    <span data-if="category_chat">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Chat</span>
                 </div>
                 <div class="settings-footer-help">Escape returns to gameplay</div>
                 <div class="settings-footer-status">

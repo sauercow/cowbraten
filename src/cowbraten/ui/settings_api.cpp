@@ -417,5 +417,48 @@ namespace cowui
         {
             return sauersettings::writestreakmilestonescale(value);
         }
+
+        bool readchat(Chat &result)
+        {
+            sauersettings::Chat legacy;
+            if(!sauersettings::readchat(legacy))
+                return false;
+
+            result.public_messages_in_top_feed =
+                legacy.public_messages_in_top_feed;
+            result.team_messages_in_top_feed =
+                legacy.team_messages_in_top_feed;
+            result.public_messages_in_bottom_box =
+                legacy.public_messages_in_bottom_box;
+            result.team_messages_in_bottom_box =
+                legacy.team_messages_in_bottom_box;
+            result.team_colored_names = legacy.team_colored_names;
+            return true;
+        }
+
+        bool writepublicchatintopfeed(bool enabled)
+        {
+            return sauersettings::writepublicchatintopfeed(enabled);
+        }
+
+        bool writeteamchatintopfeed(bool enabled)
+        {
+            return sauersettings::writeteamchatintopfeed(enabled);
+        }
+
+        bool writepublicchatinbottombox(bool enabled)
+        {
+            return sauersettings::writepublicchatinbottombox(enabled);
+        }
+
+        bool writeteamchatinbottombox(bool enabled)
+        {
+            return sauersettings::writeteamchatinbottombox(enabled);
+        }
+
+        bool writeteamcoloredchatnames(bool enabled)
+        {
+            return sauersettings::writeteamcoloredchatnames(enabled);
+        }
     }
 }

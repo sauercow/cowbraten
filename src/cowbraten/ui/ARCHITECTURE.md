@@ -302,3 +302,25 @@ than this initial production slice. Their exact `showgui` names therefore
 continue through the legacy fallback. No HUD or Crosshair compatibility alias
 is added until the corresponding RmlUi surface is a sufficiently complete
 semantic replacement.
+
+The first Chat slice preserves Sauer's actual console-backed message model.
+Public and team chat enter the shared console buffer as the distinct
+`CON_CHAT` and `CON_TEAMCHAT` message types. Explicit typed writers toggle
+only those two bits in the persistent `confilter` top-left feed and
+`miniconfilter` bottom-left mini-console masks, preserving every unrelated or
+custom filter bit. `teamcolorchat` remains a separate persistent boolean that
+controls player-name coloring when chat lines are formatted. All five values
+apply immediately and are read back from their fixed legacy idents after each
+write, on Chat activation, on Settings activation, and after legacy-console
+handoff. The full-console `fullconfilter`, message delivery, `saycommand`,
+`sayteamcommand`, input ownership, and scrollback are unchanged.
+
+`confade` and `consize` affect the complete top-left console feed, while
+`miniconfade`, `miniconsize`, and `miniconwidth` affect every message type a
+user may route into the mini-console. They are intentionally not represented
+as chat-only duration or size settings. Chat highlight sounds are absent from
+the current Cowbraten source, player ignore state is transient per-connection
+behavior, and the server's `specchat` policy is not a client preference, so
+none are exposed by this slice. There is no dedicated legacy Chat settings
+document to replace; the console tab remains available through the existing
+legacy `options` content, and no new `showgui` mapping is added.

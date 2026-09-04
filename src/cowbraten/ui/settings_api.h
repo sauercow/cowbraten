@@ -110,6 +110,15 @@ namespace cowui
             float streak_milestone_scale_maximum;
         };
 
+        struct Chat
+        {
+            bool public_messages_in_top_feed;
+            bool team_messages_in_top_feed;
+            bool public_messages_in_bottom_box;
+            bool team_messages_in_bottom_box;
+            bool team_colored_names;
+        };
+
         struct Resolution
         {
             int width;
@@ -175,6 +184,13 @@ namespace cowui
         bool writedamagecompass(bool enabled);
         bool writefragmessages(FragMessagesMode mode);
         bool writestreakmilestonescale(float value);
+
+        bool readchat(Chat &result);
+        bool writepublicchatintopfeed(bool enabled);
+        bool writeteamchatintopfeed(bool enabled);
+        bool writepublicchatinbottombox(bool enabled);
+        bool writeteamchatinbottombox(bool enabled);
+        bool writeteamcoloredchatnames(bool enabled);
     }
 }
 

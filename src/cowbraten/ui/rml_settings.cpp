@@ -421,6 +421,26 @@ namespace cowui
                 &streak_milestone_scale_invalid
             ) &&
             constructor.Bind("hud_status", &hud_status) &&
+            constructor.Bind(
+                "public_chat_in_top_feed",
+                &public_chat_in_top_feed
+            ) &&
+            constructor.Bind(
+                "team_chat_in_top_feed",
+                &team_chat_in_top_feed
+            ) &&
+            constructor.Bind(
+                "public_chat_in_bottom_box",
+                &public_chat_in_bottom_box
+            ) &&
+            constructor.Bind(
+                "team_chat_in_bottom_box",
+                &team_chat_in_bottom_box
+            ) &&
+            constructor.Bind(
+                "team_colored_chat_names",
+                &team_colored_chat_names
+            ) &&
             constructor.Bind("category_game", &category_game) &&
             constructor.Bind("category_hud", &category_hud) &&
             constructor.Bind(
@@ -438,6 +458,10 @@ namespace cowui
             constructor.Bind(
                 "category_crosshair",
                 &category_crosshair
+            ) &&
+            constructor.Bind(
+                "category_chat",
+                &category_chat
             ) &&
             constructor.BindEventCallback(
                 "select_resolution",
@@ -488,6 +512,10 @@ namespace cowui
             router.registeraction(
                 "settings.category.crosshair",
                 crosshaircategoryaction
+            ) &&
+            router.registeraction(
+                "settings.category.chat",
+                chatcategoryaction
             ) &&
             router.registeraction(
                 "settings.presentation.windowed",
@@ -620,6 +648,26 @@ namespace cowui
             router.registeraction(
                 "settings.hud.streak-scale.commit",
                 commitstreakscaleaction
+            ) &&
+            router.registeraction(
+                "settings.chat.top.public",
+                publicchatintopfeedaction
+            ) &&
+            router.registeraction(
+                "settings.chat.top.team",
+                teamchatintopfeedaction
+            ) &&
+            router.registeraction(
+                "settings.chat.bottom.public",
+                publicchatinbottomboxaction
+            ) &&
+            router.registeraction(
+                "settings.chat.bottom.team",
+                teamchatinbottomboxaction
+            ) &&
+            router.registeraction(
+                "settings.chat.team-colors",
+                teamcoloredchatnamesaction
             );
 
         if(!valid)
@@ -726,12 +774,18 @@ namespace cowui
         hud_status.clear();
         streak_milestone_scale_invalid = false;
         streak_milestone_scale_editing = false;
+        public_chat_in_top_feed = true;
+        team_chat_in_top_feed = true;
+        public_chat_in_bottom_box = false;
+        team_chat_in_bottom_box = false;
+        team_colored_chat_names = true;
         category_game = true;
         category_hud = false;
         category_graphics = false;
         category_audio = false;
         category_mouse_keyboard = false;
         category_crosshair = false;
+        category_chat = false;
     }
 
     void RmlSettings::activate()
@@ -815,7 +869,9 @@ namespace cowui
             return false;
         if(!refreshcrosshair(!crosshair_size_editing))
             return false;
-        return refreshhud(!streak_milestone_scale_editing);
+        if(!refreshhud(!streak_milestone_scale_editing))
+            return false;
+        return refreshchat();
     }
 
     bool RmlSettings::refreshvideo()
@@ -1457,6 +1513,46 @@ namespace cowui
         return true;
     }
 
+    bool RmlSettings::refreshchat()
+    {
+        settings::Chat current;
+        if(!settings::readchat(current))
+            return false;
+
+        if(public_chat_in_top_feed !=
+           current.public_messages_in_top_feed)
+        {
+            public_chat_in_top_feed =
+                current.public_messages_in_top_feed;
+            model.DirtyVariable("public_chat_in_top_feed");
+        }
+        if(team_chat_in_top_feed != current.team_messages_in_top_feed)
+        {
+            team_chat_in_top_feed = current.team_messages_in_top_feed;
+            model.DirtyVariable("team_chat_in_top_feed");
+        }
+        if(public_chat_in_bottom_box !=
+           current.public_messages_in_bottom_box)
+        {
+            public_chat_in_bottom_box =
+                current.public_messages_in_bottom_box;
+            model.DirtyVariable("public_chat_in_bottom_box");
+        }
+        if(team_chat_in_bottom_box !=
+           current.team_messages_in_bottom_box)
+        {
+            team_chat_in_bottom_box =
+                current.team_messages_in_bottom_box;
+            model.DirtyVariable("team_chat_in_bottom_box");
+        }
+        if(team_colored_chat_names != current.team_colored_names)
+        {
+            team_colored_chat_names = current.team_colored_names;
+            model.DirtyVariable("team_colored_chat_names");
+        }
+        return true;
+    }
+
     void RmlSettings::commitsensitivity()
     {
         float requested = 0.0f;
@@ -1520,6 +1616,7 @@ namespace cowui
         const bool mouse_keyboard = category ==
             Category::MouseKeyboard;
         const bool crosshair = category == Category::Crosshair;
+        const bool chat = category == Category::Chat;
         if(category_game != game)
         {
             category_game = game;
@@ -1550,6 +1647,11 @@ namespace cowui
             category_crosshair = crosshair;
             model.DirtyVariable("category_crosshair");
         }
+        if(category_chat != chat)
+        {
+            category_chat = chat;
+            model.DirtyVariable("category_chat");
+        }
 
         if(audio)
             refreshaudio();
@@ -1557,6 +1659,8 @@ namespace cowui
             refreshhud(!streak_milestone_scale_editing);
         else if(crosshair)
             refreshcrosshair(!crosshair_size_editing);
+        else if(chat)
+            refreshchat();
     }
 
     void RmlSettings::setpresentation(
@@ -1802,6 +1906,13 @@ namespace cowui
     {
         if(instance)
             instance->setcategory(Category::Crosshair);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::chatcategoryaction(Rml::Event &event)
+    {
+        if(instance)
+            instance->setcategory(Category::Chat);
         event.StopPropagation();
     }
 
@@ -2306,5 +2417,65 @@ namespace cowui
             instance->commitstreakscale();
             event.StopPropagation();
         }
+    }
+
+    void RmlSettings::publicchatintopfeedaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writepublicchatintopfeed(
+                !instance->public_chat_in_top_feed
+            );
+            instance->refreshchat();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::teamchatintopfeedaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writeteamchatintopfeed(
+                !instance->team_chat_in_top_feed
+            );
+            instance->refreshchat();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::publicchatinbottomboxaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writepublicchatinbottombox(
+                !instance->public_chat_in_bottom_box
+            );
+            instance->refreshchat();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::teamchatinbottomboxaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writeteamchatinbottombox(
+                !instance->team_chat_in_bottom_box
+            );
+            instance->refreshchat();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::teamcoloredchatnamesaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writeteamcoloredchatnames(
+                !instance->team_colored_chat_names
+            );
+            instance->refreshchat();
+        }
+        event.StopPropagation();
     }
 }
