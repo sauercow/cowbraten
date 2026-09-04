@@ -162,5 +162,35 @@ namespace cowui
         {
             sauersettings::resetgraphics();
         }
+
+        bool readaudio(Audio &result)
+        {
+            sauersettings::Audio legacy;
+            if(!sauersettings::readaudio(legacy))
+                return false;
+
+            result.sound_volume = legacy.sound_volume;
+            result.sound_volume_minimum =
+                legacy.sound_volume_minimum;
+            result.sound_volume_maximum =
+                legacy.sound_volume_maximum;
+            result.music_volume = legacy.music_volume;
+            result.music_volume_minimum =
+                legacy.music_volume_minimum;
+            result.music_volume_maximum =
+                legacy.music_volume_maximum;
+            result.backend_active = legacy.backend_active;
+            return true;
+        }
+
+        bool writesoundvolume(int value)
+        {
+            return sauersettings::writesoundvolume(value);
+        }
+
+        bool writemusicvolume(int value)
+        {
+            return sauersettings::writemusicvolume(value);
+        }
     }
 }

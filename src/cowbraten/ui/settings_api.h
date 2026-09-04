@@ -45,6 +45,17 @@ namespace cowui
             int actual_samples;
         };
 
+        struct Audio
+        {
+            int sound_volume;
+            int sound_volume_minimum;
+            int sound_volume_maximum;
+            int music_volume;
+            int music_volume_minimum;
+            int music_volume_maximum;
+            bool backend_active;
+        };
+
         struct Resolution
         {
             int width;
@@ -73,6 +84,10 @@ namespace cowui
         bool readantialiasing(Antialiasing &result);
         bool writeantialiasing(int samples);
         void resetgraphics();
+
+        bool readaudio(Audio &result);
+        bool writesoundvolume(int value);
+        bool writemusicvolume(int value);
     }
 }
 

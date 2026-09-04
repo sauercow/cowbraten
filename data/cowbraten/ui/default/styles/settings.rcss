@@ -707,6 +707,26 @@ body
     line-height: 18px;
 }
 
+.settings-audio-section
+{
+    margin-top: var(--space-3);
+}
+
+.settings-audio-value
+{
+    width: 136px;
+}
+
+.settings-audio-range-row
+{
+    margin-top: var(--space-3);
+}
+
+.settings-audio-info-row
+{
+    margin-top: var(--space-3);
+}
+
 .settings-footer
 {
     box-sizing: border-box;
@@ -820,6 +840,11 @@ body
     }
 
     .settings-resolution-section
+    {
+        margin-top: var(--space-2);
+    }
+
+    .settings-audio-section
     {
         margin-top: var(--space-2);
     }

@@ -53,11 +53,13 @@ namespace cowui
         enum class Category
         {
             Game,
-            Graphics
+            Graphics,
+            Audio
         };
 
         bool refresh();
         bool refreshvideo();
+        bool refreshaudio();
         void setcategory(Category category);
         void setpresentation(
             settings::PresentationMode presentation,
@@ -76,11 +78,14 @@ namespace cowui
         static void changefovaction(Rml::Event &event);
         static void gamecategoryaction(Rml::Event &event);
         static void graphicscategoryaction(Rml::Event &event);
+        static void audiocategoryaction(Rml::Event &event);
         static void windowedaction(Rml::Event &event);
         static void exclusivefullscreenaction(Rml::Event &event);
         static void desktopfullscreenaction(Rml::Event &event);
         static void vsyncaction(Rml::Event &event);
         static void changefpslimitaction(Rml::Event &event);
+        static void changesoundvolumeaction(Rml::Event &event);
+        static void changemusicvolumeaction(Rml::Event &event);
 
         Rml::DataModelHandle model;
         std::vector<Resolution> resolutions;
@@ -113,8 +118,18 @@ namespace cowui
         bool antialiasing_4x = false;
         bool antialiasing_8x = false;
         bool antialiasing_16x = false;
+        int sound_volume = 255;
+        int sound_volume_minimum = 0;
+        int sound_volume_maximum = 255;
+        int music_volume = 128;
+        int music_volume_minimum = 0;
+        int music_volume_maximum = 255;
+        Rml::String sound_volume_label;
+        Rml::String music_volume_label;
+        Rml::String audio_status;
         bool category_game = true;
         bool category_graphics = false;
+        bool category_audio = false;
 
         static RmlSettings *instance;
     };

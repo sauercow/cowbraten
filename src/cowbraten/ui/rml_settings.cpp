@@ -125,10 +125,41 @@ namespace cowui
             constructor.Bind("antialiasing_4x", &antialiasing_4x) &&
             constructor.Bind("antialiasing_8x", &antialiasing_8x) &&
             constructor.Bind("antialiasing_16x", &antialiasing_16x) &&
+            constructor.Bind("sound_volume", &sound_volume) &&
+            constructor.Bind(
+                "sound_volume_minimum",
+                &sound_volume_minimum
+            ) &&
+            constructor.Bind(
+                "sound_volume_maximum",
+                &sound_volume_maximum
+            ) &&
+            constructor.Bind(
+                "sound_volume_label",
+                &sound_volume_label
+            ) &&
+            constructor.Bind("music_volume", &music_volume) &&
+            constructor.Bind(
+                "music_volume_minimum",
+                &music_volume_minimum
+            ) &&
+            constructor.Bind(
+                "music_volume_maximum",
+                &music_volume_maximum
+            ) &&
+            constructor.Bind(
+                "music_volume_label",
+                &music_volume_label
+            ) &&
+            constructor.Bind("audio_status", &audio_status) &&
             constructor.Bind("category_game", &category_game) &&
             constructor.Bind(
                 "category_graphics",
                 &category_graphics
+            ) &&
+            constructor.Bind(
+                "category_audio",
+                &category_audio
             ) &&
             constructor.BindEventCallback(
                 "select_resolution",
@@ -155,6 +186,10 @@ namespace cowui
                 graphicscategoryaction
             ) &&
             router.registeraction(
+                "settings.category.audio",
+                audiocategoryaction
+            ) &&
+            router.registeraction(
                 "settings.presentation.windowed",
                 windowedaction
             ) &&
@@ -173,6 +208,14 @@ namespace cowui
             router.registeraction(
                 "settings.fps-limit",
                 changefpslimitaction
+            ) &&
+            router.registeraction(
+                "settings.audio.sound-volume",
+                changesoundvolumeaction
+            ) &&
+            router.registeraction(
+                "settings.audio.music-volume",
+                changemusicvolumeaction
             );
 
         if(!valid)
@@ -226,8 +269,18 @@ namespace cowui
         antialiasing_4x = false;
         antialiasing_8x = false;
         antialiasing_16x = false;
+        sound_volume = 255;
+        sound_volume_minimum = 0;
+        sound_volume_maximum = 255;
+        music_volume = 128;
+        music_volume_minimum = 0;
+        music_volume_maximum = 255;
+        sound_volume_label.clear();
+        music_volume_label.clear();
+        audio_status.clear();
         category_game = true;
         category_graphics = false;
+        category_audio = false;
     }
 
     void RmlSettings::activate()
@@ -303,7 +356,9 @@ namespace cowui
             model.DirtyVariable("fov_maximum");
         }
 
-        return refreshvideo();
+        if(!refreshvideo())
+            return false;
+        return refreshaudio();
     }
 
     bool RmlSettings::refreshvideo()
@@ -582,10 +637,86 @@ namespace cowui
         return true;
     }
 
+    bool RmlSettings::refreshaudio()
+    {
+        settings::Audio current;
+        if(!settings::readaudio(current))
+            return false;
+
+        if(sound_volume != current.sound_volume)
+        {
+            sound_volume = current.sound_volume;
+            model.DirtyVariable("sound_volume");
+        }
+        if(sound_volume_minimum != current.sound_volume_minimum)
+        {
+            sound_volume_minimum = current.sound_volume_minimum;
+            model.DirtyVariable("sound_volume_minimum");
+        }
+        if(sound_volume_maximum != current.sound_volume_maximum)
+        {
+            sound_volume_maximum = current.sound_volume_maximum;
+            model.DirtyVariable("sound_volume_maximum");
+        }
+        if(music_volume != current.music_volume)
+        {
+            music_volume = current.music_volume;
+            model.DirtyVariable("music_volume");
+        }
+        if(music_volume_minimum != current.music_volume_minimum)
+        {
+            music_volume_minimum = current.music_volume_minimum;
+            model.DirtyVariable("music_volume_minimum");
+        }
+        if(music_volume_maximum != current.music_volume_maximum)
+        {
+            music_volume_maximum = current.music_volume_maximum;
+            model.DirtyVariable("music_volume_maximum");
+        }
+
+        char label[32];
+        const int sound_percent = current.sound_volume_maximum > 0
+            ? (current.sound_volume * 100 +
+                current.sound_volume_maximum / 2) /
+                current.sound_volume_maximum
+            : 0;
+        std::snprintf(label, sizeof(label), "%d%%", sound_percent);
+        if(sound_volume_label != label)
+        {
+            sound_volume_label = label;
+            model.DirtyVariable("sound_volume_label");
+        }
+
+        const int music_percent = current.music_volume_maximum > 0
+            ? (current.music_volume * 100 +
+                current.music_volume_maximum / 2) /
+                current.music_volume_maximum
+            : 0;
+        std::snprintf(label, sizeof(label), "%d%%", music_percent);
+        if(music_volume_label != label)
+        {
+            music_volume_label = label;
+            model.DirtyVariable("music_volume_label");
+        }
+
+        const char *status = !current.backend_active
+            ? "Audio backend unavailable"
+            : (current.sound_volume
+                ? "Audio backend active"
+                : "All audio muted by Sound Volume");
+        if(audio_status != status)
+        {
+            audio_status = status;
+            model.DirtyVariable("audio_status");
+        }
+        return true;
+    }
+
     void RmlSettings::setcategory(Category category)
     {
         const bool game = category == Category::Game;
         const bool graphics = category == Category::Graphics;
+        const bool audio = category == Category::Audio;
         if(category_game != game)
         {
             category_game = game;
@@ -595,6 +726,11 @@ namespace cowui
         {
             category_graphics = graphics;
             model.DirtyVariable("category_graphics");
+        }
+        if(category_audio != audio)
+        {
+            category_audio = audio;
+            model.DirtyVariable("category_audio");
         }
     }
 
@@ -737,6 +873,13 @@ namespace cowui
         event.StopPropagation();
     }
 
+    void RmlSettings::audiocategoryaction(Rml::Event &event)
+    {
+        if(instance)
+            instance->setcategory(Category::Audio);
+        event.StopPropagation();
+    }
+
     void RmlSettings::windowedaction(Rml::Event &event)
     {
         if(instance)
@@ -810,6 +953,50 @@ namespace cowui
         }
 
         instance->refreshvideo();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changesoundvolumeaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->sound_volume
+        );
+        if(!settings::writesoundvolume(requested))
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected the sound volume %d\n",
+                requested
+            );
+        }
+
+        instance->refreshaudio();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changemusicvolumeaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->music_volume
+        );
+        if(!settings::writemusicvolume(requested))
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected the music volume %d\n",
+                requested
+            );
+        }
+
+        instance->refreshaudio();
         event.StopPropagation();
     }
 }

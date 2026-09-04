@@ -3,6 +3,7 @@
 #include "sauer_settings_bridge.h"
 
 extern int scr_w, scr_h, fullscreendesktop;
+extern bool nosound;
 extern void resetgl();
 extern void screenres(int width, int height);
 
@@ -53,6 +54,22 @@ namespace cowui
         static ident *fsaaident()
         {
             ident *id = getident("fsaa");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *soundvolumeident()
+        {
+            ident *id = getident("soundvol");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *musicvolumeident()
+        {
+            ident *id = getident("musicvol");
             return id && id->type == ID_VAR
                 ? id
                 : nullptr;
@@ -302,6 +319,52 @@ namespace cowui
         void resetgraphics()
         {
             ::resetgl();
+        }
+
+        bool readaudio(Audio &result)
+        {
+            ident *sound_id = soundvolumeident();
+            ident *music_id = musicvolumeident();
+            if(!sound_id || !sound_id->storage.i ||
+               !music_id || !music_id->storage.i)
+            {
+                return false;
+            }
+
+            result.sound_volume = *sound_id->storage.i;
+            result.sound_volume_minimum = sound_id->minval;
+            result.sound_volume_maximum = sound_id->maxval;
+            result.music_volume = *music_id->storage.i;
+            result.music_volume_minimum = music_id->minval;
+            result.music_volume_maximum = music_id->maxval;
+            result.backend_active = !::nosound;
+            return true;
+        }
+
+        bool writesoundvolume(int value)
+        {
+            ident *id = soundvolumeident();
+            if(!id || !id->storage.i ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            setvarchecked(id, value);
+            return *id->storage.i == value;
+        }
+
+        bool writemusicvolume(int value)
+        {
+            ident *id = musicvolumeident();
+            if(!id || !id->storage.i ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            setvarchecked(id, value);
+            return *id->storage.i == value;
         }
     }
 }

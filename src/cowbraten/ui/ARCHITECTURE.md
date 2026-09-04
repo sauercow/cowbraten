@@ -182,3 +182,19 @@ Category selection remains owned by the cached model and only the active page
 subtree is presented. Existing window resize and GL-reset callbacks refresh
 the video model when Settings is active, keeping it event-driven without
 per-frame polling.
+
+Audio volume uses the same explicit boundary. `soundvol` and `musicvol` remain
+the authoritative persistent Sauer mix values, with their declared `0..255`
+ranges. Sound Volume controls gameplay effects and retains Sauer's existing
+special behavior where zero stops effects and gates music; it is not presented
+as an independent mathematical master gain. Music Volume updates the active
+SDL_mixer music stream immediately whenever Sound Volume is non-zero. The
+model also reports whether Sauer's audio backend is actually active through a
+plain boolean snapshot from the legacy bridge. There is no separate legacy
+master-volume ident, so the UI does not fabricate one.
+
+Settings activation, local volume writes, and return from the legacy console
+refresh the Audio model. Sound enablement, channel count, sample frequency,
+buffer length, driver choice, and sound-pack selection are intentionally not
+part of this immediate-volume slice: they require `resetsound()`, backend
+fallback/readback policy, or separate asset-selection semantics.

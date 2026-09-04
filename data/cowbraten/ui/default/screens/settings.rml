@@ -43,7 +43,9 @@
                             <span class="settings-nav-index">03</span>
                             <span>Graphics</span>
                         </button>
-                        <button class="nav-item settings-nav-item" disabled="true">
+                        <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_audio"
+                            onclick="settings.category.audio">
                             <span class="settings-nav-index">04</span>
                             <span>Audio</span>
                         </button>
@@ -71,6 +73,12 @@
                         <div class="settings-scope-kicker">Typed Runtime State</div>
                         <div class="settings-scope-copy">
                             Display mode and VSync report accepted SDL state. Frame limiting uses Cowbraten's existing render scheduler.
+                        </div>
+                    </div>
+                    <div class="settings-scope-note" data-if="category_audio">
+                        <div class="settings-scope-kicker">Existing Sound Mix</div>
+                        <div class="settings-scope-copy">
+                            Sauer provides separate sound and music levels. Sound Volume at zero also mutes music through the existing engine gate.
                         </div>
                     </div>
                 </div>
@@ -305,6 +313,99 @@
                         </div>
                     </div>
 
+                    <div class="settings-page" data-if="category_audio">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Audio / Mix</div>
+                            <div class="settings-stage-title">Audio</div>
+                            <div class="settings-stage-copy">
+                                Balance gameplay sounds and music through Cowbraten's existing SDL_mixer audio path.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Sound Volume</div>
+                                    <div class="settings-control-description">
+                                        Controls gameplay sound effects. Setting this to zero also mutes music through Sauer's existing global audio gate.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-audio-value">
+                                    <span class="settings-fps-value-label">{{ sound_volume_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-range-row settings-audio-range-row">
+                                <span class="settings-range-bound">{{ sound_volume_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    value="255"
+                                    data-attr-min="sound_volume_minimum"
+                                    data-attr-max="sound_volume_maximum"
+                                    data-attr-value="sound_volume"
+                                    onchange="settings.audio.sound-volume" />
+                                <span class="settings-range-bound settings-range-maximum">{{ sound_volume_maximum }}</span>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>Engine value&nbsp;&nbsp;{{ sound_volume }} / {{ sound_volume_maximum }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Music Volume</div>
+                                    <div class="settings-control-description">
+                                        Controls streamed music independently while Sound Volume remains above zero.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-audio-value">
+                                    <span class="settings-fps-value-label">{{ music_volume_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-range-row settings-audio-range-row">
+                                <span class="settings-range-bound">{{ music_volume_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    value="128"
+                                    data-attr-min="music_volume_minimum"
+                                    data-attr-max="music_volume_maximum"
+                                    data-attr-value="music_volume"
+                                    onchange="settings.audio.music-volume" />
+                                <span class="settings-range-bound settings-range-maximum">{{ music_volume_maximum }}</span>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>Engine value&nbsp;&nbsp;{{ music_volume }} / {{ music_volume_maximum }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-info-row settings-audio-info-row">
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Runtime</div>
+                                <div class="settings-info-value">{{ audio_status }}</div>
+                            </div>
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Application</div>
+                                <div class="settings-info-value">Immediate</div>
+                            </div>
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Persistence</div>
+                                <div class="settings-info-value">Existing Sauer config</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -312,6 +413,7 @@
                 <div>
                     <span data-if="category_game">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Game</span>
                     <span data-if="category_graphics">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Graphics</span>
+                    <span data-if="category_audio">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Audio</span>
                 </div>
                 <div class="settings-footer-help">Escape returns to gameplay</div>
                 <div class="settings-footer-status">
