@@ -666,6 +666,11 @@
                                             data-event-click="capture_key(binding.action_id)">Rebind</button>
                                         <span class="settings-key-capture"
                                             data-if="key_capture_id == binding.action_id">{{ key_capture_status }}</span>
+                                        <span class="settings-key-conflict"
+                                            data-if="key_capture_id == binding.action_id && key_conflict_status != ''"
+                                            data-class-is-available="key_conflict_available"
+                                            data-class-is-same-action="key_conflict_same_action"
+                                            data-class-is-conflict="key_conflict_present">{{ key_conflict_status }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -686,6 +691,11 @@
                                             data-event-click="capture_key(binding.action_id)">Rebind</button>
                                         <span class="settings-key-capture"
                                             data-if="key_capture_id == binding.action_id">{{ key_capture_status }}</span>
+                                        <span class="settings-key-conflict"
+                                            data-if="key_capture_id == binding.action_id && key_conflict_status != ''"
+                                            data-class-is-available="key_conflict_available"
+                                            data-class-is-same-action="key_conflict_same_action"
+                                            data-class-is-conflict="key_conflict_present">{{ key_conflict_status }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -706,6 +716,11 @@
                                             data-event-click="capture_key(binding.action_id)">Rebind</button>
                                         <span class="settings-key-capture"
                                             data-if="key_capture_id == binding.action_id">{{ key_capture_status }}</span>
+                                        <span class="settings-key-conflict"
+                                            data-if="key_capture_id == binding.action_id && key_conflict_status != ''"
+                                            data-class-is-available="key_conflict_available"
+                                            data-class-is-same-action="key_conflict_same_action"
+                                            data-class-is-conflict="key_conflict_present">{{ key_conflict_status }}</span>
                                     </div>
                                 </div>
                             </div>

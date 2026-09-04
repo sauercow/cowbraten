@@ -22,7 +22,26 @@ namespace cowui
 
         typedef void (*KeyVisitor)(const char *key_name, void *data);
 
+        enum class ConflictKind
+        {
+            Unbound,
+            SameAction,
+            CuratedAction,
+            CustomAction
+        };
+
+        struct Conflict
+        {
+            ConflictKind kind = ConflictKind::Unbound;
+            Action action = Action::MoveForward;
+        };
+
         bool visit(Action action, KeyVisitor visitor, void *data);
+        bool inspectconflict(
+            Action target_action,
+            const char *key_name,
+            Conflict &result
+        );
         bool bind(Action action, const char *key_name);
         bool unbind(Action action, const char *key_name);
     }

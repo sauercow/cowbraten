@@ -121,6 +121,9 @@ namespace cowui
         bool refreshhud(bool update_edit_buffer = false);
         bool refreshchat();
         bool refreshkeybindings();
+        bool refreshkeyconflict();
+        void clearkeyconflict();
+        static const char *keybindinglabel(keybindings::Action action);
         void startkeycapture(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
         void commitsensitivity();
@@ -218,6 +221,11 @@ namespace cowui
         int key_capture_id = -1;
         Rml::String key_candidate;
         Rml::String key_capture_status;
+        keybindings::Conflict key_conflict;
+        Rml::String key_conflict_status;
+        bool key_conflict_available = false;
+        bool key_conflict_same_action = false;
+        bool key_conflict_present = false;
 
         int fov = 100;
         int fov_minimum = 10;

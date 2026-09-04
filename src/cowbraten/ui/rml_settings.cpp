@@ -257,6 +257,10 @@ namespace cowui
             constructor.Bind("resolutions", &resolutions) &&
             constructor.Bind("key_capture_id", &key_capture_id) &&
             constructor.Bind("key_capture_status", &key_capture_status) &&
+            constructor.Bind("key_conflict_status", &key_conflict_status) &&
+            constructor.Bind("key_conflict_available", &key_conflict_available) &&
+            constructor.Bind("key_conflict_same_action", &key_conflict_same_action) &&
+            constructor.Bind("key_conflict_present", &key_conflict_present) &&
             constructor.BindEventCallback("capture_key", &RmlSettings::startkeycapture, this) &&
             constructor.Bind("crosshair_choices", &crosshair_choices) &&
             constructor.Bind("soundpack_choices", &soundpack_choices) &&
@@ -1691,6 +1695,91 @@ namespace cowui
             keybindings_interface.swap(interface_rows);
             model.DirtyVariable("keybindings_interface");
         }
+        return key_candidate.empty() || refreshkeyconflict();
+    }
+
+    const char *RmlSettings::keybindinglabel(keybindings::Action action)
+    {
+        switch(action)
+        {
+            case keybindings::Action::MoveForward: return "Move Forward";
+            case keybindings::Action::MoveBackward: return "Move Backward";
+            case keybindings::Action::MoveLeft: return "Move Left";
+            case keybindings::Action::MoveRight: return "Move Right";
+            case keybindings::Action::Jump: return "Jump";
+            case keybindings::Action::Attack: return "Attack";
+            case keybindings::Action::Zoom: return "Zoom";
+            case keybindings::Action::WeaponAction: return "Weapon Action";
+            case keybindings::Action::Scoreboard: return "Scoreboard";
+            case keybindings::Action::PublicChat: return "Public Chat";
+            case keybindings::Action::TeamChat: return "Team Chat";
+        }
+        return "This action";
+    }
+
+    void RmlSettings::clearkeyconflict()
+    {
+        key_conflict = keybindings::Conflict();
+        key_conflict_status.clear();
+        key_conflict_available = false;
+        key_conflict_same_action = false;
+        key_conflict_present = false;
+        if(model)
+        {
+            model.DirtyVariable("key_conflict_status");
+            model.DirtyVariable("key_conflict_available");
+            model.DirtyVariable("key_conflict_same_action");
+            model.DirtyVariable("key_conflict_present");
+        }
+    }
+
+    bool RmlSettings::refreshkeyconflict()
+    {
+        if(key_candidate.empty())
+        {
+            clearkeyconflict();
+            return true;
+        }
+
+        keybindings::Conflict conflict;
+        if(!keybindings::inspectconflict(
+               key_capture_action,
+               key_candidate.c_str(),
+               conflict))
+        {
+            clearkeyconflict();
+            return false;
+        }
+
+        key_conflict = conflict;
+        key_conflict_available = conflict.kind ==
+            keybindings::ConflictKind::Unbound;
+        key_conflict_same_action = conflict.kind ==
+            keybindings::ConflictKind::SameAction;
+        key_conflict_present = !key_conflict_available &&
+            !key_conflict_same_action;
+
+        switch(conflict.kind)
+        {
+            case keybindings::ConflictKind::Unbound:
+                key_conflict_status = "Available";
+                break;
+            case keybindings::ConflictKind::SameAction:
+                key_conflict_status = "Already bound to this action";
+                break;
+            case keybindings::ConflictKind::CuratedAction:
+                key_conflict_status = "Currently bound to: ";
+                key_conflict_status += keybindinglabel(conflict.action);
+                break;
+            case keybindings::ConflictKind::CustomAction:
+                key_conflict_status = "Currently bound to a custom action";
+                break;
+        }
+
+        model.DirtyVariable("key_conflict_status");
+        model.DirtyVariable("key_conflict_available");
+        model.DirtyVariable("key_conflict_same_action");
+        model.DirtyVariable("key_conflict_present");
         return true;
     }
 
@@ -1715,6 +1804,7 @@ namespace cowui
         key_capture_action = static_cast<keybindings::Action>(id);
         key_capture_id = id;
         key_candidate.clear();
+        clearkeyconflict();
         key_capture_active = true;
         key_capture_status = "Press a key... (Esc to cancel)";
         model.DirtyVariable("key_capture_id");
@@ -1729,6 +1819,7 @@ namespace cowui
         key_capture_id = -1;
         key_candidate.clear();
         key_capture_status.clear();
+        clearkeyconflict();
         if(model)
         {
             model.DirtyVariable("key_capture_id");
@@ -1742,8 +1833,9 @@ namespace cowui
             return;
         key_candidate = name;
         key_capture_active = false;
-        key_capture_status = "Captured: " + key_candidate + " (pending; not applied)";
+        key_capture_status = "Captured: " + key_candidate;
         model.DirtyVariable("key_capture_status");
+        refreshkeyconflict();
     }
 
     void RmlSettings::commitsensitivity()
