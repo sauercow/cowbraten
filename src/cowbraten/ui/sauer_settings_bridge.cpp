@@ -222,6 +222,22 @@ namespace cowui
             { "Dot II", "packages/crosshairs/dot2.png", "packages/crosshairs/dot2_hit.png" }
         };
 
+        static bool resourceavailable(const char *path)
+        {
+            stream *file = openfile(path, "rb");
+            if(!file)
+                return false;
+
+            delete file;
+            return true;
+        }
+
+        static bool crosshairavailable(const CrosshairCatalogEntry &choice)
+        {
+            return resourceavailable(choice.normal) &&
+                resourceavailable(choice.hit);
+        }
+
         static int selectedcrosshair()
         {
             const char *current = getcrosshairname(0);
@@ -610,6 +626,9 @@ namespace cowui
 
             loopi(int(sizeof(crosshair_catalog) / sizeof(crosshair_catalog[0])))
             {
+                if(!crosshairavailable(crosshair_catalog[i]))
+                    continue;
+
                 CrosshairChoice choice;
                 choice.id = i;
                 choice.label = crosshair_catalog[i].label;
@@ -629,6 +648,9 @@ namespace cowui
 
             const CrosshairCatalogEntry &choice =
                 crosshair_catalog[selection];
+            if(!crosshairavailable(choice))
+                return false;
+
             loadcrosshair(choice.normal, 0);
             loadcrosshair(choice.hit, 2);
             return selectedcrosshair() == selection &&

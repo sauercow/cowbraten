@@ -252,14 +252,16 @@ underlying duration as a new product control.
 Crosshair selection is not an ident. The legacy bridge owns the same fixed
 normal/hit texture pairs advertised by `menus.cfg`, gives RmlUi stable numeric
 choice IDs and labels, and invokes the existing engine `loadcrosshair()` path
-for slots 0 and 2. An engine read-only helper reports the effective texture
-name so a custom config is represented as Custom instead of being
-misidentified. Texture paths never originate in RML, and Sauer's existing
-`writecrosshairs()` config persistence remains authoritative. The current Rml
-renderer deliberately has no production external-image loader, so this slice
-does not duplicate texture ownership or expose engine OpenGL handles merely to
-provide a preview. The legacy `showgui crosshair` chooser remains available
-until an equivalent production-safe preview exists.
+for slots 0 and 2. Only pairs resolvable through Sauer's package filesystem are
+advertised, because a legacy menu catalog may outlive an optional asset pack.
+An engine read-only helper reports the effective texture name so a custom
+config is represented as Custom instead of being misidentified. Texture paths
+never originate in RML, and Sauer's existing `writecrosshairs()` config
+persistence remains authoritative. The current Rml renderer deliberately has
+no production external-image loader, so this slice does not duplicate texture
+ownership or expose engine OpenGL handles merely to provide a preview. The
+legacy `showgui crosshair` chooser remains available until an equivalent
+production-safe preview exists.
 
 The first HUD slice is deliberately limited to combat feedback. It exposes
 vanilla Sauer's persistent `damagescreen` and `damagecompass` toggles, p1x's
