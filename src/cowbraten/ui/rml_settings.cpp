@@ -81,15 +81,50 @@ namespace cowui
             constructor.Bind("fov_maximum", &fov_maximum) &&
             constructor.Bind("resolution_label", &resolution_label) &&
             constructor.Bind("video_status", &video_status) &&
-            constructor.Bind("fullscreen", &fullscreen) &&
+            constructor.Bind("presentation_label", &presentation_label) &&
             constructor.Bind(
-                "desktop_fullscreen",
-                &desktop_fullscreen
+                "presentation_windowed",
+                &presentation_windowed
+            ) &&
+            constructor.Bind(
+                "presentation_exclusive",
+                &presentation_exclusive
+            ) &&
+            constructor.Bind(
+                "presentation_desktop",
+                &presentation_desktop
             ) &&
             constructor.Bind(
                 "resolution_enabled",
                 &resolution_enabled
             ) &&
+            constructor.Bind("vsync", &vsync) &&
+            constructor.Bind("vsync_adaptive", &vsync_adaptive) &&
+            constructor.Bind("vsync_status", &vsync_status) &&
+            constructor.Bind("fps_limit", &fps_limit) &&
+            constructor.Bind(
+                "fps_limit_minimum",
+                &fps_limit_minimum
+            ) &&
+            constructor.Bind(
+                "fps_limit_maximum",
+                &fps_limit_maximum
+            ) &&
+            constructor.Bind("fps_limit_label", &fps_limit_label) &&
+            constructor.Bind("antialiasing", &antialiasing) &&
+            constructor.Bind(
+                "antialiasing_label",
+                &antialiasing_label
+            ) &&
+            constructor.Bind(
+                "antialiasing_status",
+                &antialiasing_status
+            ) &&
+            constructor.Bind("antialiasing_off", &antialiasing_off) &&
+            constructor.Bind("antialiasing_2x", &antialiasing_2x) &&
+            constructor.Bind("antialiasing_4x", &antialiasing_4x) &&
+            constructor.Bind("antialiasing_8x", &antialiasing_8x) &&
+            constructor.Bind("antialiasing_16x", &antialiasing_16x) &&
             constructor.Bind("category_game", &category_game) &&
             constructor.Bind(
                 "category_graphics",
@@ -98,6 +133,11 @@ namespace cowui
             constructor.BindEventCallback(
                 "select_resolution",
                 &RmlSettings::selectresolution,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_antialiasing",
+                &RmlSettings::selectantialiasing,
                 this
             );
 
@@ -115,8 +155,24 @@ namespace cowui
                 graphicscategoryaction
             ) &&
             router.registeraction(
-                "settings.fullscreen",
-                fullscreenaction
+                "settings.presentation.windowed",
+                windowedaction
+            ) &&
+            router.registeraction(
+                "settings.presentation.exclusive",
+                exclusivefullscreenaction
+            ) &&
+            router.registeraction(
+                "settings.presentation.desktop",
+                desktopfullscreenaction
+            ) &&
+            router.registeraction(
+                "settings.vsync",
+                vsyncaction
+            ) &&
+            router.registeraction(
+                "settings.fps-limit",
+                changefpslimitaction
             );
 
         if(!valid)
@@ -128,6 +184,7 @@ namespace cowui
         model = constructor.GetModelHandle();
         instance = this;
         video_status = "Live engine state";
+        vsync_status = "Runtime state";
         refresh();
         return true;
     }
@@ -147,9 +204,28 @@ namespace cowui
         fov_maximum = 150;
         resolution_label.clear();
         video_status.clear();
-        fullscreen = false;
-        desktop_fullscreen = false;
+        presentation_label.clear();
+        vsync_status.clear();
+        fps_limit_label.clear();
+        presentation_windowed = true;
+        presentation_exclusive = false;
+        presentation_desktop = false;
         resolution_enabled = true;
+        vsync = false;
+        vsync_adaptive = false;
+        fps_limit = 200;
+        fps_limit_minimum = 0;
+        fps_limit_maximum = 1000;
+        antialiasing = 0;
+        antialiasing_requested = -1;
+        pending_antialiasing = -1;
+        antialiasing_label.clear();
+        antialiasing_status.clear();
+        antialiasing_off = true;
+        antialiasing_2x = false;
+        antialiasing_4x = false;
+        antialiasing_8x = false;
+        antialiasing_16x = false;
         category_game = true;
         category_graphics = false;
     }
@@ -162,6 +238,45 @@ namespace cowui
     void RmlSettings::videochanged()
     {
         refreshvideo();
+    }
+
+    void RmlSettings::applypending()
+    {
+        if(pending_antialiasing < 0)
+            return;
+
+        const int requested = pending_antialiasing;
+        pending_antialiasing = -1;
+        settings::resetgraphics();
+        refreshvideo();
+
+        char status[96];
+        if(antialiasing == requested)
+        {
+            if(requested)
+            {
+                std::snprintf(
+                    status,
+                    sizeof(status),
+                    "%dx multisample antialiasing active",
+                    requested
+                );
+            }
+            else std::snprintf(status, sizeof(status), "Antialiasing disabled");
+        }
+        else
+        {
+            std::snprintf(
+                status,
+                sizeof(status),
+                "%dx was unavailable; runtime is %s",
+                requested,
+                antialiasing ? antialiasing_label.c_str() : "off"
+            );
+        }
+
+        antialiasing_status = status;
+        model.DirtyVariable("antialiasing_status");
     }
 
     bool RmlSettings::refresh()
@@ -197,21 +312,39 @@ namespace cowui
         if(!settings::readvideo(current))
             return false;
 
-        if(fullscreen != current.fullscreen)
+        const bool windowed = current.presentation ==
+            settings::PresentationMode::Windowed;
+        const bool exclusive = current.presentation ==
+            settings::PresentationMode::ExclusiveFullscreen;
+        const bool desktop = current.presentation ==
+            settings::PresentationMode::DesktopFullscreen;
+
+        if(presentation_windowed != windowed)
         {
-            fullscreen = current.fullscreen;
-            model.DirtyVariable("fullscreen");
+            presentation_windowed = windowed;
+            model.DirtyVariable("presentation_windowed");
+        }
+        if(presentation_exclusive != exclusive)
+        {
+            presentation_exclusive = exclusive;
+            model.DirtyVariable("presentation_exclusive");
+        }
+        if(presentation_desktop != desktop)
+        {
+            presentation_desktop = desktop;
+            model.DirtyVariable("presentation_desktop");
         }
 
-        const bool desktop_fullscreen_active =
-            current.fullscreen && current.desktop_fullscreen;
-        if(desktop_fullscreen != desktop_fullscreen_active)
+        const char *mode_label = windowed
+            ? "Windowed"
+            : (desktop ? "Desktop fullscreen" : "Exclusive fullscreen");
+        if(presentation_label != mode_label)
         {
-            desktop_fullscreen = desktop_fullscreen_active;
-            model.DirtyVariable("desktop_fullscreen");
+            presentation_label = mode_label;
+            model.DirtyVariable("presentation_label");
         }
 
-        const bool can_select_resolution = !desktop_fullscreen_active;
+        const bool can_select_resolution = !desktop;
         if(resolution_enabled != can_select_resolution)
         {
             resolution_enabled = can_select_resolution;
@@ -292,6 +425,160 @@ namespace cowui
             resolutions.swap(next);
             model.DirtyVariable("resolutions");
         }
+
+        settings::Vsync current_vsync;
+        if(!settings::readvsync(current_vsync))
+            return false;
+
+        if(vsync != current_vsync.enabled)
+        {
+            vsync = current_vsync.enabled;
+            model.DirtyVariable("vsync");
+        }
+        if(vsync_adaptive != current_vsync.adaptive)
+        {
+            vsync_adaptive = current_vsync.adaptive;
+            model.DirtyVariable("vsync_adaptive");
+        }
+
+        const char *current_vsync_status = current_vsync.adaptive
+            ? "Adaptive VSync active"
+            : (current_vsync.enabled ? "VSync active" : "VSync disabled");
+        if(vsync_status != current_vsync_status)
+        {
+            vsync_status = current_vsync_status;
+            model.DirtyVariable("vsync_status");
+        }
+
+        settings::FpsLimit current_fps_limit;
+        if(!settings::readfpslimit(current_fps_limit))
+            return false;
+
+        if(fps_limit != current_fps_limit.value)
+        {
+            fps_limit = current_fps_limit.value;
+            model.DirtyVariable("fps_limit");
+        }
+        if(fps_limit_minimum != current_fps_limit.minimum)
+        {
+            fps_limit_minimum = current_fps_limit.minimum;
+            model.DirtyVariable("fps_limit_minimum");
+        }
+        if(fps_limit_maximum != current_fps_limit.maximum)
+        {
+            fps_limit_maximum = current_fps_limit.maximum;
+            model.DirtyVariable("fps_limit_maximum");
+        }
+
+        if(current_fps_limit.value)
+        {
+            std::snprintf(
+                label,
+                sizeof(label),
+                "%d FPS",
+                current_fps_limit.value
+            );
+        }
+        else std::snprintf(label, sizeof(label), "Unlimited");
+
+        if(fps_limit_label != label)
+        {
+            fps_limit_label = label;
+            model.DirtyVariable("fps_limit_label");
+        }
+
+        settings::Antialiasing current_antialiasing;
+        if(!settings::readantialiasing(current_antialiasing))
+            return false;
+
+        antialiasing_requested =
+            current_antialiasing.requested_samples;
+
+        if(antialiasing != current_antialiasing.actual_samples)
+        {
+            antialiasing = current_antialiasing.actual_samples;
+            model.DirtyVariable("antialiasing");
+        }
+
+        const bool aa_off = current_antialiasing.actual_samples == 0;
+        const bool aa_2x = current_antialiasing.actual_samples == 2;
+        const bool aa_4x = current_antialiasing.actual_samples == 4;
+        const bool aa_8x = current_antialiasing.actual_samples == 8;
+        const bool aa_16x = current_antialiasing.actual_samples == 16;
+        if(antialiasing_off != aa_off)
+        {
+            antialiasing_off = aa_off;
+            model.DirtyVariable("antialiasing_off");
+        }
+        if(antialiasing_2x != aa_2x)
+        {
+            antialiasing_2x = aa_2x;
+            model.DirtyVariable("antialiasing_2x");
+        }
+        if(antialiasing_4x != aa_4x)
+        {
+            antialiasing_4x = aa_4x;
+            model.DirtyVariable("antialiasing_4x");
+        }
+        if(antialiasing_8x != aa_8x)
+        {
+            antialiasing_8x = aa_8x;
+            model.DirtyVariable("antialiasing_8x");
+        }
+        if(antialiasing_16x != aa_16x)
+        {
+            antialiasing_16x = aa_16x;
+            model.DirtyVariable("antialiasing_16x");
+        }
+
+        if(current_antialiasing.actual_samples)
+        {
+            std::snprintf(
+                label,
+                sizeof(label),
+                "%dx MSAA",
+                current_antialiasing.actual_samples
+            );
+        }
+        else std::snprintf(label, sizeof(label), "Off");
+
+        if(antialiasing_label != label)
+        {
+            antialiasing_label = label;
+            model.DirtyVariable("antialiasing_label");
+        }
+
+        char aa_status[96];
+        if(current_antialiasing.requested_samples > 0 &&
+           current_antialiasing.requested_samples !=
+               current_antialiasing.actual_samples)
+        {
+            std::snprintf(
+                aa_status,
+                sizeof(aa_status),
+                "%dx requested; runtime is %s",
+                current_antialiasing.requested_samples,
+                current_antialiasing.actual_samples
+                    ? label
+                    : "off"
+            );
+        }
+        else if(current_antialiasing.actual_samples)
+        {
+            std::snprintf(
+                aa_status,
+                sizeof(aa_status),
+                "%dx multisample antialiasing active",
+                current_antialiasing.actual_samples
+            );
+        }
+        else std::snprintf(aa_status, sizeof(aa_status), "Antialiasing disabled");
+
+        if(antialiasing_status != aa_status)
+        {
+            antialiasing_status = aa_status;
+            model.DirtyVariable("antialiasing_status");
+        }
         return true;
     }
 
@@ -309,6 +596,32 @@ namespace cowui
             category_graphics = graphics;
             model.DirtyVariable("category_graphics");
         }
+    }
+
+    void RmlSettings::setpresentation(
+        settings::PresentationMode presentation,
+        Rml::Event &event)
+    {
+        if(settings::writepresentation(presentation))
+        {
+            switch(presentation)
+            {
+                case settings::PresentationMode::Windowed:
+                    video_status = "Windowed mode active";
+                    break;
+                case settings::PresentationMode::ExclusiveFullscreen:
+                    video_status = "Exclusive fullscreen active";
+                    break;
+                case settings::PresentationMode::DesktopFullscreen:
+                    video_status = "Desktop fullscreen active";
+                    break;
+            }
+        }
+        else video_status = "Display mode change was not accepted";
+
+        model.DirtyVariable("video_status");
+        refreshvideo();
+        event.StopPropagation();
     }
 
     void RmlSettings::selectresolution(
@@ -342,6 +655,49 @@ namespace cowui
 
         model.DirtyVariable("video_status");
         refreshvideo();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::selectantialiasing(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 1)
+            return;
+
+        const int samples = arguments[0].Get<int>();
+        const bool supported_value = samples == 0 ||
+            samples == 2 ||
+            samples == 4 ||
+            samples == 8 ||
+            samples == 16;
+        const bool request_changed = samples !=
+            antialiasing_requested;
+
+        if(!supported_value || !settings::writeantialiasing(samples))
+        {
+            antialiasing_status = "Antialiasing request was rejected";
+            model.DirtyVariable("antialiasing_status");
+            event.StopPropagation();
+            return;
+        }
+
+        antialiasing_requested = samples;
+        if(!request_changed && samples == antialiasing)
+        {
+            antialiasing_status = samples
+                ? "Requested value already active"
+                : "Antialiasing disabled";
+            model.DirtyVariable("antialiasing_status");
+        }
+        else
+        {
+            pending_antialiasing = samples;
+            antialiasing_status = "Rebuilding the graphics context";
+            model.DirtyVariable("antialiasing_status");
+        }
+
         event.StopPropagation();
     }
 
@@ -381,28 +737,79 @@ namespace cowui
         event.StopPropagation();
     }
 
-    void RmlSettings::fullscreenaction(Rml::Event &event)
+    void RmlSettings::windowedaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->setpresentation(
+                settings::PresentationMode::Windowed,
+                event
+            );
+        }
+        else event.StopPropagation();
+    }
+
+    void RmlSettings::exclusivefullscreenaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->setpresentation(
+                settings::PresentationMode::ExclusiveFullscreen,
+                event
+            );
+        }
+        else event.StopPropagation();
+    }
+
+    void RmlSettings::desktopfullscreenaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->setpresentation(
+                settings::PresentationMode::DesktopFullscreen,
+                event
+            );
+        }
+        else event.StopPropagation();
+    }
+
+    void RmlSettings::vsyncaction(Rml::Event &event)
     {
         if(!instance)
             return;
 
-        const bool requested = !instance->fullscreen;
-        if(settings::writefullscreen(requested))
+        const bool requested = !instance->vsync;
+        const bool accepted = settings::writevsync(requested);
+        instance->refreshvideo();
+        if(!accepted)
         {
-            instance->video_status = requested
-                ? "Fullscreen enabled"
-                : "Windowed mode enabled";
+            instance->vsync_status =
+                "Driver rejected the VSync change";
+            instance->model.DirtyVariable("vsync_status");
         }
-        else
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changefpslimitaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->fps_limit
+        );
+
+        if(!settings::writefpslimit(requested))
         {
-            instance->video_status = requested
-                ? "Fullscreen is unavailable at this resolution"
-                : "Windowed mode was not accepted";
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected the FPS limit %d\n",
+                requested
+            );
         }
 
-        instance->model.DirtyVariable("video_status");
         instance->refreshvideo();
-        instance->model.DirtyVariable("fullscreen");
         event.StopPropagation();
     }
 }

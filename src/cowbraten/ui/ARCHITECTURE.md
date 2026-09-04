@@ -129,14 +129,15 @@ ident table to RML:
         -> sauer_settings_bridge (legacy-only)
         -> checked Sauer setter
 
-The first supported value is FOV. The first Graphics slice adds fullscreen and
-resolution through the same boundary. The legacy bridge alone knows the fixed
-`fov` and `fullscreen` ident names, verifies their integer types, and writes
-them through `setvarchecked()`. Resolution changes call the existing
-`screenres()` path with checked integer dimensions. Neither the document nor
-the RmlUi-facing model can supply an ident name or a CubeScript command.
-Additional settings should gain similarly explicit typed API functions rather
-than a generic ident setter.
+The first supported value is FOV. Graphics adds the three presentation modes,
+resolution, VSync, the rendered-frame limit, and multisample antialiasing
+through the same boundary. The legacy bridge alone knows the fixed `fov`,
+`fullscreen`, `fullscreendesktop`, `vsync`, `maxfps`, and `fsaa` ident names,
+verifies their integer types, and writes them through `setvarchecked()`.
+Resolution changes call the existing `screenres()` path with checked integer
+dimensions. Neither the document nor the RmlUi-facing model can supply an
+ident name or a CubeScript command. Additional settings should gain similarly
+explicit typed API functions rather than a generic ident setter.
 
 Resolution choices are value snapshots enumerated from SDL for the display
 containing the game window. The Rml model owns, sorts, and de-duplicates those
@@ -144,9 +145,29 @@ values, then accepts clicks only for an advertised width/height pair. A current
 custom window size may be displayed but cannot be selected as a fullscreen
 mode. Desktop fullscreen keeps its existing Sauer semantics and disables the
 resolution choices because that mode always uses the display's native size.
-The fullscreen and current-resolution presentation values are read from the
-actual SDL window state, not inferred from markup or requested `scr_w/scr_h`
-values.
+Windowed, exclusive fullscreen, and desktop fullscreen are separate typed
+values. Their presentation state and current dimensions are read from the
+actual SDL window flags and size, not inferred from markup or requested
+`scr_w/scr_h` values.
+
+VSync writes the fixed Sauer setting so the existing adaptive-tear policy and
+callback remain authoritative, then reads `SDL_GL_GetSwapInterval()` through
+the legacy bridge. An SDL failure synchronizes Sauer's `vsync` value back to
+the effective interval instead of leaving requested and runtime state split.
+Drivers may still report only the interval mode, not whether every displayed
+frame is physically synchronized. The FPS limit uses the fixed `maxfps`
+setting and its declared range; zero retains Cowbraten's existing unlimited
+rendering meaning.
+
+MSAA keeps requested and effective state distinct. RML may request only the
+legacy menu values Off, 2x, 4x, 8x, or 16x. `fsaa` stores that request, while
+the effective value is read from `SDL_GL_MULTISAMPLEBUFFERS` and
+`SDL_GL_MULTISAMPLESAMPLES` after the context exists. Applying a changed value
+uses the existing `resetgl()` lifecycle and its unsupported-mode fallback.
+The reset is deferred until the originating RmlUi input dispatch has returned,
+so a callback never destroys renderer resources while RmlUi is still handling
+the event. The cached document and data model survive the reset, and the model
+then reports the effective value even when it differs from the request.
 
 The `settings` data model owns the displayed FOV value and range. Opening or
 returning to the cached Settings document refreshes those values from Sauer.
@@ -155,8 +176,9 @@ handler writes through the typed API, immediately reads the accepted value
 back, and dirties only model variables that changed. When the legacy console
 temporarily suspends RmlUi, the model refreshes before Settings is shown again,
 so a normal `/fov` change is reflected without per-frame ident polling.
-The same activation and console-resume refresh updates fullscreen, current
-resolution, and the supported-mode snapshot. Category selection remains owned
-by the cached model and only the active page subtree is presented. Existing
-window resize and GL-reset callbacks refresh the video model when Settings is
-active, keeping it event-driven without per-frame polling.
+The same activation and console-resume refresh updates presentation, current
+resolution, the supported-mode snapshot, VSync, FPS limit, and effective MSAA.
+Category selection remains owned by the cached model and only the active page
+subtree is presented. Existing window resize and GL-reset callbacks refresh
+the video model when Settings is active, keeping it event-driven without
+per-frame polling.

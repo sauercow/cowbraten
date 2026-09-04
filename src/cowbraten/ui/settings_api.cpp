@@ -6,6 +6,36 @@ namespace cowui
 {
     namespace settings
     {
+        static PresentationMode presentationmode(
+            sauersettings::PresentationMode mode)
+        {
+            switch(mode)
+            {
+                case sauersettings::PresentationMode::Windowed:
+                    return PresentationMode::Windowed;
+                case sauersettings::PresentationMode::ExclusiveFullscreen:
+                    return PresentationMode::ExclusiveFullscreen;
+                case sauersettings::PresentationMode::DesktopFullscreen:
+                    return PresentationMode::DesktopFullscreen;
+            }
+            return PresentationMode::Windowed;
+        }
+
+        static sauersettings::PresentationMode presentationmode(
+            PresentationMode mode)
+        {
+            switch(mode)
+            {
+                case PresentationMode::Windowed:
+                    return sauersettings::PresentationMode::Windowed;
+                case PresentationMode::ExclusiveFullscreen:
+                    return sauersettings::PresentationMode::ExclusiveFullscreen;
+                case PresentationMode::DesktopFullscreen:
+                    return sauersettings::PresentationMode::DesktopFullscreen;
+            }
+            return sauersettings::PresentationMode::Windowed;
+        }
+
         bool readfov(Fov &result)
         {
             sauersettings::Fov legacy;
@@ -31,14 +61,15 @@ namespace cowui
 
             result.width = legacy.width;
             result.height = legacy.height;
-            result.fullscreen = legacy.fullscreen;
-            result.desktop_fullscreen = legacy.desktop_fullscreen;
+            result.presentation = presentationmode(legacy.presentation);
             return true;
         }
 
-        bool writefullscreen(bool enabled)
+        bool writepresentation(PresentationMode mode)
         {
-            return sauersettings::writefullscreen(enabled);
+            return sauersettings::writepresentation(
+                presentationmode(mode)
+            );
         }
 
         bool writeresolution(int width, int height)
@@ -76,6 +107,60 @@ namespace cowui
                 visitresolution,
                 &adapter
             );
+        }
+
+        bool readvsync(Vsync &result)
+        {
+            sauersettings::Vsync legacy;
+            if(!sauersettings::readvsync(legacy))
+                return false;
+
+            result.enabled = legacy.enabled;
+            result.adaptive = legacy.adaptive;
+            return true;
+        }
+
+        bool writevsync(bool enabled)
+        {
+            return sauersettings::writevsync(enabled);
+        }
+
+        bool readfpslimit(FpsLimit &result)
+        {
+            sauersettings::FpsLimit legacy;
+            if(!sauersettings::readfpslimit(legacy))
+                return false;
+
+            result.value = legacy.value;
+            result.minimum = legacy.minimum;
+            result.maximum = legacy.maximum;
+            return true;
+        }
+
+        bool writefpslimit(int value)
+        {
+            return sauersettings::writefpslimit(value);
+        }
+
+        bool readantialiasing(Antialiasing &result)
+        {
+            sauersettings::Antialiasing legacy;
+            if(!sauersettings::readantialiasing(legacy))
+                return false;
+
+            result.requested_samples = legacy.requested_samples;
+            result.actual_samples = legacy.actual_samples;
+            return true;
+        }
+
+        bool writeantialiasing(int samples)
+        {
+            return sauersettings::writeantialiasing(samples);
+        }
+
+        void resetgraphics()
+        {
+            sauersettings::resetgraphics();
         }
     }
 }

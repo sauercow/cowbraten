@@ -14,6 +14,11 @@ namespace Rml
 
 namespace cowui
 {
+    namespace settings
+    {
+        enum class PresentationMode;
+    }
+
     class RmlActionRouter;
 
     class RmlSettings final
@@ -24,6 +29,7 @@ namespace cowui
 
         void activate();
         void videochanged();
+        void applypending();
 
     private:
         struct Resolution
@@ -53,7 +59,16 @@ namespace cowui
         bool refresh();
         bool refreshvideo();
         void setcategory(Category category);
+        void setpresentation(
+            settings::PresentationMode presentation,
+            Rml::Event &event
+        );
         void selectresolution(
+            Rml::DataModelHandle,
+            Rml::Event &event,
+            const Rml::VariantList &arguments
+        );
+        void selectantialiasing(
             Rml::DataModelHandle,
             Rml::Event &event,
             const Rml::VariantList &arguments
@@ -61,7 +76,11 @@ namespace cowui
         static void changefovaction(Rml::Event &event);
         static void gamecategoryaction(Rml::Event &event);
         static void graphicscategoryaction(Rml::Event &event);
-        static void fullscreenaction(Rml::Event &event);
+        static void windowedaction(Rml::Event &event);
+        static void exclusivefullscreenaction(Rml::Event &event);
+        static void desktopfullscreenaction(Rml::Event &event);
+        static void vsyncaction(Rml::Event &event);
+        static void changefpslimitaction(Rml::Event &event);
 
         Rml::DataModelHandle model;
         std::vector<Resolution> resolutions;
@@ -72,9 +91,28 @@ namespace cowui
 
         Rml::String resolution_label;
         Rml::String video_status;
-        bool fullscreen = false;
-        bool desktop_fullscreen = false;
+        Rml::String presentation_label;
+        Rml::String vsync_status;
+        Rml::String fps_limit_label;
+        bool presentation_windowed = true;
+        bool presentation_exclusive = false;
+        bool presentation_desktop = false;
         bool resolution_enabled = true;
+        bool vsync = false;
+        bool vsync_adaptive = false;
+        int fps_limit = 200;
+        int fps_limit_minimum = 0;
+        int fps_limit_maximum = 1000;
+        int antialiasing = 0;
+        int antialiasing_requested = -1;
+        int pending_antialiasing = -1;
+        Rml::String antialiasing_label;
+        Rml::String antialiasing_status;
+        bool antialiasing_off = true;
+        bool antialiasing_2x = false;
+        bool antialiasing_4x = false;
+        bool antialiasing_8x = false;
+        bool antialiasing_16x = false;
         bool category_game = true;
         bool category_graphics = false;
 

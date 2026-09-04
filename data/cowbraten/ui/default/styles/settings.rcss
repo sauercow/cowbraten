@@ -196,10 +196,52 @@ body
 
 .settings-page
 {
+    box-sizing: border-box;
     display: flex;
-    flex: none;
+    flex: 1;
+    min-height: 0;
     width: 100%;
+    padding-right: var(--space-1);
     flex-direction: column;
+    overflow-y: auto;
+}
+
+.settings-page scrollbarvertical
+{
+    width: 12px;
+    background-color: var(--color-surface);
+}
+
+.settings-page scrollbarvertical slidertrack
+{
+    width: 11px;
+    background-color: var(--color-surface);
+}
+
+.settings-page scrollbarvertical sliderbar
+{
+    width: 7px;
+    min-height: 40px;
+    margin-left: 2px;
+    background-color: var(--color-disabled);
+    border-radius: var(--radius-control);
+}
+
+.settings-page scrollbarvertical sliderbar:hover
+{
+    background-color: var(--color-primary-pressed);
+}
+
+.settings-page scrollbarvertical sliderbar:active
+{
+    background-color: var(--color-primary);
+}
+
+.settings-page scrollbarvertical sliderarrowdec,
+.settings-page scrollbarvertical sliderarrowinc
+{
+    width: 0;
+    height: 0;
 }
 
 .settings-stage-header
@@ -472,6 +514,32 @@ body
     padding-bottom: var(--space-2);
 }
 
+.settings-mode-current
+{
+    min-width: 216px;
+}
+
+.settings-mode-selector
+{
+    display: flex;
+    margin-top: var(--space-3);
+    gap: var(--space-1);
+}
+
+.settings-mode-button
+{
+    flex: 1;
+    height: 40px;
+    line-height: 38px;
+}
+
+.settings-mode-button.is-selected
+{
+    background-color: var(--color-primary-pressed);
+    border-color: var(--color-primary);
+    color: var(--color-text);
+}
+
 .settings-display-row
 {
     display: flex;
@@ -496,6 +564,75 @@ body
     color: var(--color-text);
     letter-spacing: 1px;
     text-transform: uppercase;
+}
+
+.settings-performance-section
+{
+    margin-top: var(--space-3);
+}
+
+.settings-control-footer-compact
+{
+    margin-top: var(--space-2);
+    padding-top: var(--space-1);
+}
+
+.settings-fps-heading
+{
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top-width: 1px;
+    border-top-color: var(--color-border);
+}
+
+.settings-fps-value
+{
+    width: 168px;
+}
+
+.settings-fps-value-label
+{
+    color: var(--color-primary);
+    font-size: 16px;
+    line-height: 54px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.settings-fps-range-row
+{
+    margin-top: var(--space-2);
+}
+
+.settings-antialiasing-section
+{
+    margin-top: var(--space-3);
+}
+
+.settings-antialiasing-current
+{
+    min-width: 168px;
+}
+
+.settings-antialiasing-selector
+{
+    display: flex;
+    margin-top: var(--space-3);
+    gap: var(--space-1);
+}
+
+.settings-antialiasing-button
+{
+    flex: 1;
+    height: 36px;
+    line-height: 34px;
+}
+
+.settings-antialiasing-button.is-selected
+{
+    background-color: var(--color-primary-pressed);
+    border-color: var(--color-primary);
+    color: var(--color-text);
 }
 
 .settings-resolution-section
@@ -660,6 +797,26 @@ body
     {
         margin-top: var(--space-1);
         padding-top: var(--space-1);
+    }
+
+    .settings-mode-selector
+    {
+        margin-top: var(--space-2);
+    }
+
+    .settings-performance-section
+    {
+        margin-top: var(--space-2);
+    }
+
+    .settings-antialiasing-section
+    {
+        margin-top: var(--space-2);
+    }
+
+    .settings-antialiasing-selector
+    {
+        margin-top: var(--space-2);
     }
 
     .settings-resolution-section

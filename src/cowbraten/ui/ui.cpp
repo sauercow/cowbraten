@@ -233,6 +233,13 @@ namespace cowui
         }
     }
 
+    static bool finishinput(bool consumed)
+    {
+        if(active_screen && active_screen->id == ScreenId::Settings)
+            settings_model.applypending();
+        return consumed;
+    }
+
     static Rml::Input::KeyIdentifier keyidentifier(SDL_Keycode key)
     {
         switch(key)
@@ -557,9 +564,11 @@ namespace cowui
                 );
 
             case SDL_MOUSEBUTTONUP:
-                return !context->ProcessMouseButtonUp(
-                    mousebutton(event.button.button),
-                    keymodifierstate()
+                return finishinput(
+                    !context->ProcessMouseButtonUp(
+                        mousebutton(event.button.button),
+                        keymodifierstate()
+                    )
                 );
 
             case SDL_MOUSEWHEEL:
@@ -589,7 +598,7 @@ namespace cowui
                         propagate;
                 }
 
-                return capture || !propagate;
+                return finishinput(capture || !propagate);
             }
 
             case SDL_KEYUP:
@@ -606,7 +615,7 @@ namespace cowui
                     keymodifierstate()
                 );
 
-                return capture || !propagate;
+                return finishinput(capture || !propagate);
             }
 
             case SDL_TEXTINPUT:

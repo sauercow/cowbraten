@@ -68,9 +68,9 @@
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_graphics">
-                        <div class="settings-scope-kicker">Display State</div>
+                        <div class="settings-scope-kicker">Typed Runtime State</div>
                         <div class="settings-scope-copy">
-                            Resolution choices come from the current display rather than a hardcoded list.
+                            Display mode and VSync report accepted SDL state. Frame limiting uses Cowbraten's existing render scheduler.
                         </div>
                     </div>
                 </div>
@@ -146,26 +146,130 @@
                         </div>
 
                         <div class="settings-section settings-display-section panel">
-                            <div class="settings-display-row">
+                            <div class="settings-control-heading">
                                 <div class="settings-control-copy">
-                                    <div class="settings-control-title">Fullscreen</div>
+                                    <div class="settings-control-title">Presentation Mode</div>
                                     <div class="settings-control-description">
-                                        Use the existing Sauer fullscreen mode for the current display.
+                                        Choose a resizable window, exclusive display mode, or borderless desktop fullscreen.
                                     </div>
                                 </div>
-                                <label class="checkbox-row settings-display-toggle">
-                                    <input class="checkbox"
-                                        type="checkbox"
-                                        data-attrif-checked="fullscreen"
-                                        onclick="settings.fullscreen" />
-                                    <span data-if="fullscreen">Enabled</span>
-                                    <span data-if="!fullscreen">Windowed</span>
-                                </label>
+                                <div class="settings-resolution-current settings-mode-current">
+                                    <span class="settings-info-label">Actual mode</span>
+                                    <span class="settings-resolution-current-value">{{ presentation_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-mode-selector">
+                                <button class="button settings-mode-button"
+                                    data-class-is-selected="presentation_windowed"
+                                    onclick="settings.presentation.windowed">
+                                    Windowed
+                                </button>
+                                <button class="button settings-mode-button"
+                                    data-class-is-selected="presentation_exclusive"
+                                    onclick="settings.presentation.exclusive">
+                                    Exclusive
+                                </button>
+                                <button class="button settings-mode-button"
+                                    data-class-is-selected="presentation_desktop"
+                                    onclick="settings.presentation.desktop">
+                                    Desktop / Borderless
+                                </button>
                             </div>
 
                             <div class="settings-control-footer">
                                 <span class="settings-live-indicator"></span>
                                 <span>{{ video_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-performance-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Vertical Synchronization</div>
+                                    <div class="settings-control-description">
+                                        Synchronize presentation with the display. Driver acceptance is read back from SDL.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox"
+                                        type="checkbox"
+                                        data-attrif-checked="vsync"
+                                        onclick="settings.vsync" />
+                                    <span data-if="vsync_adaptive">Adaptive</span>
+                                    <span data-if="vsync &amp;&amp; !vsync_adaptive">Enabled</span>
+                                    <span data-if="!vsync">Disabled</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ vsync_status }}</span>
+                            </div>
+
+                            <div class="settings-control-heading settings-fps-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Frame Rate Limit</div>
+                                    <div class="settings-control-description">
+                                        Cap rendered frames without reducing Cowbraten's input or network processing frequency. Zero is unlimited.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-fps-value">
+                                    <span class="settings-fps-value-label">{{ fps_limit_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-range-row settings-fps-range-row">
+                                <span class="settings-range-bound">0</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="1000"
+                                    step="1"
+                                    value="200"
+                                    data-attr-min="fps_limit_minimum"
+                                    data-attr-max="fps_limit_maximum"
+                                    data-attr-value="fps_limit"
+                                    onchange="settings.fps-limit" />
+                                <span class="settings-range-bound settings-range-maximum">1000</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Antialiasing</div>
+                                    <div class="settings-control-description">
+                                        Multisample the scene edges. Changing this option rebuilds the existing OpenGL context.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Actual runtime</span>
+                                    <span class="settings-resolution-current-value">{{ antialiasing_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="antialiasing_off"
+                                    data-event-click="select_antialiasing(0)">Off</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="antialiasing_2x"
+                                    data-event-click="select_antialiasing(2)">2x</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="antialiasing_4x"
+                                    data-event-click="select_antialiasing(4)">4x</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="antialiasing_8x"
+                                    data-event-click="select_antialiasing(8)">8x</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="antialiasing_16x"
+                                    data-event-click="select_antialiasing(16)">16x</button>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ antialiasing_status }}</span>
                             </div>
                         </div>
 
@@ -195,13 +299,12 @@
                                 </div>
                             </div>
 
-                            <div class="settings-resolution-note" data-if="desktop_fullscreen">
+                            <div class="settings-resolution-note" data-if="presentation_desktop">
                                 Desktop fullscreen uses the display's native size. Resolution selection is unavailable in this mode.
                             </div>
                         </div>
                     </div>
 
-                    <div class="settings-stage-spacer"></div>
                 </div>
             </div>
 
