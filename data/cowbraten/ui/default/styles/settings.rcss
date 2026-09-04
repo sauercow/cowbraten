@@ -727,6 +727,57 @@ body
     margin-top: var(--space-3);
 }
 
+.settings-input-section
+{
+    margin-top: var(--space-3);
+}
+
+.settings-stepper
+{
+    display: flex;
+    flex: none;
+    width: 232px;
+    height: 40px;
+    margin-left: var(--space-3);
+    gap: var(--space-1);
+}
+
+.settings-stepper-button
+{
+    width: 48px;
+    min-width: 48px;
+    height: 40px;
+    padding: 0;
+    color: var(--color-primary);
+    font-size: 20px;
+    line-height: 38px;
+}
+
+.settings-stepper-value
+{
+    box-sizing: border-box;
+    flex: 1;
+    height: 40px;
+    background-color: var(--color-surface-2);
+    border-width: 1px;
+    border-color: var(--color-border);
+    color: var(--color-primary);
+    font-size: 17px;
+    line-height: 38px;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.settings-unavailable-note
+{
+    display: block;
+    margin-top: var(--space-3);
+    padding: var(--space-2);
+    background-color: var(--color-surface-2);
+    border-left-width: 3px;
+    border-left-color: var(--color-disabled);
+}
+
 .settings-footer
 {
     box-sizing: border-box;
@@ -845,6 +896,11 @@ body
     }
 
     .settings-audio-section
+    {
+        margin-top: var(--space-2);
+    }
+
+    .settings-input-section
     {
         margin-top: var(--space-2);
     }

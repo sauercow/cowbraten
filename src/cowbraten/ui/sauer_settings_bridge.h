@@ -56,6 +56,14 @@ namespace cowui
             bool backend_active;
         };
 
+        struct MouseInput
+        {
+            float sensitivity;
+            float sensitivity_minimum;
+            float sensitivity_maximum;
+            bool inverted;
+        };
+
         struct Resolution
         {
             int width;
@@ -88,6 +96,10 @@ namespace cowui
         bool readaudio(Audio &result);
         bool writesoundvolume(int value);
         bool writemusicvolume(int value);
+
+        bool readmouseinput(MouseInput &result);
+        bool writesensitivity(float value);
+        bool writeinvertedmouse(bool enabled);
     }
 }
 

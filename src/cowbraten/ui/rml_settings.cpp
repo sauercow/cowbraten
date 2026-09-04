@@ -152,6 +152,27 @@ namespace cowui
                 &music_volume_label
             ) &&
             constructor.Bind("audio_status", &audio_status) &&
+            constructor.Bind(
+                "mouse_sensitivity",
+                &mouse_sensitivity
+            ) &&
+            constructor.Bind(
+                "mouse_sensitivity_minimum",
+                &mouse_sensitivity_minimum
+            ) &&
+            constructor.Bind(
+                "mouse_sensitivity_maximum",
+                &mouse_sensitivity_maximum
+            ) &&
+            constructor.Bind(
+                "mouse_sensitivity_label",
+                &mouse_sensitivity_label
+            ) &&
+            constructor.Bind("inverted_mouse", &inverted_mouse) &&
+            constructor.Bind(
+                "mouse_input_status",
+                &mouse_input_status
+            ) &&
             constructor.Bind("category_game", &category_game) &&
             constructor.Bind(
                 "category_graphics",
@@ -160,6 +181,10 @@ namespace cowui
             constructor.Bind(
                 "category_audio",
                 &category_audio
+            ) &&
+            constructor.Bind(
+                "category_mouse_keyboard",
+                &category_mouse_keyboard
             ) &&
             constructor.BindEventCallback(
                 "select_resolution",
@@ -190,6 +215,10 @@ namespace cowui
                 audiocategoryaction
             ) &&
             router.registeraction(
+                "settings.category.mouse-keyboard",
+                mousekeyboardcategoryaction
+            ) &&
+            router.registeraction(
                 "settings.presentation.windowed",
                 windowedaction
             ) &&
@@ -216,6 +245,18 @@ namespace cowui
             router.registeraction(
                 "settings.audio.music-volume",
                 changemusicvolumeaction
+            ) &&
+            router.registeraction(
+                "settings.input.sensitivity.decrease",
+                decreasesensitivityaction
+            ) &&
+            router.registeraction(
+                "settings.input.sensitivity.increase",
+                increasesensitivityaction
+            ) &&
+            router.registeraction(
+                "settings.input.inverted-mouse",
+                invertedmouseaction
             );
 
         if(!valid)
@@ -278,9 +319,16 @@ namespace cowui
         sound_volume_label.clear();
         music_volume_label.clear();
         audio_status.clear();
+        mouse_sensitivity = 3.0f;
+        mouse_sensitivity_minimum = 0.001f;
+        mouse_sensitivity_maximum = 1000.0f;
+        mouse_sensitivity_label.clear();
+        inverted_mouse = false;
+        mouse_input_status.clear();
         category_game = true;
         category_graphics = false;
         category_audio = false;
+        category_mouse_keyboard = false;
     }
 
     void RmlSettings::activate()
@@ -358,7 +406,9 @@ namespace cowui
 
         if(!refreshvideo())
             return false;
-        return refreshaudio();
+        if(!refreshaudio())
+            return false;
+        return refreshmouseinput();
     }
 
     bool RmlSettings::refreshvideo()
@@ -712,11 +762,59 @@ namespace cowui
         return true;
     }
 
+    bool RmlSettings::refreshmouseinput()
+    {
+        settings::MouseInput current;
+        if(!settings::readmouseinput(current))
+            return false;
+
+        if(mouse_sensitivity != current.sensitivity)
+        {
+            mouse_sensitivity = current.sensitivity;
+            model.DirtyVariable("mouse_sensitivity");
+        }
+        if(mouse_sensitivity_minimum != current.sensitivity_minimum)
+        {
+            mouse_sensitivity_minimum = current.sensitivity_minimum;
+            model.DirtyVariable("mouse_sensitivity_minimum");
+        }
+        if(mouse_sensitivity_maximum != current.sensitivity_maximum)
+        {
+            mouse_sensitivity_maximum = current.sensitivity_maximum;
+            model.DirtyVariable("mouse_sensitivity_maximum");
+        }
+        if(inverted_mouse != current.inverted)
+        {
+            inverted_mouse = current.inverted;
+            model.DirtyVariable("inverted_mouse");
+        }
+
+        char label[32];
+        std::snprintf(label, sizeof(label), "%.2f", current.sensitivity);
+        if(mouse_sensitivity_label != label)
+        {
+            mouse_sensitivity_label = label;
+            model.DirtyVariable("mouse_sensitivity_label");
+        }
+
+        const char *status = current.inverted
+            ? "Vertical look inverted"
+            : "Standard vertical look";
+        if(mouse_input_status != status)
+        {
+            mouse_input_status = status;
+            model.DirtyVariable("mouse_input_status");
+        }
+        return true;
+    }
+
     void RmlSettings::setcategory(Category category)
     {
         const bool game = category == Category::Game;
         const bool graphics = category == Category::Graphics;
         const bool audio = category == Category::Audio;
+        const bool mouse_keyboard = category ==
+            Category::MouseKeyboard;
         if(category_game != game)
         {
             category_game = game;
@@ -731,6 +829,11 @@ namespace cowui
         {
             category_audio = audio;
             model.DirtyVariable("category_audio");
+        }
+        if(category_mouse_keyboard != mouse_keyboard)
+        {
+            category_mouse_keyboard = mouse_keyboard;
+            model.DirtyVariable("category_mouse_keyboard");
         }
     }
 
@@ -880,6 +983,13 @@ namespace cowui
         event.StopPropagation();
     }
 
+    void RmlSettings::mousekeyboardcategoryaction(Rml::Event &event)
+    {
+        if(instance)
+            instance->setcategory(Category::MouseKeyboard);
+        event.StopPropagation();
+    }
+
     void RmlSettings::windowedaction(Rml::Event &event)
     {
         if(instance)
@@ -997,6 +1107,67 @@ namespace cowui
         }
 
         instance->refreshaudio();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::decreasesensitivityaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::max(
+            instance->mouse_sensitivity_minimum,
+            instance->mouse_sensitivity - 0.1f
+        );
+        if(!settings::writesensitivity(requested))
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected mouse sensitivity %.3f\n",
+                requested
+            );
+        }
+
+        instance->refreshmouseinput();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasesensitivityaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::min(
+            instance->mouse_sensitivity_maximum,
+            instance->mouse_sensitivity + 0.1f
+        );
+        if(!settings::writesensitivity(requested))
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected mouse sensitivity %.3f\n",
+                requested
+            );
+        }
+
+        instance->refreshmouseinput();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::invertedmouseaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        if(!settings::writeinvertedmouse(!instance->inverted_mouse))
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected inverted mouse change\n"
+            );
+        }
+
+        instance->refreshmouseinput();
         event.StopPropagation();
     }
 }

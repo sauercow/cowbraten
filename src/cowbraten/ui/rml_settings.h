@@ -54,12 +54,14 @@ namespace cowui
         {
             Game,
             Graphics,
-            Audio
+            Audio,
+            MouseKeyboard
         };
 
         bool refresh();
         bool refreshvideo();
         bool refreshaudio();
+        bool refreshmouseinput();
         void setcategory(Category category);
         void setpresentation(
             settings::PresentationMode presentation,
@@ -79,6 +81,7 @@ namespace cowui
         static void gamecategoryaction(Rml::Event &event);
         static void graphicscategoryaction(Rml::Event &event);
         static void audiocategoryaction(Rml::Event &event);
+        static void mousekeyboardcategoryaction(Rml::Event &event);
         static void windowedaction(Rml::Event &event);
         static void exclusivefullscreenaction(Rml::Event &event);
         static void desktopfullscreenaction(Rml::Event &event);
@@ -86,6 +89,9 @@ namespace cowui
         static void changefpslimitaction(Rml::Event &event);
         static void changesoundvolumeaction(Rml::Event &event);
         static void changemusicvolumeaction(Rml::Event &event);
+        static void decreasesensitivityaction(Rml::Event &event);
+        static void increasesensitivityaction(Rml::Event &event);
+        static void invertedmouseaction(Rml::Event &event);
 
         Rml::DataModelHandle model;
         std::vector<Resolution> resolutions;
@@ -127,9 +133,16 @@ namespace cowui
         Rml::String sound_volume_label;
         Rml::String music_volume_label;
         Rml::String audio_status;
+        float mouse_sensitivity = 3.0f;
+        float mouse_sensitivity_minimum = 0.001f;
+        float mouse_sensitivity_maximum = 1000.0f;
+        Rml::String mouse_sensitivity_label;
+        bool inverted_mouse = false;
+        Rml::String mouse_input_status;
         bool category_game = true;
         bool category_graphics = false;
         bool category_audio = false;
+        bool category_mouse_keyboard = false;
 
         static RmlSettings *instance;
     };

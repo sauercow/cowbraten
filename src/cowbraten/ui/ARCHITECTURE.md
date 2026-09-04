@@ -198,3 +198,18 @@ refresh the Audio model. Sound enablement, channel count, sample frequency,
 buffer length, driver choice, and sound-pack selection are intentionally not
 part of this immediate-volume slice: they require `resetsound()`, backend
 fallback/readback policy, or separate asset-selection semantics.
+
+The first Mouse / Keyboard slice exposes only gameplay sensitivity and
+vertical-look inversion. The bridge targets the fixed persistent
+`sensitivity` float and `invmouse` integer idents; both affect camera input
+immediately and require no SDL or renderer reset. Sensitivity uses explicit
+0.10 decrement/increment actions while retaining Sauer's full declared range
+and reflecting externally supplied values. It does not alter `guisens`, which
+belongs to the legacy 3D GUI and does not control RmlUi's absolute pointer.
+Mouse acceleration, zoom-specific response, and sensitivity scaling remain
+outside this basic slice.
+
+No keyboard binding API is exposed yet. A future binding milestone must own
+capture state, cancellation, conflict policy, multiple bindings, readable key
+names, and persistence explicitly; it must not pass arbitrary bind commands
+from markup.

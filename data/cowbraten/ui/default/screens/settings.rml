@@ -49,7 +49,9 @@
                             <span class="settings-nav-index">04</span>
                             <span>Audio</span>
                         </button>
-                        <button class="nav-item settings-nav-item" disabled="true">
+                        <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_mouse_keyboard"
+                            onclick="settings.category.mouse-keyboard">
                             <span class="settings-nav-index">05</span>
                             <span>Mouse / Keyboard</span>
                         </button>
@@ -79,6 +81,12 @@
                         <div class="settings-scope-kicker">Existing Sound Mix</div>
                         <div class="settings-scope-copy">
                             Sauer provides separate sound and music levels. Sound Volume at zero also mutes music through the existing engine gate.
+                        </div>
+                    </div>
+                    <div class="settings-scope-note" data-if="category_mouse_keyboard">
+                        <div class="settings-scope-kicker">Gameplay Mouse</div>
+                        <div class="settings-scope-copy">
+                            These controls affect relative gameplay look. RmlUi continues to use the operating system's absolute pointer while menus are open.
                         </div>
                     </div>
                 </div>
@@ -406,6 +414,70 @@
                         </div>
                     </div>
 
+                    <div class="settings-page" data-if="category_mouse_keyboard">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Input / Gameplay</div>
+                            <div class="settings-stage-title">Mouse &amp; Keyboard</div>
+                            <div class="settings-stage-copy">
+                                Adjust the existing gameplay mouse response. Key binding capture remains intentionally separate.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-input-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Mouse Sensitivity</div>
+                                    <div class="settings-control-description">
+                                        Changes the relative mouse scale used for camera movement. Adjustments apply immediately in steps of 0.10.
+                                    </div>
+                                </div>
+                                <div class="settings-stepper">
+                                    <button class="button settings-stepper-button"
+                                        onclick="settings.input.sensitivity.decrease">-</button>
+                                    <div class="settings-stepper-value">{{ mouse_sensitivity_label }}</div>
+                                    <button class="button settings-stepper-button"
+                                        onclick="settings.input.sensitivity.increase">+</button>
+                                </div>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>Engine range&nbsp;&nbsp;{{ mouse_sensitivity_minimum }} - {{ mouse_sensitivity_maximum }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-input-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Invert Vertical Look</div>
+                                    <div class="settings-control-description">
+                                        Reverses vertical camera movement while preserving horizontal look.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox"
+                                        type="checkbox"
+                                        data-attrif-checked="inverted_mouse"
+                                        onclick="settings.input.inverted-mouse" />
+                                    <span data-if="inverted_mouse">Inverted</span>
+                                    <span data-if="!inverted_mouse">Standard</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ mouse_input_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-unavailable-note">
+                            <div class="settings-info-label">Key bindings</div>
+                            <div class="settings-info-value">
+                                Not included in this slice. Capture, conflicts, multiple bindings, cancellation, and readable key names require a dedicated design.
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -414,6 +486,7 @@
                     <span data-if="category_game">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Game</span>
                     <span data-if="category_graphics">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Graphics</span>
                     <span data-if="category_audio">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Audio</span>
+                    <span data-if="category_mouse_keyboard">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Mouse / Keyboard</span>
                 </div>
                 <div class="settings-footer-help">Escape returns to gameplay</div>
                 <div class="settings-footer-status">

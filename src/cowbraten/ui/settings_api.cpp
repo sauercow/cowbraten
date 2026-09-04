@@ -192,5 +192,30 @@ namespace cowui
         {
             return sauersettings::writemusicvolume(value);
         }
+
+        bool readmouseinput(MouseInput &result)
+        {
+            sauersettings::MouseInput legacy;
+            if(!sauersettings::readmouseinput(legacy))
+                return false;
+
+            result.sensitivity = legacy.sensitivity;
+            result.sensitivity_minimum =
+                legacy.sensitivity_minimum;
+            result.sensitivity_maximum =
+                legacy.sensitivity_maximum;
+            result.inverted = legacy.inverted;
+            return true;
+        }
+
+        bool writesensitivity(float value)
+        {
+            return sauersettings::writesensitivity(value);
+        }
+
+        bool writeinvertedmouse(bool enabled)
+        {
+            return sauersettings::writeinvertedmouse(enabled);
+        }
     }
 }

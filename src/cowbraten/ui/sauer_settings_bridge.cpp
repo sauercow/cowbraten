@@ -2,6 +2,9 @@
 
 #include "sauer_settings_bridge.h"
 
+#include <cstdint>
+#include <cstring>
+
 extern int scr_w, scr_h, fullscreendesktop;
 extern bool nosound;
 extern void resetgl();
@@ -11,6 +14,17 @@ namespace cowui
 {
     namespace sauersettings
     {
+        static bool finitefloat(float value)
+        {
+            static_assert(
+                sizeof(float) == sizeof(std::uint32_t),
+                "Cowbraten settings require 32-bit IEEE-754 floats"
+            );
+            std::uint32_t bits = 0;
+            std::memcpy(&bits, &value, sizeof(bits));
+            return (bits & 0x7F800000u) != 0x7F800000u;
+        }
+
         static ident *fovident()
         {
             ident *id = getident("fov");
@@ -70,6 +84,22 @@ namespace cowui
         static ident *musicvolumeident()
         {
             ident *id = getident("musicvol");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *sensitivityident()
+        {
+            ident *id = getident("sensitivity");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *invertedmouseident()
+        {
+            ident *id = getident("invmouse");
             return id && id->type == ID_VAR
                 ? id
                 : nullptr;
@@ -365,6 +395,46 @@ namespace cowui
 
             setvarchecked(id, value);
             return *id->storage.i == value;
+        }
+
+        bool readmouseinput(MouseInput &result)
+        {
+            ident *sensitivity_id = sensitivityident();
+            ident *inverted_id = invertedmouseident();
+            if(!sensitivity_id || !sensitivity_id->storage.f ||
+               !inverted_id || !inverted_id->storage.i)
+            {
+                return false;
+            }
+
+            result.sensitivity = *sensitivity_id->storage.f;
+            result.sensitivity_minimum = sensitivity_id->minvalf;
+            result.sensitivity_maximum = sensitivity_id->maxvalf;
+            result.inverted = *inverted_id->storage.i != 0;
+            return true;
+        }
+
+        bool writesensitivity(float value)
+        {
+            ident *id = sensitivityident();
+            if(!id || !id->storage.f || !finitefloat(value) ||
+               value < id->minvalf || value > id->maxvalf)
+            {
+                return false;
+            }
+
+            setfvarchecked(id, value);
+            return *id->storage.f == value;
+        }
+
+        bool writeinvertedmouse(bool enabled)
+        {
+            ident *id = invertedmouseident();
+            if(!id || !id->storage.i)
+                return false;
+
+            setvarchecked(id, enabled ? 1 : 0);
+            return (*id->storage.i != 0) == enabled;
         }
     }
 }
