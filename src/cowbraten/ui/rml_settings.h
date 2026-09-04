@@ -17,6 +17,7 @@ namespace cowui
     namespace settings
     {
         enum class PresentationMode;
+        struct CrosshairChoice;
     }
 
     class RmlActionRouter;
@@ -50,19 +51,39 @@ namespace cowui
             }
         };
 
+        struct CrosshairChoice
+        {
+            Rml::String label;
+            int id = -1;
+            bool selected = false;
+
+            bool operator==(const CrosshairChoice &other) const
+            {
+                return label == other.label &&
+                    id == other.id &&
+                    selected == other.selected;
+            }
+        };
+
         enum class Category
         {
             Game,
+            Hud,
             Graphics,
             Audio,
-            MouseKeyboard
+            MouseKeyboard,
+            Crosshair
         };
 
         bool refresh();
         bool refreshvideo();
         bool refreshaudio();
         bool refreshmouseinput(bool update_edit_buffer = false);
+        bool refreshcrosshair(bool update_edit_buffer = false);
+        bool refreshhud(bool update_edit_buffer = false);
         void commitsensitivity();
+        void commitcrosshairsize();
+        void commitstreakscale();
         void setcategory(Category category);
         void setpresentation(
             settings::PresentationMode presentation,
@@ -78,11 +99,22 @@ namespace cowui
             Rml::Event &event,
             const Rml::VariantList &arguments
         );
+        void selectcrosshair(
+            Rml::DataModelHandle,
+            Rml::Event &event,
+            const Rml::VariantList &arguments
+        );
+        static void appendcrosshairchoice(
+            const settings::CrosshairChoice &choice,
+            void *data
+        );
         static void changefovaction(Rml::Event &event);
         static void gamecategoryaction(Rml::Event &event);
+        static void hudcategoryaction(Rml::Event &event);
         static void graphicscategoryaction(Rml::Event &event);
         static void audiocategoryaction(Rml::Event &event);
         static void mousekeyboardcategoryaction(Rml::Event &event);
+        static void crosshaircategoryaction(Rml::Event &event);
         static void windowedaction(Rml::Event &event);
         static void exclusivefullscreenaction(Rml::Event &event);
         static void desktopfullscreenaction(Rml::Event &event);
@@ -96,9 +128,31 @@ namespace cowui
         static void blursensitivityaction(Rml::Event &event);
         static void commitsensitivityaction(Rml::Event &event);
         static void invertedmouseaction(Rml::Event &event);
+        static void decreasecrosshairsizeaction(Rml::Event &event);
+        static void increasecrosshairsizeaction(Rml::Event &event);
+        static void focuscrosshairsizeaction(Rml::Event &event);
+        static void blurcrosshairsizeaction(Rml::Event &event);
+        static void commitcrosshairsizeaction(Rml::Event &event);
+        static void crosshaireffectsaction(Rml::Event &event);
+        static void crosshairhealthcolorsaction(Rml::Event &event);
+        static void teamcrosshairaction(Rml::Event &event);
+        static void hitcrosshairaction(Rml::Event &event);
+        static void crosshairreloadfadeaction(Rml::Event &event);
+        static void crosshairreloadrotationaction(Rml::Event &event);
+        static void damagescreenaction(Rml::Event &event);
+        static void damagecompassaction(Rml::Event &event);
+        static void fragmessagesoffaction(Rml::Event &event);
+        static void fragmessagesallaction(Rml::Event &event);
+        static void fragmessagesoutsideinstaaction(Rml::Event &event);
+        static void decreasestreakscaleaction(Rml::Event &event);
+        static void increasestreakscaleaction(Rml::Event &event);
+        static void focusstreakscaleaction(Rml::Event &event);
+        static void blurstreakscaleaction(Rml::Event &event);
+        static void commitstreakscaleaction(Rml::Event &event);
 
         Rml::DataModelHandle model;
         std::vector<Resolution> resolutions;
+        std::vector<CrosshairChoice> crosshair_choices;
 
         int fov = 100;
         int fov_minimum = 10;
@@ -147,10 +201,39 @@ namespace cowui
         bool mouse_sensitivity_editing = false;
         bool inverted_mouse = false;
         Rml::String mouse_input_status;
+        int crosshair_selection = -1;
+        Rml::String crosshair_selection_label;
+        int crosshair_size = 30;
+        int crosshair_size_minimum = 0;
+        int crosshair_size_maximum = 50;
+        Rml::String crosshair_size_input;
+        Rml::String crosshair_status;
+        bool crosshair_size_invalid = false;
+        bool crosshair_size_editing = false;
+        bool crosshair_effects = true;
+        bool crosshair_health_colors = true;
+        bool team_crosshair = true;
+        bool hit_crosshair = true;
+        bool crosshair_reload_fade = true;
+        bool crosshair_reload_rotation = true;
+        bool damage_screen = true;
+        bool damage_compass = true;
+        bool frag_messages_off = false;
+        bool frag_messages_all = true;
+        bool frag_messages_outside_insta = false;
+        float streak_milestone_scale = 1.25f;
+        float streak_milestone_scale_minimum = 1.0f;
+        float streak_milestone_scale_maximum = 2.0f;
+        Rml::String streak_milestone_scale_input;
+        Rml::String hud_status;
+        bool streak_milestone_scale_invalid = false;
+        bool streak_milestone_scale_editing = false;
         bool category_game = true;
+        bool category_hud = false;
         bool category_graphics = false;
         bool category_audio = false;
         bool category_mouse_keyboard = false;
+        bool category_crosshair = false;
 
         static RmlSettings *instance;
     };

@@ -33,7 +33,9 @@
                             <span class="settings-nav-index">01</span>
                             <span>Game</span>
                         </button>
-                        <button class="nav-item settings-nav-item" disabled="true">
+                        <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_hud"
+                            onclick="settings.category.hud">
                             <span class="settings-nav-index">02</span>
                             <span>HUD</span>
                         </button>
@@ -55,7 +57,9 @@
                             <span class="settings-nav-index">05</span>
                             <span>Mouse / Keyboard</span>
                         </button>
-                        <button class="nav-item settings-nav-item" disabled="true">
+                        <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_crosshair"
+                            onclick="settings.category.crosshair">
                             <span class="settings-nav-index">06</span>
                             <span>Crosshair</span>
                         </button>
@@ -77,6 +81,12 @@
                             Display mode and VSync report accepted SDL state. Frame limiting uses Cowbraten's existing render scheduler.
                         </div>
                     </div>
+                    <div class="settings-scope-note" data-if="category_hud">
+                        <div class="settings-scope-kicker">Combat Information</div>
+                        <div class="settings-scope-copy">
+                            Damage feedback and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
+                        </div>
+                    </div>
                     <div class="settings-scope-note" data-if="category_audio">
                         <div class="settings-scope-kicker">Existing Sound Mix</div>
                         <div class="settings-scope-copy">
@@ -87,6 +97,12 @@
                         <div class="settings-scope-kicker">Gameplay Mouse</div>
                         <div class="settings-scope-copy">
                             These controls affect relative gameplay look. RmlUi continues to use the operating system's absolute pointer while menus are open.
+                        </div>
+                    </div>
+                    <div class="settings-scope-note" data-if="category_crosshair">
+                        <div class="settings-scope-kicker">Gameplay Reticle</div>
+                        <div class="settings-scope-copy">
+                            Selection loads Sauer's existing normal and hit textures. Dynamic effects remain controlled by the gameplay renderer.
                         </div>
                     </div>
                 </div>
@@ -148,6 +164,100 @@
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Application</div>
                                 <div class="settings-info-value">Immediate</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-page" data-if="category_hud">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">HUD / Combat Feedback</div>
+                            <div class="settings-stage-title">HUD</div>
+                            <div class="settings-stage-copy">
+                                Keep critical combat information readable without changing Cowbraten's existing HUD rendering behavior.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Damage Screen</div>
+                                    <div class="settings-control-description">
+                                        Shows the existing red edge flash when damage is received.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="damage_screen"
+                                        onclick="settings.hud.damage-screen" />
+                                    <span data-if="damage_screen">Enabled</span>
+                                    <span data-if="!damage_screen">Disabled</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Damage Compass</div>
+                                    <div class="settings-control-description">
+                                        Shows Sauer's directional damage wedges around the viewport.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="damage_compass"
+                                        onclick="settings.hud.damage-compass" />
+                                    <span data-if="damage_compass">Enabled</span>
+                                    <span data-if="!damage_compass">Disabled</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Frag &amp; Streak Messages</div>
+                                    <div class="settings-control-description">
+                                        Uses p1x's three-state frag-message policy. Disabling it also hides Cowbraten streak milestones.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-mode-selector settings-hud-mode-selector">
+                                <button class="button settings-mode-button"
+                                    data-class-is-selected="frag_messages_off"
+                                    onclick="settings.hud.frag-messages.off">Off</button>
+                                <button class="button settings-mode-button"
+                                    data-class-is-selected="frag_messages_all"
+                                    onclick="settings.hud.frag-messages.all">All Modes</button>
+                                <button class="button settings-mode-button"
+                                    data-class-is-selected="frag_messages_outside_insta"
+                                    onclick="settings.hud.frag-messages.outside-insta">Hide in Insta</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Streak Milestone Scale</div>
+                                    <div class="settings-control-description">
+                                        Additional size multiplier for Cowbraten's 5, 10, 15, 20, and 25 kill milestone messages.
+                                    </div>
+                                </div>
+                                <div class="settings-stepper">
+                                    <button class="button settings-stepper-button"
+                                        onclick="settings.hud.streak-scale.decrease">-</button>
+                                    <input class="text-input settings-stepper-value"
+                                        type="text" maxlength="8"
+                                        data-value="streak_milestone_scale_input"
+                                        data-class-is-invalid="streak_milestone_scale_invalid"
+                                        onfocus="settings.hud.streak-scale.focus"
+                                        onblur="settings.hud.streak-scale.blur"
+                                        onkeyup="settings.hud.streak-scale.commit" />
+                                    <button class="button settings-stepper-button"
+                                        onclick="settings.hud.streak-scale.increase">+</button>
+                                </div>
+                            </div>
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>Range&nbsp;&nbsp;{{ streak_milestone_scale_minimum }} - {{ streak_milestone_scale_maximum }}&nbsp;&nbsp;//&nbsp;&nbsp;{{ hud_status }}</span>
                             </div>
                         </div>
                     </div>
@@ -486,15 +596,186 @@
                         </div>
                     </div>
 
+                    <div class="settings-page" data-if="category_crosshair">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">HUD / Reticle</div>
+                            <div class="settings-stage-title">Crosshair</div>
+                            <div class="settings-stage-copy">
+                                Select the existing Sauer crosshair pair and configure the gameplay-owned dynamic states.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Crosshair Style</div>
+                                    <div class="settings-control-description">
+                                        Choosing a style loads its normal and hit textures through Sauer's texture manager.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-crosshair-current">
+                                    <span class="settings-fps-value-label">{{ crosshair_selection_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-crosshair-grid">
+                                <div class="settings-crosshair-repeat"
+                                    data-for="choice : crosshair_choices">
+                                    <button class="button settings-crosshair-choice"
+                                        data-class-is-selected="choice.selected"
+                                        data-event-click="select_crosshair(choice.id)">
+                                        {{ choice.label }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Crosshair Size</div>
+                                    <div class="settings-control-description">
+                                        Uses Sauer's exact integer size. Buttons move by one; type a value to commit on Enter or focus loss.
+                                    </div>
+                                </div>
+                                <div class="settings-stepper">
+                                    <button class="button settings-stepper-button"
+                                        onclick="settings.crosshair.size.decrease">-</button>
+                                    <input class="text-input settings-stepper-value"
+                                        type="text" maxlength="3"
+                                        data-value="crosshair_size_input"
+                                        data-class-is-invalid="crosshair_size_invalid"
+                                        onfocus="settings.crosshair.size.focus"
+                                        onblur="settings.crosshair.size.blur"
+                                        onkeyup="settings.crosshair.size.commit" />
+                                    <button class="button settings-stepper-button"
+                                        onclick="settings.crosshair.size.increase">+</button>
+                                </div>
+                            </div>
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>Range&nbsp;&nbsp;{{ crosshair_size_minimum }} - {{ crosshair_size_maximum }}&nbsp;&nbsp;//&nbsp;&nbsp;{{ crosshair_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Dynamic Effects</div>
+                                    <div class="settings-control-description">
+                                        Master switch for teammate, hit, and health-color crosshair states.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="crosshair_effects"
+                                        onclick="settings.crosshair.effects" />
+                                    <span data-if="crosshair_effects">Enabled</span>
+                                    <span data-if="!crosshair_effects">Disabled</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Health Colors</div>
+                                    <div class="settings-control-description">
+                                        Uses inherited low-health crosshair colors outside instagib modes.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="crosshair_health_colors"
+                                        data-attrif-disabled="!crosshair_effects"
+                                        onclick="settings.crosshair.health-colors" />
+                                    <span data-if="crosshair_health_colors">Enabled</span>
+                                    <span data-if="!crosshair_health_colors">Disabled</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Teammate Crosshair</div>
+                                    <div class="settings-control-description">
+                                        Switches to the teammate state when aiming at an ally.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="team_crosshair"
+                                        data-attrif-disabled="!crosshair_effects"
+                                        onclick="settings.crosshair.teammates" />
+                                    <span data-if="team_crosshair">Enabled</span>
+                                    <span data-if="!team_crosshair">Disabled</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Hit Marker</div>
+                                    <div class="settings-control-description">
+                                        Shows the selected hit texture for Sauer's standard 425 ms interval.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hit_crosshair"
+                                        data-attrif-disabled="!crosshair_effects"
+                                        onclick="settings.crosshair.hit-marker" />
+                                    <span data-if="hit_crosshair">Enabled</span>
+                                    <span data-if="!hit_crosshair">Disabled</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Reload Fade</div>
+                                    <div class="settings-control-description">
+                                        p1x rifle reload feedback fades from red to the ready color in instagib.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="crosshair_reload_fade"
+                                        data-attrif-disabled="!crosshair_effects || !crosshair_health_colors"
+                                        onclick="settings.crosshair.reload-fade" />
+                                    <span data-if="crosshair_reload_fade">Enabled</span>
+                                    <span data-if="!crosshair_reload_fade">Disabled</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Reload Rotation</div>
+                                    <div class="settings-control-description">
+                                        Cowbraten rotates the rifle crosshair from 45 degrees back to ready during reload.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="crosshair_reload_rotation"
+                                        onclick="settings.crosshair.reload-rotation" />
+                                    <span data-if="crosshair_reload_rotation">Enabled</span>
+                                    <span data-if="!crosshair_reload_rotation">Disabled</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-unavailable-note">
+                            <div class="settings-info-label">Preview</div>
+                            <div class="settings-info-value">
+                                The live gameplay texture remains authoritative. An in-menu preview waits for production external-image support in the Rml renderer.
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
             <div class="settings-footer">
                 <div>
                     <span data-if="category_game">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Game</span>
+                    <span data-if="category_hud">Settings&nbsp;&nbsp;//&nbsp;&nbsp;HUD</span>
                     <span data-if="category_graphics">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Graphics</span>
                     <span data-if="category_audio">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Audio</span>
                     <span data-if="category_mouse_keyboard">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Mouse / Keyboard</span>
+                    <span data-if="category_crosshair">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Crosshair</span>
                 </div>
                 <div class="settings-footer-help">Escape returns to gameplay</div>
                 <div class="settings-footer-status">

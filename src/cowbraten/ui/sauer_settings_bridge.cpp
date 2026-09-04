@@ -9,6 +9,8 @@ extern int scr_w, scr_h, fullscreendesktop;
 extern bool nosound;
 extern void resetgl();
 extern void screenres(int width, int height);
+extern void loadcrosshair(const char *name, int index);
+extern const char *getcrosshairname(int index);
 
 namespace cowui
 {
@@ -103,6 +105,141 @@ namespace cowui
             return id && id->type == ID_VAR
                 ? id
                 : nullptr;
+        }
+
+        static ident *crosshairsizeident()
+        {
+            ident *id = getident("crosshairsize");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *crosshaireffectsident()
+        {
+            ident *id = getident("crosshairfx");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *crosshairhealthcolorsident()
+        {
+            ident *id = getident("crosshaircolors");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *teamcrosshairident()
+        {
+            ident *id = getident("teamcrosshair");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hitcrosshairident()
+        {
+            ident *id = getident("hitcrosshair");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *crosshairreloadfadeident()
+        {
+            ident *id = getident("crosshairreloadfade");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *crosshairreloadrotationident()
+        {
+            ident *id = getident("crosshairreloadrotate");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *damagescreenident()
+        {
+            ident *id = getident("damagescreen");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *damagecompassident()
+        {
+            ident *id = getident("damagecompass");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *fragmessagesident()
+        {
+            ident *id = getident("hudfragmessages");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *streakmilestonescaleident()
+        {
+            ident *id = getident("streakmilestonescale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        struct CrosshairCatalogEntry
+        {
+            const char *label;
+            const char *normal;
+            const char *hit;
+        };
+
+        static const CrosshairCatalogEntry crosshair_catalog[] =
+        {
+            { "Classic", "data/crosshair.png", "data/hit.png" },
+            { "X", "packages/crosshairs/x.png", "packages/crosshairs/x-hit.png" },
+            { "X Dot", "packages/crosshairs/x_dot.png", "packages/crosshairs/x_dot-hit.png" },
+            { "Circle", "packages/crosshairs/o.png", "packages/crosshairs/o-hit.png" },
+            { "Circle X", "packages/crosshairs/o_x.png", "packages/crosshairs/o_x-hit.png" },
+            { "Circle Dot", "packages/crosshairs/o_dot.png", "packages/crosshairs/o_dot-hit.png" },
+            { "Dot", "packages/crosshairs/dot.png", "packages/crosshairs/dot-hit.png" },
+            { "Wide Dot", "packages/crosshairs/dot_wide.png", "packages/crosshairs/dot_wide-hit.png" },
+            { "Star", "packages/crosshairs/star.png", "packages/crosshairs/star-hit.png" },
+            { "Wide", "packages/crosshairs/wide.png", "packages/crosshairs/wide-hit.png" },
+            { "Circle Dot II", "packages/crosshairs/circle_dot.png", "packages/crosshairs/circle_dot_hit.png" },
+            { "Cross Normal", "packages/crosshairs/cross_normal.png", "packages/crosshairs/cross_normal_hit.png" },
+            { "Cross Whole", "packages/crosshairs/cross_whole.png", "packages/crosshairs/cross_whole_hit.png" },
+            { "Dot Normal", "packages/crosshairs/dot_normal.png", "packages/crosshairs/dot_normal_hit.png" },
+            { "Dot Whole", "packages/crosshairs/dot_whole.png", "packages/crosshairs/dot_whole_hit.png" },
+            { "Dot II", "packages/crosshairs/dot2.png", "packages/crosshairs/dot2_hit.png" }
+        };
+
+        static int selectedcrosshair()
+        {
+            const char *current = getcrosshairname(0);
+            loopi(int(sizeof(crosshair_catalog) / sizeof(crosshair_catalog[0])))
+            {
+                if(!std::strcmp(current, crosshair_catalog[i].normal))
+                    return i;
+            }
+            return -1;
+        }
+
+        static bool writeboolean(ident *id, bool enabled)
+        {
+            if(!id || !id->storage.i)
+                return false;
+
+            setvarchecked(id, enabled ? 1 : 0);
+            return (*id->storage.i != 0) == enabled;
         }
 
         static bool validantialiasing(int samples)
@@ -430,11 +567,205 @@ namespace cowui
         bool writeinvertedmouse(bool enabled)
         {
             ident *id = invertedmouseident();
+            return writeboolean(id, enabled);
+        }
+
+        bool readcrosshair(Crosshair &result)
+        {
+            ident *size_id = crosshairsizeident();
+            ident *effects_id = crosshaireffectsident();
+            ident *colors_id = crosshairhealthcolorsident();
+            ident *team_id = teamcrosshairident();
+            ident *hit_id = hitcrosshairident();
+            ident *fade_id = crosshairreloadfadeident();
+            ident *rotation_id = crosshairreloadrotationident();
+            if(!size_id || !size_id->storage.i ||
+               !effects_id || !effects_id->storage.i ||
+               !colors_id || !colors_id->storage.i ||
+               !team_id || !team_id->storage.i ||
+               !hit_id || !hit_id->storage.i ||
+               !fade_id || !fade_id->storage.i ||
+               !rotation_id || !rotation_id->storage.i)
+            {
+                return false;
+            }
+
+            result.selection = selectedcrosshair();
+            result.size = *size_id->storage.i;
+            result.size_minimum = size_id->minval;
+            result.size_maximum = size_id->maxval;
+            result.effects = *effects_id->storage.i != 0;
+            result.health_colors = *colors_id->storage.i != 0;
+            result.teammates = *team_id->storage.i != 0;
+            result.hit_marker = *hit_id->storage.i > 0;
+            result.reload_fade = *fade_id->storage.i != 0;
+            result.reload_rotation = *rotation_id->storage.i != 0;
+            return true;
+        }
+
+        bool visitcrosshairs(CrosshairChoiceVisitor visitor, void *data)
+        {
+            if(!visitor)
+                return false;
+
+            loopi(int(sizeof(crosshair_catalog) / sizeof(crosshair_catalog[0])))
+            {
+                CrosshairChoice choice;
+                choice.id = i;
+                choice.label = crosshair_catalog[i].label;
+                visitor(choice, data);
+            }
+            return true;
+        }
+
+        bool writecrosshairselection(int selection)
+        {
+            if(selection < 0 ||
+               selection >= int(sizeof(crosshair_catalog) /
+                   sizeof(crosshair_catalog[0])))
+            {
+                return false;
+            }
+
+            const CrosshairCatalogEntry &choice =
+                crosshair_catalog[selection];
+            loadcrosshair(choice.normal, 0);
+            loadcrosshair(choice.hit, 2);
+            return selectedcrosshair() == selection &&
+                !std::strcmp(getcrosshairname(2), choice.hit);
+        }
+
+        bool writecrosshairsize(int size)
+        {
+            ident *id = crosshairsizeident();
+            if(!id || !id->storage.i ||
+               size < id->minval || size > id->maxval)
+            {
+                return false;
+            }
+
+            setvarchecked(id, size);
+            return *id->storage.i == size;
+        }
+
+        bool writecrosshaireffects(bool enabled)
+        {
+            return writeboolean(crosshaireffectsident(), enabled);
+        }
+
+        bool writecrosshairhealthcolors(bool enabled)
+        {
+            return writeboolean(crosshairhealthcolorsident(), enabled);
+        }
+
+        bool writeteamcrosshair(bool enabled)
+        {
+            return writeboolean(teamcrosshairident(), enabled);
+        }
+
+        bool writehitcrosshair(bool enabled)
+        {
+            ident *id = hitcrosshairident();
             if(!id || !id->storage.i)
                 return false;
 
-            setvarchecked(id, enabled ? 1 : 0);
-            return (*id->storage.i != 0) == enabled;
+            const int value = enabled ? 425 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+            setvarchecked(id, value);
+            return (*id->storage.i > 0) == enabled;
+        }
+
+        bool writecrosshairreloadfade(bool enabled)
+        {
+            return writeboolean(crosshairreloadfadeident(), enabled);
+        }
+
+        bool writecrosshairreloadrotation(bool enabled)
+        {
+            return writeboolean(crosshairreloadrotationident(), enabled);
+        }
+
+        bool readhud(Hud &result)
+        {
+            ident *screen_id = damagescreenident();
+            ident *compass_id = damagecompassident();
+            ident *messages_id = fragmessagesident();
+            ident *streak_id = streakmilestonescaleident();
+            if(!screen_id || !screen_id->storage.i ||
+               !compass_id || !compass_id->storage.i ||
+               !messages_id || !messages_id->storage.i ||
+               !streak_id || !streak_id->storage.f)
+            {
+                return false;
+            }
+
+            result.damage_screen = *screen_id->storage.i != 0;
+            result.damage_compass = *compass_id->storage.i != 0;
+            switch(*messages_id->storage.i)
+            {
+                case 0:
+                    result.frag_messages = FragMessagesMode::Off;
+                    break;
+                case 2:
+                    result.frag_messages = FragMessagesMode::OutsideInsta;
+                    break;
+                default:
+                    result.frag_messages = FragMessagesMode::AllModes;
+                    break;
+            }
+            result.streak_milestone_scale = *streak_id->storage.f;
+            result.streak_milestone_scale_minimum = streak_id->minvalf;
+            result.streak_milestone_scale_maximum = streak_id->maxvalf;
+            return true;
+        }
+
+        bool writedamagescreen(bool enabled)
+        {
+            return writeboolean(damagescreenident(), enabled);
+        }
+
+        bool writedamagecompass(bool enabled)
+        {
+            return writeboolean(damagecompassident(), enabled);
+        }
+
+        bool writefragmessages(FragMessagesMode mode)
+        {
+            ident *id = fragmessagesident();
+            if(!id || !id->storage.i)
+                return false;
+
+            int value = 0;
+            switch(mode)
+            {
+                case FragMessagesMode::Off:
+                    value = 0;
+                    break;
+                case FragMessagesMode::AllModes:
+                    value = 1;
+                    break;
+                case FragMessagesMode::OutsideInsta:
+                    value = 2;
+                    break;
+            }
+            if(value < id->minval || value > id->maxval)
+                return false;
+            setvarchecked(id, value);
+            return *id->storage.i == value;
+        }
+
+        bool writestreakmilestonescale(float value)
+        {
+            ident *id = streakmilestonescaleident();
+            if(!id || !id->storage.f || !finitefloat(value) ||
+               value < id->minvalf || value > id->maxvalf)
+            {
+                return false;
+            }
+
+            setfvarchecked(id, value);
+            return *id->storage.f == value;
         }
     }
 }

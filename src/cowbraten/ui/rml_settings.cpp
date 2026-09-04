@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <climits>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -59,7 +60,7 @@ namespace cowui
         return text;
     }
 
-    static bool parsesensitivity(const Rml::String &text, float &value)
+    static bool parsefloat(const Rml::String &text, float &value)
     {
         if(text.empty())
             return false;
@@ -79,12 +80,55 @@ namespace cowui
         return true;
     }
 
+    static bool parseinteger(const Rml::String &text, int &value)
+    {
+        if(text.empty())
+            return false;
+
+        char *end = nullptr;
+        errno = 0;
+        const long parsed = std::strtol(text.c_str(), &end, 10);
+        if(end == text.c_str() || errno == ERANGE ||
+           parsed < INT_MIN || parsed > INT_MAX)
+        {
+            return false;
+        }
+
+        while(*end == ' ' || *end == '\t' || *end == '\r' || *end == '\n')
+            ++end;
+        if(*end)
+            return false;
+
+        value = int(parsed);
+        return true;
+    }
+
     static float stepsensitivity(float value, int direction)
     {
         const double stepped = std::round(
             (double(value) + double(direction) * 0.01) * 100.0
         ) / 100.0;
         return float(stepped);
+    }
+
+    static float stepstreakscale(float value, int direction)
+    {
+        const double stepped = std::round(
+            (double(value) + double(direction) * 0.05) * 100.0
+        ) / 100.0;
+        return float(stepped);
+    }
+
+    void RmlSettings::appendcrosshairchoice(
+        const settings::CrosshairChoice &choice,
+        void *data)
+    {
+        std::vector<RmlSettings::CrosshairChoice> &choices =
+            *static_cast<std::vector<RmlSettings::CrosshairChoice> *>(data);
+        RmlSettings::CrosshairChoice row;
+        row.id = choice.id;
+        row.label = choice.label;
+        choices.push_back(row);
     }
 
     bool RmlSettings::init(
@@ -121,9 +165,34 @@ namespace cowui
             valid = false;
         }
 
+        if(auto choice = constructor.RegisterStruct<CrosshairChoice>())
+        {
+            valid = valid &&
+                choice.RegisterMember(
+                    "label",
+                    &CrosshairChoice::label
+                ) &&
+                choice.RegisterMember("id", &CrosshairChoice::id) &&
+                choice.RegisterMember(
+                    "selected",
+                    &CrosshairChoice::selected
+                );
+        }
+        else valid = false;
+
+        if(valid)
+        {
+            valid = settings::visitcrosshairs(
+                appendcrosshairchoice,
+                &crosshair_choices
+            );
+        }
+
         valid = valid &&
             constructor.RegisterArray<std::vector<Resolution>>() &&
+            constructor.RegisterArray<std::vector<CrosshairChoice>>() &&
             constructor.Bind("resolutions", &resolutions) &&
+            constructor.Bind("crosshair_choices", &crosshair_choices) &&
             constructor.Bind("fov", &fov) &&
             constructor.Bind("fov_minimum", &fov_minimum) &&
             constructor.Bind("fov_maximum", &fov_maximum) &&
@@ -233,7 +302,74 @@ namespace cowui
                 "mouse_input_status",
                 &mouse_input_status
             ) &&
+            constructor.Bind(
+                "crosshair_selection_label",
+                &crosshair_selection_label
+            ) &&
+            constructor.Bind("crosshair_size", &crosshair_size) &&
+            constructor.Bind(
+                "crosshair_size_minimum",
+                &crosshair_size_minimum
+            ) &&
+            constructor.Bind(
+                "crosshair_size_maximum",
+                &crosshair_size_maximum
+            ) &&
+            constructor.Bind(
+                "crosshair_size_input",
+                &crosshair_size_input
+            ) &&
+            constructor.Bind(
+                "crosshair_size_invalid",
+                &crosshair_size_invalid
+            ) &&
+            constructor.Bind("crosshair_status", &crosshair_status) &&
+            constructor.Bind("crosshair_effects", &crosshair_effects) &&
+            constructor.Bind(
+                "crosshair_health_colors",
+                &crosshair_health_colors
+            ) &&
+            constructor.Bind("team_crosshair", &team_crosshair) &&
+            constructor.Bind("hit_crosshair", &hit_crosshair) &&
+            constructor.Bind(
+                "crosshair_reload_fade",
+                &crosshair_reload_fade
+            ) &&
+            constructor.Bind(
+                "crosshair_reload_rotation",
+                &crosshair_reload_rotation
+            ) &&
+            constructor.Bind("damage_screen", &damage_screen) &&
+            constructor.Bind("damage_compass", &damage_compass) &&
+            constructor.Bind("frag_messages_off", &frag_messages_off) &&
+            constructor.Bind("frag_messages_all", &frag_messages_all) &&
+            constructor.Bind(
+                "frag_messages_outside_insta",
+                &frag_messages_outside_insta
+            ) &&
+            constructor.Bind(
+                "streak_milestone_scale",
+                &streak_milestone_scale
+            ) &&
+            constructor.Bind(
+                "streak_milestone_scale_minimum",
+                &streak_milestone_scale_minimum
+            ) &&
+            constructor.Bind(
+                "streak_milestone_scale_maximum",
+                &streak_milestone_scale_maximum
+            ) &&
+            constructor.Bind(
+                "streak_milestone_scale_input",
+                &streak_milestone_scale_input
+            ) &&
+            constructor.Bind(
+                "streak_milestone_scale_invalid",
+                &streak_milestone_scale_invalid
+            ) &&
+            constructor.Bind("hud_status", &hud_status) &&
             constructor.Bind("category_game", &category_game) &&
+            constructor.Bind("category_hud", &category_hud) &&
             constructor.Bind(
                 "category_graphics",
                 &category_graphics
@@ -246,6 +382,10 @@ namespace cowui
                 "category_mouse_keyboard",
                 &category_mouse_keyboard
             ) &&
+            constructor.Bind(
+                "category_crosshair",
+                &category_crosshair
+            ) &&
             constructor.BindEventCallback(
                 "select_resolution",
                 &RmlSettings::selectresolution,
@@ -254,6 +394,11 @@ namespace cowui
             constructor.BindEventCallback(
                 "select_antialiasing",
                 &RmlSettings::selectantialiasing,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_crosshair",
+                &RmlSettings::selectcrosshair,
                 this
             );
 
@@ -267,6 +412,10 @@ namespace cowui
                 gamecategoryaction
             ) &&
             router.registeraction(
+                "settings.category.hud",
+                hudcategoryaction
+            ) &&
+            router.registeraction(
                 "settings.category.graphics",
                 graphicscategoryaction
             ) &&
@@ -277,6 +426,10 @@ namespace cowui
             router.registeraction(
                 "settings.category.mouse-keyboard",
                 mousekeyboardcategoryaction
+            ) &&
+            router.registeraction(
+                "settings.category.crosshair",
+                crosshaircategoryaction
             ) &&
             router.registeraction(
                 "settings.presentation.windowed",
@@ -329,6 +482,90 @@ namespace cowui
             router.registeraction(
                 "settings.input.inverted-mouse",
                 invertedmouseaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.size.decrease",
+                decreasecrosshairsizeaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.size.increase",
+                increasecrosshairsizeaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.size.focus",
+                focuscrosshairsizeaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.size.blur",
+                blurcrosshairsizeaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.size.commit",
+                commitcrosshairsizeaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.effects",
+                crosshaireffectsaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.health-colors",
+                crosshairhealthcolorsaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.teammates",
+                teamcrosshairaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.hit-marker",
+                hitcrosshairaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.reload-fade",
+                crosshairreloadfadeaction
+            ) &&
+            router.registeraction(
+                "settings.crosshair.reload-rotation",
+                crosshairreloadrotationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.damage-screen",
+                damagescreenaction
+            ) &&
+            router.registeraction(
+                "settings.hud.damage-compass",
+                damagecompassaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.off",
+                fragmessagesoffaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.all",
+                fragmessagesallaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.outside-insta",
+                fragmessagesoutsideinstaaction
+            ) &&
+            router.registeraction(
+                "settings.hud.streak-scale.decrease",
+                decreasestreakscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.streak-scale.increase",
+                increasestreakscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.streak-scale.focus",
+                focusstreakscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.streak-scale.blur",
+                blurstreakscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.streak-scale.commit",
+                commitstreakscaleaction
             );
 
         if(!valid)
@@ -341,6 +578,7 @@ namespace cowui
         instance = this;
         video_status = "Live engine state";
         vsync_status = "Runtime state";
+        crosshair_status = "Immediate / existing Sauer config";
         refresh();
         return true;
     }
@@ -355,6 +593,7 @@ namespace cowui
 
         model = Rml::DataModelHandle();
         resolutions.clear();
+        crosshair_choices.clear();
         fov = 100;
         fov_minimum = 10;
         fov_maximum = 150;
@@ -401,10 +640,39 @@ namespace cowui
         mouse_sensitivity_editing = false;
         inverted_mouse = false;
         mouse_input_status.clear();
+        crosshair_selection = -1;
+        crosshair_selection_label.clear();
+        crosshair_size = 30;
+        crosshair_size_minimum = 0;
+        crosshair_size_maximum = 50;
+        crosshair_size_input.clear();
+        crosshair_status.clear();
+        crosshair_size_invalid = false;
+        crosshair_size_editing = false;
+        crosshair_effects = true;
+        crosshair_health_colors = true;
+        team_crosshair = true;
+        hit_crosshair = true;
+        crosshair_reload_fade = true;
+        crosshair_reload_rotation = true;
+        damage_screen = true;
+        damage_compass = true;
+        frag_messages_off = false;
+        frag_messages_all = true;
+        frag_messages_outside_insta = false;
+        streak_milestone_scale = 1.25f;
+        streak_milestone_scale_minimum = 1.0f;
+        streak_milestone_scale_maximum = 2.0f;
+        streak_milestone_scale_input.clear();
+        hud_status.clear();
+        streak_milestone_scale_invalid = false;
+        streak_milestone_scale_editing = false;
         category_game = true;
+        category_hud = false;
         category_graphics = false;
         category_audio = false;
         category_mouse_keyboard = false;
+        category_crosshair = false;
     }
 
     void RmlSettings::activate()
@@ -484,7 +752,11 @@ namespace cowui
             return false;
         if(!refreshaudio())
             return false;
-        return refreshmouseinput(!mouse_sensitivity_editing);
+        if(!refreshmouseinput(!mouse_sensitivity_editing))
+            return false;
+        if(!refreshcrosshair(!crosshair_size_editing))
+            return false;
+        return refreshhud(!streak_milestone_scale_editing);
     }
 
     bool RmlSettings::refreshvideo()
@@ -888,10 +1160,184 @@ namespace cowui
         return true;
     }
 
+    bool RmlSettings::refreshcrosshair(bool update_edit_buffer)
+    {
+        settings::Crosshair current;
+        if(!settings::readcrosshair(current))
+            return false;
+
+        if(crosshair_selection != current.selection)
+        {
+            crosshair_selection = current.selection;
+        }
+
+        Rml::String selection_label = "Custom";
+        bool choices_changed = false;
+        for(std::vector<CrosshairChoice>::iterator choice =
+                crosshair_choices.begin();
+            choice != crosshair_choices.end();
+            ++choice)
+        {
+            const bool selected = choice->id == current.selection;
+            if(choice->selected != selected)
+            {
+                choice->selected = selected;
+                choices_changed = true;
+            }
+            if(selected)
+                selection_label = choice->label;
+        }
+        if(choices_changed)
+            model.DirtyVariable("crosshair_choices");
+        if(crosshair_selection_label != selection_label)
+        {
+            crosshair_selection_label = selection_label;
+            model.DirtyVariable("crosshair_selection_label");
+        }
+
+        if(crosshair_size != current.size)
+        {
+            crosshair_size = current.size;
+            model.DirtyVariable("crosshair_size");
+        }
+        if(crosshair_size_minimum != current.size_minimum)
+        {
+            crosshair_size_minimum = current.size_minimum;
+            model.DirtyVariable("crosshair_size_minimum");
+        }
+        if(crosshair_size_maximum != current.size_maximum)
+        {
+            crosshair_size_maximum = current.size_maximum;
+            model.DirtyVariable("crosshair_size_maximum");
+        }
+
+        char size_text[16];
+        std::snprintf(size_text, sizeof(size_text), "%d", current.size);
+        if(update_edit_buffer && crosshair_size_input != size_text)
+        {
+            crosshair_size_input = size_text;
+            model.DirtyVariable("crosshair_size_input");
+        }
+
+        if(crosshair_effects != current.effects)
+        {
+            crosshair_effects = current.effects;
+            model.DirtyVariable("crosshair_effects");
+        }
+        if(crosshair_health_colors != current.health_colors)
+        {
+            crosshair_health_colors = current.health_colors;
+            model.DirtyVariable("crosshair_health_colors");
+        }
+        if(team_crosshair != current.teammates)
+        {
+            team_crosshair = current.teammates;
+            model.DirtyVariable("team_crosshair");
+        }
+        if(hit_crosshair != current.hit_marker)
+        {
+            hit_crosshair = current.hit_marker;
+            model.DirtyVariable("hit_crosshair");
+        }
+        if(crosshair_reload_fade != current.reload_fade)
+        {
+            crosshair_reload_fade = current.reload_fade;
+            model.DirtyVariable("crosshair_reload_fade");
+        }
+        if(crosshair_reload_rotation != current.reload_rotation)
+        {
+            crosshair_reload_rotation = current.reload_rotation;
+            model.DirtyVariable("crosshair_reload_rotation");
+        }
+        return true;
+    }
+
+    bool RmlSettings::refreshhud(bool update_edit_buffer)
+    {
+        settings::Hud current;
+        if(!settings::readhud(current))
+            return false;
+
+        if(damage_screen != current.damage_screen)
+        {
+            damage_screen = current.damage_screen;
+            model.DirtyVariable("damage_screen");
+        }
+        if(damage_compass != current.damage_compass)
+        {
+            damage_compass = current.damage_compass;
+            model.DirtyVariable("damage_compass");
+        }
+
+        const bool messages_off = current.frag_messages ==
+            settings::FragMessagesMode::Off;
+        const bool messages_all = current.frag_messages ==
+            settings::FragMessagesMode::AllModes;
+        const bool messages_outside_insta = current.frag_messages ==
+            settings::FragMessagesMode::OutsideInsta;
+        if(frag_messages_off != messages_off)
+        {
+            frag_messages_off = messages_off;
+            model.DirtyVariable("frag_messages_off");
+        }
+        if(frag_messages_all != messages_all)
+        {
+            frag_messages_all = messages_all;
+            model.DirtyVariable("frag_messages_all");
+        }
+        if(frag_messages_outside_insta != messages_outside_insta)
+        {
+            frag_messages_outside_insta = messages_outside_insta;
+            model.DirtyVariable("frag_messages_outside_insta");
+        }
+
+        if(streak_milestone_scale != current.streak_milestone_scale)
+        {
+            streak_milestone_scale = current.streak_milestone_scale;
+            model.DirtyVariable("streak_milestone_scale");
+        }
+        if(streak_milestone_scale_minimum !=
+           current.streak_milestone_scale_minimum)
+        {
+            streak_milestone_scale_minimum =
+                current.streak_milestone_scale_minimum;
+            model.DirtyVariable("streak_milestone_scale_minimum");
+        }
+        if(streak_milestone_scale_maximum !=
+           current.streak_milestone_scale_maximum)
+        {
+            streak_milestone_scale_maximum =
+                current.streak_milestone_scale_maximum;
+            model.DirtyVariable("streak_milestone_scale_maximum");
+        }
+
+        const Rml::String scale_text = formatsensitivity(
+            current.streak_milestone_scale
+        );
+        if(update_edit_buffer &&
+           streak_milestone_scale_input != scale_text)
+        {
+            streak_milestone_scale_input = scale_text;
+            model.DirtyVariable("streak_milestone_scale_input");
+        }
+
+        const char *status = messages_off
+            ? "Frag and streak messages disabled"
+            : (messages_outside_insta
+                ? "Messages hidden in instagib modes"
+                : "Frag and streak messages active in all modes");
+        if(hud_status != status)
+        {
+            hud_status = status;
+            model.DirtyVariable("hud_status");
+        }
+        return true;
+    }
+
     void RmlSettings::commitsensitivity()
     {
         float requested = 0.0f;
-        const bool accepted = parsesensitivity(
+        const bool accepted = parsefloat(
                 mouse_sensitivity_input,
                 requested
             ) &&
@@ -906,17 +1352,60 @@ namespace cowui
         refreshmouseinput(true);
     }
 
+    void RmlSettings::commitcrosshairsize()
+    {
+        int requested = 0;
+        const bool accepted = parseinteger(
+                crosshair_size_input,
+                requested
+            ) &&
+            settings::writecrosshairsize(requested);
+
+        crosshair_size_invalid = !accepted;
+        model.DirtyVariable("crosshair_size_invalid");
+        crosshair_status = accepted
+            ? "Crosshair size applied"
+            : "Invalid size; restored the last effective setting";
+        model.DirtyVariable("crosshair_status");
+        refreshcrosshair(true);
+    }
+
+    void RmlSettings::commitstreakscale()
+    {
+        float requested = 0.0f;
+        const bool accepted = parsefloat(
+                streak_milestone_scale_input,
+                requested
+            ) &&
+            settings::writestreakmilestonescale(requested);
+
+        streak_milestone_scale_invalid = !accepted;
+        model.DirtyVariable("streak_milestone_scale_invalid");
+        refreshhud(true);
+        hud_status = accepted
+            ? "Streak milestone scale applied"
+            : "Invalid scale; restored the last effective setting";
+        model.DirtyVariable("hud_status");
+    }
+
     void RmlSettings::setcategory(Category category)
     {
         const bool game = category == Category::Game;
+        const bool hud = category == Category::Hud;
         const bool graphics = category == Category::Graphics;
         const bool audio = category == Category::Audio;
         const bool mouse_keyboard = category ==
             Category::MouseKeyboard;
+        const bool crosshair = category == Category::Crosshair;
         if(category_game != game)
         {
             category_game = game;
             model.DirtyVariable("category_game");
+        }
+        if(category_hud != hud)
+        {
+            category_hud = hud;
+            model.DirtyVariable("category_hud");
         }
         if(category_graphics != graphics)
         {
@@ -933,6 +1422,16 @@ namespace cowui
             category_mouse_keyboard = mouse_keyboard;
             model.DirtyVariable("category_mouse_keyboard");
         }
+        if(category_crosshair != crosshair)
+        {
+            category_crosshair = crosshair;
+            model.DirtyVariable("category_crosshair");
+        }
+
+        if(hud)
+            refreshhud(!streak_milestone_scale_editing);
+        else if(crosshair)
+            refreshcrosshair(!crosshair_size_editing);
     }
 
     void RmlSettings::setpresentation(
@@ -1038,6 +1537,42 @@ namespace cowui
         event.StopPropagation();
     }
 
+    void RmlSettings::selectcrosshair(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 1)
+            return;
+
+        const int selection = arguments[0].Get<int>();
+        bool advertised = false;
+        for(std::vector<CrosshairChoice>::const_iterator choice =
+                crosshair_choices.begin();
+            choice != crosshair_choices.end();
+            ++choice)
+        {
+            if(choice->id == selection)
+            {
+                advertised = true;
+                break;
+            }
+        }
+
+        if(!advertised || !settings::writecrosshairselection(selection))
+        {
+            crosshair_status = "Crosshair selection was rejected";
+            model.DirtyVariable("crosshair_status");
+        }
+        else
+        {
+            crosshair_status = "Crosshair textures loaded by Sauer";
+            model.DirtyVariable("crosshair_status");
+        }
+        refreshcrosshair();
+        event.StopPropagation();
+    }
+
     void RmlSettings::changefovaction(Rml::Event &event)
     {
         if(!instance)
@@ -1067,6 +1602,13 @@ namespace cowui
         event.StopPropagation();
     }
 
+    void RmlSettings::hudcategoryaction(Rml::Event &event)
+    {
+        if(instance)
+            instance->setcategory(Category::Hud);
+        event.StopPropagation();
+    }
+
     void RmlSettings::graphicscategoryaction(Rml::Event &event)
     {
         if(instance)
@@ -1085,6 +1627,13 @@ namespace cowui
     {
         if(instance)
             instance->setcategory(Category::MouseKeyboard);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::crosshaircategoryaction(Rml::Event &event)
+    {
+        if(instance)
+            instance->setcategory(Category::Crosshair);
         event.StopPropagation();
     }
 
@@ -1313,5 +1862,287 @@ namespace cowui
 
         instance->refreshmouseinput();
         event.StopPropagation();
+    }
+
+    void RmlSettings::decreasecrosshairsizeaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = std::max(
+            instance->crosshair_size_minimum,
+            instance->crosshair_size - 1
+        );
+        const bool accepted = settings::writecrosshairsize(requested);
+        instance->crosshair_size_invalid = false;
+        instance->model.DirtyVariable("crosshair_size_invalid");
+        instance->crosshair_status = accepted
+            ? "Crosshair size adjusted by 1"
+            : "Crosshair size change was rejected";
+        instance->model.DirtyVariable("crosshair_status");
+        instance->refreshcrosshair(true);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasecrosshairsizeaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = std::min(
+            instance->crosshair_size_maximum,
+            instance->crosshair_size + 1
+        );
+        const bool accepted = settings::writecrosshairsize(requested);
+        instance->crosshair_size_invalid = false;
+        instance->model.DirtyVariable("crosshair_size_invalid");
+        instance->crosshair_status = accepted
+            ? "Crosshair size adjusted by 1"
+            : "Crosshair size change was rejected";
+        instance->model.DirtyVariable("crosshair_status");
+        instance->refreshcrosshair(true);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focuscrosshairsizeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->crosshair_size_editing = true;
+            if(instance->crosshair_size_invalid)
+            {
+                instance->crosshair_size_invalid = false;
+                instance->model.DirtyVariable("crosshair_size_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurcrosshairsizeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitcrosshairsize();
+            instance->crosshair_size_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitcrosshairsizeaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitcrosshairsize();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::crosshaireffectsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writecrosshaireffects(!instance->crosshair_effects);
+            instance->refreshcrosshair();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::crosshairhealthcolorsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writecrosshairhealthcolors(
+                !instance->crosshair_health_colors
+            );
+            instance->refreshcrosshair();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::teamcrosshairaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writeteamcrosshair(!instance->team_crosshair);
+            instance->refreshcrosshair();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::hitcrosshairaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writehitcrosshair(!instance->hit_crosshair);
+            instance->refreshcrosshair();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::crosshairreloadfadeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writecrosshairreloadfade(
+                !instance->crosshair_reload_fade
+            );
+            instance->refreshcrosshair();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::crosshairreloadrotationaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writecrosshairreloadrotation(
+                !instance->crosshair_reload_rotation
+            );
+            instance->refreshcrosshair();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::damagescreenaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writedamagescreen(!instance->damage_screen);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::damagecompassaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writedamagecompass(!instance->damage_compass);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessagesoffaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writefragmessages(settings::FragMessagesMode::Off);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessagesallaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writefragmessages(
+                settings::FragMessagesMode::AllModes
+            );
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessagesoutsideinstaaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writefragmessages(
+                settings::FragMessagesMode::OutsideInsta
+            );
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::decreasestreakscaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::max(
+            instance->streak_milestone_scale_minimum,
+            stepstreakscale(instance->streak_milestone_scale, -1)
+        );
+        const bool accepted = settings::writestreakmilestonescale(requested);
+        instance->streak_milestone_scale_invalid = false;
+        instance->model.DirtyVariable(
+            "streak_milestone_scale_invalid"
+        );
+        instance->refreshhud(true);
+        instance->hud_status = accepted
+            ? "Streak scale adjusted by 0.05"
+            : "Streak scale change was rejected";
+        instance->model.DirtyVariable("hud_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasestreakscaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::min(
+            instance->streak_milestone_scale_maximum,
+            stepstreakscale(instance->streak_milestone_scale, 1)
+        );
+        const bool accepted = settings::writestreakmilestonescale(requested);
+        instance->streak_milestone_scale_invalid = false;
+        instance->model.DirtyVariable(
+            "streak_milestone_scale_invalid"
+        );
+        instance->refreshhud(true);
+        instance->hud_status = accepted
+            ? "Streak scale adjusted by 0.05"
+            : "Streak scale change was rejected";
+        instance->model.DirtyVariable("hud_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusstreakscaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->streak_milestone_scale_editing = true;
+            if(instance->streak_milestone_scale_invalid)
+            {
+                instance->streak_milestone_scale_invalid = false;
+                instance->model.DirtyVariable(
+                    "streak_milestone_scale_invalid"
+                );
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurstreakscaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitstreakscale();
+            instance->streak_milestone_scale_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitstreakscaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitstreakscale();
+            event.StopPropagation();
+        }
     }
 }

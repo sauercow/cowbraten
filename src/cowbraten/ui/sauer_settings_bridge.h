@@ -64,6 +64,43 @@ namespace cowui
             bool inverted;
         };
 
+        struct Crosshair
+        {
+            int selection;
+            int size;
+            int size_minimum;
+            int size_maximum;
+            bool effects;
+            bool health_colors;
+            bool teammates;
+            bool hit_marker;
+            bool reload_fade;
+            bool reload_rotation;
+        };
+
+        struct CrosshairChoice
+        {
+            int id;
+            const char *label;
+        };
+
+        enum class FragMessagesMode
+        {
+            Off,
+            AllModes,
+            OutsideInsta
+        };
+
+        struct Hud
+        {
+            bool damage_screen;
+            bool damage_compass;
+            FragMessagesMode frag_messages;
+            float streak_milestone_scale;
+            float streak_milestone_scale_minimum;
+            float streak_milestone_scale_maximum;
+        };
+
         struct Resolution
         {
             int width;
@@ -72,6 +109,11 @@ namespace cowui
 
         typedef void (*ResolutionVisitor)(
             const Resolution &resolution,
+            void *data
+        );
+
+        typedef void (*CrosshairChoiceVisitor)(
+            const CrosshairChoice &choice,
             void *data
         );
 
@@ -100,6 +142,23 @@ namespace cowui
         bool readmouseinput(MouseInput &result);
         bool writesensitivity(float value);
         bool writeinvertedmouse(bool enabled);
+
+        bool readcrosshair(Crosshair &result);
+        bool visitcrosshairs(CrosshairChoiceVisitor visitor, void *data);
+        bool writecrosshairselection(int selection);
+        bool writecrosshairsize(int size);
+        bool writecrosshaireffects(bool enabled);
+        bool writecrosshairhealthcolors(bool enabled);
+        bool writeteamcrosshair(bool enabled);
+        bool writehitcrosshair(bool enabled);
+        bool writecrosshairreloadfade(bool enabled);
+        bool writecrosshairreloadrotation(bool enabled);
+
+        bool readhud(Hud &result);
+        bool writedamagescreen(bool enabled);
+        bool writedamagecompass(bool enabled);
+        bool writefragmessages(FragMessagesMode mode);
+        bool writestreakmilestonescale(float value);
     }
 }
 

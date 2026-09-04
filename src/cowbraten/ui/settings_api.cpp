@@ -36,6 +36,36 @@ namespace cowui
             return sauersettings::PresentationMode::Windowed;
         }
 
+        static FragMessagesMode fragmessagesmode(
+            sauersettings::FragMessagesMode mode)
+        {
+            switch(mode)
+            {
+                case sauersettings::FragMessagesMode::Off:
+                    return FragMessagesMode::Off;
+                case sauersettings::FragMessagesMode::AllModes:
+                    return FragMessagesMode::AllModes;
+                case sauersettings::FragMessagesMode::OutsideInsta:
+                    return FragMessagesMode::OutsideInsta;
+            }
+            return FragMessagesMode::Off;
+        }
+
+        static sauersettings::FragMessagesMode fragmessagesmode(
+            FragMessagesMode mode)
+        {
+            switch(mode)
+            {
+                case FragMessagesMode::Off:
+                    return sauersettings::FragMessagesMode::Off;
+                case FragMessagesMode::AllModes:
+                    return sauersettings::FragMessagesMode::AllModes;
+                case FragMessagesMode::OutsideInsta:
+                    return sauersettings::FragMessagesMode::OutsideInsta;
+            }
+            return sauersettings::FragMessagesMode::Off;
+        }
+
         bool readfov(Fov &result)
         {
             sauersettings::Fov legacy;
@@ -216,6 +246,136 @@ namespace cowui
         bool writeinvertedmouse(bool enabled)
         {
             return sauersettings::writeinvertedmouse(enabled);
+        }
+
+        bool readcrosshair(Crosshair &result)
+        {
+            sauersettings::Crosshair legacy;
+            if(!sauersettings::readcrosshair(legacy))
+                return false;
+
+            result.selection = legacy.selection;
+            result.size = legacy.size;
+            result.size_minimum = legacy.size_minimum;
+            result.size_maximum = legacy.size_maximum;
+            result.effects = legacy.effects;
+            result.health_colors = legacy.health_colors;
+            result.teammates = legacy.teammates;
+            result.hit_marker = legacy.hit_marker;
+            result.reload_fade = legacy.reload_fade;
+            result.reload_rotation = legacy.reload_rotation;
+            return true;
+        }
+
+        struct CrosshairChoiceAdapter
+        {
+            CrosshairChoiceVisitor visitor;
+            void *data;
+        };
+
+        static void visitcrosshairchoice(
+            const sauersettings::CrosshairChoice &legacy,
+            void *data)
+        {
+            CrosshairChoiceAdapter &adapter =
+                *static_cast<CrosshairChoiceAdapter *>(data);
+            CrosshairChoice choice;
+            choice.id = legacy.id;
+            choice.label = legacy.label;
+            adapter.visitor(choice, adapter.data);
+        }
+
+        bool visitcrosshairs(CrosshairChoiceVisitor visitor, void *data)
+        {
+            if(!visitor)
+                return false;
+
+            CrosshairChoiceAdapter adapter;
+            adapter.visitor = visitor;
+            adapter.data = data;
+            return sauersettings::visitcrosshairs(
+                visitcrosshairchoice,
+                &adapter
+            );
+        }
+
+        bool writecrosshairselection(int selection)
+        {
+            return sauersettings::writecrosshairselection(selection);
+        }
+
+        bool writecrosshairsize(int size)
+        {
+            return sauersettings::writecrosshairsize(size);
+        }
+
+        bool writecrosshaireffects(bool enabled)
+        {
+            return sauersettings::writecrosshaireffects(enabled);
+        }
+
+        bool writecrosshairhealthcolors(bool enabled)
+        {
+            return sauersettings::writecrosshairhealthcolors(enabled);
+        }
+
+        bool writeteamcrosshair(bool enabled)
+        {
+            return sauersettings::writeteamcrosshair(enabled);
+        }
+
+        bool writehitcrosshair(bool enabled)
+        {
+            return sauersettings::writehitcrosshair(enabled);
+        }
+
+        bool writecrosshairreloadfade(bool enabled)
+        {
+            return sauersettings::writecrosshairreloadfade(enabled);
+        }
+
+        bool writecrosshairreloadrotation(bool enabled)
+        {
+            return sauersettings::writecrosshairreloadrotation(enabled);
+        }
+
+        bool readhud(Hud &result)
+        {
+            sauersettings::Hud legacy;
+            if(!sauersettings::readhud(legacy))
+                return false;
+
+            result.damage_screen = legacy.damage_screen;
+            result.damage_compass = legacy.damage_compass;
+            result.frag_messages = fragmessagesmode(legacy.frag_messages);
+            result.streak_milestone_scale = legacy.streak_milestone_scale;
+            result.streak_milestone_scale_minimum =
+                legacy.streak_milestone_scale_minimum;
+            result.streak_milestone_scale_maximum =
+                legacy.streak_milestone_scale_maximum;
+            return true;
+        }
+
+        bool writedamagescreen(bool enabled)
+        {
+            return sauersettings::writedamagescreen(enabled);
+        }
+
+        bool writedamagecompass(bool enabled)
+        {
+            return sauersettings::writedamagecompass(enabled);
+        }
+
+        bool writefragmessages(FragMessagesMode mode)
+        {
+            return sauersettings::writefragmessages(
+                fragmessagesmode(mode)
+            );
+        }
+
+        bool writestreakmilestonescale(float value)
+        {
+            return sauersettings::writestreakmilestonescale(value);
         }
     }
 }

@@ -42,6 +42,14 @@ The small C++ screen table owns explicit screen identifiers and asset paths. It
 lazily loads each document once, caches it for the RmlUi context lifetime, and
 shows or hides documents on transitions.
 
+`data/cowbraten/ui/default/` is the current default theme, not an engine-owned
+layout contract. Concrete default screen and font paths are centralized in
+`ui.cpp`; settings models and actions do not reference DOM ids, classes, RML
+hierarchy, pixel positions, or style values. A future theme resolver may replace
+those physical paths while retaining the same `ScreenId`, typed model fields,
+and whitelisted action names. RML and RCSS remain responsible for arranging and
+presenting that semantic contract.
+
 Only implemented screens receive identifiers. Main, Servers, and Settings are
 the current production identifiers, while Test remains a developer-only
 identifier. Later screens are added to the table when their documents and
@@ -231,3 +239,40 @@ No keyboard binding API is exposed yet. A future binding milestone must own
 capture state, cancellation, conflict policy, multiple bindings, readable key
 names, and persistence explicitly; it must not pass arbitrary bind commands
 from markup.
+
+The first Crosshair slice follows the same fixed-name boundary. Its value
+snapshot contains the persistent `crosshairsize`, `crosshairfx`,
+`crosshaircolors`, `teamcrosshair`, `hitcrosshair`, `crosshairreloadfade`, and
+`crosshairreloadrotate` settings. Size retains Sauer's declared integer
+`0..50` range and uses a local edit buffer, so incomplete text is not written
+while typing. The hit marker remains a boolean UI operation and reuses the
+legacy menu's standard 425 ms enabled value; this slice does not expose the
+underlying duration as a new product control.
+
+Crosshair selection is not an ident. The legacy bridge owns the same fixed
+normal/hit texture pairs advertised by `menus.cfg`, gives RmlUi stable numeric
+choice IDs and labels, and invokes the existing engine `loadcrosshair()` path
+for slots 0 and 2. An engine read-only helper reports the effective texture
+name so a custom config is represented as Custom instead of being
+misidentified. Texture paths never originate in RML, and Sauer's existing
+`writecrosshairs()` config persistence remains authoritative. The current Rml
+renderer deliberately has no production external-image loader, so this slice
+does not duplicate texture ownership or expose engine OpenGL handles merely to
+provide a preview. The legacy `showgui crosshair` chooser remains available
+until an equivalent production-safe preview exists.
+
+The first HUD slice is deliberately limited to combat feedback. It exposes
+vanilla Sauer's persistent `damagescreen` and `damagecompass` toggles, p1x's
+three-state `hudfragmessages` mode, and Cowbraten's persistent
+`streakmilestonescale` float. All apply immediately through their existing
+render paths without resource or GL reset. The streak scale uses its declared
+`1.0..2.0` range and the same local edit/commit/readback policy as exact mouse
+sensitivity. Settings activation, category activation, local writes, and
+console return refresh these snapshots; there is no frame-loop polling.
+
+The legacy `ammobar`, `gameclock`, `hudscore`, `scoreboard`, and
+`hudfragmessages` adjustment documents contain substantially more controls
+than this initial production slice. Their exact `showgui` names therefore
+continue through the legacy fallback. No HUD or Crosshair compatibility alias
+is added until the corresponding RmlUi surface is a sufficiently complete
+semantic replacement.
