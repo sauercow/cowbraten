@@ -54,12 +54,14 @@ namespace cowui
         struct CrosshairChoice
         {
             Rml::String label;
+            Rml::String resource;
             int id = -1;
             bool selected = false;
 
             bool operator==(const CrosshairChoice &other) const
             {
                 return label == other.label &&
+                    resource == other.resource &&
                     id == other.id &&
                     selected == other.selected;
             }
@@ -141,9 +143,8 @@ namespace cowui
         static void crosshairreloadrotationaction(Rml::Event &event);
         static void damagescreenaction(Rml::Event &event);
         static void damagecompassaction(Rml::Event &event);
-        static void fragmessagesoffaction(Rml::Event &event);
-        static void fragmessagesallaction(Rml::Event &event);
-        static void fragmessagesoutsideinstaaction(Rml::Event &event);
+        static void fragmessagesenabledaction(Rml::Event &event);
+        static void fragmessagesinstaaction(Rml::Event &event);
         static void decreasestreakscaleaction(Rml::Event &event);
         static void increasestreakscaleaction(Rml::Event &event);
         static void focusstreakscaleaction(Rml::Event &event);
@@ -203,6 +204,7 @@ namespace cowui
         Rml::String mouse_input_status;
         int crosshair_selection = -1;
         Rml::String crosshair_selection_label;
+        Rml::String crosshair_selection_resource;
         int crosshair_size = 30;
         int crosshair_size_minimum = 0;
         int crosshair_size_maximum = 50;
@@ -218,9 +220,8 @@ namespace cowui
         bool crosshair_reload_rotation = true;
         bool damage_screen = true;
         bool damage_compass = true;
-        bool frag_messages_off = false;
-        bool frag_messages_all = true;
-        bool frag_messages_outside_insta = false;
+        bool frag_messages_enabled = true;
+        bool frag_messages_in_insta = true;
         float streak_milestone_scale = 1.25f;
         float streak_milestone_scale_minimum = 1.0f;
         float streak_milestone_scale_maximum = 2.0f;

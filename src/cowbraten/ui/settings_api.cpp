@@ -255,6 +255,7 @@ namespace cowui
                 return false;
 
             result.selection = legacy.selection;
+            result.resource = legacy.resource;
             result.size = legacy.size;
             result.size_minimum = legacy.size_minimum;
             result.size_maximum = legacy.size_maximum;
@@ -282,6 +283,7 @@ namespace cowui
             CrosshairChoice choice;
             choice.id = legacy.id;
             choice.label = legacy.label;
+            choice.resource = legacy.resource;
             adapter.visitor(choice, adapter.data);
         }
 

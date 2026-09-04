@@ -1,9 +1,12 @@
 #include <SDL.h>
+#include <SDL_image.h>
 #include <SDL_opengl.h>
 
 #include "glexts.h"
 #include "rml_render.h"
 
+#include <RmlUi/Core/Core.h>
+#include <RmlUi/Core/FileInterface.h>
 #include <RmlUi/Core/Vertex.h>
 
 #include <cstddef>
@@ -962,10 +965,183 @@ namespace cowui
 
     Rml::TextureHandle RmlRenderInterface::LoadTexture(
         Rml::Vector2i &texture_dimensions,
-        const Rml::String &)
+        const Rml::String &source)
     {
+        static const char crosshair_prefix[] =
+            "?cowbraten-crosshair:";
+
         texture_dimensions = Rml::Vector2i(0, 0);
-        return 0;
+
+        const bool crosshair_mask = std::strncmp(
+            source.c_str(),
+            crosshair_prefix,
+            sizeof(crosshair_prefix) - 1
+        ) == 0;
+        const char *file_source = crosshair_mask
+            ? source.c_str() + sizeof(crosshair_prefix) - 1
+            : source.c_str();
+        if(!file_source[0])
+            return 0;
+
+        Rml::FileInterface *files = Rml::GetFileInterface();
+        if(!files)
+            return 0;
+
+        Rml::FileHandle file = files->Open(file_source);
+        if(!file)
+            return 0;
+
+        const size_t file_size = files->Length(file);
+        if(!file_size || file_size > INT_MAX)
+        {
+            files->Close(file);
+            return 0;
+        }
+
+        Rml::byte *file_data =
+            new (std::nothrow) Rml::byte[file_size];
+        if(!file_data)
+        {
+            files->Close(file);
+            return 0;
+        }
+
+        const size_t bytes_read = files->Read(
+            file_data,
+            file_size,
+            file
+        );
+        files->Close(file);
+        if(bytes_read != file_size)
+        {
+            delete[] file_data;
+            return 0;
+        }
+
+        const char *extension = std::strrchr(file_source, '.');
+        extension = extension ? extension + 1 : "";
+
+        SDL_RWops *rw = SDL_RWFromConstMem(
+            file_data,
+            int(file_size)
+        );
+        SDL_Surface *surface = rw
+            ? IMG_LoadTyped_RW(rw, 1, extension)
+            : nullptr;
+        delete[] file_data;
+
+        if(!surface)
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: failed to decode texture '%s': %s\n",
+                file_source,
+                IMG_GetError()
+            );
+            return 0;
+        }
+
+        const bool source_has_alpha = surface->format->Amask != 0;
+        if(surface->format->format != SDL_PIXELFORMAT_RGBA32)
+        {
+            SDL_Surface *converted = SDL_ConvertSurfaceFormat(
+                surface,
+                SDL_PIXELFORMAT_RGBA32,
+                0
+            );
+            SDL_FreeSurface(surface);
+            surface = converted;
+            if(!surface)
+                return 0;
+        }
+
+        if(surface->w <= 0 || surface->h <= 0)
+        {
+            SDL_FreeSurface(surface);
+            return 0;
+        }
+
+        const size_t pixel_count =
+            size_t(surface->w) * size_t(surface->h);
+        if(pixel_count > size_t(-1) / 4)
+        {
+            SDL_FreeSurface(surface);
+            return 0;
+        }
+
+        const size_t data_size = pixel_count * 4;
+        Rml::byte *pixels =
+            new (std::nothrow) Rml::byte[data_size];
+        if(!pixels)
+        {
+            SDL_FreeSurface(surface);
+            return 0;
+        }
+
+        if(SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) < 0)
+        {
+            delete[] pixels;
+            SDL_FreeSurface(surface);
+            return 0;
+        }
+
+        for(int y = 0; y < surface->h; ++y)
+        {
+            const Rml::byte *source_row =
+                static_cast<const Rml::byte *>(surface->pixels) +
+                size_t(y) * size_t(surface->pitch);
+            Rml::byte *destination_row =
+                pixels + size_t(y) * size_t(surface->w) * 4;
+
+            for(int x = 0; x < surface->w; ++x)
+            {
+                const Rml::byte *source_pixel = source_row + x * 4;
+                Rml::byte *destination_pixel = destination_row + x * 4;
+                if(crosshair_mask && !source_has_alpha)
+                {
+                    int alpha = source_pixel[0];
+                    if(source_pixel[1] > alpha)
+                        alpha = source_pixel[1];
+                    if(source_pixel[2] > alpha)
+                        alpha = source_pixel[2];
+
+                    destination_pixel[0] = source_pixel[0];
+                    destination_pixel[1] = source_pixel[1];
+                    destination_pixel[2] = source_pixel[2];
+                    destination_pixel[3] = Rml::byte(alpha);
+                }
+                else
+                {
+                    const int alpha = source_pixel[3];
+                    destination_pixel[0] = Rml::byte(
+                        int(source_pixel[0]) * alpha / 255
+                    );
+                    destination_pixel[1] = Rml::byte(
+                        int(source_pixel[1]) * alpha / 255
+                    );
+                    destination_pixel[2] = Rml::byte(
+                        int(source_pixel[2]) * alpha / 255
+                    );
+                    destination_pixel[3] = source_pixel[3];
+                }
+            }
+        }
+
+        if(SDL_MUSTLOCK(surface))
+            SDL_UnlockSurface(surface);
+
+        const Rml::Vector2i dimensions(surface->w, surface->h);
+        SDL_FreeSurface(surface);
+
+        const Rml::TextureHandle result = GenerateTexture(
+            Rml::Span<const Rml::byte>(pixels, data_size),
+            dimensions
+        );
+        delete[] pixels;
+
+        if(result)
+            texture_dimensions = dimensions;
+        return result;
     }
 
     Rml::TextureHandle RmlRenderInterface::GenerateTexture(

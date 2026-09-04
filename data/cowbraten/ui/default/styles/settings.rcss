@@ -745,23 +745,36 @@ body
     border-top-color: var(--color-border);
 }
 
-.settings-hud-mode-selector .settings-mode-button
-{
-    min-width: 0;
-}
-
 .settings-crosshair-current
 {
     width: 176px;
+    height: 64px;
+    align-items: center;
+    justify-content: flex-start;
 }
 
-.settings-crosshair-current .settings-fps-value-label
+.settings-crosshair-current-image
 {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 0 var(--space-1);
+    display: block;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    margin-left: var(--space-2);
+}
+
+.settings-crosshair-current-label
+{
+    display: block;
+    flex: 1;
+    min-width: 0;
+    margin: 0 var(--space-2);
     overflow: hidden;
+    color: var(--color-primary);
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 1px;
     text-align: center;
+    text-transform: uppercase;
     white-space: nowrap;
 }
 
@@ -781,10 +794,32 @@ body
 
 .settings-crosshair-choice
 {
+    box-sizing: border-box;
+    display: block;
     width: 100%;
-    height: 34px;
-    line-height: 32px;
-    font-size: 10px;
+    height: 64px;
+    padding: 5px var(--space-1);
+    line-height: 14px;
+}
+
+.settings-crosshair-choice-image
+{
+    display: block;
+    width: 32px;
+    height: 32px;
+    margin: 0 auto;
+}
+
+.settings-crosshair-choice-label
+{
+    display: block;
+    margin-top: 3px;
+    overflow: hidden;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .settings-crosshair-choice.is-selected

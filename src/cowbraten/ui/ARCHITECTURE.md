@@ -257,11 +257,16 @@ advertised, because a legacy menu catalog may outlive an optional asset pack.
 An engine read-only helper reports the effective texture name so a custom
 config is represented as Custom instead of being misidentified. Texture paths
 never originate in RML, and Sauer's existing `writecrosshairs()` config
-persistence remains authoritative. The current Rml renderer deliberately has
-no production external-image loader, so this slice does not duplicate texture
-ownership or expose engine OpenGL handles merely to provide a preview. The
-legacy `showgui crosshair` chooser remains available until an equivalent
-production-safe preview exists.
+persistence remains authoritative. The bridge exposes each effective normal
+texture path as semantic choice data. Theme RML decides whether and where to
+render it. The generic Rml texture loader reads the same file through the
+Sauer-backed `FileInterface`, decodes it with SDL_image, premultiplies its
+pixels, and places it in the renderer's existing CPU-backed texture lifecycle.
+The semantic `?cowbraten-crosshair:` resource prefix additionally identifies
+legacy RGB mask images whose black background is transparent under Sauer's
+additive crosshair blend; the loader converts that mask to premultiplied alpha
+for RmlUi. This keeps previews valid across `resetgl()` without exposing engine
+texture or OpenGL handles or encoding any Settings DOM structure in C++.
 
 The first HUD slice is deliberately limited to combat feedback. It exposes
 vanilla Sauer's persistent `damagescreen` and `damagecompass` toggles, p1x's
@@ -271,6 +276,13 @@ render paths without resource or GL reset. The streak scale uses its declared
 `1.0..2.0` range and the same local edit/commit/readback policy as exact mouse
 sensitivity. Settings activation, category activation, local writes, and
 console return refresh these snapshots; there is no frame-loop polling.
+
+`hudfragmessages` is one p1x enum, not a generic per-game-mode policy: `0`
+disables frag and Cowbraten streak messages, `1` shows them in all modes, and
+`2` shows them outside instagib only. No equivalent exceptions exist for other
+modes. The default theme therefore presents an Enabled toggle plus a subordinate
+Show in Instagib toggle, while the typed settings API retains the exact engine
+enum as its source of truth.
 
 The legacy `ammobar`, `gameclock`, `hudscore`, `scoreboard`, and
 `hudfragmessages` adjustment documents contain substantially more controls

@@ -607,6 +607,7 @@ namespace cowui
             }
 
             result.selection = selectedcrosshair();
+            result.resource = getcrosshairname(0);
             result.size = *size_id->storage.i;
             result.size_minimum = size_id->minval;
             result.size_maximum = size_id->maxval;
@@ -632,6 +633,7 @@ namespace cowui
                 CrosshairChoice choice;
                 choice.id = i;
                 choice.label = crosshair_catalog[i].label;
+                choice.resource = crosshair_catalog[i].normal;
                 visitor(choice, data);
             }
             return true;

@@ -119,6 +119,13 @@ namespace cowui
         return float(stepped);
     }
 
+    static Rml::String rmlcrosshairresource(const char *path)
+    {
+        if(!path || !path[0])
+            return Rml::String();
+        return Rml::String("?cowbraten-crosshair:") + path;
+    }
+
     void RmlSettings::appendcrosshairchoice(
         const settings::CrosshairChoice &choice,
         void *data)
@@ -128,6 +135,7 @@ namespace cowui
         RmlSettings::CrosshairChoice row;
         row.id = choice.id;
         row.label = choice.label;
+        row.resource = rmlcrosshairresource(choice.resource);
         choices.push_back(row);
     }
 
@@ -171,6 +179,10 @@ namespace cowui
                 choice.RegisterMember(
                     "label",
                     &CrosshairChoice::label
+                ) &&
+                choice.RegisterMember(
+                    "resource",
+                    &CrosshairChoice::resource
                 ) &&
                 choice.RegisterMember("id", &CrosshairChoice::id) &&
                 choice.RegisterMember(
@@ -306,6 +318,10 @@ namespace cowui
                 "crosshair_selection_label",
                 &crosshair_selection_label
             ) &&
+            constructor.Bind(
+                "crosshair_selection_resource",
+                &crosshair_selection_resource
+            ) &&
             constructor.Bind("crosshair_size", &crosshair_size) &&
             constructor.Bind(
                 "crosshair_size_minimum",
@@ -341,11 +357,13 @@ namespace cowui
             ) &&
             constructor.Bind("damage_screen", &damage_screen) &&
             constructor.Bind("damage_compass", &damage_compass) &&
-            constructor.Bind("frag_messages_off", &frag_messages_off) &&
-            constructor.Bind("frag_messages_all", &frag_messages_all) &&
             constructor.Bind(
-                "frag_messages_outside_insta",
-                &frag_messages_outside_insta
+                "frag_messages_enabled",
+                &frag_messages_enabled
+            ) &&
+            constructor.Bind(
+                "frag_messages_in_insta",
+                &frag_messages_in_insta
             ) &&
             constructor.Bind(
                 "streak_milestone_scale",
@@ -536,16 +554,12 @@ namespace cowui
                 damagecompassaction
             ) &&
             router.registeraction(
-                "settings.hud.frag-messages.off",
-                fragmessagesoffaction
+                "settings.hud.frag-messages.enabled",
+                fragmessagesenabledaction
             ) &&
             router.registeraction(
-                "settings.hud.frag-messages.all",
-                fragmessagesallaction
-            ) &&
-            router.registeraction(
-                "settings.hud.frag-messages.outside-insta",
-                fragmessagesoutsideinstaaction
+                "settings.hud.frag-messages.insta",
+                fragmessagesinstaaction
             ) &&
             router.registeraction(
                 "settings.hud.streak-scale.decrease",
@@ -642,6 +656,7 @@ namespace cowui
         mouse_input_status.clear();
         crosshair_selection = -1;
         crosshair_selection_label.clear();
+        crosshair_selection_resource.clear();
         crosshair_size = 30;
         crosshair_size_minimum = 0;
         crosshair_size_maximum = 50;
@@ -657,9 +672,8 @@ namespace cowui
         crosshair_reload_rotation = true;
         damage_screen = true;
         damage_compass = true;
-        frag_messages_off = false;
-        frag_messages_all = true;
-        frag_messages_outside_insta = false;
+        frag_messages_enabled = true;
+        frag_messages_in_insta = true;
         streak_milestone_scale = 1.25f;
         streak_milestone_scale_minimum = 1.0f;
         streak_milestone_scale_maximum = 2.0f;
@@ -1194,6 +1208,13 @@ namespace cowui
             crosshair_selection_label = selection_label;
             model.DirtyVariable("crosshair_selection_label");
         }
+        const Rml::String selection_resource =
+            rmlcrosshairresource(current.resource);
+        if(crosshair_selection_resource != selection_resource)
+        {
+            crosshair_selection_resource = selection_resource;
+            model.DirtyVariable("crosshair_selection_resource");
+        }
 
         if(crosshair_size != current.size)
         {
@@ -1269,26 +1290,19 @@ namespace cowui
             model.DirtyVariable("damage_compass");
         }
 
-        const bool messages_off = current.frag_messages ==
+        const bool messages_enabled = current.frag_messages !=
             settings::FragMessagesMode::Off;
-        const bool messages_all = current.frag_messages ==
+        const bool messages_in_insta = current.frag_messages ==
             settings::FragMessagesMode::AllModes;
-        const bool messages_outside_insta = current.frag_messages ==
-            settings::FragMessagesMode::OutsideInsta;
-        if(frag_messages_off != messages_off)
+        if(frag_messages_enabled != messages_enabled)
         {
-            frag_messages_off = messages_off;
-            model.DirtyVariable("frag_messages_off");
+            frag_messages_enabled = messages_enabled;
+            model.DirtyVariable("frag_messages_enabled");
         }
-        if(frag_messages_all != messages_all)
+        if(frag_messages_in_insta != messages_in_insta)
         {
-            frag_messages_all = messages_all;
-            model.DirtyVariable("frag_messages_all");
-        }
-        if(frag_messages_outside_insta != messages_outside_insta)
-        {
-            frag_messages_outside_insta = messages_outside_insta;
-            model.DirtyVariable("frag_messages_outside_insta");
+            frag_messages_in_insta = messages_in_insta;
+            model.DirtyVariable("frag_messages_in_insta");
         }
 
         if(streak_milestone_scale != current.streak_milestone_scale)
@@ -1321,9 +1335,9 @@ namespace cowui
             model.DirtyVariable("streak_milestone_scale_input");
         }
 
-        const char *status = messages_off
+        const char *status = !messages_enabled
             ? "Frag and streak messages disabled"
-            : (messages_outside_insta
+            : (!messages_in_insta
                 ? "Messages hidden in instagib modes"
                 : "Frag and streak messages active in all modes");
         if(hud_status != status)
@@ -2028,34 +2042,28 @@ namespace cowui
         event.StopPropagation();
     }
 
-    void RmlSettings::fragmessagesoffaction(Rml::Event &event)
-    {
-        if(instance)
-        {
-            settings::writefragmessages(settings::FragMessagesMode::Off);
-            instance->refreshhud();
-        }
-        event.StopPropagation();
-    }
-
-    void RmlSettings::fragmessagesallaction(Rml::Event &event)
+    void RmlSettings::fragmessagesenabledaction(Rml::Event &event)
     {
         if(instance)
         {
             settings::writefragmessages(
-                settings::FragMessagesMode::AllModes
+                instance->frag_messages_enabled
+                    ? settings::FragMessagesMode::Off
+                    : settings::FragMessagesMode::AllModes
             );
             instance->refreshhud();
         }
         event.StopPropagation();
     }
 
-    void RmlSettings::fragmessagesoutsideinstaaction(Rml::Event &event)
+    void RmlSettings::fragmessagesinstaaction(Rml::Event &event)
     {
-        if(instance)
+        if(instance && instance->frag_messages_enabled)
         {
             settings::writefragmessages(
-                settings::FragMessagesMode::OutsideInsta
+                instance->frag_messages_in_insta
+                    ? settings::FragMessagesMode::OutsideInsta
+                    : settings::FragMessagesMode::AllModes
             );
             instance->refreshhud();
         }

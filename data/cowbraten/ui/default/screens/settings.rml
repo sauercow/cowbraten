@@ -212,24 +212,36 @@
                         </div>
 
                         <div class="settings-section settings-compact-section panel">
-                            <div class="settings-control-heading">
+                            <div class="settings-display-row">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Frag &amp; Streak Messages</div>
                                     <div class="settings-control-description">
-                                        Uses p1x's three-state frag-message policy. Disabling it also hides Cowbraten streak milestones.
+                                        Shows p1x frag messages and Cowbraten streak milestones using their existing shared HUD path.
                                     </div>
                                 </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="frag_messages_enabled"
+                                        onclick="settings.hud.frag-messages.enabled" />
+                                    <span data-if="frag_messages_enabled">Enabled</span>
+                                    <span data-if="!frag_messages_enabled">Disabled</span>
+                                </label>
                             </div>
-                            <div class="settings-mode-selector settings-hud-mode-selector">
-                                <button class="button settings-mode-button"
-                                    data-class-is-selected="frag_messages_off"
-                                    onclick="settings.hud.frag-messages.off">Off</button>
-                                <button class="button settings-mode-button"
-                                    data-class-is-selected="frag_messages_all"
-                                    onclick="settings.hud.frag-messages.all">All Modes</button>
-                                <button class="button settings-mode-button"
-                                    data-class-is-selected="frag_messages_outside_insta"
-                                    onclick="settings.hud.frag-messages.outside-insta">Hide in Insta</button>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Show in Instagib</div>
+                                    <div class="settings-control-description">
+                                        p1x provides one special exception for instagib; no equivalent per-mode switches exist for other modes.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="frag_messages_in_insta"
+                                        data-attrif-disabled="!frag_messages_enabled"
+                                        onclick="settings.hud.frag-messages.insta" />
+                                    <span data-if="frag_messages_in_insta">Shown</span>
+                                    <span data-if="!frag_messages_in_insta">Hidden</span>
+                                </label>
                             </div>
                         </div>
 
@@ -614,7 +626,9 @@
                                     </div>
                                 </div>
                                 <div class="settings-value settings-crosshair-current">
-                                    <span class="settings-fps-value-label">{{ crosshair_selection_label }}</span>
+                                    <img class="settings-crosshair-current-image"
+                                        data-attr-src="crosshair_selection_resource" />
+                                    <span class="settings-crosshair-current-label">{{ crosshair_selection_label }}</span>
                                 </div>
                             </div>
                             <div class="settings-crosshair-grid">
@@ -623,7 +637,9 @@
                                     <button class="button settings-crosshair-choice"
                                         data-class-is-selected="choice.selected"
                                         data-event-click="select_crosshair(choice.id)">
-                                        {{ choice.label }}
+                                        <img class="settings-crosshair-choice-image"
+                                            data-attr-src="choice.resource" />
+                                        <span class="settings-crosshair-choice-label">{{ choice.label }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -757,12 +773,6 @@
                             </div>
                         </div>
 
-                        <div class="settings-unavailable-note">
-                            <div class="settings-info-label">Preview</div>
-                            <div class="settings-info-value">
-                                The live gameplay texture remains authoritative. An in-menu preview waits for production external-image support in the Rml renderer.
-                            </div>
-                        </div>
                     </div>
 
                 </div>

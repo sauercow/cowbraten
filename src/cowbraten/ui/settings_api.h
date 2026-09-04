@@ -67,6 +67,7 @@ namespace cowui
         struct Crosshair
         {
             int selection;
+            const char *resource;
             int size;
             int size_minimum;
             int size_maximum;
@@ -82,6 +83,7 @@ namespace cowui
         {
             int id;
             const char *label;
+            const char *resource;
         };
 
         enum class FragMessagesMode
