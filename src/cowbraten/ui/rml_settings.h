@@ -18,6 +18,7 @@ namespace cowui
     {
         enum class PresentationMode;
         struct CrosshairChoice;
+        struct SoundpackChoice;
     }
 
     class RmlActionRouter;
@@ -67,6 +68,20 @@ namespace cowui
             }
         };
 
+        struct SoundpackChoice
+        {
+            Rml::String id;
+            Rml::String label;
+            bool selected = false;
+
+            bool operator==(const SoundpackChoice &other) const
+            {
+                return id == other.id &&
+                    label == other.label &&
+                    selected == other.selected;
+            }
+        };
+
         enum class Category
         {
             Game,
@@ -106,8 +121,17 @@ namespace cowui
             Rml::Event &event,
             const Rml::VariantList &arguments
         );
+        void selectsoundpack(
+            Rml::DataModelHandle,
+            Rml::Event &event,
+            const Rml::VariantList &arguments
+        );
         static void appendcrosshairchoice(
             const settings::CrosshairChoice &choice,
+            void *data
+        );
+        static void appendsoundpackchoice(
+            const settings::SoundpackChoice &choice,
             void *data
         );
         static void changefovaction(Rml::Event &event);
@@ -154,6 +178,7 @@ namespace cowui
         Rml::DataModelHandle model;
         std::vector<Resolution> resolutions;
         std::vector<CrosshairChoice> crosshair_choices;
+        std::vector<SoundpackChoice> soundpack_choices;
 
         int fov = 100;
         int fov_minimum = 10;
@@ -192,6 +217,9 @@ namespace cowui
         Rml::String sound_volume_label;
         Rml::String music_volume_label;
         Rml::String audio_status;
+        Rml::String active_soundpack;
+        Rml::String active_soundpack_label;
+        Rml::String soundpack_status;
         float mouse_sensitivity = 3.0f;
         float mouse_sensitivity_minimum = 0.001f;
         float mouse_sensitivity_maximum = 1000.0f;

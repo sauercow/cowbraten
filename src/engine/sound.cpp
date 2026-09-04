@@ -472,10 +472,13 @@ static bool soundpackavailable(const char *name)
     return dirs > 0;
 }
 
-// Return every valid sound pack as a CubeScript list.
-// "original" always exists and is always the first entry.
-static void listsoundpacks()
+// Visit every valid sound pack. "original" always exists and is first.
+// Directory names are stable identities and are intentionally not prettified.
+void visitsoundpacks(soundpackvisitor visitor, void *data)
 {
+    if(!visitor)
+        return;
+
     vector<char *> entries, packs;
 
     listfiles("soundpacks", NULL, entries);
@@ -502,24 +505,29 @@ static void listsoundpacks()
             packs.add(newstring(name));
     }
 
-    vector<char> output;
-
-    const char *original = "original";
-    output.put(original, strlen(original));
-
-    loopv(packs)
-    {
-        output.add(' ');
-        output.put(packs[i], strlen(packs[i]));
-    }
-
-    output.add('\0');
-
-    char *result = newstring(output.getbuf());
+    packs.sort();
+    visitor("original", data);
+    loopv(packs) visitor(packs[i], data);
 
     entries.deletearrays();
     packs.deletearrays();
+}
 
+static void appendsoundpackname(const char *name, void *data)
+{
+    vector<char> &output = *static_cast<vector<char> *>(data);
+    if(!output.empty()) output.add(' ');
+    output.put(name, strlen(name));
+}
+
+// Return every valid sound pack as a CubeScript list.
+static void listsoundpacks()
+{
+    vector<char> output;
+    visitsoundpacks(appendsoundpackname, &output);
+    output.add('\0');
+
+    char *result = newstring(output.getbuf());
     stringret(result);
 }
 COMMAND(listsoundpacks, "");
@@ -1196,4 +1204,3 @@ void updatemumble()
     mumbleinfo->top = mumblevec(vec(RAD*player->yaw, RAD*(player->pitch+90)));
 #endif
 }
-

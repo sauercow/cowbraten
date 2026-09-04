@@ -565,6 +565,8 @@ extern void clearmainmenu();
 extern void g3d_mainmenu();
 
 // sound
+typedef void (*soundpackvisitor)(const char *name, void *data);
+extern void visitsoundpacks(soundpackvisitor visitor, void *data);
 extern void clearmapsounds();
 extern void checkmapsounds();
 extern void updatesounds();

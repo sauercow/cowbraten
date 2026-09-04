@@ -91,6 +91,14 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *soundpackident()
+        {
+            ident *id = getident("soundpack");
+            return id && id->type == ID_SVAR
+                ? id
+                : nullptr;
+        }
+
         static ident *sensitivityident()
         {
             ident *id = getident("sensitivity");
@@ -508,8 +516,11 @@ namespace cowui
         {
             ident *sound_id = soundvolumeident();
             ident *music_id = musicvolumeident();
+            ident *soundpack_id = soundpackident();
             if(!sound_id || !sound_id->storage.i ||
-               !music_id || !music_id->storage.i)
+               !music_id || !music_id->storage.i ||
+               !soundpack_id || !soundpack_id->storage.s ||
+               !*soundpack_id->storage.s)
             {
                 return false;
             }
@@ -520,7 +531,38 @@ namespace cowui
             result.music_volume = *music_id->storage.i;
             result.music_volume_minimum = music_id->minval;
             result.music_volume_maximum = music_id->maxval;
+            result.active_soundpack = *soundpack_id->storage.s;
             result.backend_active = !::nosound;
+            return true;
+        }
+
+        struct SoundpackVisitorAdapter
+        {
+            SoundpackChoiceVisitor visitor;
+            void *data;
+        };
+
+        static void visitsoundpackchoice(const char *name, void *data)
+        {
+            SoundpackVisitorAdapter &adapter =
+                *static_cast<SoundpackVisitorAdapter *>(data);
+            SoundpackChoice choice;
+            choice.id = name;
+            choice.display_name = !std::strcmp(name, "original")
+                ? "Original"
+                : name;
+            adapter.visitor(choice, adapter.data);
+        }
+
+        bool visitsoundpacks(SoundpackChoiceVisitor visitor, void *data)
+        {
+            if(!visitor)
+                return false;
+
+            SoundpackVisitorAdapter adapter;
+            adapter.visitor = visitor;
+            adapter.data = data;
+            ::visitsoundpacks(visitsoundpackchoice, &adapter);
             return true;
         }
 
@@ -548,6 +590,35 @@ namespace cowui
 
             setvarchecked(id, value);
             return *id->storage.i == value;
+        }
+
+        struct SoundpackMatch
+        {
+            const char *requested;
+            bool found;
+        };
+
+        static void findsoundpack(const char *name, void *data)
+        {
+            SoundpackMatch &match = *static_cast<SoundpackMatch *>(data);
+            if(!std::strcmp(name, match.requested))
+                match.found = true;
+        }
+
+        bool writesoundpack(const char *requested)
+        {
+            ident *id = soundpackident();
+            if(!id || !id->storage.s || !requested || !requested[0])
+                return false;
+
+            SoundpackMatch match = { requested, false };
+            ::visitsoundpacks(findsoundpack, &match);
+            if(!match.found)
+                return false;
+
+            setsvarchecked(id, requested);
+            return *id->storage.s &&
+                !std::strcmp(*id->storage.s, requested);
         }
 
         bool readmouseinput(MouseInput &result)

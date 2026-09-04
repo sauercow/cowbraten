@@ -520,6 +520,38 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Soundpack</div>
+                                    <div class="settings-control-description">
+                                        Selects an installed gameplay sound pack discovered through the active Sauer package roots.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-soundpack-current">
+                                    <span class="settings-soundpack-current-label">{{ active_soundpack_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-soundpack-grid">
+                                <div class="settings-soundpack-repeat"
+                                    data-for="pack : soundpack_choices">
+                                    <button class="button settings-soundpack-choice"
+                                        data-class-is-selected="pack.selected"
+                                        data-event-click="select_soundpack(pack.id)">
+                                        <span class="settings-soundpack-choice-label">{{ pack.label }}</span>
+                                        <span class="settings-soundpack-choice-state"
+                                            data-if="pack.selected">Active</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ soundpack_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-info-row settings-audio-info-row">
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Runtime</div>

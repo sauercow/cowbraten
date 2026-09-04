@@ -209,8 +209,41 @@ namespace cowui
                 legacy.music_volume_minimum;
             result.music_volume_maximum =
                 legacy.music_volume_maximum;
+            result.active_soundpack = legacy.active_soundpack;
             result.backend_active = legacy.backend_active;
             return true;
+        }
+
+        struct SoundpackChoiceAdapter
+        {
+            SoundpackChoiceVisitor visitor;
+            void *data;
+        };
+
+        static void visitsoundpackchoice(
+            const sauersettings::SoundpackChoice &legacy,
+            void *data)
+        {
+            SoundpackChoiceAdapter &adapter =
+                *static_cast<SoundpackChoiceAdapter *>(data);
+            SoundpackChoice choice;
+            choice.id = legacy.id;
+            choice.display_name = legacy.display_name;
+            adapter.visitor(choice, adapter.data);
+        }
+
+        bool visitsoundpacks(SoundpackChoiceVisitor visitor, void *data)
+        {
+            if(!visitor)
+                return false;
+
+            SoundpackChoiceAdapter adapter;
+            adapter.visitor = visitor;
+            adapter.data = data;
+            return sauersettings::visitsoundpacks(
+                visitsoundpackchoice,
+                &adapter
+            );
         }
 
         bool writesoundvolume(int value)
@@ -221,6 +254,11 @@ namespace cowui
         bool writemusicvolume(int value)
         {
             return sauersettings::writemusicvolume(value);
+        }
+
+        bool writesoundpack(const char *id)
+        {
+            return sauersettings::writesoundpack(id);
         }
 
         bool readmouseinput(MouseInput &result)

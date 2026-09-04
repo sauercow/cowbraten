@@ -217,9 +217,21 @@ master-volume ident, so the UI does not fabricate one.
 
 Settings activation, local volume writes, and return from the legacy console
 refresh the Audio model. Sound enablement, channel count, sample frequency,
-buffer length, driver choice, and sound-pack selection are intentionally not
-part of this immediate-volume slice: they require `resetsound()`, backend
-fallback/readback policy, or separate asset-selection semantics.
+buffer length, and driver choice remain outside this first Audio slice because
+they require `resetsound()` and additional runtime fallback/readback policy.
+
+Soundpack choices come from the engine's existing `visitsoundpacks()` discovery
+path, which also backs the legacy `listsoundpacks` command. Directory names are
+stable semantic IDs; RML receives only those validated IDs, their existing
+display names, and selection state. A selection is checked against a freshly
+discovered backend choice before the fixed `soundpack` ident is changed. Its
+existing callback synchronously stops gameplay sound channels, resets game
+sound registrations and cached samples, loads the selected `sounds.cfg`, and
+falls back to Original on validation or configuration failure. Music is not
+restarted. The Rml model immediately reads back the effective ID and rebuilds
+only its small choice snapshot on Settings/Audio activation, local selection,
+or console return. No filesystem paths, CubeScript, DOM structure, or theme
+presentation cross this typed boundary.
 
 The first Mouse / Keyboard slice exposes only gameplay sensitivity and
 vertical-look inversion. The bridge targets the fixed persistent

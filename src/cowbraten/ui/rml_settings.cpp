@@ -139,6 +139,18 @@ namespace cowui
         choices.push_back(row);
     }
 
+    void RmlSettings::appendsoundpackchoice(
+        const settings::SoundpackChoice &choice,
+        void *data)
+    {
+        std::vector<RmlSettings::SoundpackChoice> &choices =
+            *static_cast<std::vector<RmlSettings::SoundpackChoice> *>(data);
+        RmlSettings::SoundpackChoice row;
+        row.id = choice.id;
+        row.label = choice.display_name;
+        choices.push_back(row);
+    }
+
     bool RmlSettings::init(
         Rml::Context *context,
         RmlActionRouter &router)
@@ -192,6 +204,21 @@ namespace cowui
         }
         else valid = false;
 
+        if(auto choice = constructor.RegisterStruct<SoundpackChoice>())
+        {
+            valid = valid &&
+                choice.RegisterMember("id", &SoundpackChoice::id) &&
+                choice.RegisterMember(
+                    "label",
+                    &SoundpackChoice::label
+                ) &&
+                choice.RegisterMember(
+                    "selected",
+                    &SoundpackChoice::selected
+                );
+        }
+        else valid = false;
+
         if(valid)
         {
             valid = settings::visitcrosshairs(
@@ -203,8 +230,10 @@ namespace cowui
         valid = valid &&
             constructor.RegisterArray<std::vector<Resolution>>() &&
             constructor.RegisterArray<std::vector<CrosshairChoice>>() &&
+            constructor.RegisterArray<std::vector<SoundpackChoice>>() &&
             constructor.Bind("resolutions", &resolutions) &&
             constructor.Bind("crosshair_choices", &crosshair_choices) &&
+            constructor.Bind("soundpack_choices", &soundpack_choices) &&
             constructor.Bind("fov", &fov) &&
             constructor.Bind("fov_minimum", &fov_minimum) &&
             constructor.Bind("fov_maximum", &fov_maximum) &&
@@ -281,6 +310,12 @@ namespace cowui
                 &music_volume_label
             ) &&
             constructor.Bind("audio_status", &audio_status) &&
+            constructor.Bind("active_soundpack", &active_soundpack) &&
+            constructor.Bind(
+                "active_soundpack_label",
+                &active_soundpack_label
+            ) &&
+            constructor.Bind("soundpack_status", &soundpack_status) &&
             constructor.Bind(
                 "mouse_sensitivity",
                 &mouse_sensitivity
@@ -417,6 +452,11 @@ namespace cowui
             constructor.BindEventCallback(
                 "select_crosshair",
                 &RmlSettings::selectcrosshair,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_soundpack",
+                &RmlSettings::selectsoundpack,
                 this
             );
 
@@ -593,6 +633,7 @@ namespace cowui
         video_status = "Live engine state";
         vsync_status = "Runtime state";
         crosshair_status = "Immediate / existing Sauer config";
+        soundpack_status = "Available through Sauer package roots";
         refresh();
         return true;
     }
@@ -608,6 +649,7 @@ namespace cowui
         model = Rml::DataModelHandle();
         resolutions.clear();
         crosshair_choices.clear();
+        soundpack_choices.clear();
         fov = 100;
         fov_minimum = 10;
         fov_maximum = 150;
@@ -644,6 +686,9 @@ namespace cowui
         sound_volume_label.clear();
         music_volume_label.clear();
         audio_status.clear();
+        active_soundpack.clear();
+        active_soundpack_label.clear();
+        soundpack_status.clear();
         mouse_sensitivity = 3.0f;
         mouse_sensitivity_minimum = 0.001f;
         mouse_sensitivity_maximum = 1000.0f;
@@ -1055,6 +1100,70 @@ namespace cowui
         if(!settings::readaudio(current))
             return false;
 
+        std::vector<SoundpackChoice> available_soundpacks;
+        if(!settings::visitsoundpacks(
+                appendsoundpackchoice,
+                &available_soundpacks))
+        {
+            return false;
+        }
+
+        const Rml::String current_soundpack = current.active_soundpack;
+        Rml::String current_soundpack_label = current_soundpack;
+        bool active_found = false;
+        for(std::vector<SoundpackChoice>::iterator choice =
+                available_soundpacks.begin();
+            choice != available_soundpacks.end();
+            ++choice)
+        {
+            choice->selected = choice->id == current_soundpack;
+            if(choice->selected)
+            {
+                current_soundpack_label = choice->label;
+                active_found = true;
+            }
+        }
+
+        if(soundpack_choices != available_soundpacks)
+        {
+            soundpack_choices.swap(available_soundpacks);
+            model.DirtyVariable("soundpack_choices");
+        }
+        if(active_soundpack != current_soundpack)
+        {
+            active_soundpack = current_soundpack;
+            model.DirtyVariable("active_soundpack");
+        }
+        if(active_soundpack_label != current_soundpack_label)
+        {
+            active_soundpack_label = current_soundpack_label;
+            model.DirtyVariable("active_soundpack_label");
+        }
+
+        char pack_status[128];
+        if(active_found)
+        {
+            std::snprintf(
+                pack_status,
+                sizeof(pack_status),
+                "%d available // gameplay sounds reload on change",
+                int(soundpack_choices.size())
+            );
+        }
+        else
+        {
+            std::snprintf(
+                pack_status,
+                sizeof(pack_status),
+                "Active pack is unavailable; select a discovered pack"
+            );
+        }
+        if(soundpack_status != pack_status)
+        {
+            soundpack_status = pack_status;
+            model.DirtyVariable("soundpack_status");
+        }
+
         if(sound_volume != current.sound_volume)
         {
             sound_volume = current.sound_volume;
@@ -1442,7 +1551,9 @@ namespace cowui
             model.DirtyVariable("category_crosshair");
         }
 
-        if(hud)
+        if(audio)
+            refreshaudio();
+        else if(hud)
             refreshhud(!streak_milestone_scale_editing);
         else if(crosshair)
             refreshcrosshair(!crosshair_size_editing);
@@ -1584,6 +1695,49 @@ namespace cowui
             model.DirtyVariable("crosshair_status");
         }
         refreshcrosshair();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::selectsoundpack(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 1)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const Rml::String requested = arguments[0].Get<Rml::String>();
+        bool advertised = false;
+        for(std::vector<SoundpackChoice>::const_iterator choice =
+                soundpack_choices.begin();
+            choice != soundpack_choices.end();
+            ++choice)
+        {
+            if(choice->id == requested)
+            {
+                advertised = true;
+                break;
+            }
+        }
+
+        if(advertised && requested == active_soundpack)
+        {
+            soundpack_status = "Selected sound pack is already active";
+            model.DirtyVariable("soundpack_status");
+            event.StopPropagation();
+            return;
+        }
+
+        const bool accepted = advertised &&
+            settings::writesoundpack(requested.c_str());
+        refreshaudio();
+        soundpack_status = accepted
+            ? "Gameplay sounds reloaded from the selected pack"
+            : "Sound pack change failed; effective selection restored";
+        model.DirtyVariable("soundpack_status");
         event.StopPropagation();
     }
 

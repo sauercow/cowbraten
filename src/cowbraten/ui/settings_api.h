@@ -53,7 +53,14 @@ namespace cowui
             int music_volume;
             int music_volume_minimum;
             int music_volume_maximum;
+            const char *active_soundpack;
             bool backend_active;
+        };
+
+        struct SoundpackChoice
+        {
+            const char *id;
+            const char *display_name;
         };
 
         struct MouseInput
@@ -119,6 +126,11 @@ namespace cowui
             void *data
         );
 
+        typedef void (*SoundpackChoiceVisitor)(
+            const SoundpackChoice &choice,
+            void *data
+        );
+
         bool readfov(Fov &result);
         bool writefov(int value);
 
@@ -138,8 +150,10 @@ namespace cowui
         void resetgraphics();
 
         bool readaudio(Audio &result);
+        bool visitsoundpacks(SoundpackChoiceVisitor visitor, void *data);
         bool writesoundvolume(int value);
         bool writemusicvolume(int value);
+        bool writesoundpack(const char *id);
 
         bool readmouseinput(MouseInput &result);
         bool writesensitivity(float value);

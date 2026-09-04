@@ -727,6 +727,89 @@ body
     margin-top: var(--space-3);
 }
 
+.settings-soundpack-current
+{
+    box-sizing: border-box;
+    display: flex;
+    flex: none;
+    width: 176px;
+    min-width: 0;
+    height: 54px;
+    margin-left: var(--space-3);
+    padding: 0 var(--space-2);
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-surface-2);
+    border-left-width: 3px;
+    border-left-color: var(--color-primary);
+}
+
+.settings-soundpack-current-label
+{
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    color: var(--color-primary);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-align: center;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.settings-soundpack-grid
+{
+    display: flex;
+    margin-top: var(--space-3);
+    flex-wrap: wrap;
+    gap: var(--space-1);
+}
+
+.settings-soundpack-repeat
+{
+    display: block;
+    flex: 1 0 184px;
+}
+
+.settings-soundpack-choice
+{
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--space-2);
+    align-items: center;
+    justify-content: space-between;
+    line-height: 38px;
+}
+
+.settings-soundpack-choice.is-selected
+{
+    background-color: var(--color-primary-pressed);
+    border-color: var(--color-primary);
+    color: var(--color-text);
+}
+
+.settings-soundpack-choice-label
+{
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.settings-soundpack-choice-state
+{
+    display: block;
+    margin-left: var(--space-2);
+    color: var(--color-primary);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
 .settings-input-section
 {
     margin-top: var(--space-3);
@@ -1001,6 +1084,11 @@ body
     }
 
     .settings-audio-section
+    {
+        margin-top: var(--space-2);
+    }
+
+    .settings-soundpack-grid
     {
         margin-top: var(--space-2);
     }
