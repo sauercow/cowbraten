@@ -256,6 +256,45 @@ ICOMMAND(searchbinds,     "s", (char *action), searchbinds(action, keym::ACTION_
 ICOMMAND(searchspecbinds, "s", (char *action), searchbinds(action, keym::ACTION_SPECTATOR));
 ICOMMAND(searcheditbinds, "s", (char *action), searchbinds(action, keym::ACTION_EDITING));
 
+void visitdefaultkeybinds(const char *action, keybindvisitor visitor, void *data)
+{
+    if(!action || !visitor) return;
+    enumerate(keyms, keym, km,
+    {
+        if(!strcmp(km.actions[keym::ACTION_DEFAULT], action))
+            visitor(km.name, data);
+    });
+}
+
+bool setdefaultkeybind(const char *key, const char *action)
+{
+    if(!key || !action) return false;
+    keym *km = findbind(const_cast<char *>(key));
+    if(!km) return false;
+    bindkey(
+        const_cast<char *>(key),
+        const_cast<char *>(action),
+        keym::ACTION_DEFAULT,
+        "bind"
+    );
+    return !strcmp(km->actions[keym::ACTION_DEFAULT], action);
+}
+
+bool cleardefaultkeybind(const char *key, const char *action)
+{
+    if(!key || !action) return false;
+    keym *km = findbind(const_cast<char *>(key));
+    if(!km || strcmp(km->actions[keym::ACTION_DEFAULT], action)) return false;
+    char emptyaction[] = "";
+    bindkey(
+        const_cast<char *>(key),
+        emptyaction,
+        keym::ACTION_DEFAULT,
+        "bind"
+    );
+    return !km->actions[keym::ACTION_DEFAULT][0];
+}
+
 void inputcommand(char *init, char *action = NULL, char *prompt = NULL, const char *flags = NULL) // turns input to the command line on or off
 {
     commandmillis = init ? totalmillis : -1;
