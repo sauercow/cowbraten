@@ -68,36 +68,42 @@ namespace cowui
             return true;
         }
 
-        bool inspectconflict(
-            Action target_action,
-            const char *key_name,
-            Conflict &result)
+        struct OwnerInspection
         {
-            result = Conflict();
-            if(!actionname(target_action) || !key_name || !key_name[0])
-                return false;
+            Action target;
+            Conflict &result;
+            KeyVisitor visitor;
+            void *data;
+        };
 
-            char owner[MAXSTRLEN];
-            bool bound = false;
-
-            if(!getdefaultkeybind(key_name, owner, sizeof(owner), bound))
-                return false;
-
-            if(!bound)
-                return true;
+        static void inspectowner(const char *owner, void *data)
+        {
+            OwnerInspection &inspection = *static_cast<OwnerInspection *>(data);
+            if(inspection.visitor) inspection.visitor(owner, inspection.data);
+            if(!owner[0]) return;
 
             Action owner_action;
             if(!actionfromname(owner, owner_action))
             {
-                result.kind = ConflictKind::CustomAction;
-                return true;
+                inspection.result.kind = ConflictKind::CustomAction;
+                return;
             }
 
-            result.action = owner_action;
-            result.kind = owner_action == target_action
+            inspection.result.action = owner_action;
+            inspection.result.kind = owner_action == inspection.target
                 ? ConflictKind::SameAction
                 : ConflictKind::CuratedAction;
-            return true;
+        }
+
+        bool inspectconflict(
+            Action target_action, const char *key_name, Conflict &result,
+            KeyVisitor owner_visitor, void *data)
+        {
+            result = Conflict();
+            if(!actionname(target_action) || !key_name || !key_name[0])
+                return false;
+            OwnerInspection inspection = {target_action, result, owner_visitor, data};
+            return visitdefaultkeyowner(key_name, inspectowner, &inspection);
         }
 
         bool bind(Action action, const char *key_name)

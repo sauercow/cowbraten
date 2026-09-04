@@ -266,28 +266,12 @@ void visitdefaultkeybinds(const char *action, keybindvisitor visitor, void *data
     });
 }
 
-bool getdefaultkeybind(
-    const char *key,
-    char *action,
-    int maxlen,
-    bool &bound)
+bool visitdefaultkeyowner(const char *key, keybindvisitor visitor, void *data)
 {
-    bound = false;
-
-    if(!key || !action || maxlen <= 0)
-        return false;
-
-    action[0] = '\0';
-
+    if(!key || !visitor) return false;
     keym *km = findbind(const_cast<char *>(key));
-    if(!km)
-        return false;
-
-    if(!km->actions[keym::ACTION_DEFAULT][0])
-        return true;
-
-    copystring(action, km->actions[keym::ACTION_DEFAULT], maxlen);
-    bound = true;
+    if(!km) return false;
+    visitor(km->actions[keym::ACTION_DEFAULT], data);
     return true;
 }
 

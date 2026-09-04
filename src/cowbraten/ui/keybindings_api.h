@@ -1,6 +1,8 @@
 #ifndef COWBRATEN_UI_KEYBINDINGS_API_H
 #define COWBRATEN_UI_KEYBINDINGS_API_H
 
+#include <string>
+
 namespace cowui
 {
     namespace keybindings
@@ -34,6 +36,12 @@ namespace cowui
         {
             ConflictKind kind = ConflictKind::Unbound;
             Action action = Action::MoveForward;
+            bool matches(const Conflict &other) const;
+
+        private:
+            // Exact backend snapshot; never exposed to the RML data model.
+            std::string owner;
+            friend bool inspectconflict(Action, const char *, Conflict &);
         };
 
         bool visit(Action action, KeyVisitor visitor, void *data);

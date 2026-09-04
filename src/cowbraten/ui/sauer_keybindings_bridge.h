@@ -1,6 +1,7 @@
 #ifndef COWBRATEN_UI_SAUER_KEYBINDINGS_BRIDGE_H
 #define COWBRATEN_UI_SAUER_KEYBINDINGS_BRIDGE_H
 
+
 namespace cowui
 {
     namespace sauerkeybindings
@@ -40,7 +41,9 @@ namespace cowui
         bool inspectconflict(
             Action target_action,
             const char *key_name,
-            Conflict &result
+            Conflict &result,
+            KeyVisitor owner_visitor = nullptr,
+            void *data = nullptr
         );
         bool bind(Action action, const char *key_name);
         bool unbind(Action action, const char *key_name);

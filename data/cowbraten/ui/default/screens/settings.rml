@@ -647,8 +647,9 @@
                         <div class="settings-section settings-keybindings-panel panel">
                             <div class="settings-control-title">Key Bindings</div>
                             <div class="settings-control-description">
-                                Current native Sauer bindings. Rebind captures a pending key only; bindings are not changed.
+                                Capture a key, then Apply or Replace to assign it. Replace changes only that key; other keys are preserved.
                             </div>
+                            <div class="settings-key-result" data-if="key_binding_status != ''">{{ key_binding_status }}</div>
 
                             <div class="settings-keybinding-group">
                                 <div class="settings-keybinding-group-title">Movement</div>
@@ -671,6 +672,15 @@
                                             data-class-is-available="key_conflict_available"
                                             data-class-is-same-action="key_conflict_same_action"
                                             data-class-is-conflict="key_conflict_present">{{ key_conflict_status }}</span>
+                                        <div class="settings-key-decisions"
+                                            data-if="key_capture_id == binding.action_id && key_candidate_pending">
+                                            <button class="button" data-if="key_conflict_available"
+                                                data-event-click="decide_key(binding.action_id, 1)">Apply</button>
+                                            <button class="button" data-if="key_conflict_present"
+                                                data-event-click="decide_key(binding.action_id, 2)">Replace</button>
+                                            <button class="button"
+                                                data-event-click="decide_key(binding.action_id, 0)">{{ key_conflict_same_action ? 'Dismiss' : 'Cancel' }}</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -696,6 +706,15 @@
                                             data-class-is-available="key_conflict_available"
                                             data-class-is-same-action="key_conflict_same_action"
                                             data-class-is-conflict="key_conflict_present">{{ key_conflict_status }}</span>
+                                        <div class="settings-key-decisions"
+                                            data-if="key_capture_id == binding.action_id && key_candidate_pending">
+                                            <button class="button" data-if="key_conflict_available"
+                                                data-event-click="decide_key(binding.action_id, 1)">Apply</button>
+                                            <button class="button" data-if="key_conflict_present"
+                                                data-event-click="decide_key(binding.action_id, 2)">Replace</button>
+                                            <button class="button"
+                                                data-event-click="decide_key(binding.action_id, 0)">{{ key_conflict_same_action ? 'Dismiss' : 'Cancel' }}</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -721,6 +740,15 @@
                                             data-class-is-available="key_conflict_available"
                                             data-class-is-same-action="key_conflict_same_action"
                                             data-class-is-conflict="key_conflict_present">{{ key_conflict_status }}</span>
+                                        <div class="settings-key-decisions"
+                                            data-if="key_capture_id == binding.action_id && key_candidate_pending">
+                                            <button class="button" data-if="key_conflict_available"
+                                                data-event-click="decide_key(binding.action_id, 1)">Apply</button>
+                                            <button class="button" data-if="key_conflict_present"
+                                                data-event-click="decide_key(binding.action_id, 2)">Replace</button>
+                                            <button class="button"
+                                                data-event-click="decide_key(binding.action_id, 0)">{{ key_conflict_same_action ? 'Dismiss' : 'Cancel' }}</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

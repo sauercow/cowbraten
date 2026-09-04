@@ -257,6 +257,9 @@ namespace cowui
             constructor.Bind("resolutions", &resolutions) &&
             constructor.Bind("key_capture_id", &key_capture_id) &&
             constructor.Bind("key_capture_status", &key_capture_status) &&
+            constructor.Bind("key_binding_status", &key_binding_status) &&
+            constructor.Bind("key_candidate_pending", &key_candidate_pending) &&
+            constructor.BindEventCallback("decide_key", &RmlSettings::decidekeycandidate, this) &&
             constructor.Bind("key_conflict_status", &key_conflict_status) &&
             constructor.Bind("key_conflict_available", &key_conflict_available) &&
             constructor.Bind("key_conflict_same_action", &key_conflict_same_action) &&
@@ -1804,6 +1807,10 @@ namespace cowui
         key_capture_action = static_cast<keybindings::Action>(id);
         key_capture_id = id;
         key_candidate.clear();
+        key_candidate_pending = false;
+        key_binding_status.clear();
+        model.DirtyVariable("key_candidate_pending");
+        model.DirtyVariable("key_binding_status");
         clearkeyconflict();
         key_capture_active = true;
         key_capture_status = "Press a key... (Esc to cancel)";
@@ -1819,11 +1826,15 @@ namespace cowui
         key_capture_id = -1;
         key_candidate.clear();
         key_capture_status.clear();
+        key_candidate_pending = false;
+        key_binding_status.clear();
         clearkeyconflict();
         if(model)
         {
             model.DirtyVariable("key_capture_id");
             model.DirtyVariable("key_capture_status");
+            model.DirtyVariable("key_candidate_pending");
+            model.DirtyVariable("key_binding_status");
         }
     }
 
@@ -1832,10 +1843,71 @@ namespace cowui
         if(!key_capture_active || !name || !name[0])
             return;
         key_candidate = name;
+        key_candidate_pending = true;
+        model.DirtyVariable("key_candidate_pending");
         key_capture_active = false;
         key_capture_status = "Captured: " + key_candidate;
         model.DirtyVariable("key_capture_status");
         refreshkeyconflict();
+    }
+
+    void RmlSettings::decidekeycandidate(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 2 || key_capture_active || !key_candidate_pending ||
+           arguments[0].Get<int>(-1) != key_capture_id)
+            return;
+
+        // Fixed UI decisions: 0 cancels/dismisses, 1 applies, 2 replaces.
+        const int decision = arguments[1].Get<int>(-1);
+        if(decision == 0)
+        {
+            cancelkeycapture();
+            return;
+        }
+        if((decision != 1 || !key_conflict_available) &&
+           (decision != 2 || !key_conflict_present))
+            return;
+
+        keybindings::Conflict fresh;
+        if(!keybindings::inspectconflict(key_capture_action, key_candidate.c_str(), fresh))
+        {
+            refreshkeybindings();
+            key_binding_status = "Could not inspect this key; no binding changed.";
+            model.DirtyVariable("key_binding_status");
+            return;
+        }
+
+        const bool already_bound = decision == 1 &&
+            fresh.kind == keybindings::ConflictKind::SameAction;
+        if(!already_bound && !key_conflict.matches(fresh))
+        {
+            refreshkeybindings();
+            key_binding_status = "Key ownership changed. Review it and confirm again.";
+            model.DirtyVariable("key_binding_status");
+            return;
+        }
+
+        // Inspection and mutation are synchronous; no event dispatch in between.
+        const bool written = already_bound ||
+            keybindings::bind(key_capture_action, key_candidate.c_str());
+        const bool refreshed = refreshkeybindings();
+        keybindings::Conflict effective;
+        const bool verified = keybindings::inspectconflict(
+            key_capture_action, key_candidate.c_str(), effective) &&
+            effective.kind == keybindings::ConflictKind::SameAction;
+        if(written && refreshed && verified)
+        {
+            const Rml::String success = key_candidate + " bound to " +
+                keybindinglabel(key_capture_action);
+            cancelkeycapture();
+            key_binding_status = success;
+        }
+        else
+            key_binding_status = "Binding could not be confirmed. Review the current bindings.";
+        model.DirtyVariable("key_binding_status");
     }
 
     void RmlSettings::commitsensitivity()

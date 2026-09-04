@@ -102,6 +102,13 @@ namespace cowui
             return sauerkeybindings::visit(bridge, visitor, data);
         }
 
+        bool Conflict::matches(const Conflict &other) const
+        {
+            return kind == other.kind && owner == other.owner &&
+                ((kind != ConflictKind::SameAction &&
+                  kind != ConflictKind::CuratedAction) || action == other.action);
+        }
+
         bool inspectconflict(
             Action target_action,
             const char *key_name,
@@ -116,7 +123,11 @@ namespace cowui
             if(!sauerkeybindings::inspectconflict(
                    target_bridge,
                    key_name,
-                   bridge_result))
+                   bridge_result,
+                   [](const char *owner, void *data) {
+                       *static_cast<std::string *>(data) = owner;
+                   },
+                   &result.owner))
             {
                 return false;
             }

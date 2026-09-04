@@ -421,12 +421,8 @@ extern void complete(char *s, int maxlen, const char *cmdprefix);
 const char *getkeyname(int code);
 typedef void (*keybindvisitor)(const char *key, void *data);
 extern void visitdefaultkeybinds(const char *action, keybindvisitor visitor, void *data);
-extern bool getdefaultkeybind(
-    const char *key,
-    char *action,
-    int maxlen,
-    bool &bound
-);
+// Visits the full default action, including an empty unbound action.
+extern bool visitdefaultkeyowner(const char *key, keybindvisitor visitor, void *data);
 extern bool setdefaultkeybind(const char *key, const char *action);
 extern bool cleardefaultkeybind(const char *key, const char *action);
 extern const char *addreleaseaction(char *s);
