@@ -1,6 +1,7 @@
 // menus.cpp: ingame menu system (also used for scores and serverlist)
 
 #include "engine.h"
+#include "ui/ui.h"
 
 #define GUI_TITLE_COLOR  COL_WHITE
 #define GUI_BUTTON_COLOR COL_WHITE
@@ -168,8 +169,18 @@ void restoregui(int pos)
 
 void showgui(const char *name)
 {
+    if(cowui::tryroutelegacygui(name))
+        return;
+
     menu *m = guis.access(name);
     if(!m) return;
+
+    // A non-migrated legacy GUI takes presentation and input ownership rather
+    // than competing with an active RmlUi screen. The RmlUi document remains
+    // cached and may be opened again through its normal navigation path.
+    if(cowui::visible())
+        cowui::close();
+
     int pos = guistack.find(m);
     if(pos<0) pushgui(m);
     else restoregui(pos);
@@ -776,7 +787,8 @@ void menuprocess()
         if(wasmain > mainmenu || level==guistack.length()) clearguis(level); 
         clearlater = false;
     }
-    if(mainmenu && !isconnected(true) && guistack.empty()) showgui("main");
+    if(mainmenu && !isconnected(true) && guistack.empty() && !cowui::visible())
+        showgui("main");
     processingmenu = false;
 }
 
@@ -793,6 +805,11 @@ void clearmainmenu()
 
 void g3d_mainmenu()
 {
+    // RmlUi and the legacy GUI never present competing menu layers. Keeping
+    // the legacy stack intact preserves its normal state if ownership returns.
+    if(cowui::visible())
+        return;
+
     if(!guistack.empty()) 
     {   
         extern int usegui2d;
@@ -800,4 +817,3 @@ void g3d_mainmenu()
         else g3d_addgui(guistack.last(), menupos, GUI_2D | GUI_FOLLOW);
     }
 }
-

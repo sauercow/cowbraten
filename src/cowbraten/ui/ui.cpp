@@ -17,6 +17,7 @@
 #include <SDL.h>
 
 #include <cstdio>
+#include <cstring>
 
 namespace cowui
 {
@@ -718,6 +719,24 @@ namespace cowui
             sauerinput::beginmenu();
 
         return true;
+    }
+
+    bool tryroutelegacygui(const char *name)
+    {
+        if(!name)
+            return false;
+
+        ScreenId screen;
+        if(!std::strcmp(name, "main"))
+            screen = ScreenId::Main;
+        else if(!std::strcmp(name, "servers"))
+            screen = ScreenId::Servers;
+        else if(!std::strcmp(name, "options"))
+            screen = ScreenId::Settings;
+        else
+            return false;
+
+        return show(screen);
     }
 
     void showtest()

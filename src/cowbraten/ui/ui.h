@@ -27,6 +27,7 @@ namespace cowui
     void render();
 
     bool show(ScreenId screen);
+    bool tryroutelegacygui(const char *name);
     void showmain();
     void showservers();
     void showsettings();

@@ -68,6 +68,20 @@ Sauer can render and operate the command line normally. Closing the command
 line reshows the same document while retaining the menu's existing cursor/grab
 ownership throughout the transition.
 
+Legacy `showgui` calls pass through an exact-name compatibility router before
+the legacy menu table. The currently migrated names are `main` -> Main,
+`servers` -> Servers, and `options` -> Settings. A match uses the same cached
+`ScreenId` navigation path as the direct `/ui_*` commands; there is no command
+parsing, partial matching, or DOM-based routing. More names are added only when
+their production screen exists.
+
+An existing, non-migrated legacy GUI keeps the original `showgui` path. If it
+is requested while RmlUi owns the menu, RmlUi closes through its normal input
+restoration path before the legacy GUI opens. An unknown name remains the
+legacy no-op and does not disturb the active RmlUi screen. While RmlUi is
+visible, the legacy GUI stack is not rendered, which prevents two menu layers
+from competing while preserving legacy stack state for a later handoff.
+
 Application behavior must not depend on element IDs. IDs remain acceptable for
 document-local relationships such as a label's `for` attribute. State reaches
 RML through event-driven data models and stable actions; documents are not
