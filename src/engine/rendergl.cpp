@@ -2166,15 +2166,20 @@ void loadcrosshair_(const char *name, int *i)
 
 COMMANDN(loadcrosshair, loadcrosshair_, "si");
 
+const char *getcrosshairname(int i)
+{
+    if(i < 0 || i >= MAXCROSSHAIRS)
+        return "";
+
+    const char *name = crosshairs[i]
+        ? crosshairs[i]->name
+        : game::defaultcrosshair(i);
+    return name ? name : "data/crosshair.png";
+}
+
 ICOMMAND(getcrosshair, "i", (int *i),
 {
-    const char *name = "";
-    if(*i >= 0 && *i < MAXCROSSHAIRS)
-    {
-        name = crosshairs[*i] ? crosshairs[*i]->name : game::defaultcrosshair(*i);
-        if(!name) name = "data/crosshair.png";
-    }
-    result(name);
+    result(getcrosshairname(*i));
 });
 
 void writecrosshairs(stream *f)
@@ -2518,4 +2523,3 @@ void cleanupgl()
 
     gle::cleanup();
 }
-
