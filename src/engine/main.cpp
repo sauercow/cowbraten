@@ -1003,7 +1003,7 @@ void checkinput()
                 return;
 
             case SDL_TEXTINPUT:
-                if(ui_visible && cowui::processevent(event))
+                if(cowui::processevent(event))
                     break;
 
                 if(textinputmask && int(event.text.timestamp-textinputtime) >= textinputfilter)
@@ -1016,7 +1016,7 @@ void checkinput()
 
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                if(ui_visible && cowui::processevent(event))
+                if(cowui::processevent(event))
                     break;
 
                 if(keyrepeatmask || !event.key.repeat)
@@ -1096,11 +1096,8 @@ void checkinput()
 
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
-                if(ui_visible)
-                {
-                    cowui::processevent(event);
+                if(cowui::processevent(event) || ui_visible)
                     break;
-                }
 
                 //if(lasttype==event.type && lastbut==event.button.button) break; // why?? get event twice without it
                 switch(event.button.button)

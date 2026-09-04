@@ -6,6 +6,7 @@
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Event.h>
+#include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Input.h>
 
 #include <algorithm>
@@ -234,6 +235,7 @@ namespace cowui
         {
             valid = valid &&
                 row.RegisterMember("label", &KeyBindingRow::label) &&
+                row.RegisterMember("action_id", &KeyBindingRow::action_id) &&
                 row.RegisterMember("keys", &KeyBindingRow::keys) &&
                 row.RegisterMember("bound", &KeyBindingRow::bound);
         }
@@ -253,6 +255,9 @@ namespace cowui
             constructor.RegisterArray<std::vector<SoundpackChoice>>() &&
             constructor.RegisterArray<std::vector<KeyBindingRow>>() &&
             constructor.Bind("resolutions", &resolutions) &&
+            constructor.Bind("key_capture_id", &key_capture_id) &&
+            constructor.Bind("key_capture_status", &key_capture_status) &&
+            constructor.BindEventCallback("capture_key", &RmlSettings::startkeycapture, this) &&
             constructor.Bind("crosshair_choices", &crosshair_choices) &&
             constructor.Bind("soundpack_choices", &soundpack_choices) &&
             constructor.Bind(
@@ -721,6 +726,7 @@ namespace cowui
 
     void RmlSettings::shutdown(Rml::Context *context)
     {
+        cancelkeycapture();
         if(instance == this)
             instance = nullptr;
 
@@ -1602,6 +1608,7 @@ namespace cowui
                                std::vector<KeyBindingRow> &rows)
         {
             KeyBindingRow row;
+            row.action_id = static_cast<int>(action);
             row.label = label;
             if(!keybindings::visit(action, appendkeyname, &row.keys))
                 return false;
@@ -1687,6 +1694,58 @@ namespace cowui
         return true;
     }
 
+    void RmlSettings::startkeycapture(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 1 || !category_mouse_keyboard)
+            return;
+
+        // Only IDs of typed rows supplied by C++ are accepted.
+        const int id = arguments[0].Get<int>(-1);
+        const KeyBindingRow *selected = nullptr;
+        for(const auto *rows : { &keybindings_movement, &keybindings_combat,
+                                &keybindings_interface })
+            for(const KeyBindingRow &row : *rows)
+                if(row.action_id == id) selected = &row;
+        if(!selected)
+            return;
+
+        event.GetCurrentElement()->GetOwnerDocument()->Focus();
+        key_capture_action = static_cast<keybindings::Action>(id);
+        key_capture_id = id;
+        key_candidate.clear();
+        key_capture_active = true;
+        key_capture_status = "Press a key... (Esc to cancel)";
+        model.DirtyVariable("key_capture_id");
+        model.DirtyVariable("key_capture_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::cancelkeycapture()
+    {
+        key_capture_active = false;
+        key_capture_action = keybindings::Action::MoveForward;
+        key_capture_id = -1;
+        key_candidate.clear();
+        key_capture_status.clear();
+        if(model)
+        {
+            model.DirtyVariable("key_capture_id");
+            model.DirtyVariable("key_capture_status");
+        }
+    }
+
+    void RmlSettings::acceptkeycandidate(const char *name)
+    {
+        if(!key_capture_active || !name || !name[0])
+            return;
+        key_candidate = name;
+        key_capture_active = false;
+        key_capture_status = "Captured: " + key_candidate + " (pending; not applied)";
+        model.DirtyVariable("key_capture_status");
+    }
+
     void RmlSettings::commitsensitivity()
     {
         float requested = 0.0f;
@@ -1743,6 +1802,8 @@ namespace cowui
 
     void RmlSettings::setcategory(Category category)
     {
+        if(category != Category::MouseKeyboard)
+            cancelkeycapture();
         const bool game = category == Category::Game;
         const bool hud = category == Category::Hud;
         const bool graphics = category == Category::Graphics;

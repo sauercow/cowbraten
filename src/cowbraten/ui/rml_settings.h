@@ -1,6 +1,8 @@
 #ifndef COWBRATEN_UI_RML_SETTINGS_H
 #define COWBRATEN_UI_RML_SETTINGS_H
 
+#include "keybindings_api.h"
+
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/Types.h>
 
@@ -32,6 +34,9 @@ namespace cowui
         void activate();
         void videochanged();
         void applypending();
+        bool capturingkey() const { return key_capture_active; }
+        void cancelkeycapture();
+        void acceptkeycandidate(const char *name);
 
     private:
         struct Resolution
@@ -84,13 +89,14 @@ namespace cowui
 
         struct KeyBindingRow
         {
+            int action_id = -1;
             Rml::String label;
             std::vector<Rml::String> keys;
             bool bound = false;
 
             bool operator==(const KeyBindingRow &other) const
             {
-                return label == other.label &&
+                return action_id == other.action_id && label == other.label &&
                     keys == other.keys &&
                     bound == other.bound;
             }
@@ -115,6 +121,8 @@ namespace cowui
         bool refreshhud(bool update_edit_buffer = false);
         bool refreshchat();
         bool refreshkeybindings();
+        void startkeycapture(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
         void commitsensitivity();
         void commitcrosshairsize();
         void commitstreakscale();
@@ -205,6 +213,11 @@ namespace cowui
         std::vector<KeyBindingRow> keybindings_movement;
         std::vector<KeyBindingRow> keybindings_combat;
         std::vector<KeyBindingRow> keybindings_interface;
+        bool key_capture_active = false;
+        keybindings::Action key_capture_action = keybindings::Action::MoveForward;
+        int key_capture_id = -1;
+        Rml::String key_candidate;
+        Rml::String key_capture_status;
 
         int fov = 100;
         int fov_minimum = 10;

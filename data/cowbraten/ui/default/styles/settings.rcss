@@ -998,6 +998,7 @@ body
 {
     box-sizing: border-box;
     display: flex;
+    flex-wrap: wrap;
     min-height: 36px;
     padding: var(--space-1) 0;
     align-items: center;
@@ -1019,10 +1020,25 @@ body
     display: flex;
     flex: none;
     min-width: 180px;
-    margin-left: var(--space-3);
+    margin-left: auto;
     align-items: center;
     justify-content: flex-end;
     gap: var(--space-1);
+}
+
+.settings-key-rebind
+{
+    margin-left: var(--space-3);
+    padding: 0 var(--space-2);
+    line-height: 24px;
+}
+
+.settings-key-capture
+{
+    width: 100%;
+    margin-top: var(--space-1);
+    color: var(--color-primary);
+    font-size: 12px;
 }
 
 .settings-key-chip

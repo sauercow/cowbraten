@@ -18,6 +18,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <array>
 
 namespace cowui
 {
@@ -64,6 +65,12 @@ namespace cowui
     static bool initialized = false;
     static bool console_suspended = false;
 
+    // Presses consumed by capture retain ownership through repeat/release,
+    // including when the document closes or the console takes over.
+    static std::array<bool, SDL_NUM_SCANCODES> captured_keys{};
+    static std::array<bool, 256> captured_buttons{};
+    static int captured_key_count = 0;
+
     static Screen *findscreen(ScreenId id)
     {
         for(Screen &screen : screens)
@@ -75,6 +82,9 @@ namespace cowui
 
     static void hidedocument(Screen &screen)
     {
+        if(screen.id == ScreenId::Settings)
+            settings_model.cancelkeycapture();
+
         if(!screen.document)
             return;
 
@@ -455,6 +465,10 @@ namespace cowui
 
     void shutdown()
     {
+        settings_model.cancelkeycapture();
+        captured_keys.fill(false);
+        captured_buttons.fill(false);
+        captured_key_count = 0;
         if(active_screen)
             close();
 
@@ -533,6 +547,28 @@ namespace cowui
 
     bool processevent(const SDL_Event &event)
     {
+        if(event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
+        {
+            const int scan = event.key.keysym.scancode;
+            if(scan >= 0 && scan < SDL_NUM_SCANCODES && captured_keys[scan])
+            {
+                if(event.type == SDL_KEYUP)
+                {
+                    captured_keys[scan] = false;
+                    --captured_key_count;
+                }
+                return true;
+            }
+        }
+        else if(event.type == SDL_MOUSEBUTTONUP &&
+                captured_buttons[event.button.button])
+        {
+            captured_buttons[event.button.button] = false;
+            return true;
+        }
+        else if(event.type == SDL_TEXTINPUT && captured_key_count)
+            return true;
+
         if(!initialized || !context || !active_screen)
             return false;
 
@@ -540,6 +576,41 @@ namespace cowui
 
         if(console_suspended)
             return false;
+
+        if(settings_model.capturingkey())
+        {
+            switch(event.type)
+            {
+                case SDL_KEYDOWN:
+                {
+                    if(event.key.repeat)
+                        return true;
+                    const int scan = event.key.keysym.scancode;
+                    if(scan >= 0 && scan < SDL_NUM_SCANCODES)
+                    {
+                        captured_keys[scan] = true;
+                        ++captured_key_count;
+                    }
+                    if(event.key.keysym.sym == SDLK_ESCAPE)
+                        settings_model.cancelkeycapture();
+                    else
+                        settings_model.acceptkeycandidate(
+                            sauerinput::capturekeyname(event));
+                    return true;
+                }
+                case SDL_MOUSEBUTTONDOWN:
+                    captured_buttons[event.button.button] = true;
+                    settings_model.acceptkeycandidate(
+                        sauerinput::capturekeyname(event));
+                    return true;
+                case SDL_MOUSEWHEEL:
+                    settings_model.acceptkeycandidate(
+                        sauerinput::capturekeyname(event));
+                    return true;
+                case SDL_TEXTINPUT:
+                    return true;
+            }
+        }
 
         if(event.type == SDL_KEYDOWN &&
            !event.key.repeat &&

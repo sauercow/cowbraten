@@ -647,7 +647,7 @@
                         <div class="settings-section settings-keybindings-panel panel">
                             <div class="settings-control-title">Key Bindings</div>
                             <div class="settings-control-description">
-                                Current native Sauer bindings. This view is read-only; key capture and conflict handling will be added separately.
+                                Current native Sauer bindings. Rebind captures a pending key only; bindings are not changed.
                             </div>
 
                             <div class="settings-keybinding-group">
@@ -662,6 +662,10 @@
                                             <span class="settings-key-unbound"
                                                 data-if="!binding.bound">Unbound</span>
                                         </div>
+                                        <button class="button settings-key-rebind"
+                                            data-event-click="capture_key(binding.action_id)">Rebind</button>
+                                        <span class="settings-key-capture"
+                                            data-if="key_capture_id == binding.action_id">{{ key_capture_status }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -678,6 +682,10 @@
                                             <span class="settings-key-unbound"
                                                 data-if="!binding.bound">Unbound</span>
                                         </div>
+                                        <button class="button settings-key-rebind"
+                                            data-event-click="capture_key(binding.action_id)">Rebind</button>
+                                        <span class="settings-key-capture"
+                                            data-if="key_capture_id == binding.action_id">{{ key_capture_status }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -694,6 +702,10 @@
                                             <span class="settings-key-unbound"
                                                 data-if="!binding.bound">Unbound</span>
                                         </div>
+                                        <button class="button settings-key-rebind"
+                                            data-event-click="capture_key(binding.action_id)">Rebind</button>
+                                        <span class="settings-key-capture"
+                                            data-if="key_capture_id == binding.action_id">{{ key_capture_status }}</span>
                                     </div>
                                 </div>
                             </div>

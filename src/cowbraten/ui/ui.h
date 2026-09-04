@@ -21,6 +21,7 @@ namespace cowui
     void beforeglreset();
     void afterglreset(int width, int height);
 
+    // Route key/button/text events even while hidden to drain captured releases.
     bool processevent(const SDL_Event &event);
 
     void update();
