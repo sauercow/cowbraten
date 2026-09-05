@@ -659,12 +659,25 @@
                                         <span class="settings-keybinding-label">{{ binding.label }}</span>
                                         <div class="settings-keybinding-values">
                                             <span class="settings-key-chip"
-                                                data-for="key : binding.keys">{{ key }}</span>
+                                                data-for="key : binding.keys">
+                                                <span>{{ key }}</span>
+                                                <button class="button settings-key-remove"
+                                                    title="Remove binding"
+                                                    data-event-click="request_key_removal(binding.action_id, key)">×</button>
+                                            </span>
                                             <span class="settings-key-unbound"
                                                 data-if="!binding.bound">Unbound</span>
                                         </div>
                                         <button class="button settings-key-rebind"
                                             data-event-click="capture_key(binding.action_id)">Rebind</button>
+                                        <div class="settings-key-removal"
+                                            data-if="key_removal_active && key_removal_action_id == binding.action_id">
+                                            <div>{{ key_removal_prompt }}</div>
+                                            <div class="settings-key-decisions">
+                                                <button class="button" data-event-click="decide_key_removal(1)">Remove</button>
+                                                <button class="button" data-event-click="decide_key_removal(0)">Cancel</button>
+                                            </div>
+                                        </div>
                                         <span class="settings-key-capture"
                                             data-if="key_capture_id == binding.action_id">{{ key_capture_status }}</span>
                                         <span class="settings-key-conflict"
@@ -693,12 +706,25 @@
                                         <span class="settings-keybinding-label">{{ binding.label }}</span>
                                         <div class="settings-keybinding-values">
                                             <span class="settings-key-chip"
-                                                data-for="key : binding.keys">{{ key }}</span>
+                                                data-for="key : binding.keys">
+                                                <span>{{ key }}</span>
+                                                <button class="button settings-key-remove"
+                                                    title="Remove binding"
+                                                    data-event-click="request_key_removal(binding.action_id, key)">×</button>
+                                            </span>
                                             <span class="settings-key-unbound"
                                                 data-if="!binding.bound">Unbound</span>
                                         </div>
                                         <button class="button settings-key-rebind"
                                             data-event-click="capture_key(binding.action_id)">Rebind</button>
+                                        <div class="settings-key-removal"
+                                            data-if="key_removal_active && key_removal_action_id == binding.action_id">
+                                            <div>{{ key_removal_prompt }}</div>
+                                            <div class="settings-key-decisions">
+                                                <button class="button" data-event-click="decide_key_removal(1)">Remove</button>
+                                                <button class="button" data-event-click="decide_key_removal(0)">Cancel</button>
+                                            </div>
+                                        </div>
                                         <span class="settings-key-capture"
                                             data-if="key_capture_id == binding.action_id">{{ key_capture_status }}</span>
                                         <span class="settings-key-conflict"
@@ -727,12 +753,25 @@
                                         <span class="settings-keybinding-label">{{ binding.label }}</span>
                                         <div class="settings-keybinding-values">
                                             <span class="settings-key-chip"
-                                                data-for="key : binding.keys">{{ key }}</span>
+                                                data-for="key : binding.keys">
+                                                <span>{{ key }}</span>
+                                                <button class="button settings-key-remove"
+                                                    title="Remove binding"
+                                                    data-event-click="request_key_removal(binding.action_id, key)">×</button>
+                                            </span>
                                             <span class="settings-key-unbound"
                                                 data-if="!binding.bound">Unbound</span>
                                         </div>
                                         <button class="button settings-key-rebind"
                                             data-event-click="capture_key(binding.action_id)">Rebind</button>
+                                        <div class="settings-key-removal"
+                                            data-if="key_removal_active && key_removal_action_id == binding.action_id">
+                                            <div>{{ key_removal_prompt }}</div>
+                                            <div class="settings-key-decisions">
+                                                <button class="button" data-event-click="decide_key_removal(1)">Remove</button>
+                                                <button class="button" data-event-click="decide_key_removal(0)">Cancel</button>
+                                            </div>
+                                        </div>
                                         <span class="settings-key-capture"
                                             data-if="key_capture_id == binding.action_id">{{ key_capture_status }}</span>
                                         <span class="settings-key-conflict"

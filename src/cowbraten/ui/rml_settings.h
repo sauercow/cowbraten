@@ -122,6 +122,11 @@ namespace cowui
         bool refreshchat();
         bool refreshkeybindings();
         bool refreshkeyconflict();
+        void clearkeyremoval();
+        void requestkeyremoval(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void decidekeyremoval(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
         void decidekeycandidate(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
         void clearkeyconflict();
@@ -225,6 +230,10 @@ namespace cowui
         Rml::String key_capture_status;
         Rml::String key_binding_status;
         bool key_candidate_pending = false;
+        bool key_removal_active = false;
+        keybindings::Action key_removal_action = keybindings::Action::MoveForward;
+        Rml::String key_removal_key;
+        Rml::String key_removal_prompt;
         keybindings::Conflict key_conflict;
         Rml::String key_conflict_status;
         bool key_conflict_available = false;

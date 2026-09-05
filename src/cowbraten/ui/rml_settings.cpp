@@ -259,6 +259,13 @@ namespace cowui
             constructor.Bind("key_capture_status", &key_capture_status) &&
             constructor.Bind("key_binding_status", &key_binding_status) &&
             constructor.Bind("key_candidate_pending", &key_candidate_pending) &&
+            constructor.Bind("key_removal_active", &key_removal_active) &&
+            constructor.BindFunc("key_removal_action_id", [this](Rml::Variant &value) {
+                value = static_cast<int>(key_removal_action);
+            }) &&
+            constructor.Bind("key_removal_prompt", &key_removal_prompt) &&
+            constructor.BindEventCallback("request_key_removal", &RmlSettings::requestkeyremoval, this) &&
+            constructor.BindEventCallback("decide_key_removal", &RmlSettings::decidekeyremoval, this) &&
             constructor.BindEventCallback("decide_key", &RmlSettings::decidekeycandidate, this) &&
             constructor.Bind("key_conflict_status", &key_conflict_status) &&
             constructor.Bind("key_conflict_available", &key_conflict_available) &&
@@ -1804,6 +1811,7 @@ namespace cowui
             return;
 
         event.GetCurrentElement()->GetOwnerDocument()->Focus();
+        clearkeyremoval();
         key_capture_action = static_cast<keybindings::Action>(id);
         key_capture_id = id;
         key_candidate.clear();
@@ -1821,6 +1829,8 @@ namespace cowui
 
     void RmlSettings::cancelkeycapture()
     {
+        // Settings close/suspension/category changes invalidate either decision.
+        clearkeyremoval();
         key_capture_active = false;
         key_capture_action = keybindings::Action::MoveForward;
         key_capture_id = -1;
@@ -1907,6 +1917,96 @@ namespace cowui
         }
         else
             key_binding_status = "Binding could not be confirmed. Review the current bindings.";
+        model.DirtyVariable("key_binding_status");
+    }
+
+    void RmlSettings::clearkeyremoval()
+    {
+        key_removal_active = false;
+        key_removal_action = keybindings::Action::MoveForward;
+        key_removal_key.clear();
+        key_removal_prompt.clear();
+        if(model)
+        {
+            model.DirtyVariable("key_removal_active");
+            model.DirtyVariable("key_removal_action_id");
+            model.DirtyVariable("key_removal_prompt");
+        }
+    }
+
+    void RmlSettings::requestkeyremoval(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 2 || !category_mouse_keyboard)
+            return;
+        const int id = arguments[0].Get<int>(-1);
+        const Rml::String key = arguments[1].Get<Rml::String>();
+        // Accept only a typed row and exact canonical key supplied by C++.
+        bool valid = false;
+        for(const auto *rows : { &keybindings_movement, &keybindings_combat,
+                                &keybindings_interface })
+            for(const KeyBindingRow &row : *rows)
+                if(row.action_id == id &&
+                   std::find(row.keys.begin(), row.keys.end(), key) != row.keys.end())
+                    valid = true;
+        if(!valid)
+            return;
+
+        cancelkeycapture();
+        key_removal_action = static_cast<keybindings::Action>(id);
+        key_removal_key = key;
+        key_removal_active = true;
+        key_removal_prompt = "Remove " + key + " from " +
+            keybindinglabel(key_removal_action) + "?";
+        model.DirtyVariable("key_removal_active");
+        model.DirtyVariable("key_removal_action_id");
+        model.DirtyVariable("key_removal_prompt");
+    }
+
+    void RmlSettings::decidekeyremoval(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !key_removal_active ||
+           !category_mouse_keyboard)
+            return;
+        const int decision = arguments[0].Get<int>(-1);
+        if(decision == 0)
+        {
+            clearkeyremoval();
+            return;
+        }
+        if(decision != 1)
+            return;
+
+        const keybindings::Action action = key_removal_action;
+        const Rml::String key = key_removal_key;
+        keybindings::Conflict fresh;
+        const bool inspected = keybindings::inspectconflict(action, key.c_str(), fresh);
+        if(!inspected || fresh.kind != keybindings::ConflictKind::SameAction)
+        {
+            clearkeyremoval();
+            refreshkeybindings();
+            key_binding_status = inspected
+                ? "Binding changed; nothing was removed."
+                : "Could not inspect this key; nothing was removed.";
+        }
+        else
+        {
+            // No event dispatch between inspection and this exact-key mutation.
+            const bool removed = keybindings::unbind(action, key.c_str());
+            clearkeyremoval();
+            const bool refreshed = refreshkeybindings();
+            keybindings::Conflict effective;
+            const bool verified = keybindings::inspectconflict(action, key.c_str(), effective) &&
+                effective.kind != keybindings::ConflictKind::SameAction;
+            key_binding_status = removed && refreshed && verified
+                ? key + " removed from " + keybindinglabel(action)
+                : "Removal could not be confirmed. Review the current bindings.";
+        }
         model.DirtyVariable("key_binding_status");
     }
 
