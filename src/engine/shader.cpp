@@ -1045,6 +1045,31 @@ int Shader::uniformlocversion()
 
 VARFP(shaderdetail, 0, MAXSHADERDETAIL, MAXSHADERDETAIL, fixshaderdetail());
 
+ShaderDetailState inspectshaderdetail()
+{
+    ShaderDetailState result = {};
+    result.requested = shaderdetail;
+    result.ready = SDL_GL_GetCurrentContext() && loadedshaders;
+    if(!result.ready) return result;
+    // Read resident metadata only. Never force lazy definitions for inspection.
+    enumerate(shaders, Shader, s,
+    {
+        if(!s.forced || s.variantshader) continue;
+        ++result.inspected;
+        Shader *selected = s.detailshader;
+        if(!selected || selected->invalid() || selected->deferred() || !selected->program)
+            ++result.unresolved;
+        else
+        {
+            Shader *preferred = shaderdetail >= 0 && shaderdetail < MAXSHADERDETAIL ?
+                s.fastshader[shaderdetail] : &s;
+            // An intentional fast mapping is not an alternative fallback.
+            if(selected != preferred) ++result.alternatives;
+        }
+    });
+    return result;
+}
+
 void Shader::fixdetailshader(bool shouldforce, bool recurse)
 {
     Shader *alt = this;

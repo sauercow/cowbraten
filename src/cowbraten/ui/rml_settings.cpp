@@ -316,6 +316,11 @@ namespace cowui
             constructor.Bind("motion_blur_available", &motion_blur_available) &&
             constructor.Bind("graphics_quality_status", &graphics_quality_status) &&
             constructor.Bind("anisotropy_enabled", &anisotropy_enabled) &&
+            constructor.Bind("shader_detail_available", &shader_detail_available) &&
+            constructor.Bind("shader_detail_selected", &shader_detail_selected) &&
+            constructor.Bind("shader_detail_label", &shader_detail_label) &&
+            constructor.Bind("shader_detail_status", &shader_detail_status) &&
+            constructor.BindEventCallback("select_shader_detail", &RmlSettings::selectshaderdetail, this) &&
             constructor.Bind("mipmap_blending", &mipmap_blending) &&
             constructor.Bind("mipmap_blending_available", &mipmap_blending_available) &&
             constructor.Bind("mipmap_blending_status", &mipmap_blending_status) &&
@@ -806,6 +811,10 @@ namespace cowui
         antialiasing = 0;
         antialiasing_requested = -1;
         pending_antialiasing = -1;
+        pending_shader_detail = shader_detail_selected = -1;
+        shader_detail_available = false;
+        shader_detail_label.clear();
+        shader_detail_status.clear();
         antialiasing_label.clear();
         antialiasing_status.clear();
         antialiasing_off = true;
@@ -878,18 +887,25 @@ namespace cowui
 
     void RmlSettings::activate()
     {
+        pending_shader_detail = -1;
         refresh();
     }
 
     void RmlSettings::videochanged()
     {
         refreshvideo();
+        // afterglreset precedes reloadshaders: the helper reports unavailable
+        // here, never a final post-reset health claim.
+        refreshshaderdetail();
     }
 
     void RmlSettings::applypending()
     {
         if(pending_antialiasing < 0)
+        {
+            applypendingshaderdetail();
             return;
+        }
 
         const int requested = pending_antialiasing;
         pending_antialiasing = -1;
@@ -923,6 +939,8 @@ namespace cowui
 
         antialiasing_status = status;
         model.DirtyVariable("antialiasing_status");
+        refreshshaderdetail(); // resetgraphics has now completed reloadshaders.
+        applypendingshaderdetail();
     }
 
     bool RmlSettings::refresh()
@@ -951,6 +969,7 @@ namespace cowui
 
         if(!refreshvideo())
             return false;
+        refreshshaderdetail();
         if(!refreshaudio())
             return false;
         if(!refreshmouseinput(!mouse_sensitivity_editing))
@@ -2458,6 +2477,63 @@ namespace cowui
         settings::MipmapBlendingState state = {};
         settings::readmipmapblending(state);
         presentmipmapblending(state);
+    }
+
+    void RmlSettings::refreshshaderdetail()
+    {
+        settings::ShaderDetailState state = {};
+        settings::readshaderdetail(state);
+        presentshaderdetail(state);
+    }
+
+    void RmlSettings::presentshaderdetail(const settings::ShaderDetailState &state)
+    {
+        shader_detail_available = state.ready;
+        shader_detail_selected = state.requested == 1 || state.requested == 3 ?
+            state.requested : -1;
+        if(state.requested == 1) shader_detail_label = "Low";
+        else if(state.requested == 3) shader_detail_label = "High";
+        else
+        {
+            char label[32];
+            std::snprintf(label, sizeof(label), "Level %d", state.requested);
+            shader_detail_label = label;
+        }
+        if(!state.ready) shader_detail_status = "Shader renderer is not ready";
+        else if(state.unresolved) shader_detail_status = "Some requested shaders are unavailable";
+        else if(state.alternatives) shader_detail_status = "Some shaders are using fallback implementations";
+        else shader_detail_status.clear();
+        model.DirtyVariable("shader_detail_available");
+        model.DirtyVariable("shader_detail_selected");
+        model.DirtyVariable("shader_detail_label");
+        model.DirtyVariable("shader_detail_status");
+    }
+
+    void RmlSettings::selectshaderdetail(
+        Rml::DataModelHandle, Rml::Event &event, const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !shader_detail_available) return;
+        const int value = arguments[0].Get<int>();
+        if(value != 1 && value != 3) return;
+        // No native write/compilation while RmlUi is dispatching this event.
+        pending_shader_detail = value;
+    }
+
+    void RmlSettings::applypendingshaderdetail()
+    {
+        if(pending_shader_detail < 0) return;
+        const int value = pending_shader_detail;
+        pending_shader_detail = -1;
+        settings::ShaderDetailState state = {};
+        const bool accepted = settings::writeshaderdetail(
+            static_cast<settings::ShaderDetailLevel>(value), state);
+        presentshaderdetail(state);
+        if(!accepted)
+        {
+            shader_detail_status = "Change not accepted. " + shader_detail_status;
+            model.DirtyVariable("shader_detail_status");
+        }
     }
 
     void RmlSettings::presentmipmapblending(const settings::MipmapBlendingState &state)

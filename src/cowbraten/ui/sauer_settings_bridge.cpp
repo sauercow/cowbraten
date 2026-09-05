@@ -587,6 +587,34 @@ namespace cowui
             return readgraphicsquality(current) && current.motion_blur == enabled;
         }
 
+        static void copyshaderdetail(const ::ShaderDetailState &source, ShaderDetailState &result)
+        {
+            result.requested = source.requested;
+            result.ready = source.ready;
+            result.inspected = source.inspected;
+            result.alternatives = source.alternatives;
+            result.unresolved = source.unresolved;
+        }
+
+        bool readshaderdetail(ShaderDetailState &result)
+        {
+            copyshaderdetail(::inspectshaderdetail(), result);
+            return result.ready;
+        }
+
+        bool writeshaderdetail(ShaderDetailLevel level, ShaderDetailState &result)
+        {
+            const int value = static_cast<int>(level);
+            ident *id = getident("shaderdetail");
+            readshaderdetail(result);
+            if(value < 0 || value > 3 || !result.ready || !id ||
+               id->type != ID_VAR || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+            setvarchecked(id, value); // Existing synchronous fixshaderdetail callback.
+            readshaderdetail(result);
+            return *id->storage.i == value;
+        }
+
         static void copymipmapblending(const ::MipmapBlendingState &source, MipmapBlendingState &result)
         {
             switch(source.status)

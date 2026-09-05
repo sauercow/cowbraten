@@ -482,6 +482,35 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Shader Detail</div>
+                                    <div class="settings-control-description">
+                                        Adjust material and effect shader detail. Changes may briefly pause rendering.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Current</span>
+                                    <span class="settings-resolution-current-value">{{ shader_detail_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="shader_detail_selected == 1"
+                                    data-attrif-disabled="!shader_detail_available"
+                                    data-event-click="select_shader_detail(1)">Low</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="shader_detail_selected == 3"
+                                    data-attrif-disabled="!shader_detail_available"
+                                    data-event-click="select_shader_detail(3)">High</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="shader_detail_status != ''">
+                                <span>{{ shader_detail_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-control-footer settings-control-footer-compact"
                             data-if="graphics_quality_status != ''">
                             <span>{{ graphics_quality_status }}</span>

@@ -61,6 +61,15 @@ extern const matrix4x3 *textmatrix;
 extern void reloadfonts();
 
 // texture
+struct ShaderDetailState
+{
+    int requested;
+    bool ready;
+    // Historically forced base shaders, not a census of current draw calls.
+    int inspected, alternatives, unresolved;
+};
+extern ShaderDetailState inspectshaderdetail();
+
 extern int hwtexsize, hwcubetexsize, hwmaxaniso, maxtexsize;
 
 enum class AnisotropyStatus { Unavailable, Unsupported, NoTextures, Verified, Mismatch, Mixed };

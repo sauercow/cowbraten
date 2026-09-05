@@ -54,6 +54,18 @@ namespace cowui
             bool motion_blur_available;
         };
 
+        enum class ShaderDetailLevel { Level0 = 0, Low = 1, Level2 = 2, High = 3 };
+        struct ShaderDetailState
+        {
+            int requested;
+            bool ready;
+            // Resident, historically forced base selections; not a global effective level.
+            int inspected, alternatives, unresolved;
+        };
+        bool readshaderdetail(ShaderDetailState &result);
+        // Native write acceptance, independent of shader selection health.
+        bool writeshaderdetail(ShaderDetailLevel level, ShaderDetailState &result);
+
         enum class MipmapBlendingStatus { Unavailable, NoTextures, Verified, Mismatch, Mixed };
         struct MipmapBlendingState
         {

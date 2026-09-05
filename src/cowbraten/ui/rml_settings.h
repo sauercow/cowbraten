@@ -23,6 +23,7 @@ namespace cowui
         struct SoundpackChoice;
         struct AnisotropyState;
         struct MipmapBlendingState;
+        struct ShaderDetailState;
     }
 
     class RmlActionRouter;
@@ -117,6 +118,11 @@ namespace cowui
 
         bool refresh();
         bool refreshvideo();
+        void refreshshaderdetail();
+        void presentshaderdetail(const settings::ShaderDetailState &state);
+        void selectshaderdetail(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void applypendingshaderdetail();
         bool refreshgraphicsquality();
         void refreshanisotropy();
         void refreshmipmapblending();
@@ -286,6 +292,11 @@ namespace cowui
         int antialiasing = 0;
         int antialiasing_requested = -1;
         int pending_antialiasing = -1;
+        int pending_shader_detail = -1;
+        int shader_detail_selected = -1;
+        bool shader_detail_available = false;
+        Rml::String shader_detail_label;
+        Rml::String shader_detail_status;
         Rml::String antialiasing_label;
         Rml::String antialiasing_status;
         bool antialiasing_off = true;

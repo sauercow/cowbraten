@@ -215,6 +215,32 @@ namespace cowui
             return sauersettings::writemotionblur(enabled);
         }
 
+        static void copyshaderdetail(const sauersettings::ShaderDetailState &source, ShaderDetailState &result)
+        {
+            result.requested = source.requested;
+            result.ready = source.ready;
+            result.inspected = source.inspected;
+            result.alternatives = source.alternatives;
+            result.unresolved = source.unresolved;
+        }
+
+        bool readshaderdetail(ShaderDetailState &result)
+        {
+            sauersettings::ShaderDetailState legacy = {};
+            const bool read = sauersettings::readshaderdetail(legacy);
+            copyshaderdetail(legacy, result);
+            return read;
+        }
+
+        bool writeshaderdetail(ShaderDetailLevel level, ShaderDetailState &result)
+        {
+            sauersettings::ShaderDetailState legacy = {};
+            const bool accepted = sauersettings::writeshaderdetail(
+                static_cast<sauersettings::ShaderDetailLevel>(static_cast<int>(level)), legacy);
+            copyshaderdetail(legacy, result);
+            return accepted;
+        }
+
         static void copymipmapblending(const sauersettings::MipmapBlendingState &source, MipmapBlendingState &result)
         {
             switch(source.status)
