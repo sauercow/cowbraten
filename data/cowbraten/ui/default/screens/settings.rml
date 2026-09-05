@@ -647,7 +647,7 @@
                         <div class="settings-section settings-keybindings-panel panel">
                             <div class="settings-control-title">Key Bindings</div>
                             <div class="settings-control-description">
-                                Capture a key, then Apply or Replace to assign it. Replace changes only that key; other keys are preserved.
+                                Actions can have multiple bindings. Add Binding keeps existing keys; Replace moves only the selected key. × removes one exact binding.
                             </div>
                             <div class="settings-key-result" data-if="key_binding_status != ''">{{ key_binding_status }}</div>
 
@@ -669,7 +669,7 @@
                                                 data-if="!binding.bound">Unbound</span>
                                         </div>
                                         <button class="button settings-key-rebind"
-                                            data-event-click="capture_key(binding.action_id)">Rebind</button>
+                                            data-event-click="capture_key(binding.action_id)">Add Binding</button>
                                         <div class="settings-key-removal"
                                             data-if="key_removal_active && key_removal_action_id == binding.action_id">
                                             <div>{{ key_removal_prompt }}</div>
@@ -716,7 +716,7 @@
                                                 data-if="!binding.bound">Unbound</span>
                                         </div>
                                         <button class="button settings-key-rebind"
-                                            data-event-click="capture_key(binding.action_id)">Rebind</button>
+                                            data-event-click="capture_key(binding.action_id)">Add Binding</button>
                                         <div class="settings-key-removal"
                                             data-if="key_removal_active && key_removal_action_id == binding.action_id">
                                             <div>{{ key_removal_prompt }}</div>
@@ -763,7 +763,7 @@
                                                 data-if="!binding.bound">Unbound</span>
                                         </div>
                                         <button class="button settings-key-rebind"
-                                            data-event-click="capture_key(binding.action_id)">Rebind</button>
+                                            data-event-click="capture_key(binding.action_id)">Add Binding</button>
                                         <div class="settings-key-removal"
                                             data-if="key_removal_active && key_removal_action_id == binding.action_id">
                                             <div>{{ key_removal_prompt }}</div>
