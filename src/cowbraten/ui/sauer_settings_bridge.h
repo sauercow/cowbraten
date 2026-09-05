@@ -45,6 +45,15 @@ namespace cowui
             int actual_samples;
         };
 
+        // Grass reflects the native switch; motion blur also reflects its
+        // renderer availability gate, not per-frame visibility.
+        struct GraphicsQuality
+        {
+            bool grass;
+            bool motion_blur;
+            bool motion_blur_available;
+        };
+
         struct Audio
         {
             int sound_volume;
@@ -157,6 +166,10 @@ namespace cowui
         bool readantialiasing(Antialiasing &result);
         bool writeantialiasing(int samples);
         void resetgraphics();
+
+        bool readgraphicsquality(GraphicsQuality &result);
+        bool writegrass(bool enabled);
+        bool writemotionblur(bool enabled);
 
         bool readaudio(Audio &result);
         bool visitsoundpacks(SoundpackChoiceVisitor visitor, void *data);

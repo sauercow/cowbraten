@@ -1033,7 +1033,6 @@ body
     padding: 0 var(--space-2);
     line-height: 23px;
     border-width: 1px;
-    border-style: solid;
     border-color: var(--color-border);
 }
 
@@ -1073,7 +1072,6 @@ body
     padding: 1px var(--space-2) 0;
     line-height: 23px;
     border-width: 1px;
-    border-style: solid;
     border-color: var(--color-border);
 }
 

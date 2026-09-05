@@ -311,6 +311,10 @@ namespace cowui
             constructor.Bind("vsync", &vsync) &&
             constructor.Bind("vsync_adaptive", &vsync_adaptive) &&
             constructor.Bind("vsync_status", &vsync_status) &&
+            constructor.Bind("grass", &grass) &&
+            constructor.Bind("motion_blur", &motion_blur) &&
+            constructor.Bind("motion_blur_available", &motion_blur_available) &&
+            constructor.Bind("graphics_quality_status", &graphics_quality_status) &&
             constructor.Bind("fps_limit", &fps_limit) &&
             constructor.Bind(
                 "fps_limit_minimum",
@@ -586,6 +590,14 @@ namespace cowui
                 vsyncaction
             ) &&
             router.registeraction(
+                "settings.grass",
+                grassaction
+            ) &&
+            router.registeraction(
+                "settings.motion-blur",
+                motionbluraction
+            ) &&
+            router.registeraction(
                 "settings.fps-limit",
                 changefpslimitaction
             ) &&
@@ -761,6 +773,9 @@ namespace cowui
         video_status.clear();
         presentation_label.clear();
         vsync_status.clear();
+        grass = false;
+        motion_blur = motion_blur_available = false;
+        graphics_quality_status.clear();
         fps_limit_label.clear();
         presentation_windowed = true;
         presentation_exclusive = false;
@@ -934,6 +949,7 @@ namespace cowui
 
     bool RmlSettings::refreshvideo()
     {
+        refreshgraphicsquality();
         settings::Video current;
         if(!settings::readvideo(current))
             return false;
@@ -2409,6 +2425,55 @@ namespace cowui
             );
         }
         else event.StopPropagation();
+    }
+
+    bool RmlSettings::refreshgraphicsquality()
+    {
+        settings::GraphicsQuality current = {};
+        const bool read = settings::readgraphicsquality(current);
+        grass = current.grass;
+        motion_blur = current.motion_blur;
+        motion_blur_available = read && current.motion_blur_available;
+        graphics_quality_status = read ? "" : "Graphics quality state is unavailable";
+        model.DirtyVariable("grass");
+        model.DirtyVariable("motion_blur");
+        model.DirtyVariable("motion_blur_available");
+        model.DirtyVariable("graphics_quality_status");
+        return read;
+    }
+
+    void RmlSettings::grassaction(Rml::Event &event)
+    {
+        event.StopPropagation();
+        if(!instance)
+            return;
+
+        settings::GraphicsQuality current;
+        const bool accepted = settings::readgraphicsquality(current) &&
+            settings::writegrass(!current.grass);
+        const bool refreshed = instance->refreshgraphicsquality();
+        if(!accepted && refreshed)
+        {
+            instance->graphics_quality_status = "Grass change was not accepted";
+            instance->model.DirtyVariable("graphics_quality_status");
+        }
+    }
+
+    void RmlSettings::motionbluraction(Rml::Event &event)
+    {
+        event.StopPropagation();
+        if(!instance)
+            return;
+
+        settings::GraphicsQuality current;
+        const bool accepted = settings::readgraphicsquality(current) &&
+            settings::writemotionblur(!current.motion_blur);
+        const bool refreshed = instance->refreshgraphicsquality();
+        if(!accepted && refreshed)
+        {
+            instance->graphics_quality_status = "Motion blur change was not accepted";
+            instance->model.DirtyVariable("graphics_quality_status");
+        }
     }
 
     void RmlSettings::vsyncaction(Rml::Event &event)

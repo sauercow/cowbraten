@@ -115,6 +115,7 @@ namespace cowui
 
         bool refresh();
         bool refreshvideo();
+        bool refreshgraphicsquality();
         bool refreshaudio();
         bool refreshmouseinput(bool update_edit_buffer = false);
         bool refreshcrosshair(bool update_edit_buffer = false);
@@ -181,6 +182,8 @@ namespace cowui
         static void exclusivefullscreenaction(Rml::Event &event);
         static void desktopfullscreenaction(Rml::Event &event);
         static void vsyncaction(Rml::Event &event);
+        static void grassaction(Rml::Event &event);
+        static void motionbluraction(Rml::Event &event);
         static void changefpslimitaction(Rml::Event &event);
         static void changesoundvolumeaction(Rml::Event &event);
         static void changemusicvolumeaction(Rml::Event &event);
@@ -248,6 +251,10 @@ namespace cowui
         Rml::String video_status;
         Rml::String presentation_label;
         Rml::String vsync_status;
+        bool grass = false;
+        bool motion_blur = false;
+        bool motion_blur_available = false;
+        Rml::String graphics_quality_status;
         Rml::String fps_limit_label;
         bool presentation_windowed = true;
         bool presentation_exclusive = false;

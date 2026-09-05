@@ -7,6 +7,7 @@
 #include <cstring>
 
 extern int scr_w, scr_h, fullscreendesktop;
+extern int grass, motionblur;
 extern bool nosound;
 extern void resetgl();
 extern void screenres(int width, int height);
@@ -552,6 +553,38 @@ namespace cowui
         void resetgraphics()
         {
             ::resetgl();
+        }
+
+        bool readgraphicsquality(GraphicsQuality &result)
+        {
+            result.grass = grass != 0;
+            // Match the addmotionblur resolution gate.
+            // Map content, pause state and effect strength remain native behavior.
+            result.motion_blur_available = screenw > 0 && screenh > 0 &&
+                max(screenw, screenh) <= hwtexsize;
+            result.motion_blur = motionblur != 0 && result.motion_blur_available;
+            return true;
+        }
+
+        bool writegrass(bool enabled)
+        {
+            ident *id = getident("grass");
+            if(!id || id->type != ID_VAR || !writeboolean(id, enabled))
+                return false;
+            return *id->storage.i == (enabled ? 1 : 0);
+        }
+
+        bool writemotionblur(bool enabled)
+        {
+            GraphicsQuality current;
+            if(!readgraphicsquality(current) || (enabled && !current.motion_blur_available))
+                return false;
+
+            ident *id = getident("motionblur");
+            // setvarchecked runs the native cleanup callback when disabling.
+            if(!id || id->type != ID_VAR || !writeboolean(id, enabled))
+                return false;
+            return readgraphicsquality(current) && current.motion_blur == enabled;
         }
 
         bool readaudio(Audio &result)

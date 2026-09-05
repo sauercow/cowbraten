@@ -193,6 +193,28 @@ namespace cowui
             sauersettings::resetgraphics();
         }
 
+        bool readgraphicsquality(GraphicsQuality &result)
+        {
+            sauersettings::GraphicsQuality legacy;
+            if(!sauersettings::readgraphicsquality(legacy))
+                return false;
+
+            result.grass = legacy.grass;
+            result.motion_blur = legacy.motion_blur;
+            result.motion_blur_available = legacy.motion_blur_available;
+            return true;
+        }
+
+        bool writegrass(bool enabled)
+        {
+            return sauersettings::writegrass(enabled);
+        }
+
+        bool writemotionblur(bool enabled)
+        {
+            return sauersettings::writemotionblur(enabled);
+        }
+
         bool readaudio(Audio &result)
         {
             sauersettings::Audio legacy;

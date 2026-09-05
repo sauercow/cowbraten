@@ -291,7 +291,7 @@
                             <div class="eyebrow settings-eyebrow">System / Display</div>
                             <div class="settings-stage-title">Graphics</div>
                             <div class="settings-stage-copy">
-                                Control the active window mode and choose a resolution supported by the current display.
+                                Adjust display, performance and visual quality settings.
                             </div>
                         </div>
 
@@ -421,6 +421,52 @@
                                 <span class="settings-live-indicator"></span>
                                 <span>{{ antialiasing_status }}</span>
                             </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Grass</div>
+                                    <div class="settings-control-description">
+                                        Draw grass on map surfaces that support it. Changes take effect immediately.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="grass"
+                                        onclick="settings.grass" />
+                                    <span data-if="grass">Enabled</span>
+                                    <span data-if="!grass">Disabled</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Motion Blur</div>
+                                    <div class="settings-control-description">
+                                        Blend successive frames during gameplay. Changes take effect immediately.
+                                    </div>
+                                    <div class="settings-control-description" data-if="!motion_blur_available">
+                                        Unavailable at this resolution with the current texture-size limit.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="motion_blur"
+                                        data-attrif-disabled="!motion_blur_available"
+                                        onclick="settings.motion-blur" />
+                                    <span data-if="motion_blur">Enabled</span>
+                                    <span data-if="!motion_blur &amp;&amp; motion_blur_available">Disabled</span>
+                                    <span data-if="!motion_blur_available">Unavailable</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-control-footer settings-control-footer-compact"
+                            data-if="graphics_quality_status != ''">
+                            <span>{{ graphics_quality_status }}</span>
                         </div>
 
                         <div class="settings-section settings-resolution-section panel">
