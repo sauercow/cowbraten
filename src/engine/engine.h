@@ -63,6 +63,16 @@ extern void reloadfonts();
 // texture
 extern int hwtexsize, hwcubetexsize, hwmaxaniso, maxtexsize;
 
+enum class AnisotropyStatus { Unavailable, Unsupported, NoTextures, Verified, Mismatch, Mixed };
+struct AnisotropyState
+{
+    AnisotropyStatus status;
+    int requested, maximum, capped, textures;
+    float actual;
+};
+extern AnisotropyState inspectanisotropy();
+extern AnisotropyState lastanisotropyapplication();
+
 extern Texture *textureload(const char *name, int clamp = 0, bool mipit = true, bool msg = true);
 extern int texalign(const void *data, int w, int bpp);
 extern void cleanuptexture(Texture *t);

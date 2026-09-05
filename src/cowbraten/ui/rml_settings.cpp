@@ -315,6 +315,12 @@ namespace cowui
             constructor.Bind("motion_blur", &motion_blur) &&
             constructor.Bind("motion_blur_available", &motion_blur_available) &&
             constructor.Bind("graphics_quality_status", &graphics_quality_status) &&
+            constructor.Bind("anisotropy_enabled", &anisotropy_enabled) &&
+            constructor.Bind("anisotropy_maximum", &anisotropy_maximum) &&
+            constructor.Bind("anisotropy_selected", &anisotropy_selected) &&
+            constructor.Bind("anisotropy_label", &anisotropy_label) &&
+            constructor.Bind("anisotropy_status", &anisotropy_status) &&
+            constructor.BindEventCallback("select_anisotropy", &RmlSettings::selectanisotropy, this) &&
             constructor.Bind("fps_limit", &fps_limit) &&
             constructor.Bind(
                 "fps_limit_minimum",
@@ -776,6 +782,11 @@ namespace cowui
         grass = false;
         motion_blur = motion_blur_available = false;
         graphics_quality_status.clear();
+        anisotropy_enabled = false;
+        anisotropy_maximum = 0;
+        anisotropy_selected = -1;
+        anisotropy_label.clear();
+        anisotropy_status.clear();
         fps_limit_label.clear();
         presentation_windowed = true;
         presentation_exclusive = false;
@@ -950,6 +961,7 @@ namespace cowui
     bool RmlSettings::refreshvideo()
     {
         refreshgraphicsquality();
+        refreshanisotropy();
         settings::Video current;
         if(!settings::readvideo(current))
             return false;
@@ -2425,6 +2437,100 @@ namespace cowui
             );
         }
         else event.StopPropagation();
+    }
+
+    void RmlSettings::refreshanisotropy()
+    {
+        settings::AnisotropyState state = {};
+        settings::readanisotropy(state);
+        presentanisotropy(state);
+    }
+
+    void RmlSettings::presentanisotropy(const settings::AnisotropyState &state)
+    {
+        using Status = settings::AnisotropyStatus;
+        anisotropy_enabled = state.status != Status::Unavailable &&
+            state.status != Status::Unsupported;
+        anisotropy_maximum = state.maximum;
+        anisotropy_selected = -1;
+        if(state.status == Status::Verified || state.status == Status::NoTextures)
+            anisotropy_selected = state.requested <= 1 ? 0 : state.requested;
+
+        char value[80], request[80];
+        const float actual = state.status == Status::NoTextures
+            ? float(state.capped) : state.actual;
+        if(actual <= 1) std::snprintf(value, sizeof(value), "Off");
+        else std::snprintf(value, sizeof(value), "%gx", double(actual));
+        anisotropy_label = value;
+        const bool custom = state.requested > 1 && state.requested != 2 &&
+            state.requested != 4 && state.requested != 8 && state.requested != 16;
+        if(custom && actual == float(state.requested))
+            anisotropy_label += " (custom)";
+
+        switch(state.status)
+        {
+            case Status::Unavailable:
+                anisotropy_label = "Unavailable";
+                anisotropy_status = "Graphics context is unavailable";
+                break;
+            case Status::Unsupported:
+                anisotropy_label = "Unsupported";
+                anisotropy_status = "Anisotropic filtering is not supported";
+                break;
+            case Status::NoTextures:
+                anisotropy_status = "Configured for new textures; no eligible textures loaded";
+                break;
+            case Status::Verified:
+                anisotropy_status = "Loaded texture filtering verified";
+                break;
+            case Status::Mismatch:
+                anisotropy_status = "Loaded texture filtering differs from the configured value";
+                break;
+            case Status::Mixed:
+                anisotropy_label = "Mixed";
+                anisotropy_status = "Loaded textures have inconsistent filtering";
+                break;
+        }
+        if(state.requested > 1 &&
+           (actual != float(state.requested) || state.status == Status::Mixed ||
+            state.status == Status::Unavailable || state.status == Status::Unsupported))
+        {
+            std::snprintf(request, sizeof(request), " | Requested: %dx%s",
+                state.requested, anisotropy_enabled && state.requested > state.maximum
+                    ? "; limited by hardware" : "");
+            anisotropy_status += request;
+        }
+        model.DirtyVariable("anisotropy_enabled");
+        model.DirtyVariable("anisotropy_maximum");
+        model.DirtyVariable("anisotropy_selected");
+        model.DirtyVariable("anisotropy_label");
+        model.DirtyVariable("anisotropy_status");
+    }
+
+    void RmlSettings::selectanisotropy(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1) return;
+        settings::AnisotropyLevel level;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: level = settings::AnisotropyLevel::Off; break;
+            case 2: level = settings::AnisotropyLevel::X2; break;
+            case 4: level = settings::AnisotropyLevel::X4; break;
+            case 8: level = settings::AnisotropyLevel::X8; break;
+            case 16: level = settings::AnisotropyLevel::X16; break;
+            default: return;
+        }
+        settings::AnisotropyState state = {};
+        const bool accepted = settings::writeanisotropy(level, state);
+        presentanisotropy(state); // Callback readback, not another texture scan.
+        if(!accepted)
+        {
+            anisotropy_status = "Change not accepted. " + anisotropy_status;
+            model.DirtyVariable("anisotropy_status");
+        }
     }
 
     bool RmlSettings::refreshgraphicsquality()

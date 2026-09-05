@@ -616,7 +616,8 @@ VARFP(texcompress, 0, 1<<10, 1<<12, initwarning("texture quality", INIT_LOAD));
 VARFP(texcompressquality, -1, -1, 1, setuptexcompress());
 VARFP(trilinear, 0, 1, 1, initwarning("texture filtering", INIT_LOAD));
 VARFP(bilinear, 0, 1, 1, initwarning("texture filtering", INIT_LOAD));
-VARFP(aniso, 0, 0, 16, initwarning("texture filtering", INIT_LOAD));
+static void applyanisotropy();
+VARFP(aniso, 0, 0, 16, applyanisotropy());
 
 extern int usetexcompress;
 
@@ -1003,6 +1004,76 @@ void createcompressedtexture(int tnum, int w, int h, uchar *data, int align, int
 }
 
 hashnameset<Texture> textures;
+
+static AnisotropyState lastanisotropy = {};
+
+static AnisotropyState scananisotropy(bool apply)
+{
+    AnisotropyState result = {};
+    result.requested = aniso;
+    result.maximum = hasAF ? hwmaxaniso : 0;
+    result.capped = hasAF ? max(1, min(aniso, result.maximum)) : 1;
+    result.actual = float(result.capped);
+    result.status = AnisotropyStatus::Unavailable;
+    // init.cfg can execute before SDL/GL initialization. Do not even traverse
+    // the registry until the context and extension capabilities are ready.
+    if(!SDL_GL_GetCurrentContext()) return result;
+    if(!hasAF || hwmaxaniso < 2)
+    {
+        result.status = AnisotropyStatus::Unsupported;
+        return result;
+    }
+
+    GLint original = 0;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &original);
+    bool mixed = false, matches = true;
+    enumerate(textures, Texture, tex,
+    {
+        if((tex.type&Texture::TYPE) != Texture::IMAGE ||
+           tex.type&Texture::STUB || !tex.id || !glIsTexture(tex.id)) continue;
+        glBindTexture(GL_TEXTURE_2D, tex.id);
+        GLint filter = 0;
+        glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, &filter);
+        switch(filter)
+        {
+            case GL_NEAREST_MIPMAP_NEAREST:
+            case GL_LINEAR_MIPMAP_NEAREST:
+            case GL_NEAREST_MIPMAP_LINEAR:
+            case GL_LINEAR_MIPMAP_LINEAR: break;
+            default: continue;
+        }
+        if(apply)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, result.capped);
+        GLfloat actual = 0;
+        glGetTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, &actual);
+        if(result.textures && actual != result.actual) mixed = true;
+        if(!result.textures) result.actual = actual;
+        ++result.textures;
+        if(actual != float(result.capped)) matches = false;
+    });
+    // No rendering, script execution or callbacks occur while temporarily
+    // bound. Restoring this unit's exact binding also preserves Sauer caches.
+    glBindTexture(GL_TEXTURE_2D, original);
+    result.status = !result.textures ? AnisotropyStatus::NoTextures :
+        mixed ? AnisotropyStatus::Mixed :
+        matches ? AnisotropyStatus::Verified : AnisotropyStatus::Mismatch;
+    return result;
+}
+
+static void applyanisotropy()
+{
+    lastanisotropy = scananisotropy(true);
+}
+
+AnisotropyState inspectanisotropy()
+{
+    return scananisotropy(false);
+}
+
+AnisotropyState lastanisotropyapplication()
+{
+    return lastanisotropy;
+}
 
 Texture *notexture = NULL; // used as default, ensured to be loaded
 
@@ -3657,4 +3728,3 @@ void mergenormalmaps(char *heightfile, char *normalfile) // jpg/png/tga + tga ->
 
 COMMAND(flipnormalmapy, "ss");
 COMMAND(mergenormalmaps, "ss");
-

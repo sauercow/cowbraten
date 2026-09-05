@@ -54,6 +54,18 @@ namespace cowui
             bool motion_blur_available;
         };
 
+        enum class AnisotropyLevel { Off = 0, X2 = 2, X4 = 4, X8 = 8, X16 = 16 };
+        enum class AnisotropyStatus { Unavailable, Unsupported, NoTextures, Verified, Mismatch, Mixed };
+        struct AnisotropyState
+        {
+            AnisotropyStatus status;
+            int requested;
+            int maximum;
+            int capped;
+            int textures;
+            float actual; // Only a uniform loaded value when Verified/Mismatch.
+        };
+
         struct Audio
         {
             int sound_volume;
@@ -170,6 +182,10 @@ namespace cowui
         bool readgraphicsquality(GraphicsQuality &result);
         bool writegrass(bool enabled);
         bool writemotionblur(bool enabled);
+
+        bool readanisotropy(AnisotropyState &result);
+        // Returns the callback's verification result without a second scan.
+        bool writeanisotropy(AnisotropyLevel level, AnisotropyState &result);
 
         bool readaudio(Audio &result);
         bool visitsoundpacks(SoundpackChoiceVisitor visitor, void *data);

@@ -215,6 +215,41 @@ namespace cowui
             return sauersettings::writemotionblur(enabled);
         }
 
+        static void copyanisotropy(const sauersettings::AnisotropyState &source, AnisotropyState &result)
+        {
+            switch(source.status)
+            {
+                case sauersettings::AnisotropyStatus::Unavailable: result.status = AnisotropyStatus::Unavailable; break;
+                case sauersettings::AnisotropyStatus::Unsupported: result.status = AnisotropyStatus::Unsupported; break;
+                case sauersettings::AnisotropyStatus::NoTextures: result.status = AnisotropyStatus::NoTextures; break;
+                case sauersettings::AnisotropyStatus::Verified: result.status = AnisotropyStatus::Verified; break;
+                case sauersettings::AnisotropyStatus::Mismatch: result.status = AnisotropyStatus::Mismatch; break;
+                case sauersettings::AnisotropyStatus::Mixed: result.status = AnisotropyStatus::Mixed; break;
+            }
+            result.requested = source.requested;
+            result.maximum = source.maximum;
+            result.capped = source.capped;
+            result.textures = source.textures;
+            result.actual = source.actual;
+        }
+
+        bool readanisotropy(AnisotropyState &result)
+        {
+            sauersettings::AnisotropyState legacy;
+            const bool read = sauersettings::readanisotropy(legacy);
+            copyanisotropy(legacy, result);
+            return read;
+        }
+
+        bool writeanisotropy(AnisotropyLevel level, AnisotropyState &result)
+        {
+            sauersettings::AnisotropyState legacy;
+            const bool accepted = sauersettings::writeanisotropy(
+                static_cast<sauersettings::AnisotropyLevel>(static_cast<int>(level)), legacy);
+            copyanisotropy(legacy, result);
+            return accepted;
+        }
+
         bool readaudio(Audio &result)
         {
             sauersettings::Audio legacy;

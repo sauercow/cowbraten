@@ -21,6 +21,7 @@ namespace cowui
         enum class PresentationMode;
         struct CrosshairChoice;
         struct SoundpackChoice;
+        struct AnisotropyState;
     }
 
     class RmlActionRouter;
@@ -116,6 +117,10 @@ namespace cowui
         bool refresh();
         bool refreshvideo();
         bool refreshgraphicsquality();
+        void refreshanisotropy();
+        void presentanisotropy(const settings::AnisotropyState &state);
+        void selectanisotropy(Rml::DataModelHandle, Rml::Event &event,
+                              const Rml::VariantList &arguments);
         bool refreshaudio();
         bool refreshmouseinput(bool update_edit_buffer = false);
         bool refreshcrosshair(bool update_edit_buffer = false);
@@ -255,6 +260,11 @@ namespace cowui
         bool motion_blur = false;
         bool motion_blur_available = false;
         Rml::String graphics_quality_status;
+        bool anisotropy_enabled = false;
+        int anisotropy_maximum = 0;
+        int anisotropy_selected = -1;
+        Rml::String anisotropy_label;
+        Rml::String anisotropy_status;
         Rml::String fps_limit_label;
         bool presentation_windowed = true;
         bool presentation_exclusive = false;

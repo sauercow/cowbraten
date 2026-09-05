@@ -388,7 +388,7 @@
                         <div class="settings-section settings-antialiasing-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">
-                                    <div class="settings-control-title">Antialiasing</div>
+                                    <div class="settings-control-title">Multisample Anti-Aliasing (MSAA)</div>
                                     <div class="settings-control-description">
                                         Multisample the scene edges. Changing this option rebuilds the existing OpenGL context.
                                     </div>
@@ -467,6 +467,50 @@
                         <div class="settings-control-footer settings-control-footer-compact"
                             data-if="graphics_quality_status != ''">
                             <span>{{ graphics_quality_status }}</span>
+                        </div>
+
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Anisotropic Filtering</div>
+                                    <div class="settings-control-description">
+                                        Sharpen textures viewed at an angle. Applies immediately without reloading textures.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Current</span>
+                                    <span class="settings-resolution-current-value">{{ anisotropy_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="anisotropy_selected == 0"
+                                    data-attrif-disabled="!anisotropy_enabled"
+                                    data-event-click="select_anisotropy(0)">Off</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="anisotropy_selected == 2"
+                                    data-if="anisotropy_maximum >= 2"
+                                    data-attrif-disabled="!anisotropy_enabled || anisotropy_maximum &lt; 2"
+                                    data-event-click="select_anisotropy(2)">2x</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="anisotropy_selected == 4"
+                                    data-if="anisotropy_maximum >= 4"
+                                    data-attrif-disabled="!anisotropy_enabled || anisotropy_maximum &lt; 4"
+                                    data-event-click="select_anisotropy(4)">4x</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="anisotropy_selected == 8"
+                                    data-if="anisotropy_maximum >= 8"
+                                    data-attrif-disabled="!anisotropy_enabled || anisotropy_maximum &lt; 8"
+                                    data-event-click="select_anisotropy(8)">8x</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="anisotropy_selected == 16"
+                                    data-if="anisotropy_maximum >= 16"
+                                    data-attrif-disabled="!anisotropy_enabled || anisotropy_maximum &lt; 16"
+                                    data-event-click="select_anisotropy(16)">16x</button>
+                            </div>
+                            <div class="settings-control-footer">
+                                <span>{{ anisotropy_status }}</span>
+                            </div>
                         </div>
 
                         <div class="settings-section settings-resolution-section panel">
