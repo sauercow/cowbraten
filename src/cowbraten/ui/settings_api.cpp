@@ -215,6 +215,36 @@ namespace cowui
             return sauersettings::writemotionblur(enabled);
         }
 
+        static void copymipmapblending(const sauersettings::MipmapBlendingState &source, MipmapBlendingState &result)
+        {
+            switch(source.status)
+            {
+                case sauersettings::MipmapBlendingStatus::Unavailable: result.status = MipmapBlendingStatus::Unavailable; break;
+                case sauersettings::MipmapBlendingStatus::NoTextures: result.status = MipmapBlendingStatus::NoTextures; break;
+                case sauersettings::MipmapBlendingStatus::Verified: result.status = MipmapBlendingStatus::Verified; break;
+                case sauersettings::MipmapBlendingStatus::Mismatch: result.status = MipmapBlendingStatus::Mismatch; break;
+                case sauersettings::MipmapBlendingStatus::Mixed: result.status = MipmapBlendingStatus::Mixed; break;
+            }
+            result.requested = source.requested;
+            result.textures = source.textures;
+        }
+
+        bool readmipmapblending(MipmapBlendingState &result)
+        {
+            sauersettings::MipmapBlendingState legacy = {};
+            const bool read = sauersettings::readmipmapblending(legacy);
+            copymipmapblending(legacy, result);
+            return read;
+        }
+
+        bool writemipmapblending(bool enabled, MipmapBlendingState &result)
+        {
+            sauersettings::MipmapBlendingState legacy = {};
+            const bool accepted = sauersettings::writemipmapblending(enabled, legacy);
+            copymipmapblending(legacy, result);
+            return accepted;
+        }
+
         static void copyanisotropy(const sauersettings::AnisotropyState &source, AnisotropyState &result)
         {
             switch(source.status)

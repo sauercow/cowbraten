@@ -54,6 +54,17 @@ namespace cowui
             bool motion_blur_available;
         };
 
+        enum class MipmapBlendingStatus { Unavailable, NoTextures, Verified, Mismatch, Mixed };
+        struct MipmapBlendingState
+        {
+            MipmapBlendingStatus status;
+            bool requested;
+            int textures;
+        };
+        bool readmipmapblending(MipmapBlendingState &result);
+        // Acceptance of the native write; verification is reported in status.
+        bool writemipmapblending(bool enabled, MipmapBlendingState &result);
+
         enum class AnisotropyLevel { Off = 0, X2 = 2, X4 = 4, X8 = 8, X16 = 16 };
         enum class AnisotropyStatus { Unavailable, Unsupported, NoTextures, Verified, Mismatch, Mixed };
         struct AnisotropyState

@@ -73,6 +73,16 @@ struct AnisotropyState
 extern AnisotropyState inspectanisotropy();
 extern AnisotropyState lastanisotropyapplication();
 
+enum class MipmapBlendingStatus { Unavailable, NoTextures, Verified, Mismatch, Mixed };
+struct MipmapBlendingState
+{
+    MipmapBlendingStatus status;
+    bool requested;
+    int textures;
+};
+extern MipmapBlendingState inspectmipmapblending();
+extern MipmapBlendingState lastmipmapblendingapplication();
+
 extern Texture *textureload(const char *name, int clamp = 0, bool mipit = true, bool msg = true);
 extern int texalign(const void *data, int w, int bpp);
 extern void cleanuptexture(Texture *t);

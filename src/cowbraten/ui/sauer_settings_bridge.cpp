@@ -587,6 +587,40 @@ namespace cowui
             return readgraphicsquality(current) && current.motion_blur == enabled;
         }
 
+        static void copymipmapblending(const ::MipmapBlendingState &source, MipmapBlendingState &result)
+        {
+            switch(source.status)
+            {
+                case ::MipmapBlendingStatus::Unavailable: result.status = MipmapBlendingStatus::Unavailable; break;
+                case ::MipmapBlendingStatus::NoTextures: result.status = MipmapBlendingStatus::NoTextures; break;
+                case ::MipmapBlendingStatus::Verified: result.status = MipmapBlendingStatus::Verified; break;
+                case ::MipmapBlendingStatus::Mismatch: result.status = MipmapBlendingStatus::Mismatch; break;
+                case ::MipmapBlendingStatus::Mixed: result.status = MipmapBlendingStatus::Mixed; break;
+            }
+            result.requested = source.requested;
+            result.textures = source.textures;
+        }
+
+        bool readmipmapblending(MipmapBlendingState &result)
+        {
+            copymipmapblending(::inspectmipmapblending(), result);
+            return result.status != MipmapBlendingStatus::Unavailable;
+        }
+
+        bool writemipmapblending(bool enabled, MipmapBlendingState &result)
+        {
+            ident *id = getident("trilinear");
+            if(!SDL_GL_GetCurrentContext() || !id || id->type != ID_VAR ||
+               !id->storage.i || id->flags&IDF_READONLY)
+            {
+                readmipmapblending(result);
+                return false;
+            }
+            setvarchecked(id, enabled ? 1 : 0);
+            copymipmapblending(::lastmipmapblendingapplication(), result);
+            return *id->storage.i == (enabled ? 1 : 0);
+        }
+
         static void copyanisotropy(const ::AnisotropyState &source, AnisotropyState &result)
         {
             switch(source.status)

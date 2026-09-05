@@ -316,6 +316,10 @@ namespace cowui
             constructor.Bind("motion_blur_available", &motion_blur_available) &&
             constructor.Bind("graphics_quality_status", &graphics_quality_status) &&
             constructor.Bind("anisotropy_enabled", &anisotropy_enabled) &&
+            constructor.Bind("mipmap_blending", &mipmap_blending) &&
+            constructor.Bind("mipmap_blending_available", &mipmap_blending_available) &&
+            constructor.Bind("mipmap_blending_status", &mipmap_blending_status) &&
+            constructor.BindEventCallback("select_mipmap_blending", &RmlSettings::selectmipmapblending, this) &&
             constructor.Bind("anisotropy_maximum", &anisotropy_maximum) &&
             constructor.Bind("anisotropy_selected", &anisotropy_selected) &&
             constructor.Bind("anisotropy_label", &anisotropy_label) &&
@@ -783,6 +787,8 @@ namespace cowui
         motion_blur = motion_blur_available = false;
         graphics_quality_status.clear();
         anisotropy_enabled = false;
+        mipmap_blending = mipmap_blending_available = false;
+        mipmap_blending_status.clear();
         anisotropy_maximum = 0;
         anisotropy_selected = -1;
         anisotropy_label.clear();
@@ -962,6 +968,7 @@ namespace cowui
     {
         refreshgraphicsquality();
         refreshanisotropy();
+        refreshmipmapblending();
         settings::Video current;
         if(!settings::readvideo(current))
             return false;
@@ -2444,6 +2451,47 @@ namespace cowui
         settings::AnisotropyState state = {};
         settings::readanisotropy(state);
         presentanisotropy(state);
+    }
+
+    void RmlSettings::refreshmipmapblending()
+    {
+        settings::MipmapBlendingState state = {};
+        settings::readmipmapblending(state);
+        presentmipmapblending(state);
+    }
+
+    void RmlSettings::presentmipmapblending(const settings::MipmapBlendingState &state)
+    {
+        using Status = settings::MipmapBlendingStatus;
+        mipmap_blending = state.requested;
+        mipmap_blending_available = state.status != Status::Unavailable;
+        switch(state.status)
+        {
+            case Status::Unavailable: mipmap_blending_status = "Graphics context is unavailable"; break;
+            case Status::NoTextures: mipmap_blending_status = "Configured for new textures; no eligible textures loaded"; break;
+            case Status::Verified: mipmap_blending_status = "Loaded texture filtering verified"; break;
+            case Status::Mismatch: mipmap_blending_status = "Loaded texture filtering differs from the configured value"; break;
+            case Status::Mixed: mipmap_blending_status = "Loaded textures have inconsistent mipmap blending"; break;
+        }
+        model.DirtyVariable("mipmap_blending");
+        model.DirtyVariable("mipmap_blending_available");
+        model.DirtyVariable("mipmap_blending_status");
+    }
+
+    void RmlSettings::selectmipmapblending(
+        Rml::DataModelHandle, Rml::Event &event, const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1) return;
+        const bool enabled = arguments[0].Get<bool>();
+        settings::MipmapBlendingState state = {};
+        const bool accepted = settings::writemipmapblending(enabled, state);
+        presentmipmapblending(state); // Synchronous callback result, no rescan.
+        if(!accepted)
+        {
+            mipmap_blending_status = "Change not accepted. " + mipmap_blending_status;
+            model.DirtyVariable("mipmap_blending_status");
+        }
     }
 
     void RmlSettings::presentanisotropy(const settings::AnisotropyState &state)

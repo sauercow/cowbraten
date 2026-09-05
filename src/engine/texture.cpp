@@ -614,7 +614,8 @@ VARFP(reducefilter, 0, 1, 1, initwarning("texture quality", INIT_LOAD));
 VARFP(texreduce, 0, 0, 12, initwarning("texture quality", INIT_LOAD));
 VARFP(texcompress, 0, 1<<10, 1<<12, initwarning("texture quality", INIT_LOAD));
 VARFP(texcompressquality, -1, -1, 1, setuptexcompress());
-VARFP(trilinear, 0, 1, 1, initwarning("texture filtering", INIT_LOAD));
+static void applymipmapblending();
+VARFP(trilinear, 0, 1, 1, applymipmapblending());
 VARFP(bilinear, 0, 1, 1, initwarning("texture filtering", INIT_LOAD));
 static void applyanisotropy();
 VARFP(aniso, 0, 0, 16, applyanisotropy());
@@ -2765,6 +2766,80 @@ struct envmap
 
 static vector<envmap> envmaps;
 static Texture *skyenvmap = NULL;
+
+static MipmapBlendingState lastmipmapblending = {};
+
+static MipmapBlendingState scanmipmapblending(bool apply)
+{
+    MipmapBlendingState result = {};
+    result.requested = trilinear != 0;
+    result.status = MipmapBlendingStatus::Unavailable;
+    if(!SDL_GL_GetCurrentContext()) return result;
+
+    GLint original2d = 0, originalcube = 0;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &original2d);
+    glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &originalcube);
+    bool matches = true, mixed = false;
+    int first = -1;
+    const auto inspect = [&](GLenum target, GLuint id)
+    {
+        if(!id || !glIsTexture(id)) return;
+        glBindTexture(target, id);
+        GLint filter = 0;
+        glGetTexParameteriv(target, GL_TEXTURE_MIN_FILTER, &filter);
+        GLenum desired;
+        switch(filter)
+        {
+            case GL_NEAREST_MIPMAP_NEAREST:
+            case GL_NEAREST_MIPMAP_LINEAR:
+                desired = result.requested ? GL_NEAREST_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_NEAREST;
+                break;
+            case GL_LINEAR_MIPMAP_NEAREST:
+            case GL_LINEAR_MIPMAP_LINEAR:
+                desired = result.requested ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST;
+                break;
+            default: return;
+        }
+        if(apply)
+        {
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, desired);
+            glGetTexParameteriv(target, GL_TEXTURE_MIN_FILTER, &filter);
+        }
+        // Compare mip-level blending, not the independent within-level mode.
+        const int blending = filter == GL_NEAREST_MIPMAP_LINEAR || filter == GL_LINEAR_MIPMAP_LINEAR ? 1 :
+            filter == GL_NEAREST_MIPMAP_NEAREST || filter == GL_LINEAR_MIPMAP_NEAREST ? 0 : -1;
+        if(result.textures && blending != first) mixed = true;
+        if(!result.textures) first = blending;
+        ++result.textures;
+        if(filter != GLint(desired)) matches = false;
+    };
+    enumerate(textures, Texture, tex,
+    {
+        if(tex.type&Texture::STUB) continue;
+        switch(tex.type&Texture::TYPE)
+        {
+            case Texture::IMAGE: inspect(GL_TEXTURE_2D, tex.id); break;
+            case Texture::CUBEMAP: inspect(GL_TEXTURE_CUBE_MAP, tex.id); break;
+        }
+    });
+    loopv(envmaps) inspect(GL_TEXTURE_CUBE_MAP, envmaps[i].tex);
+    // No rendering/callbacks occur under temporary bindings; Sauer caches
+    // remain valid because both bindings on this exact unit are restored.
+    glBindTexture(GL_TEXTURE_2D, original2d);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, originalcube);
+    result.status = !result.textures ? MipmapBlendingStatus::NoTextures :
+        mixed ? MipmapBlendingStatus::Mixed :
+        matches ? MipmapBlendingStatus::Verified : MipmapBlendingStatus::Mismatch;
+    return result;
+}
+
+static void applymipmapblending()
+{
+    lastmipmapblending = scanmipmapblending(true);
+}
+
+MipmapBlendingState inspectmipmapblending() { return scanmipmapblending(false); }
+MipmapBlendingState lastmipmapblendingapplication() { return lastmipmapblending; }
 
 void clearenvmaps()
 {

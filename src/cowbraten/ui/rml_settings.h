@@ -22,6 +22,7 @@ namespace cowui
         struct CrosshairChoice;
         struct SoundpackChoice;
         struct AnisotropyState;
+        struct MipmapBlendingState;
     }
 
     class RmlActionRouter;
@@ -118,6 +119,10 @@ namespace cowui
         bool refreshvideo();
         bool refreshgraphicsquality();
         void refreshanisotropy();
+        void refreshmipmapblending();
+        void presentmipmapblending(const settings::MipmapBlendingState &state);
+        void selectmipmapblending(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
         void presentanisotropy(const settings::AnisotropyState &state);
         void selectanisotropy(Rml::DataModelHandle, Rml::Event &event,
                               const Rml::VariantList &arguments);
@@ -261,6 +266,9 @@ namespace cowui
         bool motion_blur_available = false;
         Rml::String graphics_quality_status;
         bool anisotropy_enabled = false;
+        bool mipmap_blending = false;
+        bool mipmap_blending_available = false;
+        Rml::String mipmap_blending_status;
         int anisotropy_maximum = 0;
         int anisotropy_selected = -1;
         Rml::String anisotropy_label;
