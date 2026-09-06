@@ -1310,6 +1310,9 @@ int main(int argc, char **argv)
     {
         logoutf("init: sdl");
 
+        // Resist sdl2-compat's later normal-priority default, but respect user environment settings.
+        if(!getenv("SDL_VIDEO_WAYLAND_SCALE_TO_DISPLAY"))
+            SDL_SetHintWithPriority("SDL_VIDEO_WAYLAND_SCALE_TO_DISPLAY", "0", SDL_HINT_OVERRIDE);
         if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_AUDIO)<0) fatal("Unable to initialize SDL: %s", SDL_GetError());
 
 #ifdef SDL_VIDEO_DRIVER_X11
