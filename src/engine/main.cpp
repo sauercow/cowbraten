@@ -543,6 +543,8 @@ static void schedulerestoregamma()
 void setfullscreen(bool enable)
 {
     if(!screen) return;
+    // Capture the current display before SDL changes the window's association.
+    const int display = SDL_GetWindowDisplayIndex(screen);
     //initwarning(enable ? "fullscreen" : "windowed");
     extern int fullscreen, fullscreendesktop;
     Uint32 flags = enable ? (fullscreendesktop ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN) : 0;
@@ -556,8 +558,8 @@ void setfullscreen(bool enable)
         SDL_SetWindowSize(screen, scr_w, scr_h);
         if(initwindowpos)
         {
-            int winx = SDL_WINDOWPOS_CENTERED, winy = SDL_WINDOWPOS_CENTERED;
-            SDL_SetWindowPosition(screen, winx, winy);
+            const int position = display >= 0 ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : SDL_WINDOWPOS_CENTERED;
+            SDL_SetWindowPosition(screen, position, position);
             initwindowpos = false;
         }
     }
@@ -598,10 +600,12 @@ void screenres(int w, int h)
         } 
         else
         {
+            const int display = SDL_GetWindowDisplayIndex(screen);
             if(SDL_GetWindowFlags(screen) & SDL_WINDOW_MAXIMIZED)
                 SDL_RestoreWindow(screen);
             SDL_SetWindowSize(screen, scr_w, scr_h);
-            SDL_SetWindowPosition(screen, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+            const int position = display >= 0 ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : SDL_WINDOWPOS_CENTERED;
+            SDL_SetWindowPosition(screen, position, position);
             initwindowpos = false;
             schedulerestoregamma();
         }
