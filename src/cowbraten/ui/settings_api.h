@@ -52,6 +52,7 @@ namespace cowui
             bool grass;
             bool motion_blur;
             bool motion_blur_available;
+            bool glare;
         };
 
         enum class ShaderDetailLevel { Performance = 0, Low = 1, Medium = 2, Full = 3 };
@@ -205,6 +206,7 @@ namespace cowui
         bool readgraphicsquality(GraphicsQuality &result);
         bool writegrass(bool enabled);
         bool writemotionblur(bool enabled);
+        bool writeglare(bool enabled);
 
         bool readanisotropy(AnisotropyState &result);
         // Returns the callback's verification result without a second scan.

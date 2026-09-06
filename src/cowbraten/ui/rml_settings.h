@@ -129,6 +129,8 @@ namespace cowui
         void presentmipmapblending(const settings::MipmapBlendingState &state);
         void selectmipmapblending(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
+        void selectglare(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
         void presentanisotropy(const settings::AnisotropyState &state);
         void selectanisotropy(Rml::DataModelHandle, Rml::Event &event,
                               const Rml::VariantList &arguments);
@@ -270,6 +272,7 @@ namespace cowui
         bool grass = false;
         bool motion_blur = false;
         bool motion_blur_available = false;
+        bool glare = false;
         Rml::String graphics_quality_status;
         bool anisotropy_enabled = false;
         bool mipmap_blending = false;

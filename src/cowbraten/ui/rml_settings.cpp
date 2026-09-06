@@ -314,6 +314,8 @@ namespace cowui
             constructor.Bind("grass", &grass) &&
             constructor.Bind("motion_blur", &motion_blur) &&
             constructor.Bind("motion_blur_available", &motion_blur_available) &&
+            constructor.Bind("glare", &glare) &&
+            constructor.BindEventCallback("select_glare", &RmlSettings::selectglare, this) &&
             constructor.Bind("graphics_quality_status", &graphics_quality_status) &&
             constructor.Bind("anisotropy_enabled", &anisotropy_enabled) &&
             constructor.Bind("shader_detail_available", &shader_detail_available) &&
@@ -790,6 +792,7 @@ namespace cowui
         vsync_status.clear();
         grass = false;
         motion_blur = motion_blur_available = false;
+        glare = false;
         graphics_quality_status.clear();
         anisotropy_enabled = false;
         mipmap_blending = mipmap_blending_available = false;
@@ -2671,10 +2674,12 @@ namespace cowui
         grass = current.grass;
         motion_blur = current.motion_blur;
         motion_blur_available = read && current.motion_blur_available;
+        glare = current.glare;
         graphics_quality_status = read ? "" : "Graphics quality state is unavailable";
         model.DirtyVariable("grass");
         model.DirtyVariable("motion_blur");
         model.DirtyVariable("motion_blur_available");
+        model.DirtyVariable("glare");
         model.DirtyVariable("graphics_quality_status");
         return read;
     }
@@ -2710,6 +2715,24 @@ namespace cowui
         {
             instance->graphics_quality_status = "Motion blur change was not accepted";
             instance->model.DirtyVariable("graphics_quality_status");
+        }
+    }
+
+    void RmlSettings::selectglare(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        const bool accepted = settings::writeglare(enabled);
+        const bool refreshed = refreshgraphicsquality();
+        if(!accepted && refreshed)
+        {
+            graphics_quality_status = "Glare change was not accepted";
+            model.DirtyVariable("graphics_quality_status");
         }
     }
 

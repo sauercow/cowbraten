@@ -202,6 +202,7 @@ namespace cowui
             result.grass = legacy.grass;
             result.motion_blur = legacy.motion_blur;
             result.motion_blur_available = legacy.motion_blur_available;
+            result.glare = legacy.glare;
             return true;
         }
 
@@ -213,6 +214,11 @@ namespace cowui
         bool writemotionblur(bool enabled)
         {
             return sauersettings::writemotionblur(enabled);
+        }
+
+        bool writeglare(bool enabled)
+        {
+            return sauersettings::writeglare(enabled);
         }
 
         static void copyshaderdetail(const sauersettings::ShaderDetailState &source, ShaderDetailState &result)

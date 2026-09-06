@@ -467,6 +467,24 @@
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
+                                    <div class="settings-control-title">Glare</div>
+                                    <div class="settings-control-description">
+                                        Add a glow around bright surfaces and effects.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="glare"
+                                        data-event-change="select_glare(ev.checked)" />
+                                    <span data-if="glare">On</span>
+                                    <span data-if="!glare">Off</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
                                     <div class="settings-control-title">Mipmap Blending</div>
                                     <div class="settings-control-description">Smooth transitions between texture mip levels.</div>
                                     <div class="settings-control-description">{{ mipmap_blending_status }}</div>

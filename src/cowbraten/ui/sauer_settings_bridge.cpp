@@ -563,6 +563,10 @@ namespace cowui
             result.motion_blur_available = screenw > 0 && screenh > 0 &&
                 max(screenw, screenh) <= hwtexsize;
             result.motion_blur = motionblur != 0 && result.motion_blur_available;
+            ident *glare_id = getident("glare");
+            if(!glare_id || glare_id->type != ID_VAR || !glare_id->storage.i)
+                return false;
+            result.glare = *glare_id->storage.i != 0;
             return true;
         }
 
@@ -585,6 +589,11 @@ namespace cowui
             if(!id || id->type != ID_VAR || !writeboolean(id, enabled))
                 return false;
             return readgraphicsquality(current) && current.motion_blur == enabled;
+        }
+
+        bool writeglare(bool enabled)
+        {
+            return writeboolean(getident("glare"), enabled);
         }
 
         static void copyshaderdetail(const ::ShaderDetailState &source, ShaderDetailState &result)
