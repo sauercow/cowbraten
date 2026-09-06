@@ -2489,15 +2489,22 @@ namespace cowui
     void RmlSettings::presentshaderdetail(const settings::ShaderDetailState &state)
     {
         shader_detail_available = state.ready;
-        shader_detail_selected = state.requested == 1 || state.requested == 3 ?
+        shader_detail_selected = state.requested >= 0 && state.requested <= 3 ?
             state.requested : -1;
-        if(state.requested == 1) shader_detail_label = "Low";
-        else if(state.requested == 3) shader_detail_label = "High";
-        else
+        switch(state.requested)
         {
-            char label[32];
-            std::snprintf(label, sizeof(label), "Level %d", state.requested);
-            shader_detail_label = label;
+            case 0: shader_detail_label = "Performance"; break;
+            case 1: shader_detail_label = "Low"; break;
+            case 2: shader_detail_label = "Medium"; break;
+            case 3: shader_detail_label = "Full"; break;
+            default:
+            {
+                char label[32];
+                std::snprintf(label, sizeof(label), "Level %d", state.requested);
+                shader_detail_label = label;
+                shader_detail_selected = -1;
+                break;
+            }
         }
         if(!state.ready) shader_detail_status = "Shader renderer is not ready";
         else if(state.unresolved) shader_detail_status = "Some requested shaders are unavailable";
@@ -2515,7 +2522,7 @@ namespace cowui
         event.StopPropagation();
         if(arguments.size() != 1 || !shader_detail_available) return;
         const int value = arguments[0].Get<int>();
-        if(value != 1 && value != 3) return;
+        if(value < 0 || value > 3) return;
         // No native write/compilation while RmlUi is dispatching this event.
         pending_shader_detail = value;
     }

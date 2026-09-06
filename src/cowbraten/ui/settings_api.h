@@ -54,7 +54,7 @@ namespace cowui
             bool motion_blur_available;
         };
 
-        enum class ShaderDetailLevel { Level0 = 0, Low = 1, Level2 = 2, High = 3 };
+        enum class ShaderDetailLevel { Performance = 0, Low = 1, Medium = 2, Full = 3 };
         struct ShaderDetailState
         {
             int requested;

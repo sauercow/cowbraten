@@ -497,13 +497,21 @@
                             </div>
                             <div class="settings-antialiasing-selector">
                                 <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="shader_detail_selected == 0"
+                                    data-attrif-disabled="!shader_detail_available"
+                                    data-event-click="select_shader_detail(0)">Performance</button>
+                                <button class="button settings-antialiasing-button"
                                     data-class-is-selected="shader_detail_selected == 1"
                                     data-attrif-disabled="!shader_detail_available"
                                     data-event-click="select_shader_detail(1)">Low</button>
                                 <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="shader_detail_selected == 2"
+                                    data-attrif-disabled="!shader_detail_available"
+                                    data-event-click="select_shader_detail(2)">Medium</button>
+                                <button class="button settings-antialiasing-button"
                                     data-class-is-selected="shader_detail_selected == 3"
                                     data-attrif-disabled="!shader_detail_available"
-                                    data-event-click="select_shader_detail(3)">High</button>
+                                    data-event-click="select_shader_detail(3)">Full</button>
                             </div>
                             <div class="settings-control-footer settings-control-footer-compact"
                                 data-if="shader_detail_status != ''">
