@@ -1053,8 +1053,11 @@ void checkinput()
     if(interceptkeysym) clearinterceptkey();
     //int lasttype = 0, lastbut = 0;
     const bool ui_visible = cowui::visible();
+    int previousdrawablewidth, previousdrawableheight;
+    getdrawabledimensions(previousdrawablewidth, previousdrawableheight);
     bool mousemoved = false;
     bool windowmetricschanged = false;
+    bool windowsizechanged = false;
     int focused = 0;
     while(pumpevents(events))
     {
@@ -1143,6 +1146,7 @@ void checkinput()
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
                     {
                         windowmetricschanged = true;
+                        windowsizechanged = true;
                         SDL_GetWindowSize(screen, &screenw, &screenh);
                         // filterevent() may see another SDL event batch before the
                         // full metrics refresh at the end of checkinput(). Keep its
@@ -1157,7 +1161,6 @@ void checkinput()
                             scr_w = clamp(screenw, SCR_MINW, SCR_MAXW);
                             scr_h = clamp(screenh, SCR_MINH, SCR_MAXH);
                         }
-                        gl_resize();
                         schedulerestoregamma();
                         break;
                     }
@@ -1224,6 +1227,12 @@ void checkinput()
         int windowwidth, windowheight, drawablewidth, drawableheight;
         getwindowdimensions(windowwidth, windowheight);
         getdrawabledimensions(drawablewidth, drawableheight);
+        if(windowsizechanged ||
+           drawablewidth != previousdrawablewidth ||
+           drawableheight != previousdrawableheight)
+        {
+            gl_resize();
+        }
         cowui::resize(
             windowwidth,
             windowheight,
