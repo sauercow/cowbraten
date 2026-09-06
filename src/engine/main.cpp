@@ -96,6 +96,32 @@ int screenw = 0, screenh = 0;
 SDL_Window *screen = NULL;
 SDL_GLContext glcontext = NULL;
 
+// Measured window coordinates and drawable pixels; informational only for now.
+struct WindowMetrics
+{
+    int windowwidth, windowheight;
+    int drawablewidth, drawableheight;
+    int displayindex;
+    bool valid;
+
+    WindowMetrics() : windowwidth(0), windowheight(0), drawablewidth(0), drawableheight(0), displayindex(-1), valid(false) {}
+};
+
+static WindowMetrics windowmetrics;
+
+static void refreshwindowmetrics()
+{
+    windowmetrics = WindowMetrics();
+    if(!screen || !glcontext || SDL_GL_GetCurrentContext() != glcontext) return;
+
+    SDL_GetWindowSize(screen, &windowmetrics.windowwidth, &windowmetrics.windowheight);
+    SDL_GL_GetDrawableSize(screen, &windowmetrics.drawablewidth, &windowmetrics.drawableheight);
+    windowmetrics.displayindex = SDL_GetWindowDisplayIndex(screen);
+    windowmetrics.valid = windowmetrics.windowwidth > 0 && windowmetrics.windowheight > 0 &&
+                          windowmetrics.drawablewidth > 0 && windowmetrics.drawableheight > 0 &&
+                          windowmetrics.displayindex >= 0;
+}
+
 #define SCR_MINW 320
 #define SCR_MINH 200
 #define SCR_MAXW 10000
@@ -585,6 +611,7 @@ void setfullscreen(bool enable)
     }
 
     schedulerestoregamma();
+    refreshwindowmetrics();
 }
 
 #ifdef _DEBUG
@@ -628,6 +655,7 @@ void screenres(int w, int h)
             SDL_SetWindowPosition(screen, position, position);
             initwindowpos = false;
             schedulerestoregamma();
+            refreshwindowmetrics();
         }
     }
     else
@@ -698,6 +726,7 @@ VARFP(vsynctear, 0, 0, 1, { if(vsync) restorevsync(); });
 
 void setupscreen()
 {
+    windowmetrics = WindowMetrics();
     if(glcontext)
     {
         SDL_GL_DeleteContext(glcontext);
@@ -803,6 +832,7 @@ void setupscreen()
     SDL_SetWindowMaximumSize(screen, SCR_MAXW, SCR_MAXH);
 
     SDL_GetWindowSize(screen, &screenw, &screenh);
+    refreshwindowmetrics();
 }
 
 void resetgl()
@@ -993,6 +1023,7 @@ void checkinput()
     //int lasttype = 0, lastbut = 0;
     const bool ui_visible = cowui::visible();
     bool mousemoved = false;
+    bool windowmetricschanged = false;
     int focused = 0;
     while(pumpevents(events))
     {
@@ -1049,23 +1080,38 @@ void checkinput()
                         focused = -1;
                         break;
 
+                    case SDL_WINDOWEVENT_MOVED:
+                        windowmetricschanged = true;
+                        break;
+
                     case SDL_WINDOWEVENT_MINIMIZED:
+                        windowmetricschanged = true;
                         if(!ignoreminimize) minimized = true;
                         break;
 
                     case SDL_WINDOWEVENT_MAXIMIZED:
                     case SDL_WINDOWEVENT_RESTORED:
+                        windowmetricschanged = true;
                         minimized = false;
                         schedulerestoregamma();
                         break;
 
-                    case SDL_WINDOWEVENT_EXPOSED:
                     case SDL_WINDOWEVENT_RESIZED:
+                        windowmetricschanged = true;
+                        // Fall through: preserve the existing gamma scheduling.
+                    case SDL_WINDOWEVENT_EXPOSED:
                         schedulerestoregamma();
                         break;
 
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+                    case SDL_WINDOWEVENT_DISPLAY_CHANGED:
+                        windowmetricschanged = true;
+                        break;
+#endif
+
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
                     {
+                        windowmetricschanged = true;
                         SDL_GetWindowSize(screen, &screenw, &screenh);
                         if(!fullscreendesktop || !(SDL_GetWindowFlags(screen) & SDL_WINDOW_FULLSCREEN))
                         {
@@ -1133,6 +1179,8 @@ void checkinput()
                 break;
         }
     }
+    // RESIZED and SIZE_CHANGED commonly arrive together; query once per batch.
+    if(windowmetricschanged) refreshwindowmetrics();
     if(focused) { if(grabinput != (focused>0)) inputgrab(grabinput = focused>0, shouldgrab); focused = 0; }
     if(mousemoved) resetmousemotion();
 }
