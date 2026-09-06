@@ -606,6 +606,13 @@ void setfullscreen(bool enable)
     //initwarning(enable ? "fullscreen" : "windowed");
     extern int fullscreen, fullscreendesktop;
     Uint32 flags = enable ? (fullscreendesktop ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN) : 0;
+    // Establish the intended display before SDL consumes its pending fullscreen
+    // destination or restores its windowed position.
+    if(display >= 0)
+    {
+        const int position = SDL_WINDOWPOS_CENTERED_DISPLAY(display);
+        SDL_SetWindowPosition(screen, position, position);
+    }
     if(SDL_SetWindowFullscreen(screen, flags) < 0)
     {
         conoutf(CON_ERROR, "could not switch to %s mode: %s", enable ? "fullscreen" : "windowed", SDL_GetError());
