@@ -74,6 +74,38 @@ void fatal(const char *s, ...)    // failure exit
 
 int curtime = 0, lastmillis = 1, elapsedtime = 0, totalmillis = 1, curframetime = 0;
 
+static bool perfstatsdrawing = false;
+static Uint64 perfstatspresent = 0;
+static Uint64 perfstatsstart = 0;
+static Uint64 perfstatsframes = 0, perfstatsrender = 0, perfstatsdrawtotal = 0;
+
+VARFP(perfstats, 0, 0, 1, {
+    perfstatsstart = 0;
+    perfstatsframes = perfstatsrender = perfstatsdrawtotal = perfstatspresent = 0;
+});
+
+static void reportperfstats(Uint64 now)
+{
+    if(!perfstatsstart)
+    {
+        perfstatsstart = now;
+        perfstatsframes = perfstatsrender = perfstatsdrawtotal = perfstatspresent = 0;
+        return;
+    }
+    Uint64 frequency = SDL_GetPerformanceFrequency();
+    Uint64 elapsed = now - perfstatsstart;
+    if(!frequency || elapsed < frequency) return;
+
+    double scale = 1000.0 / double(frequency);
+    conoutf("PERF fps=%.1f draw=%.2fms render=%.2fms present=%.2fms",
+            double(perfstatsframes) * double(frequency) / double(elapsed),
+            double(perfstatsdrawtotal) * scale / double(perfstatsframes),
+            double(perfstatsrender) * scale / double(perfstatsframes),
+            double(perfstatspresent) * scale / double(perfstatsframes));
+    perfstatsstart = now;
+    perfstatsframes = perfstatsrender = perfstatsdrawtotal = perfstatspresent = 0;
+}
+
 dynent *player = NULL;
 
 int initing = NOT_INITING;
@@ -1078,7 +1110,9 @@ void swapbuffers(bool overlay)
 {
     recorder::capture(overlay);
     gle::disable();
+    Uint64 presentstart = perfstatsdrawing ? SDL_GetPerformanceCounter() : 0;
     SDL_GL_SwapWindow(screen);
+    if(perfstatsdrawing) perfstatspresent += SDL_GetPerformanceCounter() - presentstart;
     restoregammaafterpresent();
 }
  
@@ -1460,9 +1494,23 @@ int main(int argc, char **argv)
             frames++;
 
             inbetweenframes = false;
+            bool profile = perfstats != 0;
+            Uint64 drawstart = profile ? SDL_GetPerformanceCounter() : 0;
+            Uint64 renderstart = drawstart;
+            perfstatsdrawing = profile;
             if(mainmenu) gl_drawmainmenu();
             else gl_drawframe();
+            Uint64 renderend = profile ? SDL_GetPerformanceCounter() : 0;
             swapbuffers();
+            Uint64 drawend = profile ? SDL_GetPerformanceCounter() : 0;
+            perfstatsdrawing = false;
+            if(profile)
+            {
+                perfstatsframes++;
+                perfstatsrender += renderend - renderstart;
+                perfstatsdrawtotal += drawend - drawstart;
+                reportperfstats(drawend);
+            }
             renderedframe = inbetweenframes = true;
             lastdrawmillis = millis;
         }
