@@ -65,6 +65,19 @@ namespace cowui
     static bool initialized = false;
     static bool console_suspended = false;
 
+    struct UiDimensions
+    {
+        int window_width = 1;
+        int window_height = 1;
+        int drawable_width = 1;
+        int drawable_height = 1;
+        int context_width = 1;
+        int context_height = 1;
+        bool input_mapping_valid = false;
+    };
+
+    static UiDimensions ui_dimensions;
+
     // Presses consumed by capture retain ownership through repeat/release,
     // including when the document closes or the console takes over.
     static std::array<bool, SDL_NUM_SCANCODES> captured_keys{};
@@ -212,6 +225,76 @@ namespace cowui
     static int valid_dimension(int value)
     {
         return value > 0 ? value : 1;
+    }
+
+    static bool setdimensions(
+        int window_width,
+        int window_height,
+        int drawable_width,
+        int drawable_height,
+        bool &context_changed)
+    {
+        const bool valid_window =
+            window_width > 0 && window_height > 0;
+        const bool valid_drawable =
+            drawable_width > 0 && drawable_height > 0;
+
+        window_width = valid_dimension(window_width);
+        window_height = valid_dimension(window_height);
+        drawable_width = valid_drawable
+            ? drawable_width
+            : window_width;
+        drawable_height = valid_drawable
+            ? drawable_height
+            : window_height;
+
+        context_changed =
+            ui_dimensions.context_width != drawable_width ||
+            ui_dimensions.context_height != drawable_height;
+
+        const bool dimensions_changed =
+            ui_dimensions.window_width != window_width ||
+            ui_dimensions.window_height != window_height ||
+            ui_dimensions.drawable_width != drawable_width ||
+            ui_dimensions.drawable_height != drawable_height ||
+            context_changed ||
+            ui_dimensions.input_mapping_valid !=
+                (valid_window && valid_drawable);
+
+        ui_dimensions.window_width = window_width;
+        ui_dimensions.window_height = window_height;
+        ui_dimensions.drawable_width = drawable_width;
+        ui_dimensions.drawable_height = drawable_height;
+        // Context space deliberately tracks drawable pixels; keeping both
+        // explicit preserves the input/render coordinate boundary.
+        ui_dimensions.context_width = drawable_width;
+        ui_dimensions.context_height = drawable_height;
+        ui_dimensions.input_mapping_valid =
+            valid_window && valid_drawable;
+
+        return dimensions_changed;
+    }
+
+    static int contextcoordinate(
+        int coordinate,
+        int window_extent,
+        int context_extent)
+    {
+        if(!ui_dimensions.input_mapping_valid ||
+           window_extent <= 0 || context_extent <= 0 ||
+           window_extent == context_extent)
+        {
+            return coordinate;
+        }
+
+        const long long scaled =
+            static_cast<long long>(coordinate) * context_extent;
+        const long long rounding = window_extent / 2;
+        return int(
+            scaled >= 0
+                ? (scaled + rounding) / window_extent
+                : (scaled - rounding) / window_extent
+        );
     }
 
     static int keymodifierstate()
@@ -368,17 +451,27 @@ namespace cowui
         }
     }
 
-    bool init(int width, int height)
+    bool init(
+        int window_width,
+        int window_height,
+        int drawable_width,
+        int drawable_height)
     {
         if(initialized)
             return true;
 
-        width = valid_dimension(width);
-        height = valid_dimension(height);
+        bool context_changed = false;
+        setdimensions(
+            window_width,
+            window_height,
+            drawable_width,
+            drawable_height,
+            context_changed
+        );
 
         render_interface.setviewport(
-            width,
-            height
+            ui_dimensions.drawable_width,
+            ui_dimensions.drawable_height
         );
 
         if(!render_interface.initgl())
@@ -415,7 +508,10 @@ namespace cowui
 
         context = Rml::CreateContext(
             "cowbraten",
-            Rml::Vector2i(width, height)
+            Rml::Vector2i(
+                ui_dimensions.context_width,
+                ui_dimensions.context_height
+            )
         );
 
         if(!context)
@@ -492,27 +588,47 @@ namespace cowui
         action_router.clear();
 
         render_interface.shutdowngl();
+        ui_dimensions = UiDimensions();
     }
 
-    void resize(int width, int height)
+    void resize(
+        int window_width,
+        int window_height,
+        int drawable_width,
+        int drawable_height)
     {
         if(!initialized || !context)
             return;
 
-        width = valid_dimension(width);
-        height = valid_dimension(height);
+        bool context_changed = false;
+        const bool dimensions_changed = setdimensions(
+            window_width,
+            window_height,
+            drawable_width,
+            drawable_height,
+            context_changed
+        );
 
         render_interface.setviewport(
-            width,
-            height
+            ui_dimensions.drawable_width,
+            ui_dimensions.drawable_height
         );
 
-        context->SetDimensions(
-            Rml::Vector2i(width, height)
-        );
+        if(context_changed)
+        {
+            context->SetDimensions(
+                Rml::Vector2i(
+                    ui_dimensions.context_width,
+                    ui_dimensions.context_height
+                )
+            );
+        }
 
-        if(active_screen && active_screen->id == ScreenId::Settings)
+        if(dimensions_changed &&
+           active_screen && active_screen->id == ScreenId::Settings)
+        {
             settings_model.videochanged();
+        }
     }
 
     void beforeglreset()
@@ -521,14 +637,24 @@ namespace cowui
             render_interface.beforeglreset();
     }
 
-    void afterglreset(int width, int height)
+    void afterglreset(
+        int window_width,
+        int window_height,
+        int drawable_width,
+        int drawable_height)
     {
-        width = valid_dimension(width);
-        height = valid_dimension(height);
+        bool context_changed = false;
+        setdimensions(
+            window_width,
+            window_height,
+            drawable_width,
+            drawable_height,
+            context_changed
+        );
 
         render_interface.setviewport(
-            width,
-            height
+            ui_dimensions.drawable_width,
+            ui_dimensions.drawable_height
         );
 
         if(initialized)
@@ -537,7 +663,10 @@ namespace cowui
         if(initialized && context)
         {
             context->SetDimensions(
-                Rml::Vector2i(width, height)
+                Rml::Vector2i(
+                    ui_dimensions.context_width,
+                    ui_dimensions.context_height
+                )
             );
 
             if(active_screen && active_screen->id == ScreenId::Settings)
@@ -623,11 +752,23 @@ namespace cowui
         switch(event.type)
         {
             case SDL_MOUSEMOTION:
-                return !context->ProcessMouseMove(
+            {
+                const int context_x = contextcoordinate(
                     event.motion.x,
+                    ui_dimensions.window_width,
+                    ui_dimensions.context_width
+                );
+                const int context_y = contextcoordinate(
                     event.motion.y,
+                    ui_dimensions.window_height,
+                    ui_dimensions.context_height
+                );
+                return !context->ProcessMouseMove(
+                    context_x,
+                    context_y,
                     keymodifierstate()
                 );
+            }
 
             case SDL_MOUSEBUTTONDOWN:
                 return !context->ProcessMouseButtonDown(

@@ -13,13 +13,27 @@ namespace cowui
         Settings
     };
 
-    bool init(int width, int height);
+    // Window dimensions use SDL input coordinates; drawable dimensions use
+    // framebuffer pixels and define the RmlUi context/rendering space.
+    bool init(
+        int window_width,
+        int window_height,
+        int drawable_width,
+        int drawable_height);
     void shutdown();
 
-    void resize(int width, int height);
+    void resize(
+        int window_width,
+        int window_height,
+        int drawable_width,
+        int drawable_height);
 
     void beforeglreset();
-    void afterglreset(int width, int height);
+    void afterglreset(
+        int window_width,
+        int window_height,
+        int drawable_width,
+        int drawable_height);
 
     // Route key/button/text events even while hidden to drain captured releases.
     bool processevent(const SDL_Event &event);

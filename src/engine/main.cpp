@@ -896,7 +896,15 @@ void resetgl()
     setupscreen();
     inputgrab(grabinput);
     gl_init();
-    cowui::afterglreset(screenw, screenh);
+    int windowwidth, windowheight, drawablewidth, drawableheight;
+    getwindowdimensions(windowwidth, windowheight);
+    getdrawabledimensions(drawablewidth, drawableheight);
+    cowui::afterglreset(
+        windowwidth,
+        windowheight,
+        drawablewidth,
+        drawableheight
+    );
 
     inbetweenframes = false;
     if(!reloadtexture(*notexture) ||
@@ -1150,7 +1158,6 @@ void checkinput()
                             scr_h = clamp(screenh, SCR_MINH, SCR_MAXH);
                         }
                         gl_resize();
-                        cowui::resize(screenw, screenh);
                         schedulerestoregamma();
                         break;
                     }
@@ -1211,7 +1218,19 @@ void checkinput()
         }
     }
     // RESIZED and SIZE_CHANGED commonly arrive together; query once per batch.
-    if(windowmetricschanged) refreshwindowmetrics();
+    if(windowmetricschanged)
+    {
+        refreshwindowmetrics();
+        int windowwidth, windowheight, drawablewidth, drawableheight;
+        getwindowdimensions(windowwidth, windowheight);
+        getdrawabledimensions(drawablewidth, drawableheight);
+        cowui::resize(
+            windowwidth,
+            windowheight,
+            drawablewidth,
+            drawableheight
+        );
+    }
     if(focused) { if(grabinput != (focused>0)) inputgrab(grabinput = focused>0, shouldgrab); focused = 0; }
     if(mousemoved) resetmousemotion();
 }
@@ -1483,8 +1502,17 @@ int main(int argc, char **argv)
     gl_init();
 
     logoutf("init: cowbraten ui");
-    if(!cowui::init(screenw, screenh))
+    int windowwidth, windowheight, drawablewidth, drawableheight;
+    getwindowdimensions(windowwidth, windowheight);
+    getdrawabledimensions(drawablewidth, drawableheight);
+    if(!cowui::init(
+           windowwidth,
+           windowheight,
+           drawablewidth,
+           drawableheight))
+    {
         fatal("failed to initialize Cowbraten UI");
+    }
 
     notexture = textureload("packages/textures/notexture.png");
     if(!notexture) fatal("could not find core textures");
