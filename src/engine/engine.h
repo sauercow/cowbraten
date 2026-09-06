@@ -29,6 +29,10 @@ extern bool inbetweenframes, renderedframe;
 
 extern SDL_Window *screen;
 extern int screenw, screenh;
+// Cached SDL window coordinates / drawable pixels; fall back to screenw/screenh.
+// Read-only: these accessors do not query SDL or change rendering dimensions.
+extern void getwindowdimensions(int &width, int &height);
+extern void getdrawabledimensions(int &width, int &height);
 extern int zpass;
 
 extern vector<int> entgroup;
