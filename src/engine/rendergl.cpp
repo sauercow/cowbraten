@@ -1865,15 +1865,19 @@ FVARP(motionblurscale, 0, 0.5f, 1);
 
 void addmotionblur()
 {
-    if(!motionblur || max(screenw, screenh) > hwtexsize) return;
+    if(!motionblur) return;
+
+    int drawablewidth, drawableheight;
+    getdrawabledimensions(drawablewidth, drawableheight);
+    if(max(drawablewidth, drawableheight) > hwtexsize) return;
 
     if(game::ispaused()) { lastmotion = 0; return; }
 
-    if(!motiontex || motionw != screenw || motionh != screenh)
+    if(!motiontex || motionw != drawablewidth || motionh != drawableheight)
     {
         if(!motiontex) glGenTextures(1, &motiontex);
-        motionw = screenw;
-        motionh = screenh;
+        motionw = drawablewidth;
+        motionh = drawableheight;
         lastmotion = 0;
         createtexture(motiontex, motionw, motionh, NULL, 3, 0, GL_RGB);
     }
@@ -1894,7 +1898,7 @@ void addmotionblur()
     {
         lastmotion = lastmillis - lastmillis%motionblurmillis;
 
-        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, screenw, screenh);
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, motionw, motionh);
     }
 }
 

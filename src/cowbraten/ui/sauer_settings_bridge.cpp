@@ -560,8 +560,10 @@ namespace cowui
             result.grass = grass != 0;
             // Match the addmotionblur resolution gate.
             // Map content, pause state and effect strength remain native behavior.
-            result.motion_blur_available = screenw > 0 && screenh > 0 &&
-                max(screenw, screenh) <= hwtexsize;
+            int drawablewidth, drawableheight;
+            getdrawabledimensions(drawablewidth, drawableheight);
+            result.motion_blur_available = drawablewidth > 0 && drawableheight > 0 &&
+                max(drawablewidth, drawableheight) <= hwtexsize;
             result.motion_blur = motionblur != 0 && result.motion_blur_available;
             ident *glare_id = getident("glare");
             if(!glare_id || glare_id->type != ID_VAR || !glare_id->storage.i)
