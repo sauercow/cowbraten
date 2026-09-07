@@ -23,6 +23,8 @@ namespace cowui
         {
             int width;
             int height;
+            int drawable_width;
+            int drawable_height;
             PresentationMode presentation;
         };
 

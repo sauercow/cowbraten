@@ -591,12 +591,14 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Resolution</div>
                                     <div class="settings-control-description">
-                                        Available modes are reported by SDL for the display containing the game window.
+                                        Window/display resolution. HiDPI rendering may use a higher physical resolution.
                                     </div>
                                 </div>
                                 <div class="settings-resolution-current">
                                     <span class="settings-info-label">Current</span>
                                     <span class="settings-resolution-current-value">{{ resolution_label }}</span>
+                                    <span class="settings-resolution-render"
+                                        data-if="render_resolution_visible">Render {{ render_resolution_label }}</span>
                                 </div>
                             </div>
 

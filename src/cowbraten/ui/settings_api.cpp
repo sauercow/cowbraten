@@ -91,6 +91,8 @@ namespace cowui
 
             result.width = legacy.width;
             result.height = legacy.height;
+            result.drawable_width = legacy.drawable_width;
+            result.drawable_height = legacy.drawable_height;
             result.presentation = presentationmode(legacy.presentation);
             return true;
         }

@@ -266,6 +266,7 @@ namespace cowui
         int fov_maximum = 150;
 
         Rml::String resolution_label;
+        Rml::String render_resolution_label;
         Rml::String video_status;
         Rml::String presentation_label;
         Rml::String vsync_status;
@@ -286,6 +287,7 @@ namespace cowui
         bool presentation_windowed = true;
         bool presentation_exclusive = false;
         bool presentation_desktop = false;
+        bool render_resolution_visible = false;
         bool resolution_enabled = true;
         bool vsync = false;
         bool vsync_adaptive = false;

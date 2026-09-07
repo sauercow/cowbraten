@@ -353,11 +353,19 @@ namespace cowui
                 return false;
 
             if(screen)
-                SDL_GetWindowSize(screen, &result.width, &result.height);
+            {
+                getwindowdimensions(result.width, result.height);
+                getdrawabledimensions(
+                    result.drawable_width,
+                    result.drawable_height
+                );
+            }
             else
             {
                 result.width = scr_w;
                 result.height = scr_h;
+                result.drawable_width = result.width;
+                result.drawable_height = result.height;
             }
             if(screen)
             {

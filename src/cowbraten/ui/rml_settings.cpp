@@ -290,6 +290,14 @@ namespace cowui
             constructor.Bind("fov_minimum", &fov_minimum) &&
             constructor.Bind("fov_maximum", &fov_maximum) &&
             constructor.Bind("resolution_label", &resolution_label) &&
+            constructor.Bind(
+                "render_resolution_label",
+                &render_resolution_label
+            ) &&
+            constructor.Bind(
+                "render_resolution_visible",
+                &render_resolution_visible
+            ) &&
             constructor.Bind("video_status", &video_status) &&
             constructor.Bind("presentation_label", &presentation_label) &&
             constructor.Bind(
@@ -787,6 +795,7 @@ namespace cowui
         fov_minimum = 10;
         fov_maximum = 150;
         resolution_label.clear();
+        render_resolution_label.clear();
         video_status.clear();
         presentation_label.clear();
         vsync_status.clear();
@@ -805,6 +814,7 @@ namespace cowui
         presentation_windowed = true;
         presentation_exclusive = false;
         presentation_desktop = false;
+        render_resolution_visible = false;
         resolution_enabled = true;
         vsync = false;
         vsync_adaptive = false;
@@ -1046,6 +1056,30 @@ namespace cowui
         {
             resolution_label = label;
             model.DirtyVariable("resolution_label");
+        }
+
+        const bool show_render_resolution =
+            current.width != current.drawable_width ||
+            current.height != current.drawable_height;
+        if(render_resolution_visible != show_render_resolution)
+        {
+            render_resolution_visible = show_render_resolution;
+            model.DirtyVariable("render_resolution_visible");
+        }
+        if(show_render_resolution)
+        {
+            std::snprintf(
+                label,
+                sizeof(label),
+                "%d x %d",
+                current.drawable_width,
+                current.drawable_height
+            );
+            if(render_resolution_label != label)
+            {
+                render_resolution_label = label;
+                model.DirtyVariable("render_resolution_label");
+            }
         }
 
         std::vector<settings::Resolution> available;
