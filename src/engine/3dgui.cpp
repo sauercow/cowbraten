@@ -316,6 +316,17 @@ struct gui : g3d_gui
         return layout(size+SHADOW, size+SHADOW);
     }
 
+    void previewrect(float x, float y, float w, float h, int &x1, int &y1, int &x2, int &y2) const
+    {
+        int drawablewidth, drawableheight;
+        getdrawabledimensions(drawablewidth, drawableheight);
+
+        x1 = int(floor(drawablewidth*(x*scale.x+origin.x)));
+        y1 = int(floor(drawableheight*(1 - ((y+h)*scale.y+origin.y))));
+        x2 = int(ceil(drawablewidth*((x+w)*scale.x+origin.x)));
+        y2 = int(ceil(drawableheight*(1 - (y*scale.y+origin.y))));
+    }
+
     int playerpreview(int model, int team, int weap, float sizescale, const char *overlaid)
     {
         autotab();
@@ -332,8 +343,8 @@ struct gui : g3d_gui
                 rect_(xi+SHADOW, yi+SHADOW, xs, ys);
                 hudshader->set();
             }
-            int x1 = int(floor(screenw*(xi*scale.x+origin.x))), y1 = int(floor(screenh*(1 - ((yi+ys)*scale.y+origin.y)))),
-                x2 = int(ceil(screenw*((xi+xs)*scale.x+origin.x))), y2 = int(ceil(screenh*(1 - (yi*scale.y+origin.y))));
+            int x1, y1, x2, y2;
+            previewrect(xi, yi, xs, ys, x1, y1, x2, y2);
             glDisable(GL_BLEND);
             modelpreview::start(x1, y1, x2-x1, y2-y1, overlaid!=NULL);
             game::renderplayerpreview(model, team, weap);
@@ -378,8 +389,8 @@ struct gui : g3d_gui
                 rect_(xi+SHADOW, yi+SHADOW, xs, ys);
                 hudshader->set();
             }
-            int x1 = int(floor(screenw*(xi*scale.x+origin.x))), y1 = int(floor(screenh*(1 - ((yi+ys)*scale.y+origin.y)))),
-                x2 = int(ceil(screenw*((xi+xs)*scale.x+origin.x))), y2 = int(ceil(screenh*(1 - (yi*scale.y+origin.y))));
+            int x1, y1, x2, y2;
+            previewrect(xi, yi, xs, ys, x1, y1, x2, y2);
             glDisable(GL_BLEND);
             modelpreview::start(x1, y1, x2-x1, y2-y1, overlaid!=NULL);
             model *m = loadmodel(name);
@@ -435,8 +446,8 @@ struct gui : g3d_gui
                 rect_(xi+SHADOW, yi+SHADOW, xs, ys);
                 hudshader->set();
             }
-            int x1 = int(floor(screenw*(xi*scale.x+origin.x))), y1 = int(floor(screenh*(1 - ((yi+ys)*scale.y+origin.y)))),
-                x2 = int(ceil(screenw*((xi+xs)*scale.x+origin.x))), y2 = int(ceil(screenh*(1 - (yi*scale.y+origin.y))));
+            int x1, y1, x2, y2;
+            previewrect(xi, yi, xs, ys, x1, y1, x2, y2);
             glDisable(GL_BLEND);
             modelpreview::start(x1, y1, x2-x1, y2-y1, overlaid!=NULL);
             previewprefab(prefab, color);
