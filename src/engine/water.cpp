@@ -1055,7 +1055,7 @@ void drawreflections()
 nowaterfall:
 
     if(!refs) return;
-    glViewport(0, 0, screenw, screenh);
+    gl_resize();
     glBindFramebuffer_(GL_FRAMEBUFFER, 0);
 }
 

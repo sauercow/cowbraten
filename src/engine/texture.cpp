@@ -2757,7 +2757,7 @@ GLuint genenvmap(const vec &o, int envmapsize, int blur, bool onlysky)
     }
     glFrontFace(GL_CW);
     delete[] pixels;
-    glViewport(0, 0, screenw, screenh);
+    gl_resize();
     clientkeepalive();
     forcecubemapload(tex);
     return tex;

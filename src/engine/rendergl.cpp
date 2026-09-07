@@ -590,7 +590,9 @@ COMMAND(glext, "s");
 
 void gl_resize()
 {
-    glViewport(0, 0, screenw, screenh);
+    int drawablewidth, drawableheight;
+    getdrawabledimensions(drawablewidth, drawableheight);
+    glViewport(0, 0, drawablewidth, drawableheight);
 }
 
 void gl_init()
@@ -1683,7 +1685,7 @@ namespace modelpreview
         drawtex = 0;
 
         glDisable(GL_SCISSOR_TEST);
-        glViewport(0, 0, screenw, screenh);
+        gl_resize();
 
         projmatrix = oldprojmatrix;
         setcamprojmatrix();
@@ -1822,7 +1824,7 @@ void drawminimap()
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    glViewport(0, 0, screenw, screenh);
+    gl_resize();
 
     camera1 = oldcamera;
     drawtex = 0;
@@ -1911,7 +1913,8 @@ void gl_drawframe()
 
     updatedynlights();
 
-    int w = screenw, h = screenh;
+    int w, h;
+    getdrawabledimensions(w, h);
     aspect = forceaspect ? forceaspect : w/float(h);
     fovy = 2*atan2(tan(curfov/2*RAD), aspect)/RAD;
 

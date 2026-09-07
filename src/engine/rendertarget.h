@@ -385,7 +385,7 @@ struct rendertarget
         }
 
         glBindFramebuffer_(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, screenw, screenh);
+        gl_resize();
     }
 
     virtual void dodebug(int w, int h) {}

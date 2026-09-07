@@ -1084,7 +1084,7 @@ namespace recorder
                 glReadPixels(0, 0, m.w, m.h, GL_BGRA, GL_UNSIGNED_BYTE, m.video);
             }
             glBindFramebuffer_(GL_FRAMEBUFFER, 0);
-            glViewport(0, 0, screenw, screenh);
+            gl_resize();
 
         }
         else glReadPixels(0, 0, m.w, m.h, GL_BGRA, GL_UNSIGNED_BYTE, m.video);
