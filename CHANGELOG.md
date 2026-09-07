@@ -1,5 +1,25 @@
 # Changelog
 
+## cowbraten 1.0.1-rc.1 — 2026-09-07
+
+Release candidate focused on window handling, display reliability and proper HiDPI rendering.
+
+### Fixes
+
+- Added proper HiDPI rendering with separate logical window and physical drawable dimensions.
+- Improved monitor preservation across windowed and fullscreen transitions.
+- Fixed fullscreen state synchronization when SDL rejects a display-mode change.
+- Fixed resizing while the window is maximized.
+- Fixed cumulative window-size drift on Wayland fractional scaling.
+- Updated viewport, PostFX, motion blur, glare, screenshots, movie capture, screen-relative render targets and model previews to use the physical drawable where required.
+- Preserved native Exclusive Fullscreen resolution without additional DPI scaling.
+
+### Compatibility
+
+- Keeps `p1xbratenversion` at 9.0.0.
+- Does not change the Sauerbraten network protocol or demo format version.
+
+
 ## cowbraten 1.0.0 — 2026-09-01
 
 Initial cowbraten release, based on p1xbraten 9.0.0.
