@@ -39,8 +39,10 @@ void drawglaretex()
     int w = 1<<glaresize, h = 1<<glaresize, blury = blurglare;
     if(blurglare && blurglareaspect)
     {
-        while(h > (1<<5) && (screenw*h)/w >= (screenh*4)/3) h /= 2;
-        blury = ((1 + 4*blurglare)*(screenw*h)/w + screenh*2)/(screenh*4);
+        int drawablewidth, drawableheight;
+        getdrawabledimensions(drawablewidth, drawableheight);
+        while(h > (1<<5) && (drawablewidth*h)/w >= (drawableheight*4)/3) h /= 2;
+        blury = ((1 + 4*blurglare)*(drawablewidth*h)/w + drawableheight*2)/(drawableheight*4);
         blury = clamp(blury, 1, MAXBLURRADIUS);
     }
 
