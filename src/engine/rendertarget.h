@@ -317,8 +317,10 @@ struct rendertarget
         h = min(h, hwtexsize);
         if(screenrect())
         {
-            if(w > screenw) w = screenw;
-            if(h > screenh) h = screenh;
+            int drawablewidth, drawableheight;
+            getdrawabledimensions(drawablewidth, drawableheight);
+            if(w > drawablewidth) w = drawablewidth;
+            if(h > drawableheight) h = drawableheight;
         }
         vieww = w;
         viewh = h;
