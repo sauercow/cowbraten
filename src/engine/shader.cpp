@@ -1322,7 +1322,7 @@ static int allocatepostfxtex(int scale)
     postfxtex &t = postfxtexs.add();
     t.scale = scale;
     glGenTextures(1, &t.id);
-    createtexture(t.id, max(screenw>>scale, 1), max(screenh>>scale, 1), NULL, 3, 1, GL_RGB);
+    createtexture(t.id, max(postfxw>>scale, 1), max(postfxh>>scale, 1), NULL, 3, 1, GL_RGB);
     return postfxtexs.length()-1;
 }
 
@@ -1345,11 +1345,13 @@ void renderpostfx()
 {
     if(postfxpasses.empty()) return;
 
-    if(postfxw != screenw || postfxh != screenh) 
+    int drawablewidth, drawableheight;
+    getdrawabledimensions(drawablewidth, drawableheight);
+    if(postfxw != drawablewidth || postfxh != drawableheight)
     {
         cleanuppostfx(false);
-        postfxw = screenw;
-        postfxh = screenh;
+        postfxw = drawablewidth;
+        postfxh = drawableheight;
     }
 
     int binds[NUMPOSTFXBINDS];
@@ -1359,7 +1361,7 @@ void renderpostfx()
     binds[0] = allocatepostfxtex(0);
     postfxtexs[binds[0]].used = 0;
     glBindTexture(GL_TEXTURE_2D, postfxtexs[binds[0]].id);
-    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, screenw, screenh);
+    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, postfxw, postfxh);
 
     if(postfxpasses.length() > 1)
     {
@@ -1374,7 +1376,8 @@ void renderpostfx()
         postfxpass &p = postfxpasses[i];
 
         int tex = -1;
-        if(!postfxpasses.inrange(i+1))
+        const bool finalpass = !postfxpasses.inrange(i+1);
+        if(finalpass)
         {
             if(postfxpasses.length() > 1) glBindFramebuffer_(GL_FRAMEBUFFER, 0);
         }
@@ -1384,9 +1387,10 @@ void renderpostfx()
             glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, postfxtexs[tex].id, 0);
         }
 
-        int w = tex >= 0 ? max(screenw>>postfxtexs[tex].scale, 1) : screenw, 
-            h = tex >= 0 ? max(screenh>>postfxtexs[tex].scale, 1) : screenh;
-        glViewport(0, 0, w, h);
+        int w = tex >= 0 ? max(postfxw>>postfxtexs[tex].scale, 1) : postfxw,
+            h = tex >= 0 ? max(postfxh>>postfxtexs[tex].scale, 1) : postfxh;
+        if(finalpass) gl_resize();
+        else glViewport(0, 0, w, h);
         p.shader->set();
         LOCALPARAM(params, p.params);
         int tw = w, th = h, tmu = 0;
@@ -1394,8 +1398,8 @@ void renderpostfx()
         {
             if(!tmu)
             {
-                tw = max(screenw>>postfxtexs[binds[j]].scale, 1);
-                th = max(screenh>>postfxtexs[binds[j]].scale, 1);
+                tw = max(postfxw>>postfxtexs[binds[j]].scale, 1);
+                th = max(postfxh>>postfxtexs[binds[j]].scale, 1);
             }
             else glActiveTexture_(GL_TEXTURE0 + tmu);
             glBindTexture(GL_TEXTURE_2D, postfxtexs[binds[j]].id);
