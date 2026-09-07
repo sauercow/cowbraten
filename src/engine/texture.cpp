@@ -3769,9 +3769,11 @@ void screenshot(char *filename)
         concatstring(buf, imageexts[format]);
     }
 
-    ImageData image(screenw, screenh, 3);
-    glPixelStorei(GL_PACK_ALIGNMENT, texalign(image.data, screenw, 3));
-    glReadPixels(0, 0, screenw, screenh, GL_RGB, GL_UNSIGNED_BYTE, image.data);
+    int drawablewidth, drawableheight;
+    getdrawabledimensions(drawablewidth, drawableheight);
+    ImageData image(drawablewidth, drawableheight, 3);
+    glPixelStorei(GL_PACK_ALIGNMENT, texalign(image.data, drawablewidth, 3));
+    glReadPixels(0, 0, drawablewidth, drawableheight, GL_RGB, GL_UNSIGNED_BYTE, image.data);
     saveimage(path(buf), format, image, true);
 }
 
