@@ -293,10 +293,12 @@ struct aviwriter
         f->putlil<uint>(videofps); // vertical refresh rate
         f->putlil<uint>(videow); // horizontal total
         f->putlil<uint>(videoh); // vertical total
-        int gcd = screenw, rem = screenh;
+        int drawablewidth, drawableheight;
+        getdrawabledimensions(drawablewidth, drawableheight);
+        int gcd = drawablewidth, rem = drawableheight;
         while(rem > 0) { gcd %= rem; swap(gcd, rem); }
-        f->putlil<ushort>(screenh/gcd); // aspect denominator
-        f->putlil<ushort>(screenw/gcd); // aspect numerator
+        f->putlil<ushort>(drawableheight/gcd); // aspect denominator
+        f->putlil<ushort>(drawablewidth/gcd); // aspect numerator
         f->putlil<uint>(videow); // frame width
         f->putlil<uint>(videoh); // frame height
         f->putlil<uint>(1); // fields per frame
@@ -933,9 +935,11 @@ namespace recorder
         
         lastframe = ~0U;
         videobuffers.clear();
+        int drawablewidth, drawableheight;
+        getdrawabledimensions(drawablewidth, drawableheight);
         loopi(MAXVIDEOBUFFERS)
         {
-            uint w = screenw, h = screenw;
+            uint w = drawablewidth, h = drawableheight;
             videobuffers.data[i].init(w, h, 4);
             videobuffers.data[i].frame = ~0U;
         }
@@ -994,9 +998,11 @@ namespace recorder
  
     void readbuffer(videobuffer &m, uint nextframe)
     {
+        int drawablewidth, drawableheight;
+        getdrawabledimensions(drawablewidth, drawableheight);
         bool accelyuv = movieaccelyuv && !(m.w%8),
-             usefbo = movieaccel && file->videow <= (uint)screenw && file->videoh <= (uint)screenh && (accelyuv || file->videow < (uint)screenw || file->videoh < (uint)screenh);
-        uint w = screenw, h = screenh;
+             usefbo = movieaccel && file->videow <= (uint)drawablewidth && file->videoh <= (uint)drawableheight && (accelyuv || file->videow < (uint)drawablewidth || file->videoh < (uint)drawableheight);
+        uint w = drawablewidth, h = drawableheight;
         if(usefbo) { w = file->videow; h = file->videoh; }
         if(w != m.w || h != m.h) m.init(w, h, 4);
         m.format = aviwriter::VID_RGB;
@@ -1005,7 +1011,7 @@ namespace recorder
         glPixelStorei(GL_PACK_ALIGNMENT, texalign(m.video, m.w, 4));
         if(usefbo)
         {
-            uint tw = screenw, th = screenh;
+            uint tw = drawablewidth, th = drawableheight;
             if(hasFBB && movieaccelblit) { tw = max(tw/2, m.w); th = max(th/2, m.h); }
             if(tw != scalew || th != scaleh)
             {
@@ -1030,18 +1036,18 @@ namespace recorder
                 glBindFramebuffer_(GL_FRAMEBUFFER, 0);
             }
                      
-            if(tw < (uint)screenw || th < (uint)screenh)
+            if(tw < (uint)drawablewidth || th < (uint)drawableheight)
             {
                 glBindFramebuffer_(GL_READ_FRAMEBUFFER, 0);
                 glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, scalefb);
                 glFramebufferTexture2D_(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, scaletex[0], 0);
-                glBlitFramebuffer_(0, 0, screenw, screenh, 0, 0, tw, th, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+                glBlitFramebuffer_(0, 0, drawablewidth, drawableheight, 0, 0, tw, th, GL_COLOR_BUFFER_BIT, GL_LINEAR);
                 glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, 0);
             }
             else
             {
                 glBindTexture(GL_TEXTURE_2D, scaletex[0]);
-                glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, screenw, screenh);
+                glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, drawablewidth, drawableheight);
             }
 
             GLOBALPARAMF(moviescale, 1.0f/scalew, 1.0f/scaleh);
@@ -1153,9 +1159,13 @@ VARP(moviesound, 0, 1, 1);
 void movie(char *name)
 {
     if(name[0] == '\0') recorder::stop();
-    else if(!recorder::isrecording()) recorder::start(name, moviefps, moview ? moview : screenw, movieh ? movieh : screenh, moviesound!=0);
+    else if(!recorder::isrecording())
+    {
+        int drawablewidth, drawableheight;
+        getdrawabledimensions(drawablewidth, drawableheight);
+        recorder::start(name, moviefps, moview ? moview : drawablewidth, movieh ? movieh : drawableheight, moviesound!=0);
+    }
 }
 
 COMMAND(movie, "s");
 ICOMMAND(movierecording, "", (), intret(recorder::isrecording() ? 1 : 0));
-
