@@ -441,6 +441,42 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Grass Distance</div>
+                                    <div class="settings-control-description">
+                                        Controls how far grass remains visible before fading out.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ grass_distance_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="grass_distance_selected == 0"
+                                    data-attrif-disabled="!grass_distance_available"
+                                    data-event-click="select_grass_distance(0)">Quick</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="grass_distance_selected == 1"
+                                    data-attrif-disabled="!grass_distance_available"
+                                    data-event-click="select_grass_distance(1)">Moderate</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="grass_distance_selected == 2"
+                                    data-attrif-disabled="!grass_distance_available"
+                                    data-event-click="select_grass_distance(2)">Slow</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="(!grass &amp;&amp; grass_distance_available) || grass_distance_status != ''">
+                                <span data-if="!grass &amp;&amp; grass_distance_available">
+                                    Grass is off; this distance will apply when enabled.
+                                </span>
+                                <span data-if="grass_distance_status != ''">{{ grass_distance_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">

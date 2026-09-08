@@ -223,6 +223,67 @@ namespace cowui
             return sauersettings::writeglare(enabled);
         }
 
+        static GrassDistance grassdistance(
+            sauersettings::GrassDistance distance)
+        {
+            switch(distance)
+            {
+                case sauersettings::GrassDistance::Quick:
+                    return GrassDistance::Quick;
+                case sauersettings::GrassDistance::Moderate:
+                    return GrassDistance::Moderate;
+                case sauersettings::GrassDistance::Slow:
+                    return GrassDistance::Slow;
+                case sauersettings::GrassDistance::Custom:
+                    return GrassDistance::Custom;
+            }
+            return GrassDistance::Custom;
+        }
+
+        static sauersettings::GrassDistance grassdistance(
+            GrassDistance distance)
+        {
+            switch(distance)
+            {
+                case GrassDistance::Quick:
+                    return sauersettings::GrassDistance::Quick;
+                case GrassDistance::Moderate:
+                    return sauersettings::GrassDistance::Moderate;
+                case GrassDistance::Slow:
+                    return sauersettings::GrassDistance::Slow;
+                case GrassDistance::Custom:
+                    return sauersettings::GrassDistance::Custom;
+            }
+            return sauersettings::GrassDistance::Custom;
+        }
+
+        static void copygrassdistance(
+            const sauersettings::GrassDistanceState &source,
+            GrassDistanceState &result)
+        {
+            result.distance = grassdistance(source.distance);
+            result.value = source.value;
+        }
+
+        bool readgrassdistance(GrassDistanceState &result)
+        {
+            sauersettings::GrassDistanceState legacy = {};
+            const bool read = sauersettings::readgrassdistance(legacy);
+            copygrassdistance(legacy, result);
+            return read;
+        }
+
+        bool writegrassdistance(
+            GrassDistance distance,
+            GrassDistanceState &result)
+        {
+            sauersettings::GrassDistanceState legacy = {};
+            const bool accepted = sauersettings::writegrassdistance(
+                grassdistance(distance), legacy);
+            copygrassdistance(legacy, result);
+            return accepted;
+        }
+
         static MotionBlurIntensity motionblurintensity(
             sauersettings::MotionBlurIntensity intensity)
         {

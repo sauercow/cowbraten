@@ -57,6 +57,19 @@ namespace cowui
             bool glare;
         };
 
+        enum class GrassDistance
+        {
+            Quick,
+            Moderate,
+            Slow,
+            Custom
+        };
+        struct GrassDistanceState
+        {
+            GrassDistance distance;
+            int value;
+        };
+
         enum class MotionBlurIntensity { Subtle, Moderate, Intense, Custom };
         struct MotionBlurIntensityState
         {
@@ -224,6 +237,11 @@ namespace cowui
         bool writegrass(bool enabled);
         bool writemotionblur(bool enabled);
         bool writeglare(bool enabled);
+
+        bool readgrassdistance(GrassDistanceState &result);
+        // Custom is output-only and is rejected as a write request.
+        bool writegrassdistance(GrassDistance distance,
+            GrassDistanceState &result);
 
         bool readmotionblurintensity(MotionBlurIntensityState &result);
         // Custom is output-only and is rejected as a write request.

@@ -606,6 +606,76 @@ namespace cowui
             return writeboolean(getident("glare"), enabled);
         }
 
+        static GrassDistance classifygrassdistance(int value)
+        {
+            switch(value)
+            {
+                case 128: return GrassDistance::Quick;
+                case 256: return GrassDistance::Moderate;
+                case 512: return GrassDistance::Slow;
+                default: return GrassDistance::Custom;
+            }
+        }
+
+        static bool grassdistancevalue(GrassDistance distance, int &value)
+        {
+            switch(distance)
+            {
+                case GrassDistance::Quick:
+                    value = 128;
+                    return true;
+                case GrassDistance::Moderate:
+                    value = 256;
+                    return true;
+                case GrassDistance::Slow:
+                    value = 512;
+                    return true;
+                case GrassDistance::Custom:
+                    return false;
+            }
+            return false;
+        }
+
+        bool readgrassdistance(GrassDistanceState &result)
+        {
+            result.distance = GrassDistance::Custom;
+            result.value = 0;
+
+            ident *id = getident("grassdist");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.value = *id->storage.i;
+            result.distance = classifygrassdistance(result.value);
+            return true;
+        }
+
+        bool writegrassdistance(
+            GrassDistance distance,
+            GrassDistanceState &result)
+        {
+            if(!readgrassdistance(result))
+                return false;
+
+            int value = 0;
+            if(!grassdistancevalue(distance, value))
+                return false;
+
+            ident *id = getident("grassdist");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            setvarchecked(id, value);
+
+            if(!readgrassdistance(result))
+                return false;
+            return result.distance == distance && result.value == value;
+        }
+
         static MotionBlurIntensity classifymotionblurintensity(float scale)
         {
             if(scale == 0.5f)

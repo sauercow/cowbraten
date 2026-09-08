@@ -320,6 +320,11 @@ namespace cowui
             constructor.Bind("vsync_adaptive", &vsync_adaptive) &&
             constructor.Bind("vsync_status", &vsync_status) &&
             constructor.Bind("grass", &grass) &&
+            constructor.Bind("grass_distance_available", &grass_distance_available) &&
+            constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
+            constructor.Bind("grass_distance_label", &grass_distance_label) &&
+            constructor.Bind("grass_distance_status", &grass_distance_status) &&
+            constructor.BindEventCallback("select_grass_distance", &RmlSettings::selectgrassdistance, this) &&
             constructor.Bind("motion_blur", &motion_blur) &&
             constructor.Bind("motion_blur_available", &motion_blur_available) &&
             constructor.Bind("motion_blur_intensity_available", &motion_blur_intensity_available) &&
@@ -810,6 +815,10 @@ namespace cowui
         presentation_label.clear();
         vsync_status.clear();
         grass = false;
+        grass_distance_available = false;
+        grass_distance_selected = -1;
+        grass_distance_label.clear();
+        grass_distance_status.clear();
         motion_blur = motion_blur_available = false;
         motion_blur_intensity_available = false;
         motion_blur_intensity_selected = -1;
@@ -1017,6 +1026,7 @@ namespace cowui
     bool RmlSettings::refreshvideo()
     {
         refreshgraphicsquality();
+        refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
         refreshanisotropy();
@@ -2787,6 +2797,94 @@ namespace cowui
         {
             graphics_quality_status = "Glare change was not accepted";
             model.DirtyVariable("graphics_quality_status");
+        }
+    }
+
+    void RmlSettings::refreshgrassdistance()
+    {
+        settings::GrassDistanceState state = {};
+        const bool available = settings::readgrassdistance(state);
+        presentgrassdistance(state, available);
+    }
+
+    void RmlSettings::presentgrassdistance(
+        const settings::GrassDistanceState &state,
+        bool available)
+    {
+        grass_distance_available = available;
+        grass_distance_selected = -1;
+        grass_distance_status.clear();
+
+        if(!available)
+        {
+            grass_distance_label = "Unavailable";
+            grass_distance_status = "Grass distance state is unavailable";
+        }
+        else switch(state.distance)
+        {
+            case settings::GrassDistance::Quick:
+                grass_distance_selected = 0;
+                grass_distance_label = "Quick";
+                break;
+            case settings::GrassDistance::Moderate:
+                grass_distance_selected = 1;
+                grass_distance_label = "Moderate";
+                break;
+            case settings::GrassDistance::Slow:
+                grass_distance_selected = 2;
+                grass_distance_label = "Slow";
+                break;
+            case settings::GrassDistance::Custom:
+            {
+                grass_distance_label = "Custom";
+                char status[64];
+                std::snprintf(status, sizeof(status),
+                    "Distance %d", state.value);
+                grass_distance_status = status;
+                break;
+            }
+        }
+
+        model.DirtyVariable("grass_distance_available");
+        model.DirtyVariable("grass_distance_selected");
+        model.DirtyVariable("grass_distance_label");
+        model.DirtyVariable("grass_distance_status");
+    }
+
+    void RmlSettings::selectgrassdistance(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !grass_distance_available)
+            return;
+
+        settings::GrassDistance distance;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: distance = settings::GrassDistance::Quick; break;
+            case 1: distance = settings::GrassDistance::Moderate; break;
+            case 2: distance = settings::GrassDistance::Slow; break;
+            default: return;
+        }
+
+        settings::GrassDistanceState state = {};
+        const bool accepted = settings::writegrassdistance(distance, state);
+        const bool available = accepted || settings::readgrassdistance(state);
+        presentgrassdistance(state, available);
+        if(!accepted && available)
+        {
+            if(grass_distance_status.empty())
+            {
+                grass_distance_status =
+                    "Change not accepted; current engine state is shown";
+            }
+            else
+            {
+                grass_distance_status = "Change not accepted. " +
+                    grass_distance_status;
+            }
+            model.DirtyVariable("grass_distance_status");
         }
     }
 
