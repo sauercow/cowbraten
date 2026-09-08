@@ -316,6 +316,68 @@ namespace cowui
             return accepted;
         }
 
+        static void copywatersurfaceeffects(
+            const sauersettings::WaterSurfaceEffectsState &source,
+            WaterSurfaceEffectsState &result)
+        {
+            result.refraction = source.refraction;
+            result.reflections = source.reflections;
+            result.caustics = source.caustics;
+            result.liquid_animation = source.liquid_animation;
+            result.render_targets_available =
+                source.render_targets_available;
+        }
+
+        bool readwatersurfaceeffects(WaterSurfaceEffectsState &result)
+        {
+            sauersettings::WaterSurfaceEffectsState legacy = {};
+            const bool read = sauersettings::readwatersurfaceeffects(legacy);
+            copywatersurfaceeffects(legacy, result);
+            return read;
+        }
+
+        bool writewaterrefraction(
+            bool enabled,
+            WaterSurfaceEffectsState &result)
+        {
+            sauersettings::WaterSurfaceEffectsState legacy = {};
+            const bool accepted = sauersettings::writewaterrefraction(
+                enabled, legacy);
+            copywatersurfaceeffects(legacy, result);
+            return accepted;
+        }
+
+        bool writewaterreflections(
+            bool enabled,
+            WaterSurfaceEffectsState &result)
+        {
+            sauersettings::WaterSurfaceEffectsState legacy = {};
+            const bool accepted = sauersettings::writewaterreflections(
+                enabled, legacy);
+            copywatersurfaceeffects(legacy, result);
+            return accepted;
+        }
+
+        bool writecaustics(bool enabled, WaterSurfaceEffectsState &result)
+        {
+            sauersettings::WaterSurfaceEffectsState legacy = {};
+            const bool accepted = sauersettings::writecaustics(
+                enabled, legacy);
+            copywatersurfaceeffects(legacy, result);
+            return accepted;
+        }
+
+        bool writeliquidanimation(
+            bool enabled,
+            WaterSurfaceEffectsState &result)
+        {
+            sauersettings::WaterSurfaceEffectsState legacy = {};
+            const bool accepted = sauersettings::writeliquidanimation(
+                enabled, legacy);
+            copywatersurfaceeffects(legacy, result);
+            return accepted;
+        }
+
         static GrassDistance grassdistance(
             sauersettings::GrassDistance distance)
         {

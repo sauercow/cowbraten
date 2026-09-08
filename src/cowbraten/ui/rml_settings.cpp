@@ -331,6 +331,18 @@ namespace cowui
             constructor.Bind("shadow_quality_label", &shadow_quality_label) &&
             constructor.Bind("shadow_quality_status", &shadow_quality_status) &&
             constructor.BindEventCallback("select_shadow_quality", &RmlSettings::selectshadowquality, this) &&
+            constructor.Bind("water_surface_state_available", &water_surface_state_available) &&
+            constructor.Bind("water_refraction", &water_refraction) &&
+            constructor.Bind("water_refraction_available", &water_refraction_available) &&
+            constructor.Bind("water_reflections", &water_reflections) &&
+            constructor.Bind("water_reflections_available", &water_reflections_available) &&
+            constructor.Bind("water_caustics", &water_caustics) &&
+            constructor.Bind("liquid_surface_animation", &liquid_surface_animation) &&
+            constructor.Bind("water_surface_status", &water_surface_status) &&
+            constructor.BindEventCallback("select_water_refraction", &RmlSettings::selectwaterrefraction, this) &&
+            constructor.BindEventCallback("select_water_reflections", &RmlSettings::selectwaterreflections, this) &&
+            constructor.BindEventCallback("select_water_caustics", &RmlSettings::selectwatercaustics, this) &&
+            constructor.BindEventCallback("select_liquid_animation", &RmlSettings::selectliquidanimation, this) &&
             constructor.Bind("grass", &grass) &&
             constructor.Bind("grass_distance_available", &grass_distance_available) &&
             constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
@@ -835,6 +847,14 @@ namespace cowui
         shadow_quality_selected = -1;
         shadow_quality_label.clear();
         shadow_quality_status.clear();
+        water_surface_state_available = false;
+        water_refraction = false;
+        water_refraction_available = false;
+        water_reflections = false;
+        water_reflections_available = false;
+        water_caustics = false;
+        liquid_surface_animation = false;
+        water_surface_status.clear();
         grass = false;
         grass_distance_available = false;
         grass_distance_selected = -1;
@@ -1049,6 +1069,7 @@ namespace cowui
         refreshgraphicsquality();
         refreshshadows();
         refreshshadowquality();
+        refreshwatersurfaceeffects();
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
@@ -2927,6 +2948,128 @@ namespace cowui
                     shadow_quality_status;
             }
             model.DirtyVariable("shadow_quality_status");
+        }
+    }
+
+    void RmlSettings::refreshwatersurfaceeffects()
+    {
+        settings::WaterSurfaceEffectsState state = {};
+        const bool available = settings::readwatersurfaceeffects(state);
+        presentwatersurfaceeffects(state, available);
+    }
+
+    void RmlSettings::presentwatersurfaceeffects(
+        const settings::WaterSurfaceEffectsState &state,
+        bool available)
+    {
+        water_surface_state_available = available;
+        water_refraction = state.refraction;
+        water_refraction_available = available &&
+            state.render_targets_available;
+        water_reflections = state.reflections;
+        water_reflections_available = available &&
+            state.render_targets_available;
+        water_caustics = state.caustics;
+        liquid_surface_animation = state.liquid_animation;
+        water_surface_status = available
+            ? ""
+            : "Water effects state is unavailable";
+
+        model.DirtyVariable("water_surface_state_available");
+        model.DirtyVariable("water_refraction");
+        model.DirtyVariable("water_refraction_available");
+        model.DirtyVariable("water_reflections");
+        model.DirtyVariable("water_reflections_available");
+        model.DirtyVariable("water_caustics");
+        model.DirtyVariable("liquid_surface_animation");
+        model.DirtyVariable("water_surface_status");
+    }
+
+    void RmlSettings::selectwaterrefraction(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !water_surface_state_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::WaterSurfaceEffectsState state = {};
+        const bool accepted = settings::writewaterrefraction(enabled, state);
+        const bool available = accepted ||
+            settings::readwatersurfaceeffects(state);
+        presentwatersurfaceeffects(state, available);
+        if(!accepted && available)
+        {
+            water_surface_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("water_surface_status");
+        }
+    }
+
+    void RmlSettings::selectwaterreflections(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !water_surface_state_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::WaterSurfaceEffectsState state = {};
+        const bool accepted = settings::writewaterreflections(enabled, state);
+        const bool available = accepted ||
+            settings::readwatersurfaceeffects(state);
+        presentwatersurfaceeffects(state, available);
+        if(!accepted && available)
+        {
+            water_surface_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("water_surface_status");
+        }
+    }
+
+    void RmlSettings::selectwatercaustics(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !water_surface_state_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::WaterSurfaceEffectsState state = {};
+        const bool accepted = settings::writecaustics(enabled, state);
+        const bool available = accepted ||
+            settings::readwatersurfaceeffects(state);
+        presentwatersurfaceeffects(state, available);
+        if(!accepted && available)
+        {
+            water_surface_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("water_surface_status");
+        }
+    }
+
+    void RmlSettings::selectliquidanimation(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !water_surface_state_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::WaterSurfaceEffectsState state = {};
+        const bool accepted = settings::writeliquidanimation(enabled, state);
+        const bool available = accepted ||
+            settings::readwatersurfaceeffects(state);
+        presentwatersurfaceeffects(state, available);
+        if(!accepted && available)
+        {
+            water_surface_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("water_surface_status");
         }
     }
 

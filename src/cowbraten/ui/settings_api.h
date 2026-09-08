@@ -77,6 +77,15 @@ namespace cowui
             int blur;
         };
 
+        struct WaterSurfaceEffectsState
+        {
+            bool refraction;
+            bool reflections;
+            bool caustics;
+            bool liquid_animation;
+            bool render_targets_available;
+        };
+
         enum class GrassDistance
         {
             Quick,
@@ -266,6 +275,15 @@ namespace cowui
         // Custom is output-only and is rejected as a write request.
         bool writeshadowquality(ShadowQuality quality,
             ShadowQualityState &result);
+
+        bool readwatersurfaceeffects(WaterSurfaceEffectsState &result);
+        bool writewaterrefraction(bool enabled,
+            WaterSurfaceEffectsState &result);
+        bool writewaterreflections(bool enabled,
+            WaterSurfaceEffectsState &result);
+        bool writecaustics(bool enabled, WaterSurfaceEffectsState &result);
+        bool writeliquidanimation(bool enabled,
+            WaterSurfaceEffectsState &result);
 
         bool readgrassdistance(GrassDistanceState &result);
         // Custom is output-only and is rejected as a write request.

@@ -767,6 +767,152 @@ namespace cowui
                 result.map_size == map_size && result.blur == blur;
         }
 
+        bool readwatersurfaceeffects(WaterSurfaceEffectsState &result)
+        {
+            result.refraction = false;
+            result.reflections = false;
+            result.caustics = false;
+            result.liquid_animation = false;
+            result.render_targets_available = false;
+
+            ident *refraction_id = getident("waterrefract");
+            ident *reflections_id = getident("waterreflect");
+            ident *caustics_id = getident("caustics");
+            ident *animation_id = getident("vertwater");
+            if(!refraction_id || refraction_id->type != ID_VAR ||
+               !refraction_id->storage.i ||
+               !reflections_id || reflections_id->type != ID_VAR ||
+               !reflections_id->storage.i ||
+               !caustics_id || caustics_id->type != ID_VAR ||
+               !caustics_id->storage.i ||
+               !animation_id || animation_id->type != ID_VAR ||
+               !animation_id->storage.i)
+            {
+                return false;
+            }
+
+            result.refraction = *refraction_id->storage.i != 0;
+            result.reflections = *reflections_id->storage.i != 0;
+            result.caustics = *caustics_id->storage.i != 0;
+            result.liquid_animation = *animation_id->storage.i != 0;
+            result.render_targets_available = hasFBO;
+            return true;
+        }
+
+        bool writewaterrefraction(
+            bool enabled,
+            WaterSurfaceEffectsState &result)
+        {
+            if(!readwatersurfaceeffects(result))
+                return false;
+
+            ident *id = getident("waterrefract");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+            if(enabled && !result.render_targets_available)
+                return false;
+
+            if(*id->storage.i != value)
+            {
+                if(!SDL_GL_GetCurrentContext())
+                    return false;
+                setvarchecked(id, value);
+            }
+
+            if(!readwatersurfaceeffects(result))
+                return false;
+            return result.refraction == enabled;
+        }
+
+        bool writewaterreflections(
+            bool enabled,
+            WaterSurfaceEffectsState &result)
+        {
+            if(!readwatersurfaceeffects(result))
+                return false;
+
+            ident *id = getident("waterreflect");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+            if(enabled && !result.render_targets_available)
+                return false;
+
+            if(*id->storage.i != value)
+            {
+                if(!SDL_GL_GetCurrentContext())
+                    return false;
+                setvarchecked(id, value);
+            }
+
+            if(!readwatersurfaceeffects(result))
+                return false;
+            return result.reflections == enabled;
+        }
+
+        bool writecaustics(bool enabled, WaterSurfaceEffectsState &result)
+        {
+            if(!readwatersurfaceeffects(result))
+                return false;
+
+            ident *id = getident("caustics");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+            {
+                if(enabled && !SDL_GL_GetCurrentContext())
+                    return false;
+                setvarchecked(id, value);
+            }
+
+            if(!readwatersurfaceeffects(result))
+                return false;
+            return result.caustics == enabled;
+        }
+
+        bool writeliquidanimation(
+            bool enabled,
+            WaterSurfaceEffectsState &result)
+        {
+            if(!readwatersurfaceeffects(result))
+                return false;
+
+            ident *id = getident("vertwater");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+            {
+                if(!SDL_GL_GetCurrentContext())
+                    return false;
+                setvarchecked(id, value);
+            }
+
+            if(!readwatersurfaceeffects(result))
+                return false;
+            return result.liquid_animation == enabled;
+        }
+
         static GrassDistance classifygrassdistance(int value)
         {
             switch(value)
