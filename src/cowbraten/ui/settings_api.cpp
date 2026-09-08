@@ -223,6 +223,41 @@ namespace cowui
             return sauersettings::writeglare(enabled);
         }
 
+        static void copyshadows(
+            const sauersettings::ShadowState &source,
+            ShadowState &result)
+        {
+            result.shadow_maps = source.shadow_maps;
+            result.blob_shadows = source.blob_shadows;
+            result.shadow_maps_available = source.shadow_maps_available;
+        }
+
+        bool readshadows(ShadowState &result)
+        {
+            sauersettings::ShadowState legacy = {};
+            const bool read = sauersettings::readshadows(legacy);
+            copyshadows(legacy, result);
+            return read;
+        }
+
+        bool writeshadowmaps(bool enabled, ShadowState &result)
+        {
+            sauersettings::ShadowState legacy = {};
+            const bool accepted = sauersettings::writeshadowmaps(
+                enabled, legacy);
+            copyshadows(legacy, result);
+            return accepted;
+        }
+
+        bool writeblobshadows(bool enabled, ShadowState &result)
+        {
+            sauersettings::ShadowState legacy = {};
+            const bool accepted = sauersettings::writeblobshadows(
+                enabled, legacy);
+            copyshadows(legacy, result);
+            return accepted;
+        }
+
         static GrassDistance grassdistance(
             sauersettings::GrassDistance distance)
         {

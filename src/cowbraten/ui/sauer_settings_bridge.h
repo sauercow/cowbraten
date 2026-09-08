@@ -57,6 +57,13 @@ namespace cowui
             bool glare;
         };
 
+        struct ShadowState
+        {
+            bool shadow_maps;
+            bool blob_shadows;
+            bool shadow_maps_available;
+        };
+
         enum class GrassDistance
         {
             Quick,
@@ -237,6 +244,10 @@ namespace cowui
         bool writegrass(bool enabled);
         bool writemotionblur(bool enabled);
         bool writeglare(bool enabled);
+
+        bool readshadows(ShadowState &result);
+        bool writeshadowmaps(bool enabled, ShadowState &result);
+        bool writeblobshadows(bool enabled, ShadowState &result);
 
         bool readgrassdistance(GrassDistanceState &result);
         // Custom is output-only and is rejected as a write request.

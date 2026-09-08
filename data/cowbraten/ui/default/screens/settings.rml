@@ -426,6 +426,55 @@
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
+                                    <div class="settings-control-title">Shadow Maps</div>
+                                    <div class="settings-control-description">
+                                        Render detailed dynamic model shadows at a higher GPU cost.
+                                    </div>
+                                    <div class="settings-control-description"
+                                        data-if="shadow_state_available &amp;&amp; !shadow_maps_available">
+                                        Unavailable with the current renderer.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="shadow_maps"
+                                        data-attrif-disabled="!shadow_state_available || (!shadow_maps_available &amp;&amp; !shadow_maps)"
+                                        data-event-change="select_shadow_maps(ev.checked)" />
+                                    <span data-if="shadow_maps">On</span>
+                                    <span data-if="!shadow_maps">Off</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Blob Shadows</div>
+                                    <div class="settings-control-description">
+                                        Use a basic, lower-cost shadow beneath eligible models.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="blob_shadows"
+                                        data-attrif-disabled="!shadow_state_available"
+                                        data-event-change="select_blob_shadows(ev.checked)" />
+                                    <span data-if="blob_shadows">On</span>
+                                    <span data-if="!blob_shadows">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="(shadow_maps &amp;&amp; blob_shadows) || shadow_status != ''">
+                                <span data-if="shadow_maps &amp;&amp; blob_shadows">
+                                    Shadow maps take precedence; blob shadows remain configured as fallback.
+                                </span>
+                                <span data-if="shadow_status != ''">{{ shadow_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
                                     <div class="settings-control-title">Grass</div>
                                     <div class="settings-control-description">
                                         Draw grass on map surfaces that support it. Changes take effect immediately.

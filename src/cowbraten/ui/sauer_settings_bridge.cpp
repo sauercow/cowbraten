@@ -606,6 +606,75 @@ namespace cowui
             return writeboolean(getident("glare"), enabled);
         }
 
+        bool readshadows(ShadowState &result)
+        {
+            result.shadow_maps = false;
+            result.blob_shadows = false;
+            result.shadow_maps_available = false;
+
+            ident *shadowmap_id = getident("shadowmap");
+            ident *blobs_id = getident("blobs");
+            if(!shadowmap_id || shadowmap_id->type != ID_VAR ||
+               !shadowmap_id->storage.i ||
+               !blobs_id || blobs_id->type != ID_VAR ||
+               !blobs_id->storage.i)
+            {
+                return false;
+            }
+
+            result.shadow_maps = *shadowmap_id->storage.i != 0;
+            result.blob_shadows = *blobs_id->storage.i != 0;
+            result.shadow_maps_available = hasFBO;
+            return true;
+        }
+
+        bool writeshadowmaps(bool enabled, ShadowState &result)
+        {
+            if(!readshadows(result) ||
+               (enabled && !result.shadow_maps_available))
+            {
+                return false;
+            }
+
+            ident *id = getident("shadowmap");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readshadows(result))
+                return false;
+            return result.shadow_maps == enabled;
+        }
+
+        bool writeblobshadows(bool enabled, ShadowState &result)
+        {
+            if(!readshadows(result))
+                return false;
+
+            ident *id = getident("blobs");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readshadows(result))
+                return false;
+            return result.blob_shadows == enabled;
+        }
+
         static GrassDistance classifygrassdistance(int value)
         {
             switch(value)

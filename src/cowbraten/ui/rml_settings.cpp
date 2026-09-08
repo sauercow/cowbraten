@@ -319,6 +319,13 @@ namespace cowui
             constructor.Bind("vsync", &vsync) &&
             constructor.Bind("vsync_adaptive", &vsync_adaptive) &&
             constructor.Bind("vsync_status", &vsync_status) &&
+            constructor.Bind("shadow_state_available", &shadow_state_available) &&
+            constructor.Bind("shadow_maps", &shadow_maps) &&
+            constructor.Bind("shadow_maps_available", &shadow_maps_available) &&
+            constructor.Bind("blob_shadows", &blob_shadows) &&
+            constructor.Bind("shadow_status", &shadow_status) &&
+            constructor.BindEventCallback("select_shadow_maps", &RmlSettings::selectshadowmaps, this) &&
+            constructor.BindEventCallback("select_blob_shadows", &RmlSettings::selectblobshadows, this) &&
             constructor.Bind("grass", &grass) &&
             constructor.Bind("grass_distance_available", &grass_distance_available) &&
             constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
@@ -814,6 +821,11 @@ namespace cowui
         video_status.clear();
         presentation_label.clear();
         vsync_status.clear();
+        shadow_state_available = false;
+        shadow_maps = false;
+        shadow_maps_available = false;
+        blob_shadows = false;
+        shadow_status.clear();
         grass = false;
         grass_distance_available = false;
         grass_distance_selected = -1;
@@ -1026,6 +1038,7 @@ namespace cowui
     bool RmlSettings::refreshvideo()
     {
         refreshgraphicsquality();
+        refreshshadows();
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
@@ -2746,6 +2759,72 @@ namespace cowui
         model.DirtyVariable("glare");
         model.DirtyVariable("graphics_quality_status");
         return read;
+    }
+
+    void RmlSettings::refreshshadows()
+    {
+        settings::ShadowState state = {};
+        const bool available = settings::readshadows(state);
+        presentshadows(state, available);
+    }
+
+    void RmlSettings::presentshadows(
+        const settings::ShadowState &state,
+        bool available)
+    {
+        shadow_state_available = available;
+        shadow_maps = state.shadow_maps;
+        shadow_maps_available = available && state.shadow_maps_available;
+        blob_shadows = state.blob_shadows;
+        shadow_status = available ? "" : "Shadow state is unavailable";
+
+        model.DirtyVariable("shadow_state_available");
+        model.DirtyVariable("shadow_maps");
+        model.DirtyVariable("shadow_maps_available");
+        model.DirtyVariable("blob_shadows");
+        model.DirtyVariable("shadow_status");
+    }
+
+    void RmlSettings::selectshadowmaps(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !shadow_state_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ShadowState state = {};
+        const bool accepted = settings::writeshadowmaps(enabled, state);
+        const bool available = accepted || settings::readshadows(state);
+        presentshadows(state, available);
+        if(!accepted && available)
+        {
+            shadow_status =
+                "Shadow Maps change was not accepted; current engine state is shown";
+            model.DirtyVariable("shadow_status");
+        }
+    }
+
+    void RmlSettings::selectblobshadows(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !shadow_state_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ShadowState state = {};
+        const bool accepted = settings::writeblobshadows(enabled, state);
+        const bool available = accepted || settings::readshadows(state);
+        presentshadows(state, available);
+        if(!accepted && available)
+        {
+            shadow_status =
+                "Blob Shadows change was not accepted; current engine state is shown";
+            model.DirtyVariable("shadow_status");
+        }
     }
 
     void RmlSettings::grassaction(Rml::Event &event)
