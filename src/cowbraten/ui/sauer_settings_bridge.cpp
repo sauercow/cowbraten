@@ -606,6 +606,76 @@ namespace cowui
             return writeboolean(getident("glare"), enabled);
         }
 
+        static MotionBlurIntensity classifymotionblurintensity(float scale)
+        {
+            if(scale == 0.5f)
+                return MotionBlurIntensity::Subtle;
+            if(scale == 0.65f)
+                return MotionBlurIntensity::Moderate;
+            if(scale == 0.8f)
+                return MotionBlurIntensity::Intense;
+            return MotionBlurIntensity::Custom;
+        }
+
+        static bool motionblurintensityvalue(
+            MotionBlurIntensity intensity,
+            float &scale)
+        {
+            switch(intensity)
+            {
+                case MotionBlurIntensity::Subtle:
+                    scale = 0.5f;
+                    return true;
+                case MotionBlurIntensity::Moderate:
+                    scale = 0.65f;
+                    return true;
+                case MotionBlurIntensity::Intense:
+                    scale = 0.8f;
+                    return true;
+                case MotionBlurIntensity::Custom:
+                    return false;
+            }
+            return false;
+        }
+
+        bool readmotionblurintensity(MotionBlurIntensityState &result)
+        {
+            result.intensity = MotionBlurIntensity::Custom;
+            result.scale = 0.0f;
+
+            ident *id = getident("motionblurscale");
+            if(!id || id->type != ID_FVAR || !id->storage.f)
+                return false;
+
+            result.scale = *id->storage.f;
+            result.intensity = classifymotionblurintensity(result.scale);
+            return true;
+        }
+
+        bool writemotionblurintensity(
+            MotionBlurIntensity intensity,
+            MotionBlurIntensityState &result)
+        {
+            if(!readmotionblurintensity(result))
+                return false;
+
+            ident *id = getident("motionblurscale");
+            float scale = 0.0f;
+            if(!id || id->type != ID_FVAR || !id->storage.f ||
+               !motionblurintensityvalue(intensity, scale) ||
+               id->flags&IDF_READONLY ||
+               scale < id->minvalf || scale > id->maxvalf)
+            {
+                return false;
+            }
+
+            setfvarchecked(id, scale);
+
+            if(!readmotionblurintensity(result))
+                return false;
+            return result.intensity == intensity && result.scale == scale;
+        }
+
         static GlarePreset classifyglarepreset(float scale, int blur_radius)
         {
             if(scale == 1.0f && blur_radius == 4)

@@ -464,6 +464,45 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Motion Blur Intensity</div>
+                                    <div class="settings-control-description">
+                                        Choose the stored strength used when Motion Blur is active.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ motion_blur_intensity_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="motion_blur_intensity_selected == 0"
+                                    data-attrif-disabled="!motion_blur_intensity_available"
+                                    data-event-click="select_motion_blur_intensity(0)">Subtle</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="motion_blur_intensity_selected == 1"
+                                    data-attrif-disabled="!motion_blur_intensity_available"
+                                    data-event-click="select_motion_blur_intensity(1)">Moderate</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="motion_blur_intensity_selected == 2"
+                                    data-attrif-disabled="!motion_blur_intensity_available"
+                                    data-event-click="select_motion_blur_intensity(2)">Intense</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="(!motion_blur_available &amp;&amp; motion_blur_intensity_available) || (motion_blur_available &amp;&amp; !motion_blur &amp;&amp; motion_blur_intensity_available) || motion_blur_intensity_status != ''">
+                                <span data-if="!motion_blur_available &amp;&amp; motion_blur_intensity_available">
+                                    Motion blur is unavailable; this intensity remains configured.
+                                </span>
+                                <span data-if="motion_blur_available &amp;&amp; !motion_blur &amp;&amp; motion_blur_intensity_available">
+                                    Motion blur is off; this intensity will apply when enabled.
+                                </span>
+                                <span data-if="motion_blur_intensity_status != ''">{{ motion_blur_intensity_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">

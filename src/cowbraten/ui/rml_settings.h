@@ -24,6 +24,7 @@ namespace cowui
         struct AnisotropyState;
         struct MipmapBlendingState;
         struct ShaderDetailState;
+        struct MotionBlurIntensityState;
         struct GlarePresetState;
     }
 
@@ -132,6 +133,12 @@ namespace cowui
             const Rml::VariantList &arguments);
         void selectglare(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
+        void refreshmotionblurintensity();
+        void presentmotionblurintensity(
+            const settings::MotionBlurIntensityState &state,
+            bool available);
+        void selectmotionblurintensity(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
         void refreshglarepreset();
         void presentglarepreset(const settings::GlarePresetState &state,
             bool available);
@@ -279,6 +286,10 @@ namespace cowui
         bool grass = false;
         bool motion_blur = false;
         bool motion_blur_available = false;
+        bool motion_blur_intensity_available = false;
+        int motion_blur_intensity_selected = -1;
+        Rml::String motion_blur_intensity_label;
+        Rml::String motion_blur_intensity_status;
         bool glare = false;
         bool glare_preset_available = false;
         int glare_preset_selected = -1;

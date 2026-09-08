@@ -57,6 +57,13 @@ namespace cowui
             bool glare;
         };
 
+        enum class MotionBlurIntensity { Subtle, Moderate, Intense, Custom };
+        struct MotionBlurIntensityState
+        {
+            MotionBlurIntensity intensity;
+            float scale;
+        };
+
         enum class GlarePreset { Subtle, Glowy, Soft, Intense, Custom };
         struct GlarePresetState
         {
@@ -217,6 +224,11 @@ namespace cowui
         bool writegrass(bool enabled);
         bool writemotionblur(bool enabled);
         bool writeglare(bool enabled);
+
+        bool readmotionblurintensity(MotionBlurIntensityState &result);
+        // Custom is output-only and is rejected as a write request.
+        bool writemotionblurintensity(MotionBlurIntensity intensity,
+            MotionBlurIntensityState &result);
 
         bool readglarepreset(GlarePresetState &result);
         bool writeglarepreset(GlarePreset preset, GlarePresetState &result);

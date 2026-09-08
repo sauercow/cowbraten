@@ -322,6 +322,11 @@ namespace cowui
             constructor.Bind("grass", &grass) &&
             constructor.Bind("motion_blur", &motion_blur) &&
             constructor.Bind("motion_blur_available", &motion_blur_available) &&
+            constructor.Bind("motion_blur_intensity_available", &motion_blur_intensity_available) &&
+            constructor.Bind("motion_blur_intensity_selected", &motion_blur_intensity_selected) &&
+            constructor.Bind("motion_blur_intensity_label", &motion_blur_intensity_label) &&
+            constructor.Bind("motion_blur_intensity_status", &motion_blur_intensity_status) &&
+            constructor.BindEventCallback("select_motion_blur_intensity", &RmlSettings::selectmotionblurintensity, this) &&
             constructor.Bind("glare", &glare) &&
             constructor.BindEventCallback("select_glare", &RmlSettings::selectglare, this) &&
             constructor.Bind("glare_preset_available", &glare_preset_available) &&
@@ -806,6 +811,10 @@ namespace cowui
         vsync_status.clear();
         grass = false;
         motion_blur = motion_blur_available = false;
+        motion_blur_intensity_available = false;
+        motion_blur_intensity_selected = -1;
+        motion_blur_intensity_label.clear();
+        motion_blur_intensity_status.clear();
         glare = false;
         glare_preset_available = false;
         glare_preset_selected = -1;
@@ -1008,6 +1017,7 @@ namespace cowui
     bool RmlSettings::refreshvideo()
     {
         refreshgraphicsquality();
+        refreshmotionblurintensity();
         refreshglarepreset();
         refreshanisotropy();
         refreshmipmapblending();
@@ -2777,6 +2787,97 @@ namespace cowui
         {
             graphics_quality_status = "Glare change was not accepted";
             model.DirtyVariable("graphics_quality_status");
+        }
+    }
+
+    void RmlSettings::refreshmotionblurintensity()
+    {
+        settings::MotionBlurIntensityState state = {};
+        const bool available = settings::readmotionblurintensity(state);
+        presentmotionblurintensity(state, available);
+    }
+
+    void RmlSettings::presentmotionblurintensity(
+        const settings::MotionBlurIntensityState &state,
+        bool available)
+    {
+        motion_blur_intensity_available = available;
+        motion_blur_intensity_selected = -1;
+        motion_blur_intensity_status.clear();
+
+        if(!available)
+        {
+            motion_blur_intensity_label = "Unavailable";
+            motion_blur_intensity_status =
+                "Motion blur intensity state is unavailable";
+        }
+        else switch(state.intensity)
+        {
+            case settings::MotionBlurIntensity::Subtle:
+                motion_blur_intensity_selected = 0;
+                motion_blur_intensity_label = "Subtle";
+                break;
+            case settings::MotionBlurIntensity::Moderate:
+                motion_blur_intensity_selected = 1;
+                motion_blur_intensity_label = "Moderate";
+                break;
+            case settings::MotionBlurIntensity::Intense:
+                motion_blur_intensity_selected = 2;
+                motion_blur_intensity_label = "Intense";
+                break;
+            case settings::MotionBlurIntensity::Custom:
+            {
+                motion_blur_intensity_label = "Custom";
+                char status[64];
+                std::snprintf(status, sizeof(status),
+                    "Scale %.9g", double(state.scale));
+                motion_blur_intensity_status = status;
+                break;
+            }
+        }
+
+        model.DirtyVariable("motion_blur_intensity_available");
+        model.DirtyVariable("motion_blur_intensity_selected");
+        model.DirtyVariable("motion_blur_intensity_label");
+        model.DirtyVariable("motion_blur_intensity_status");
+    }
+
+    void RmlSettings::selectmotionblurintensity(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !motion_blur_intensity_available)
+            return;
+
+        settings::MotionBlurIntensity intensity;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: intensity = settings::MotionBlurIntensity::Subtle; break;
+            case 1: intensity = settings::MotionBlurIntensity::Moderate; break;
+            case 2: intensity = settings::MotionBlurIntensity::Intense; break;
+            default: return;
+        }
+
+        settings::MotionBlurIntensityState state = {};
+        const bool accepted = settings::writemotionblurintensity(
+            intensity, state);
+        const bool available = accepted ||
+            settings::readmotionblurintensity(state);
+        presentmotionblurintensity(state, available);
+        if(!accepted && available)
+        {
+            if(motion_blur_intensity_status.empty())
+            {
+                motion_blur_intensity_status =
+                    "Change not accepted; current engine state is shown";
+            }
+            else
+            {
+                motion_blur_intensity_status = "Change not accepted. " +
+                    motion_blur_intensity_status;
+            }
+            model.DirtyVariable("motion_blur_intensity_status");
         }
     }
 

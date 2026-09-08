@@ -223,6 +223,67 @@ namespace cowui
             return sauersettings::writeglare(enabled);
         }
 
+        static MotionBlurIntensity motionblurintensity(
+            sauersettings::MotionBlurIntensity intensity)
+        {
+            switch(intensity)
+            {
+                case sauersettings::MotionBlurIntensity::Subtle:
+                    return MotionBlurIntensity::Subtle;
+                case sauersettings::MotionBlurIntensity::Moderate:
+                    return MotionBlurIntensity::Moderate;
+                case sauersettings::MotionBlurIntensity::Intense:
+                    return MotionBlurIntensity::Intense;
+                case sauersettings::MotionBlurIntensity::Custom:
+                    return MotionBlurIntensity::Custom;
+            }
+            return MotionBlurIntensity::Custom;
+        }
+
+        static sauersettings::MotionBlurIntensity motionblurintensity(
+            MotionBlurIntensity intensity)
+        {
+            switch(intensity)
+            {
+                case MotionBlurIntensity::Subtle:
+                    return sauersettings::MotionBlurIntensity::Subtle;
+                case MotionBlurIntensity::Moderate:
+                    return sauersettings::MotionBlurIntensity::Moderate;
+                case MotionBlurIntensity::Intense:
+                    return sauersettings::MotionBlurIntensity::Intense;
+                case MotionBlurIntensity::Custom:
+                    return sauersettings::MotionBlurIntensity::Custom;
+            }
+            return sauersettings::MotionBlurIntensity::Custom;
+        }
+
+        static void copymotionblurintensity(
+            const sauersettings::MotionBlurIntensityState &source,
+            MotionBlurIntensityState &result)
+        {
+            result.intensity = motionblurintensity(source.intensity);
+            result.scale = source.scale;
+        }
+
+        bool readmotionblurintensity(MotionBlurIntensityState &result)
+        {
+            sauersettings::MotionBlurIntensityState legacy = {};
+            const bool read = sauersettings::readmotionblurintensity(legacy);
+            copymotionblurintensity(legacy, result);
+            return read;
+        }
+
+        bool writemotionblurintensity(
+            MotionBlurIntensity intensity,
+            MotionBlurIntensityState &result)
+        {
+            sauersettings::MotionBlurIntensityState legacy = {};
+            const bool accepted = sauersettings::writemotionblurintensity(
+                motionblurintensity(intensity), legacy);
+            copymotionblurintensity(legacy, result);
+            return accepted;
+        }
+
         static GlarePreset glarepreset(sauersettings::GlarePreset preset)
         {
             switch(preset)
