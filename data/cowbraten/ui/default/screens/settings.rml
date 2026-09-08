@@ -595,6 +595,52 @@
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
+                                    <div class="settings-control-title">Waterfall Refraction</div>
+                                    <div class="settings-control-description">
+                                        Distort the scene behind eligible waterfalls using an additional render pass.
+                                    </div>
+                                    <div class="settings-control-description"
+                                        data-if="waterfall_state_available &amp;&amp; !waterfall_refraction_available">
+                                        Unavailable with the current renderer.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="waterfall_refraction"
+                                        data-attrif-disabled="!waterfall_state_available || (!waterfall_refraction_available &amp;&amp; !waterfall_refraction)"
+                                        data-event-change="select_waterfall_refraction(ev.checked)" />
+                                    <span data-if="waterfall_refraction">On</span>
+                                    <span data-if="!waterfall_refraction">Off</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Waterfall Reflections</div>
+                                    <div class="settings-control-description">
+                                        Add environment-map reflections to waterfall surfaces.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="waterfall_reflections"
+                                        data-attrif-disabled="!waterfall_state_available"
+                                        data-event-change="select_waterfall_reflections(ev.checked)" />
+                                    <span data-if="waterfall_reflections">On</span>
+                                    <span data-if="!waterfall_reflections">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="waterfall_status != ''">
+                                <span>{{ waterfall_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
                                     <div class="settings-control-title">Grass</div>
                                     <div class="settings-control-description">
                                         Draw grass on map surfaces that support it. Changes take effect immediately.

@@ -343,6 +343,13 @@ namespace cowui
             constructor.BindEventCallback("select_water_reflections", &RmlSettings::selectwaterreflections, this) &&
             constructor.BindEventCallback("select_water_caustics", &RmlSettings::selectwatercaustics, this) &&
             constructor.BindEventCallback("select_liquid_animation", &RmlSettings::selectliquidanimation, this) &&
+            constructor.Bind("waterfall_state_available", &waterfall_state_available) &&
+            constructor.Bind("waterfall_refraction", &waterfall_refraction) &&
+            constructor.Bind("waterfall_refraction_available", &waterfall_refraction_available) &&
+            constructor.Bind("waterfall_reflections", &waterfall_reflections) &&
+            constructor.Bind("waterfall_status", &waterfall_status) &&
+            constructor.BindEventCallback("select_waterfall_refraction", &RmlSettings::selectwaterfallrefraction, this) &&
+            constructor.BindEventCallback("select_waterfall_reflections", &RmlSettings::selectwaterfallreflections, this) &&
             constructor.Bind("grass", &grass) &&
             constructor.Bind("grass_distance_available", &grass_distance_available) &&
             constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
@@ -855,6 +862,11 @@ namespace cowui
         water_caustics = false;
         liquid_surface_animation = false;
         water_surface_status.clear();
+        waterfall_state_available = false;
+        waterfall_refraction = false;
+        waterfall_refraction_available = false;
+        waterfall_reflections = false;
+        waterfall_status.clear();
         grass = false;
         grass_distance_available = false;
         grass_distance_selected = -1;
@@ -1070,6 +1082,7 @@ namespace cowui
         refreshshadows();
         refreshshadowquality();
         refreshwatersurfaceeffects();
+        refreshwaterfalleffects();
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
@@ -3070,6 +3083,79 @@ namespace cowui
             water_surface_status =
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("water_surface_status");
+        }
+    }
+
+    void RmlSettings::refreshwaterfalleffects()
+    {
+        settings::WaterfallEffectsState state = {};
+        const bool available = settings::readwaterfalleffects(state);
+        presentwaterfalleffects(state, available);
+    }
+
+    void RmlSettings::presentwaterfalleffects(
+        const settings::WaterfallEffectsState &state,
+        bool available)
+    {
+        waterfall_state_available = available;
+        waterfall_refraction = state.refraction;
+        waterfall_refraction_available = available &&
+            state.render_targets_available;
+        waterfall_reflections = state.reflections;
+        waterfall_status = available
+            ? ""
+            : "Waterfall effects state is unavailable";
+
+        model.DirtyVariable("waterfall_state_available");
+        model.DirtyVariable("waterfall_refraction");
+        model.DirtyVariable("waterfall_refraction_available");
+        model.DirtyVariable("waterfall_reflections");
+        model.DirtyVariable("waterfall_status");
+    }
+
+    void RmlSettings::selectwaterfallrefraction(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !waterfall_state_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::WaterfallEffectsState state = {};
+        const bool accepted = settings::writewaterfallrefraction(
+            enabled, state);
+        const bool available = accepted ||
+            settings::readwaterfalleffects(state);
+        presentwaterfalleffects(state, available);
+        if(!accepted && available)
+        {
+            waterfall_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("waterfall_status");
+        }
+    }
+
+    void RmlSettings::selectwaterfallreflections(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !waterfall_state_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::WaterfallEffectsState state = {};
+        const bool accepted = settings::writewaterfallreflections(
+            enabled, state);
+        const bool available = accepted ||
+            settings::readwaterfalleffects(state);
+        presentwaterfalleffects(state, available);
+        if(!accepted && available)
+        {
+            waterfall_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("waterfall_status");
         }
     }
 

@@ -378,6 +378,46 @@ namespace cowui
             return accepted;
         }
 
+        static void copywaterfalleffects(
+            const sauersettings::WaterfallEffectsState &source,
+            WaterfallEffectsState &result)
+        {
+            result.refraction = source.refraction;
+            result.reflections = source.reflections;
+            result.render_targets_available =
+                source.render_targets_available;
+        }
+
+        bool readwaterfalleffects(WaterfallEffectsState &result)
+        {
+            sauersettings::WaterfallEffectsState legacy = {};
+            const bool read = sauersettings::readwaterfalleffects(legacy);
+            copywaterfalleffects(legacy, result);
+            return read;
+        }
+
+        bool writewaterfallrefraction(
+            bool enabled,
+            WaterfallEffectsState &result)
+        {
+            sauersettings::WaterfallEffectsState legacy = {};
+            const bool accepted = sauersettings::writewaterfallrefraction(
+                enabled, legacy);
+            copywaterfalleffects(legacy, result);
+            return accepted;
+        }
+
+        bool writewaterfallreflections(
+            bool enabled,
+            WaterfallEffectsState &result)
+        {
+            sauersettings::WaterfallEffectsState legacy = {};
+            const bool accepted = sauersettings::writewaterfallreflections(
+                enabled, legacy);
+            copywaterfalleffects(legacy, result);
+            return accepted;
+        }
+
         static GrassDistance grassdistance(
             sauersettings::GrassDistance distance)
         {

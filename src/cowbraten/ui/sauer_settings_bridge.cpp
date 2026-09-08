@@ -913,6 +913,86 @@ namespace cowui
             return result.liquid_animation == enabled;
         }
 
+        bool readwaterfalleffects(WaterfallEffectsState &result)
+        {
+            result.refraction = false;
+            result.reflections = false;
+            result.render_targets_available = false;
+
+            ident *refraction_id = getident("waterfallrefract");
+            ident *reflections_id = getident("waterfallenv");
+            if(!refraction_id || refraction_id->type != ID_VAR ||
+               !refraction_id->storage.i ||
+               !reflections_id || reflections_id->type != ID_VAR ||
+               !reflections_id->storage.i)
+            {
+                return false;
+            }
+
+            result.refraction = *refraction_id->storage.i != 0;
+            result.reflections = *reflections_id->storage.i != 0;
+            result.render_targets_available = hasFBO;
+            return true;
+        }
+
+        bool writewaterfallrefraction(
+            bool enabled,
+            WaterfallEffectsState &result)
+        {
+            if(!readwaterfalleffects(result))
+                return false;
+
+            ident *id = getident("waterfallrefract");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+            if(enabled && !result.render_targets_available)
+                return false;
+
+            if(*id->storage.i != value)
+            {
+                if(!SDL_GL_GetCurrentContext())
+                    return false;
+                setvarchecked(id, value);
+            }
+
+            if(!readwaterfalleffects(result))
+                return false;
+            return result.refraction == enabled;
+        }
+
+        bool writewaterfallreflections(
+            bool enabled,
+            WaterfallEffectsState &result)
+        {
+            if(!readwaterfalleffects(result))
+                return false;
+
+            ident *id = getident("waterfallenv");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+            {
+                if(!SDL_GL_GetCurrentContext())
+                    return false;
+                setvarchecked(id, value);
+            }
+
+            if(!readwaterfalleffects(result))
+                return false;
+            return result.reflections == enabled;
+        }
+
         static GrassDistance classifygrassdistance(int value)
         {
             switch(value)
