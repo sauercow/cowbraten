@@ -446,6 +446,38 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Shadow Map Quality</div>
+                                    <div class="settings-control-description">
+                                        Controls shadow detail and edge smoothing.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ shadow_quality_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="shadow_quality_selected == 0"
+                                    data-attrif-disabled="!shadow_quality_available"
+                                    data-event-click="select_shadow_quality(0)">Medium</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="shadow_quality_selected == 1"
+                                    data-attrif-disabled="!shadow_quality_available"
+                                    data-event-click="select_shadow_quality(1)">High</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="(shadow_state_available &amp;&amp; !shadow_maps &amp;&amp; shadow_quality_available) || shadow_quality_status != ''">
+                                <span data-if="shadow_state_available &amp;&amp; !shadow_maps &amp;&amp; shadow_quality_available">
+                                    Shadow maps are off; this quality will apply when enabled.
+                                </span>
+                                <span data-if="shadow_quality_status != ''">{{ shadow_quality_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">

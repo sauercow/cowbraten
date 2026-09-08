@@ -258,6 +258,64 @@ namespace cowui
             return accepted;
         }
 
+        static ShadowQuality shadowquality(
+            sauersettings::ShadowQuality quality)
+        {
+            switch(quality)
+            {
+                case sauersettings::ShadowQuality::Medium:
+                    return ShadowQuality::Medium;
+                case sauersettings::ShadowQuality::High:
+                    return ShadowQuality::High;
+                case sauersettings::ShadowQuality::Custom:
+                    return ShadowQuality::Custom;
+            }
+            return ShadowQuality::Custom;
+        }
+
+        static sauersettings::ShadowQuality shadowquality(
+            ShadowQuality quality)
+        {
+            switch(quality)
+            {
+                case ShadowQuality::Medium:
+                    return sauersettings::ShadowQuality::Medium;
+                case ShadowQuality::High:
+                    return sauersettings::ShadowQuality::High;
+                case ShadowQuality::Custom:
+                    return sauersettings::ShadowQuality::Custom;
+            }
+            return sauersettings::ShadowQuality::Custom;
+        }
+
+        static void copyshadowquality(
+            const sauersettings::ShadowQualityState &source,
+            ShadowQualityState &result)
+        {
+            result.quality = shadowquality(source.quality);
+            result.map_size = source.map_size;
+            result.blur = source.blur;
+        }
+
+        bool readshadowquality(ShadowQualityState &result)
+        {
+            sauersettings::ShadowQualityState legacy = {};
+            const bool read = sauersettings::readshadowquality(legacy);
+            copyshadowquality(legacy, result);
+            return read;
+        }
+
+        bool writeshadowquality(
+            ShadowQuality quality,
+            ShadowQualityState &result)
+        {
+            sauersettings::ShadowQualityState legacy = {};
+            const bool accepted = sauersettings::writeshadowquality(
+                shadowquality(quality), legacy);
+            copyshadowquality(legacy, result);
+            return accepted;
+        }
+
         static GrassDistance grassdistance(
             sauersettings::GrassDistance distance)
         {

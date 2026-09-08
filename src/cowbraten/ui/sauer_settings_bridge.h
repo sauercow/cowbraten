@@ -64,6 +64,19 @@ namespace cowui
             bool shadow_maps_available;
         };
 
+        enum class ShadowQuality
+        {
+            Medium,
+            High,
+            Custom
+        };
+        struct ShadowQualityState
+        {
+            ShadowQuality quality;
+            int map_size;
+            int blur;
+        };
+
         enum class GrassDistance
         {
             Quick,
@@ -248,6 +261,11 @@ namespace cowui
         bool readshadows(ShadowState &result);
         bool writeshadowmaps(bool enabled, ShadowState &result);
         bool writeblobshadows(bool enabled, ShadowState &result);
+
+        bool readshadowquality(ShadowQualityState &result);
+        // Custom is output-only and is rejected as a write request.
+        bool writeshadowquality(ShadowQuality quality,
+            ShadowQualityState &result);
 
         bool readgrassdistance(GrassDistanceState &result);
         // Custom is output-only and is rejected as a write request.

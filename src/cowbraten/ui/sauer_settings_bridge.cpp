@@ -675,6 +675,98 @@ namespace cowui
             return result.blob_shadows == enabled;
         }
 
+        static ShadowQuality classifyshadowquality(int map_size, int blur)
+        {
+            if(map_size == 9 && blur == 1)
+                return ShadowQuality::Medium;
+            if(map_size == 10 && blur == 2)
+                return ShadowQuality::High;
+            return ShadowQuality::Custom;
+        }
+
+        static bool shadowqualityvalues(
+            ShadowQuality quality,
+            int &map_size,
+            int &blur)
+        {
+            switch(quality)
+            {
+                case ShadowQuality::Medium:
+                    map_size = 9;
+                    blur = 1;
+                    return true;
+                case ShadowQuality::High:
+                    map_size = 10;
+                    blur = 2;
+                    return true;
+                case ShadowQuality::Custom:
+                    return false;
+            }
+            return false;
+        }
+
+        bool readshadowquality(ShadowQualityState &result)
+        {
+            result.quality = ShadowQuality::Custom;
+            result.map_size = 0;
+            result.blur = 0;
+
+            ident *map_size_id = getident("shadowmapsize");
+            ident *blur_id = getident("blurshadowmap");
+            if(!map_size_id || map_size_id->type != ID_VAR ||
+               !map_size_id->storage.i ||
+               !blur_id || blur_id->type != ID_VAR || !blur_id->storage.i)
+            {
+                return false;
+            }
+
+            result.map_size = *map_size_id->storage.i;
+            result.blur = *blur_id->storage.i;
+            result.quality = classifyshadowquality(
+                result.map_size, result.blur);
+            return true;
+        }
+
+        bool writeshadowquality(
+            ShadowQuality quality,
+            ShadowQualityState &result)
+        {
+            if(!readshadowquality(result))
+                return false;
+
+            int map_size = 0, blur = 0;
+            if(!shadowqualityvalues(quality, map_size, blur))
+                return false;
+
+            ident *map_size_id = getident("shadowmapsize");
+            ident *blur_id = getident("blurshadowmap");
+            if(!map_size_id || map_size_id->type != ID_VAR ||
+               !map_size_id->storage.i || map_size_id->flags&IDF_READONLY ||
+               map_size < map_size_id->minval ||
+               map_size > map_size_id->maxval ||
+               !blur_id || blur_id->type != ID_VAR || !blur_id->storage.i ||
+               blur_id->flags&IDF_READONLY ||
+               blur < blur_id->minval || blur > blur_id->maxval)
+            {
+                return false;
+            }
+
+            const bool change_map_size = *map_size_id->storage.i != map_size;
+            const bool change_blur = *blur_id->storage.i != blur;
+            if(change_map_size && !SDL_GL_GetCurrentContext())
+                return false;
+
+            if(change_blur)
+                setvarchecked(blur_id, blur);
+            if(change_map_size)
+                setvarchecked(map_size_id, map_size);
+
+            if(!readshadowquality(result))
+                return false;
+            return result.quality == quality &&
+                result.map_size == map_size && result.blur == blur;
+        }
+
         static GrassDistance classifygrassdistance(int value)
         {
             switch(value)

@@ -326,6 +326,11 @@ namespace cowui
             constructor.Bind("shadow_status", &shadow_status) &&
             constructor.BindEventCallback("select_shadow_maps", &RmlSettings::selectshadowmaps, this) &&
             constructor.BindEventCallback("select_blob_shadows", &RmlSettings::selectblobshadows, this) &&
+            constructor.Bind("shadow_quality_available", &shadow_quality_available) &&
+            constructor.Bind("shadow_quality_selected", &shadow_quality_selected) &&
+            constructor.Bind("shadow_quality_label", &shadow_quality_label) &&
+            constructor.Bind("shadow_quality_status", &shadow_quality_status) &&
+            constructor.BindEventCallback("select_shadow_quality", &RmlSettings::selectshadowquality, this) &&
             constructor.Bind("grass", &grass) &&
             constructor.Bind("grass_distance_available", &grass_distance_available) &&
             constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
@@ -826,6 +831,10 @@ namespace cowui
         shadow_maps_available = false;
         blob_shadows = false;
         shadow_status.clear();
+        shadow_quality_available = false;
+        shadow_quality_selected = -1;
+        shadow_quality_label.clear();
+        shadow_quality_status.clear();
         grass = false;
         grass_distance_available = false;
         grass_distance_selected = -1;
@@ -1039,6 +1048,7 @@ namespace cowui
     {
         refreshgraphicsquality();
         refreshshadows();
+        refreshshadowquality();
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
@@ -2824,6 +2834,99 @@ namespace cowui
             shadow_status =
                 "Blob Shadows change was not accepted; current engine state is shown";
             model.DirtyVariable("shadow_status");
+        }
+    }
+
+    void RmlSettings::refreshshadowquality()
+    {
+        settings::ShadowQualityState state = {};
+        const bool available = settings::readshadowquality(state);
+        presentshadowquality(state, available);
+    }
+
+    void RmlSettings::presentshadowquality(
+        const settings::ShadowQualityState &state,
+        bool available)
+    {
+        shadow_quality_available = available;
+        shadow_quality_selected = -1;
+        shadow_quality_status.clear();
+
+        if(!available)
+        {
+            shadow_quality_label = "Unavailable";
+            shadow_quality_status =
+                "Shadow map quality state is unavailable";
+        }
+        else switch(state.quality)
+        {
+            case settings::ShadowQuality::Medium:
+                shadow_quality_selected = 0;
+                shadow_quality_label = "Medium";
+                break;
+            case settings::ShadowQuality::High:
+                shadow_quality_selected = 1;
+                shadow_quality_label = "High";
+                break;
+            case settings::ShadowQuality::Custom:
+            {
+                shadow_quality_label = "Custom";
+                char status[96];
+                if(state.map_size >= 7 && state.map_size <= 11)
+                {
+                    std::snprintf(status, sizeof(status),
+                        "Size %d (%d px) | Blur %d", state.map_size,
+                        1 << state.map_size, state.blur);
+                }
+                else
+                {
+                    std::snprintf(status, sizeof(status),
+                        "Size %d | Blur %d", state.map_size, state.blur);
+                }
+                shadow_quality_status = status;
+                break;
+            }
+        }
+
+        model.DirtyVariable("shadow_quality_available");
+        model.DirtyVariable("shadow_quality_selected");
+        model.DirtyVariable("shadow_quality_label");
+        model.DirtyVariable("shadow_quality_status");
+    }
+
+    void RmlSettings::selectshadowquality(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !shadow_quality_available)
+            return;
+
+        settings::ShadowQuality quality;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: quality = settings::ShadowQuality::Medium; break;
+            case 1: quality = settings::ShadowQuality::High; break;
+            default: return;
+        }
+
+        settings::ShadowQualityState state = {};
+        const bool accepted = settings::writeshadowquality(quality, state);
+        const bool available = accepted || settings::readshadowquality(state);
+        presentshadowquality(state, available);
+        if(!accepted && available)
+        {
+            if(shadow_quality_status.empty())
+            {
+                shadow_quality_status =
+                    "Change not accepted; current engine state is shown";
+            }
+            else
+            {
+                shadow_quality_status = "Change not accepted. " +
+                    shadow_quality_status;
+            }
+            model.DirtyVariable("shadow_quality_status");
         }
     }
 

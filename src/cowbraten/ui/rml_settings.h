@@ -25,6 +25,7 @@ namespace cowui
         struct MipmapBlendingState;
         struct ShaderDetailState;
         struct ShadowState;
+        struct ShadowQualityState;
         struct GrassDistanceState;
         struct MotionBlurIntensityState;
         struct GlarePresetState;
@@ -134,6 +135,12 @@ namespace cowui
         void selectshadowmaps(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
         void selectblobshadows(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void refreshshadowquality();
+        void presentshadowquality(
+            const settings::ShadowQualityState &state,
+            bool available);
+        void selectshadowquality(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
         void refreshanisotropy();
         void refreshmipmapblending();
@@ -302,6 +309,10 @@ namespace cowui
         bool shadow_maps_available = false;
         bool blob_shadows = false;
         Rml::String shadow_status;
+        bool shadow_quality_available = false;
+        int shadow_quality_selected = -1;
+        Rml::String shadow_quality_label;
+        Rml::String shadow_quality_status;
         bool grass = false;
         bool grass_distance_available = false;
         int grass_distance_selected = -1;
