@@ -606,6 +606,106 @@ namespace cowui
             return writeboolean(getident("glare"), enabled);
         }
 
+        static GlarePreset classifyglarepreset(float scale, int blur_radius)
+        {
+            if(scale == 1.0f && blur_radius == 4)
+                return GlarePreset::Subtle;
+            if(scale == 2.0f && blur_radius == 3)
+                return GlarePreset::Glowy;
+            if(scale == 1.0f && blur_radius == 7)
+                return GlarePreset::Soft;
+            if(scale == 2.0f && blur_radius == 7)
+                return GlarePreset::Intense;
+            return GlarePreset::Custom;
+        }
+
+        static bool glarepresetvalues(
+            GlarePreset preset,
+            float &scale,
+            int &blur_radius)
+        {
+            switch(preset)
+            {
+                case GlarePreset::Subtle:
+                    scale = 1.0f;
+                    blur_radius = 4;
+                    return true;
+                case GlarePreset::Glowy:
+                    scale = 2.0f;
+                    blur_radius = 3;
+                    return true;
+                case GlarePreset::Soft:
+                    scale = 1.0f;
+                    blur_radius = 7;
+                    return true;
+                case GlarePreset::Intense:
+                    scale = 2.0f;
+                    blur_radius = 7;
+                    return true;
+                case GlarePreset::Custom:
+                    return false;
+            }
+            return false;
+        }
+
+        bool readglarepreset(GlarePresetState &result)
+        {
+            result.preset = GlarePreset::Custom;
+            result.scale = 0.0f;
+            result.blur_radius = 0;
+
+            ident *scale_id = getident("glarescale");
+            ident *blur_id = getident("blurglare");
+            if(!scale_id || scale_id->type != ID_FVAR || !scale_id->storage.f ||
+               !blur_id || blur_id->type != ID_VAR || !blur_id->storage.i)
+            {
+                return false;
+            }
+
+            result.scale = *scale_id->storage.f;
+            result.blur_radius = *blur_id->storage.i;
+            result.preset = classifyglarepreset(result.scale, result.blur_radius);
+            return true;
+        }
+
+        bool writeglarepreset(GlarePreset preset, GlarePresetState &result)
+        {
+            result.preset = GlarePreset::Custom;
+            result.scale = 0.0f;
+            result.blur_radius = 0;
+
+            ident *scale_id = getident("glarescale");
+            ident *blur_id = getident("blurglare");
+            if(!scale_id || scale_id->type != ID_FVAR || !scale_id->storage.f ||
+               !blur_id || blur_id->type != ID_VAR || !blur_id->storage.i)
+            {
+                return false;
+            }
+
+            result.scale = *scale_id->storage.f;
+            result.blur_radius = *blur_id->storage.i;
+            result.preset = classifyglarepreset(result.scale, result.blur_radius);
+
+            float scale = 0.0f;
+            int blur_radius = 0;
+            if(!glarepresetvalues(preset, scale, blur_radius) ||
+               scale_id->flags&IDF_READONLY || blur_id->flags&IDF_READONLY ||
+               scale < scale_id->minvalf || scale > scale_id->maxvalf ||
+               blur_radius < blur_id->minval || blur_radius > blur_id->maxval)
+            {
+                return false;
+            }
+
+            // Preserve the legacy menu's order. Neither ident has a callback.
+            setvarchecked(blur_id, blur_radius);
+            setfvarchecked(scale_id, scale);
+
+            if(!readglarepreset(result))
+                return false;
+            return result.preset == preset && result.scale == scale &&
+                result.blur_radius == blur_radius;
+        }
+
         static void copyshaderdetail(const ::ShaderDetailState &source, ShaderDetailState &result)
         {
             result.requested = source.requested;

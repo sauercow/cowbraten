@@ -482,6 +482,46 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Glare Preset</div>
+                                    <div class="settings-control-description">
+                                        Choose the stored glare intensity and blur profile.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ glare_preset_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="glare_preset_selected == 0"
+                                    data-attrif-disabled="!glare_preset_available"
+                                    data-event-click="select_glare_preset(0)">Subtle</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="glare_preset_selected == 1"
+                                    data-attrif-disabled="!glare_preset_available"
+                                    data-event-click="select_glare_preset(1)">Glowy</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="glare_preset_selected == 2"
+                                    data-attrif-disabled="!glare_preset_available"
+                                    data-event-click="select_glare_preset(2)">Soft</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="glare_preset_selected == 3"
+                                    data-attrif-disabled="!glare_preset_available"
+                                    data-event-click="select_glare_preset(3)">Intense</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="(!glare &amp;&amp; glare_preset_available) || glare_preset_status != ''">
+                                <span data-if="!glare &amp;&amp; glare_preset_available">
+                                    Glare is off; this preset will apply when enabled.
+                                </span>
+                                <span data-if="glare_preset_status != ''">{{ glare_preset_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">

@@ -24,6 +24,7 @@ namespace cowui
         struct AnisotropyState;
         struct MipmapBlendingState;
         struct ShaderDetailState;
+        struct GlarePresetState;
     }
 
     class RmlActionRouter;
@@ -130,6 +131,11 @@ namespace cowui
         void selectmipmapblending(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
         void selectglare(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void refreshglarepreset();
+        void presentglarepreset(const settings::GlarePresetState &state,
+            bool available);
+        void selectglarepreset(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
         void presentanisotropy(const settings::AnisotropyState &state);
         void selectanisotropy(Rml::DataModelHandle, Rml::Event &event,
@@ -274,6 +280,10 @@ namespace cowui
         bool motion_blur = false;
         bool motion_blur_available = false;
         bool glare = false;
+        bool glare_preset_available = false;
+        int glare_preset_selected = -1;
+        Rml::String glare_preset_label;
+        Rml::String glare_preset_status;
         Rml::String graphics_quality_status;
         bool anisotropy_enabled = false;
         bool mipmap_blending = false;

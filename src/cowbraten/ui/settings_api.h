@@ -57,6 +57,14 @@ namespace cowui
             bool glare;
         };
 
+        enum class GlarePreset { Subtle, Glowy, Soft, Intense, Custom };
+        struct GlarePresetState
+        {
+            GlarePreset preset;
+            float scale;
+            int blur_radius;
+        };
+
         enum class ShaderDetailLevel { Performance = 0, Low = 1, Medium = 2, Full = 3 };
         struct ShaderDetailState
         {
@@ -209,6 +217,9 @@ namespace cowui
         bool writegrass(bool enabled);
         bool writemotionblur(bool enabled);
         bool writeglare(bool enabled);
+
+        bool readglarepreset(GlarePresetState &result);
+        bool writeglarepreset(GlarePreset preset, GlarePresetState &result);
 
         bool readanisotropy(AnisotropyState &result);
         // Returns the callback's verification result without a second scan.

@@ -223,6 +223,68 @@ namespace cowui
             return sauersettings::writeglare(enabled);
         }
 
+        static GlarePreset glarepreset(sauersettings::GlarePreset preset)
+        {
+            switch(preset)
+            {
+                case sauersettings::GlarePreset::Subtle:
+                    return GlarePreset::Subtle;
+                case sauersettings::GlarePreset::Glowy:
+                    return GlarePreset::Glowy;
+                case sauersettings::GlarePreset::Soft:
+                    return GlarePreset::Soft;
+                case sauersettings::GlarePreset::Intense:
+                    return GlarePreset::Intense;
+                case sauersettings::GlarePreset::Custom:
+                    return GlarePreset::Custom;
+            }
+            return GlarePreset::Custom;
+        }
+
+        static sauersettings::GlarePreset glarepreset(GlarePreset preset)
+        {
+            switch(preset)
+            {
+                case GlarePreset::Subtle:
+                    return sauersettings::GlarePreset::Subtle;
+                case GlarePreset::Glowy:
+                    return sauersettings::GlarePreset::Glowy;
+                case GlarePreset::Soft:
+                    return sauersettings::GlarePreset::Soft;
+                case GlarePreset::Intense:
+                    return sauersettings::GlarePreset::Intense;
+                case GlarePreset::Custom:
+                    return sauersettings::GlarePreset::Custom;
+            }
+            return sauersettings::GlarePreset::Custom;
+        }
+
+        static void copyglarepreset(
+            const sauersettings::GlarePresetState &source,
+            GlarePresetState &result)
+        {
+            result.preset = glarepreset(source.preset);
+            result.scale = source.scale;
+            result.blur_radius = source.blur_radius;
+        }
+
+        bool readglarepreset(GlarePresetState &result)
+        {
+            sauersettings::GlarePresetState legacy = {};
+            const bool read = sauersettings::readglarepreset(legacy);
+            copyglarepreset(legacy, result);
+            return read;
+        }
+
+        bool writeglarepreset(GlarePreset preset, GlarePresetState &result)
+        {
+            sauersettings::GlarePresetState legacy = {};
+            const bool accepted = sauersettings::writeglarepreset(
+                glarepreset(preset), legacy);
+            copyglarepreset(legacy, result);
+            return accepted;
+        }
+
         static void copyshaderdetail(const sauersettings::ShaderDetailState &source, ShaderDetailState &result)
         {
             result.requested = source.requested;

@@ -324,6 +324,11 @@ namespace cowui
             constructor.Bind("motion_blur_available", &motion_blur_available) &&
             constructor.Bind("glare", &glare) &&
             constructor.BindEventCallback("select_glare", &RmlSettings::selectglare, this) &&
+            constructor.Bind("glare_preset_available", &glare_preset_available) &&
+            constructor.Bind("glare_preset_selected", &glare_preset_selected) &&
+            constructor.Bind("glare_preset_label", &glare_preset_label) &&
+            constructor.Bind("glare_preset_status", &glare_preset_status) &&
+            constructor.BindEventCallback("select_glare_preset", &RmlSettings::selectglarepreset, this) &&
             constructor.Bind("graphics_quality_status", &graphics_quality_status) &&
             constructor.Bind("anisotropy_enabled", &anisotropy_enabled) &&
             constructor.Bind("shader_detail_available", &shader_detail_available) &&
@@ -802,6 +807,10 @@ namespace cowui
         grass = false;
         motion_blur = motion_blur_available = false;
         glare = false;
+        glare_preset_available = false;
+        glare_preset_selected = -1;
+        glare_preset_label.clear();
+        glare_preset_status.clear();
         graphics_quality_status.clear();
         anisotropy_enabled = false;
         mipmap_blending = mipmap_blending_available = false;
@@ -999,6 +1008,7 @@ namespace cowui
     bool RmlSettings::refreshvideo()
     {
         refreshgraphicsquality();
+        refreshglarepreset();
         refreshanisotropy();
         refreshmipmapblending();
         settings::Video current;
@@ -2767,6 +2777,93 @@ namespace cowui
         {
             graphics_quality_status = "Glare change was not accepted";
             model.DirtyVariable("graphics_quality_status");
+        }
+    }
+
+    void RmlSettings::refreshglarepreset()
+    {
+        settings::GlarePresetState state = {};
+        const bool available = settings::readglarepreset(state);
+        presentglarepreset(state, available);
+    }
+
+    void RmlSettings::presentglarepreset(
+        const settings::GlarePresetState &state,
+        bool available)
+    {
+        glare_preset_available = available;
+        glare_preset_selected = -1;
+        glare_preset_status.clear();
+
+        if(!available)
+        {
+            glare_preset_label = "Unavailable";
+            glare_preset_status = "Glare preset state is unavailable";
+        }
+        else switch(state.preset)
+        {
+            case settings::GlarePreset::Subtle:
+                glare_preset_selected = 0;
+                glare_preset_label = "Subtle";
+                break;
+            case settings::GlarePreset::Glowy:
+                glare_preset_selected = 1;
+                glare_preset_label = "Glowy";
+                break;
+            case settings::GlarePreset::Soft:
+                glare_preset_selected = 2;
+                glare_preset_label = "Soft";
+                break;
+            case settings::GlarePreset::Intense:
+                glare_preset_selected = 3;
+                glare_preset_label = "Intense";
+                break;
+            case settings::GlarePreset::Custom:
+            {
+                glare_preset_label = "Custom";
+                char status[96];
+                std::snprintf(status, sizeof(status),
+                    "Scale %g | Blur %d",
+                    double(state.scale), state.blur_radius);
+                glare_preset_status = status;
+                break;
+            }
+        }
+
+        model.DirtyVariable("glare_preset_available");
+        model.DirtyVariable("glare_preset_selected");
+        model.DirtyVariable("glare_preset_label");
+        model.DirtyVariable("glare_preset_status");
+    }
+
+    void RmlSettings::selectglarepreset(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !glare_preset_available)
+            return;
+
+        settings::GlarePreset preset;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: preset = settings::GlarePreset::Subtle; break;
+            case 1: preset = settings::GlarePreset::Glowy; break;
+            case 2: preset = settings::GlarePreset::Soft; break;
+            case 3: preset = settings::GlarePreset::Intense; break;
+            default: return;
+        }
+
+        settings::GlarePresetState state = {};
+        const bool accepted = settings::writeglarepreset(preset, state);
+        const bool available = accepted || settings::readglarepreset(state);
+        presentglarepreset(state, available);
+        if(!accepted && available)
+        {
+            if(glare_preset_status.empty())
+                glare_preset_status = "Change not accepted; current engine state is shown";
+            else glare_preset_status = "Change not accepted. " + glare_preset_status;
+            model.DirtyVariable("glare_preset_status");
         }
     }
 
