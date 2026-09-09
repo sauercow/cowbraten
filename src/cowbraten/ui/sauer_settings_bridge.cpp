@@ -1064,6 +1064,141 @@ namespace cowui
             return result.setting == setting && result.max_lights == value;
         }
 
+        bool readsoftparticles(SoftParticlesState &result)
+        {
+            result.enabled = false;
+
+            ident *id = getident("depthfx");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writesoftparticles(
+            bool enabled,
+            SoftParticlesState &result)
+        {
+            if(!readsoftparticles(result))
+                return false;
+
+            ident *id = getident("depthfx");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readsoftparticles(result))
+                return false;
+            return result.enabled == enabled;
+        }
+
+        static SoftParticleQuality classifysoftparticlequality(
+            int depth_size,
+            int blur)
+        {
+            if(depth_size == 7 && blur == 1)
+                return SoftParticleQuality::Low;
+            if(depth_size == 10 && blur == 0)
+                return SoftParticleQuality::Medium;
+            if(depth_size == 12 && blur == 0)
+                return SoftParticleQuality::High;
+            return SoftParticleQuality::Custom;
+        }
+
+        static bool softparticlequalityvalues(
+            SoftParticleQuality quality,
+            int &depth_size,
+            int &blur)
+        {
+            switch(quality)
+            {
+                case SoftParticleQuality::Low:
+                    depth_size = 7;
+                    blur = 1;
+                    return true;
+                case SoftParticleQuality::Medium:
+                    depth_size = 10;
+                    blur = 0;
+                    return true;
+                case SoftParticleQuality::High:
+                    depth_size = 12;
+                    blur = 0;
+                    return true;
+                case SoftParticleQuality::Custom:
+                    return false;
+            }
+            return false;
+        }
+
+        bool readsoftparticlequality(SoftParticleQualityState &result)
+        {
+            result.quality = SoftParticleQuality::Custom;
+            result.depth_size = 0;
+            result.blur = 0;
+
+            ident *size_id = getident("depthfxsize");
+            ident *blur_id = getident("blurdepthfx");
+            if(!size_id || size_id->type != ID_VAR || !size_id->storage.i ||
+               !blur_id || blur_id->type != ID_VAR || !blur_id->storage.i)
+            {
+                return false;
+            }
+
+            result.depth_size = *size_id->storage.i;
+            result.blur = *blur_id->storage.i;
+            result.quality = classifysoftparticlequality(
+                result.depth_size, result.blur);
+            return true;
+        }
+
+        bool writesoftparticlequality(
+            SoftParticleQuality quality,
+            SoftParticleQualityState &result)
+        {
+            if(!readsoftparticlequality(result))
+                return false;
+
+            int depth_size = 0, blur = 0;
+            if(!softparticlequalityvalues(quality, depth_size, blur))
+                return false;
+
+            ident *size_id = getident("depthfxsize");
+            ident *blur_id = getident("blurdepthfx");
+            if(!size_id || size_id->type != ID_VAR || !size_id->storage.i ||
+               size_id->flags&IDF_READONLY ||
+               depth_size < size_id->minval ||
+               depth_size > size_id->maxval ||
+               !blur_id || blur_id->type != ID_VAR || !blur_id->storage.i ||
+               blur_id->flags&IDF_READONLY ||
+               blur < blur_id->minval || blur > blur_id->maxval)
+            {
+                return false;
+            }
+
+            const bool size_changed = *size_id->storage.i != depth_size;
+            const bool blur_changed = *blur_id->storage.i != blur;
+            if(size_changed && !SDL_GL_GetCurrentContext())
+                return false;
+
+            if(blur_changed)
+                setvarchecked(blur_id, blur);
+            if(size_changed)
+                setvarchecked(size_id, depth_size);
+
+            if(!readsoftparticlequality(result))
+                return false;
+            return result.quality == quality &&
+                result.depth_size == depth_size && result.blur == blur;
+        }
+
         static GrassDistance classifygrassdistance(int value)
         {
             switch(value)

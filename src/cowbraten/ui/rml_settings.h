@@ -29,6 +29,8 @@ namespace cowui
         struct WaterSurfaceEffectsState;
         struct WaterfallEffectsState;
         struct DynamicLightsState;
+        struct SoftParticlesState;
+        struct SoftParticleQualityState;
         struct GrassDistanceState;
         struct MotionBlurIntensityState;
         struct GlarePresetState;
@@ -170,6 +172,18 @@ namespace cowui
             const settings::DynamicLightsState &state,
             bool available);
         void selectdynamiclights(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void refreshsoftparticles();
+        void presentsoftparticles(
+            const settings::SoftParticlesState &state,
+            bool available);
+        void selectsoftparticles(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void refreshsoftparticlequality();
+        void presentsoftparticlequality(
+            const settings::SoftParticleQualityState &state,
+            bool available);
+        void selectsoftparticlequality(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void refreshanisotropy();
         void refreshmipmapblending();
@@ -359,6 +373,13 @@ namespace cowui
         int dynamic_lights_selected = -1;
         Rml::String dynamic_lights_label;
         Rml::String dynamic_lights_status;
+        bool soft_particles_available = false;
+        bool soft_particles = false;
+        Rml::String soft_particles_status;
+        bool soft_particle_quality_available = false;
+        int soft_particle_quality_selected = -1;
+        Rml::String soft_particle_quality_label;
+        Rml::String soft_particle_quality_status;
         bool grass = false;
         bool grass_distance_available = false;
         int grass_distance_selected = -1;

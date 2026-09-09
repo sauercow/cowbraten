@@ -355,6 +355,15 @@ namespace cowui
             constructor.Bind("dynamic_lights_label", &dynamic_lights_label) &&
             constructor.Bind("dynamic_lights_status", &dynamic_lights_status) &&
             constructor.BindEventCallback("select_dynamic_lights", &RmlSettings::selectdynamiclights, this) &&
+            constructor.Bind("soft_particles_available", &soft_particles_available) &&
+            constructor.Bind("soft_particles", &soft_particles) &&
+            constructor.Bind("soft_particles_status", &soft_particles_status) &&
+            constructor.BindEventCallback("select_soft_particles", &RmlSettings::selectsoftparticles, this) &&
+            constructor.Bind("soft_particle_quality_available", &soft_particle_quality_available) &&
+            constructor.Bind("soft_particle_quality_selected", &soft_particle_quality_selected) &&
+            constructor.Bind("soft_particle_quality_label", &soft_particle_quality_label) &&
+            constructor.Bind("soft_particle_quality_status", &soft_particle_quality_status) &&
+            constructor.BindEventCallback("select_soft_particle_quality", &RmlSettings::selectsoftparticlequality, this) &&
             constructor.Bind("grass", &grass) &&
             constructor.Bind("grass_distance_available", &grass_distance_available) &&
             constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
@@ -876,6 +885,13 @@ namespace cowui
         dynamic_lights_selected = -1;
         dynamic_lights_label.clear();
         dynamic_lights_status.clear();
+        soft_particles_available = false;
+        soft_particles = false;
+        soft_particles_status.clear();
+        soft_particle_quality_available = false;
+        soft_particle_quality_selected = -1;
+        soft_particle_quality_label.clear();
+        soft_particle_quality_status.clear();
         grass = false;
         grass_distance_available = false;
         grass_distance_selected = -1;
@@ -1093,6 +1109,8 @@ namespace cowui
         refreshwatersurfaceeffects();
         refreshwaterfalleffects();
         refreshdynamiclights();
+        refreshsoftparticles();
+        refreshsoftparticlequality();
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
@@ -3255,6 +3273,141 @@ namespace cowui
                     dynamic_lights_status;
             }
             model.DirtyVariable("dynamic_lights_status");
+        }
+    }
+
+    void RmlSettings::refreshsoftparticles()
+    {
+        settings::SoftParticlesState state = {};
+        const bool available = settings::readsoftparticles(state);
+        presentsoftparticles(state, available);
+    }
+
+    void RmlSettings::presentsoftparticles(
+        const settings::SoftParticlesState &state,
+        bool available)
+    {
+        soft_particles_available = available;
+        soft_particles = state.enabled;
+        soft_particles_status.clear();
+        if(!available)
+            soft_particles_status = "Soft particles state is unavailable";
+
+        model.DirtyVariable("soft_particles_available");
+        model.DirtyVariable("soft_particles");
+        model.DirtyVariable("soft_particles_status");
+    }
+
+    void RmlSettings::selectsoftparticles(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !soft_particles_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::SoftParticlesState state = {};
+        const bool accepted = settings::writesoftparticles(enabled, state);
+        const bool available = accepted || settings::readsoftparticles(state);
+        presentsoftparticles(state, available);
+        if(!accepted && available)
+        {
+            soft_particles_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("soft_particles_status");
+        }
+    }
+
+    void RmlSettings::refreshsoftparticlequality()
+    {
+        settings::SoftParticleQualityState state = {};
+        const bool available = settings::readsoftparticlequality(state);
+        presentsoftparticlequality(state, available);
+    }
+
+    void RmlSettings::presentsoftparticlequality(
+        const settings::SoftParticleQualityState &state,
+        bool available)
+    {
+        soft_particle_quality_available = available;
+        soft_particle_quality_selected = -1;
+        soft_particle_quality_status.clear();
+
+        if(!available)
+        {
+            soft_particle_quality_label = "Unavailable";
+            soft_particle_quality_status =
+                "Soft particle quality state is unavailable";
+        }
+        else switch(state.quality)
+        {
+            case settings::SoftParticleQuality::Low:
+                soft_particle_quality_selected = 0;
+                soft_particle_quality_label = "Low";
+                break;
+            case settings::SoftParticleQuality::Medium:
+                soft_particle_quality_selected = 1;
+                soft_particle_quality_label = "Medium";
+                break;
+            case settings::SoftParticleQuality::High:
+                soft_particle_quality_selected = 2;
+                soft_particle_quality_label = "High";
+                break;
+            case settings::SoftParticleQuality::Custom:
+            {
+                soft_particle_quality_label = "Custom";
+                char status[96];
+                std::snprintf(status, sizeof(status),
+                    "Depth target level: %d · Blur radius: %d",
+                    state.depth_size, state.blur);
+                soft_particle_quality_status = status;
+                break;
+            }
+        }
+
+        model.DirtyVariable("soft_particle_quality_available");
+        model.DirtyVariable("soft_particle_quality_selected");
+        model.DirtyVariable("soft_particle_quality_label");
+        model.DirtyVariable("soft_particle_quality_status");
+    }
+
+    void RmlSettings::selectsoftparticlequality(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !soft_particle_quality_available)
+            return;
+
+        settings::SoftParticleQuality quality;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: quality = settings::SoftParticleQuality::Low; break;
+            case 1: quality = settings::SoftParticleQuality::Medium; break;
+            case 2: quality = settings::SoftParticleQuality::High; break;
+            default: return;
+        }
+
+        settings::SoftParticleQualityState state = {};
+        const bool accepted = settings::writesoftparticlequality(
+            quality, state);
+        const bool available = accepted ||
+            settings::readsoftparticlequality(state);
+        presentsoftparticlequality(state, available);
+        if(!accepted && available)
+        {
+            if(soft_particle_quality_status.empty())
+            {
+                soft_particle_quality_status =
+                    "Change not accepted; current engine state is shown";
+            }
+            else
+            {
+                soft_particle_quality_status = "Change not accepted. " +
+                    soft_particle_quality_status;
+            }
+            model.DirtyVariable("soft_particle_quality_status");
         }
     }
 

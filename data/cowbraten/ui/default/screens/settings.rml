@@ -674,6 +674,62 @@
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
+                                    <div class="settings-control-title">Soft Particles</div>
+                                    <div class="settings-control-description">
+                                        Smooth the edges where explosion particles intersect world geometry using an off-screen depth pass.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="soft_particles"
+                                        data-attrif-disabled="!soft_particles_available"
+                                        data-event-change="select_soft_particles(ev.checked)" />
+                                    <span data-if="soft_particles">On</span>
+                                    <span data-if="!soft_particles">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="soft_particles_status != ''">
+                                <span>{{ soft_particles_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Soft Particle Quality</div>
+                                    <div class="settings-control-description">
+                                        Adjust off-screen depth resolution and smoothing for Soft Particles. Higher quality uses more GPU resources.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ soft_particle_quality_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="soft_particle_quality_selected == 0"
+                                    data-attrif-disabled="!soft_particle_quality_available"
+                                    data-event-click="select_soft_particle_quality(0)">Low</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="soft_particle_quality_selected == 1"
+                                    data-attrif-disabled="!soft_particle_quality_available"
+                                    data-event-click="select_soft_particle_quality(1)">Medium</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="soft_particle_quality_selected == 2"
+                                    data-attrif-disabled="!soft_particle_quality_available"
+                                    data-event-click="select_soft_particle_quality(2)">High</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="soft_particle_quality_status != ''">
+                                <span>{{ soft_particle_quality_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
                                     <div class="settings-control-title">Grass</div>
                                     <div class="settings-control-description">
                                         Draw grass on map surfaces that support it. Changes take effect immediately.

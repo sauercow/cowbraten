@@ -479,6 +479,94 @@ namespace cowui
             return accepted;
         }
 
+        static void copysoftparticles(
+            const sauersettings::SoftParticlesState &source,
+            SoftParticlesState &result)
+        {
+            result.enabled = source.enabled;
+        }
+
+        bool readsoftparticles(SoftParticlesState &result)
+        {
+            sauersettings::SoftParticlesState legacy = {};
+            const bool read = sauersettings::readsoftparticles(legacy);
+            copysoftparticles(legacy, result);
+            return read;
+        }
+
+        bool writesoftparticles(
+            bool enabled,
+            SoftParticlesState &result)
+        {
+            sauersettings::SoftParticlesState legacy = {};
+            const bool accepted = sauersettings::writesoftparticles(
+                enabled, legacy);
+            copysoftparticles(legacy, result);
+            return accepted;
+        }
+
+        static SoftParticleQuality softparticlequality(
+            sauersettings::SoftParticleQuality quality)
+        {
+            switch(quality)
+            {
+                case sauersettings::SoftParticleQuality::Low:
+                    return SoftParticleQuality::Low;
+                case sauersettings::SoftParticleQuality::Medium:
+                    return SoftParticleQuality::Medium;
+                case sauersettings::SoftParticleQuality::High:
+                    return SoftParticleQuality::High;
+                case sauersettings::SoftParticleQuality::Custom:
+                    return SoftParticleQuality::Custom;
+            }
+            return SoftParticleQuality::Custom;
+        }
+
+        static sauersettings::SoftParticleQuality softparticlequality(
+            SoftParticleQuality quality)
+        {
+            switch(quality)
+            {
+                case SoftParticleQuality::Low:
+                    return sauersettings::SoftParticleQuality::Low;
+                case SoftParticleQuality::Medium:
+                    return sauersettings::SoftParticleQuality::Medium;
+                case SoftParticleQuality::High:
+                    return sauersettings::SoftParticleQuality::High;
+                case SoftParticleQuality::Custom:
+                    return sauersettings::SoftParticleQuality::Custom;
+            }
+            return sauersettings::SoftParticleQuality::Custom;
+        }
+
+        static void copysoftparticlequality(
+            const sauersettings::SoftParticleQualityState &source,
+            SoftParticleQualityState &result)
+        {
+            result.quality = softparticlequality(source.quality);
+            result.depth_size = source.depth_size;
+            result.blur = source.blur;
+        }
+
+        bool readsoftparticlequality(SoftParticleQualityState &result)
+        {
+            sauersettings::SoftParticleQualityState legacy = {};
+            const bool read = sauersettings::readsoftparticlequality(legacy);
+            copysoftparticlequality(legacy, result);
+            return read;
+        }
+
+        bool writesoftparticlequality(
+            SoftParticleQuality quality,
+            SoftParticleQualityState &result)
+        {
+            sauersettings::SoftParticleQualityState legacy = {};
+            const bool accepted = sauersettings::writesoftparticlequality(
+                softparticlequality(quality), legacy);
+            copysoftparticlequality(legacy, result);
+            return accepted;
+        }
+
         static GrassDistance grassdistance(
             sauersettings::GrassDistance distance)
         {

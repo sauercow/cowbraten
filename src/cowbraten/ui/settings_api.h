@@ -106,6 +106,25 @@ namespace cowui
             int max_lights;
         };
 
+        struct SoftParticlesState
+        {
+            bool enabled;
+        };
+
+        enum class SoftParticleQuality
+        {
+            Low,
+            Medium,
+            High,
+            Custom
+        };
+        struct SoftParticleQualityState
+        {
+            SoftParticleQuality quality;
+            int depth_size;
+            int blur;
+        };
+
         enum class GrassDistance
         {
             Quick,
@@ -315,6 +334,14 @@ namespace cowui
         // Custom is output-only and is rejected as a write request.
         bool writedynamiclights(DynamicLights setting,
             DynamicLightsState &result);
+
+        bool readsoftparticles(SoftParticlesState &result);
+        bool writesoftparticles(bool enabled, SoftParticlesState &result);
+
+        bool readsoftparticlequality(SoftParticleQualityState &result);
+        // Custom is output-only and is rejected as a write request.
+        bool writesoftparticlequality(SoftParticleQuality quality,
+            SoftParticleQualityState &result);
 
         bool readgrassdistance(GrassDistanceState &result);
         // Custom is output-only and is rejected as a write request.
