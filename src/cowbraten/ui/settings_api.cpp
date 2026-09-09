@@ -418,6 +418,67 @@ namespace cowui
             return accepted;
         }
 
+        static DynamicLights dynamiclights(
+            sauersettings::DynamicLights setting)
+        {
+            switch(setting)
+            {
+                case sauersettings::DynamicLights::Off:
+                    return DynamicLights::Off;
+                case sauersettings::DynamicLights::Medium:
+                    return DynamicLights::Medium;
+                case sauersettings::DynamicLights::High:
+                    return DynamicLights::High;
+                case sauersettings::DynamicLights::Custom:
+                    return DynamicLights::Custom;
+            }
+            return DynamicLights::Custom;
+        }
+
+        static sauersettings::DynamicLights dynamiclights(
+            DynamicLights setting)
+        {
+            switch(setting)
+            {
+                case DynamicLights::Off:
+                    return sauersettings::DynamicLights::Off;
+                case DynamicLights::Medium:
+                    return sauersettings::DynamicLights::Medium;
+                case DynamicLights::High:
+                    return sauersettings::DynamicLights::High;
+                case DynamicLights::Custom:
+                    return sauersettings::DynamicLights::Custom;
+            }
+            return sauersettings::DynamicLights::Custom;
+        }
+
+        static void copydynamiclights(
+            const sauersettings::DynamicLightsState &source,
+            DynamicLightsState &result)
+        {
+            result.setting = dynamiclights(source.setting);
+            result.max_lights = source.max_lights;
+        }
+
+        bool readdynamiclights(DynamicLightsState &result)
+        {
+            sauersettings::DynamicLightsState legacy = {};
+            const bool read = sauersettings::readdynamiclights(legacy);
+            copydynamiclights(legacy, result);
+            return read;
+        }
+
+        bool writedynamiclights(
+            DynamicLights setting,
+            DynamicLightsState &result)
+        {
+            sauersettings::DynamicLightsState legacy = {};
+            const bool accepted = sauersettings::writedynamiclights(
+                dynamiclights(setting), legacy);
+            copydynamiclights(legacy, result);
+            return accepted;
+        }
+
         static GrassDistance grassdistance(
             sauersettings::GrassDistance distance)
         {

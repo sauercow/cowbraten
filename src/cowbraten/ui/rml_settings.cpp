@@ -350,6 +350,11 @@ namespace cowui
             constructor.Bind("waterfall_status", &waterfall_status) &&
             constructor.BindEventCallback("select_waterfall_refraction", &RmlSettings::selectwaterfallrefraction, this) &&
             constructor.BindEventCallback("select_waterfall_reflections", &RmlSettings::selectwaterfallreflections, this) &&
+            constructor.Bind("dynamic_lights_available", &dynamic_lights_available) &&
+            constructor.Bind("dynamic_lights_selected", &dynamic_lights_selected) &&
+            constructor.Bind("dynamic_lights_label", &dynamic_lights_label) &&
+            constructor.Bind("dynamic_lights_status", &dynamic_lights_status) &&
+            constructor.BindEventCallback("select_dynamic_lights", &RmlSettings::selectdynamiclights, this) &&
             constructor.Bind("grass", &grass) &&
             constructor.Bind("grass_distance_available", &grass_distance_available) &&
             constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
@@ -867,6 +872,10 @@ namespace cowui
         waterfall_refraction_available = false;
         waterfall_reflections = false;
         waterfall_status.clear();
+        dynamic_lights_available = false;
+        dynamic_lights_selected = -1;
+        dynamic_lights_label.clear();
+        dynamic_lights_status.clear();
         grass = false;
         grass_distance_available = false;
         grass_distance_selected = -1;
@@ -1083,6 +1092,7 @@ namespace cowui
         refreshshadowquality();
         refreshwatersurfaceeffects();
         refreshwaterfalleffects();
+        refreshdynamiclights();
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
@@ -3156,6 +3166,95 @@ namespace cowui
             waterfall_status =
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("waterfall_status");
+        }
+    }
+
+    void RmlSettings::refreshdynamiclights()
+    {
+        settings::DynamicLightsState state = {};
+        const bool available = settings::readdynamiclights(state);
+        presentdynamiclights(state, available);
+    }
+
+    void RmlSettings::presentdynamiclights(
+        const settings::DynamicLightsState &state,
+        bool available)
+    {
+        dynamic_lights_available = available;
+        dynamic_lights_selected = -1;
+        dynamic_lights_status.clear();
+
+        if(!available)
+        {
+            dynamic_lights_label = "Unavailable";
+            dynamic_lights_status = "Dynamic lights state is unavailable";
+        }
+        else switch(state.setting)
+        {
+            case settings::DynamicLights::Off:
+                dynamic_lights_selected = 0;
+                dynamic_lights_label = "Off";
+                break;
+            case settings::DynamicLights::Medium:
+                dynamic_lights_selected = 1;
+                dynamic_lights_label = "Medium";
+                break;
+            case settings::DynamicLights::High:
+                dynamic_lights_selected = 2;
+                dynamic_lights_label = "High";
+                break;
+            case settings::DynamicLights::Custom:
+            {
+                dynamic_lights_label = "Custom";
+                char status[64];
+                std::snprintf(status, sizeof(status),
+                    "World-surface light limit: %d", state.max_lights);
+                dynamic_lights_status = status;
+                break;
+            }
+        }
+
+        model.DirtyVariable("dynamic_lights_available");
+        model.DirtyVariable("dynamic_lights_selected");
+        model.DirtyVariable("dynamic_lights_label");
+        model.DirtyVariable("dynamic_lights_status");
+    }
+
+    void RmlSettings::selectdynamiclights(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !dynamic_lights_available)
+            return;
+
+        settings::DynamicLights setting;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: setting = settings::DynamicLights::Off; break;
+            case 1: setting = settings::DynamicLights::Medium; break;
+            case 2: setting = settings::DynamicLights::High; break;
+            default: return;
+        }
+
+        settings::DynamicLightsState state = {};
+        const bool accepted = settings::writedynamiclights(setting, state);
+        const bool available = accepted ||
+            settings::readdynamiclights(state);
+        presentdynamiclights(state, available);
+        if(!accepted && available)
+        {
+            if(dynamic_lights_status.empty())
+            {
+                dynamic_lights_status =
+                    "Change not accepted; current engine state is shown";
+            }
+            else
+            {
+                dynamic_lights_status = "Change not accepted. " +
+                    dynamic_lights_status;
+            }
+            model.DirtyVariable("dynamic_lights_status");
         }
     }
 

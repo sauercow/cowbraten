@@ -28,6 +28,7 @@ namespace cowui
         struct ShadowQualityState;
         struct WaterSurfaceEffectsState;
         struct WaterfallEffectsState;
+        struct DynamicLightsState;
         struct GrassDistanceState;
         struct MotionBlurIntensityState;
         struct GlarePresetState;
@@ -163,6 +164,12 @@ namespace cowui
         void selectwaterfallrefraction(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void selectwaterfallreflections(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void refreshdynamiclights();
+        void presentdynamiclights(
+            const settings::DynamicLightsState &state,
+            bool available);
+        void selectdynamiclights(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void refreshanisotropy();
         void refreshmipmapblending();
@@ -348,6 +355,10 @@ namespace cowui
         bool waterfall_refraction_available = false;
         bool waterfall_reflections = false;
         Rml::String waterfall_status;
+        bool dynamic_lights_available = false;
+        int dynamic_lights_selected = -1;
+        Rml::String dynamic_lights_label;
+        Rml::String dynamic_lights_status;
         bool grass = false;
         bool grass_distance_available = false;
         int grass_distance_selected = -1;

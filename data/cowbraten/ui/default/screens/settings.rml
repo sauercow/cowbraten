@@ -638,6 +638,39 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Dynamic Lights</div>
+                                    <div class="settings-control-description">
+                                        Controls how many nearby dynamic lights can illuminate world surfaces in each map area. Higher levels add GPU lighting work.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ dynamic_lights_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="dynamic_lights_selected == 0"
+                                    data-attrif-disabled="!dynamic_lights_available"
+                                    data-event-click="select_dynamic_lights(0)">Off</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="dynamic_lights_selected == 1"
+                                    data-attrif-disabled="!dynamic_lights_available"
+                                    data-event-click="select_dynamic_lights(1)">Medium</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="dynamic_lights_selected == 2"
+                                    data-attrif-disabled="!dynamic_lights_available"
+                                    data-event-click="select_dynamic_lights(2)">High</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="dynamic_lights_status != ''">
+                                <span>{{ dynamic_lights_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">

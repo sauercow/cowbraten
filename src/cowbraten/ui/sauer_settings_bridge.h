@@ -93,6 +93,19 @@ namespace cowui
             bool render_targets_available;
         };
 
+        enum class DynamicLights
+        {
+            Off,
+            Medium,
+            High,
+            Custom
+        };
+        struct DynamicLightsState
+        {
+            DynamicLights setting;
+            int max_lights;
+        };
+
         enum class GrassDistance
         {
             Quick,
@@ -297,6 +310,11 @@ namespace cowui
             WaterfallEffectsState &result);
         bool writewaterfallreflections(bool enabled,
             WaterfallEffectsState &result);
+
+        bool readdynamiclights(DynamicLightsState &result);
+        // Custom is output-only and is rejected as a write request.
+        bool writedynamiclights(DynamicLights setting,
+            DynamicLightsState &result);
 
         bool readgrassdistance(GrassDistanceState &result);
         // Custom is output-only and is rejected as a write request.

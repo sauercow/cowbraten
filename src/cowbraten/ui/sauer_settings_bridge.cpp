@@ -993,6 +993,77 @@ namespace cowui
             return result.reflections == enabled;
         }
 
+        static DynamicLights classifydynamiclights(int max_lights)
+        {
+            switch(max_lights)
+            {
+                case 0: return DynamicLights::Off;
+                case 3: return DynamicLights::Medium;
+                case 5: return DynamicLights::High;
+                default: return DynamicLights::Custom;
+            }
+        }
+
+        static bool dynamiclightsvalue(DynamicLights setting, int &value)
+        {
+            switch(setting)
+            {
+                case DynamicLights::Off:
+                    value = 0;
+                    return true;
+                case DynamicLights::Medium:
+                    value = 3;
+                    return true;
+                case DynamicLights::High:
+                    value = 5;
+                    return true;
+                case DynamicLights::Custom:
+                    return false;
+            }
+            return false;
+        }
+
+        bool readdynamiclights(DynamicLightsState &result)
+        {
+            result.setting = DynamicLights::Custom;
+            result.max_lights = 0;
+
+            ident *id = getident("maxdynlights");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.max_lights = *id->storage.i;
+            result.setting = classifydynamiclights(result.max_lights);
+            return true;
+        }
+
+        bool writedynamiclights(
+            DynamicLights setting,
+            DynamicLightsState &result)
+        {
+            if(!readdynamiclights(result))
+                return false;
+
+            int value = 0;
+            if(!dynamiclightsvalue(setting, value))
+                return false;
+
+            ident *id = getident("maxdynlights");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readdynamiclights(result))
+                return false;
+            return result.setting == setting && result.max_lights == value;
+        }
+
         static GrassDistance classifygrassdistance(int value)
         {
             switch(value)
