@@ -364,6 +364,10 @@ namespace cowui
             constructor.Bind("soft_particle_quality_label", &soft_particle_quality_label) &&
             constructor.Bind("soft_particle_quality_status", &soft_particle_quality_status) &&
             constructor.BindEventCallback("select_soft_particle_quality", &RmlSettings::selectsoftparticlequality, this) &&
+            constructor.Bind("decals_available", &decals_available) &&
+            constructor.Bind("decals", &decals) &&
+            constructor.Bind("decals_status", &decals_status) &&
+            constructor.BindEventCallback("select_decals", &RmlSettings::selectdecals, this) &&
             constructor.Bind("grass", &grass) &&
             constructor.Bind("grass_distance_available", &grass_distance_available) &&
             constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
@@ -892,6 +896,9 @@ namespace cowui
         soft_particle_quality_selected = -1;
         soft_particle_quality_label.clear();
         soft_particle_quality_status.clear();
+        decals_available = false;
+        decals = false;
+        decals_status.clear();
         grass = false;
         grass_distance_available = false;
         grass_distance_selected = -1;
@@ -1111,6 +1118,7 @@ namespace cowui
         refreshdynamiclights();
         refreshsoftparticles();
         refreshsoftparticlequality();
+        refreshdecals();
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
@@ -3408,6 +3416,49 @@ namespace cowui
                     soft_particle_quality_status;
             }
             model.DirtyVariable("soft_particle_quality_status");
+        }
+    }
+
+    void RmlSettings::refreshdecals()
+    {
+        settings::DecalsState state = {};
+        const bool available = settings::readdecals(state);
+        presentdecals(state, available);
+    }
+
+    void RmlSettings::presentdecals(
+        const settings::DecalsState &state,
+        bool available)
+    {
+        decals_available = available;
+        decals = state.enabled;
+        decals_status.clear();
+        if(!available)
+            decals_status = "Decals state is unavailable";
+
+        model.DirtyVariable("decals_available");
+        model.DirtyVariable("decals");
+        model.DirtyVariable("decals_status");
+    }
+
+    void RmlSettings::selectdecals(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !decals_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::DecalsState state = {};
+        const bool accepted = settings::writedecals(enabled, state);
+        const bool available = accepted || settings::readdecals(state);
+        presentdecals(state, available);
+        if(!accepted && available)
+        {
+            decals_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("decals_status");
         }
     }
 

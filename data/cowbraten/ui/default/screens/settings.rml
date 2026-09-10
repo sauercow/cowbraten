@@ -730,6 +730,29 @@
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
+                                    <div class="settings-control-title">Decals</div>
+                                    <div class="settings-control-description">
+                                        Create and draw bullet holes, scorch marks, and blood on eligible world surfaces. Turning this off hides existing marks while they expire.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="decals"
+                                        data-attrif-disabled="!decals_available"
+                                        data-event-change="select_decals(ev.checked)" />
+                                    <span data-if="decals">On</span>
+                                    <span data-if="!decals">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="decals_status != ''">
+                                <span>{{ decals_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
                                     <div class="settings-control-title">Grass</div>
                                     <div class="settings-control-description">
                                         Draw grass on map surfaces that support it. Changes take effect immediately.

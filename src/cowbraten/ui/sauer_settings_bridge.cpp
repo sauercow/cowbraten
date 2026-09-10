@@ -1199,6 +1199,40 @@ namespace cowui
                 result.depth_size == depth_size && result.blur == blur;
         }
 
+        bool readdecals(DecalsState &result)
+        {
+            result.enabled = false;
+
+            ident *id = getident("decals");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writedecals(bool enabled, DecalsState &result)
+        {
+            if(!readdecals(result))
+                return false;
+
+            ident *id = getident("decals");
+            const int target = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               target < id->minval || target > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != target)
+                setvarchecked(id, target);
+
+            if(!readdecals(result))
+                return false;
+            return result.enabled == enabled;
+        }
+
         static GrassDistance classifygrassdistance(int value)
         {
             switch(value)

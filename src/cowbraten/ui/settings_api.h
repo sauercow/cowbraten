@@ -125,6 +125,11 @@ namespace cowui
             int blur;
         };
 
+        struct DecalsState
+        {
+            bool enabled;
+        };
+
         enum class GrassDistance
         {
             Quick,
@@ -342,6 +347,9 @@ namespace cowui
         // Custom is output-only and is rejected as a write request.
         bool writesoftparticlequality(SoftParticleQuality quality,
             SoftParticleQualityState &result);
+
+        bool readdecals(DecalsState &result);
+        bool writedecals(bool enabled, DecalsState &result);
 
         bool readgrassdistance(GrassDistanceState &result);
         // Custom is output-only and is rejected as a write request.

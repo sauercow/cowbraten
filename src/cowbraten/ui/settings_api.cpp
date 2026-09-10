@@ -567,6 +567,30 @@ namespace cowui
             return accepted;
         }
 
+        static void copydecals(
+            const sauersettings::DecalsState &source,
+            DecalsState &result)
+        {
+            result.enabled = source.enabled;
+        }
+
+        bool readdecals(DecalsState &result)
+        {
+            sauersettings::DecalsState legacy = {};
+            const bool read = sauersettings::readdecals(legacy);
+            copydecals(legacy, result);
+            return read;
+        }
+
+        bool writedecals(bool enabled, DecalsState &result)
+        {
+            sauersettings::DecalsState legacy = {};
+            const bool accepted = sauersettings::writedecals(
+                enabled, legacy);
+            copydecals(legacy, result);
+            return accepted;
+        }
+
         static GrassDistance grassdistance(
             sauersettings::GrassDistance distance)
         {
