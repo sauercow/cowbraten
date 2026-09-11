@@ -515,6 +515,7 @@ namespace game
     // Local player's current kill streak.
 
     static int killstreak = 0;
+    static bool killstreaklifeactive = false;
     static int streakmilestonevalue = 0;
     static int streakmilestonemillis = 0;
 
@@ -550,12 +551,27 @@ namespace game
         streakmilestonemillis = 0;
     }
 
+    void openkillstreaklife()
+    {
+        killstreaklifeactive = false;
+        resetkillstreak();
+        killstreaklifeactive = true;
+    }
+
+    void closekillstreaklife()
+    {
+        killstreaklifeactive = false;
+        resetkillstreak();
+    }
+
     static int updatekillstreak(fpsent *victim, fpsent *actor, int fragdelta)
     {
         // Any death of the local player ends the current streak.
         if(victim == player1)
         {
-            resetkillstreak();
+            // Multiplayer deaths are closed by the authoritative N_DIED path.
+            // Local modes retain their existing direct death reset behavior.
+            if(!m_mp(gamemode)) resetkillstreak();
             return 0;
         }
 
@@ -570,6 +586,11 @@ namespace game
         // In multiplayer, only count the kill if the server actually
         // increased the actor's authoritative frag score.
         if(fragdelta <= 0)
+            return -1;
+
+        // In multiplayer, streak credit belongs only to the confirmed local
+        // life opened by N_SPAWNSTATE and closed by authoritative lifecycle events.
+        if(m_mp(gamemode) && !killstreaklifeactive)
             return -1;
 
         return ++killstreak;
@@ -872,7 +893,7 @@ namespace game
         showscores(false);
         disablezoom();
         lasthit = 0;
-        resetkillstreak();
+        closekillstreaklife();
     }
 
     void loadingmap(const char *name)

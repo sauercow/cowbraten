@@ -760,6 +760,8 @@ namespace game
     extern void deathstate(fpsent *d, bool restore = false);
     extern void damaged(int damage, fpsent *d, fpsent *actor, bool local = true);
     extern void resetkillstreak();
+    extern void openkillstreaklife();
+    extern void closekillstreaklife();
     extern void killed(fpsent *d, fpsent *actor, int fragdelta = 1);
     extern void timeupdate(int timeremain);
     extern void msgsound(int n, physent *d = NULL);

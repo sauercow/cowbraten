@@ -960,6 +960,7 @@ namespace game
 
     void gamedisconnect(bool cleanup)
     {
+        closekillstreaklife();
         if(remote) stopfollowing();
         ignores.setsize(0);
         connected = remote = false;
@@ -1502,7 +1503,7 @@ namespace game
                 if(!d) break;
                 if(d==player1)
                 {
-                    resetkillstreak();
+                    closekillstreaklife();
                     if(editmode) toggleedit();
                     stopfollowing();
                     if(deathscore) showscores(true);
@@ -1623,6 +1624,7 @@ namespace game
                 {
                     showscores(false);
                     lasthit = 0;
+                    if(m_mp(gamemode)) openkillstreaklife();
                 }
                 if(cmode) cmode->respawned(s);
 				ai::spawned(s);
@@ -1712,6 +1714,7 @@ namespace game
                 int vcn = getint(p), acn = getint(p), frags = getint(p), tfrags = getint(p);
                 fpsent *victim = getclient(vcn),
                        *actor = getclient(acn);
+                if(victim==player1 && m_mp(gamemode)) closekillstreaklife();
                 if(!actor) break;
                 int oldfrags = actor->frags;
                 actor->frags = frags;
@@ -2063,6 +2066,7 @@ namespace game
                         if(editmode) toggleedit();
                         if(s->state==CS_DEAD) showscores(false);
                         disablezoom();
+                        closekillstreaklife();
                     }
                     s->state = CS_SPECTATOR;
                 }
