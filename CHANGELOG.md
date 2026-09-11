@@ -1,5 +1,21 @@
 # Changelog
 
+## cowbraten 1.0.1-rc.2 — 2026-09-11
+
+Second release candidate with a client-side kill-streak lifecycle correction.
+
+### Fixes
+
+- Fixed multiplayer kill streaks carrying post-death kill credit into the next life.
+- Kill streaks now belong to the confirmed local life opened by spawn and closed by authoritative death and other lifecycle transitions.
+- Post-death kills still preserve the server-provided frag score but no longer increment the next-life HUD streak.
+
+### Compatibility
+
+- Keeps `p1xbratenversion` at 9.0.0.
+- Does not change the Sauerbraten network protocol or demo format version.
+
+
 ## cowbraten 1.0.1-rc.1 — 2026-09-07
 
 Release candidate focused on window handling, display reliability and proper HiDPI rendering.
