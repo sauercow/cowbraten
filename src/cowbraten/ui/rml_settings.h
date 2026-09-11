@@ -38,6 +38,7 @@ namespace cowui
         struct GrassDistanceState;
         struct MotionBlurIntensityState;
         struct GlarePresetState;
+        struct TextureQualityState;
     }
 
     class RmlActionRouter;
@@ -234,6 +235,12 @@ namespace cowui
         void presentglarepreset(const settings::GlarePresetState &state,
             bool available);
         void selectglarepreset(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void refreshtexturequality();
+        void presenttexturequality(
+            const settings::TextureQualityState &state,
+            bool available);
+        void selecttexturequality(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
         void presentanisotropy(const settings::AnisotropyState &state);
         void selectanisotropy(Rml::DataModelHandle, Rml::Event &event,
@@ -436,6 +443,10 @@ namespace cowui
         int glare_preset_selected = -1;
         Rml::String glare_preset_label;
         Rml::String glare_preset_status;
+        bool texture_quality_available = false;
+        int texture_quality_selected = -1;
+        Rml::String texture_quality_label;
+        Rml::String texture_quality_status;
         Rml::String graphics_quality_status;
         bool anisotropy_enabled = false;
         bool mipmap_blending = false;

@@ -401,6 +401,11 @@ namespace cowui
             constructor.Bind("glare_preset_label", &glare_preset_label) &&
             constructor.Bind("glare_preset_status", &glare_preset_status) &&
             constructor.BindEventCallback("select_glare_preset", &RmlSettings::selectglarepreset, this) &&
+            constructor.Bind("texture_quality_available", &texture_quality_available) &&
+            constructor.Bind("texture_quality_selected", &texture_quality_selected) &&
+            constructor.Bind("texture_quality_label", &texture_quality_label) &&
+            constructor.Bind("texture_quality_status", &texture_quality_status) &&
+            constructor.BindEventCallback("select_texture_quality", &RmlSettings::selecttexturequality, this) &&
             constructor.Bind("graphics_quality_status", &graphics_quality_status) &&
             constructor.Bind("anisotropy_enabled", &anisotropy_enabled) &&
             constructor.Bind("shader_detail_available", &shader_detail_available) &&
@@ -937,6 +942,10 @@ namespace cowui
         glare_preset_selected = -1;
         glare_preset_label.clear();
         glare_preset_status.clear();
+        texture_quality_available = false;
+        texture_quality_selected = -1;
+        texture_quality_label.clear();
+        texture_quality_status.clear();
         graphics_quality_status.clear();
         anisotropy_enabled = false;
         mipmap_blending = mipmap_blending_available = false;
@@ -1148,6 +1157,7 @@ namespace cowui
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
+        refreshtexturequality();
         refreshanisotropy();
         refreshmipmapblending();
         settings::Video current;
@@ -3982,6 +3992,97 @@ namespace cowui
                 glare_preset_status = "Change not accepted; current engine state is shown";
             else glare_preset_status = "Change not accepted. " + glare_preset_status;
             model.DirtyVariable("glare_preset_status");
+        }
+    }
+
+    void RmlSettings::refreshtexturequality()
+    {
+        settings::TextureQualityState state = {};
+        const bool available = settings::readtexturequality(state);
+        presenttexturequality(state, available);
+    }
+
+    void RmlSettings::presenttexturequality(
+        const settings::TextureQualityState &state,
+        bool available)
+    {
+        texture_quality_available = available;
+        texture_quality_selected = -1;
+        texture_quality_status.clear();
+
+        if(!available)
+        {
+            texture_quality_label = "Unavailable";
+            texture_quality_status =
+                "Texture Quality state is unavailable";
+        }
+        else switch(state.quality)
+        {
+            case settings::TextureQuality::Low:
+                texture_quality_selected = 0;
+                texture_quality_label = "Low";
+                break;
+            case settings::TextureQuality::Medium:
+                texture_quality_selected = 1;
+                texture_quality_label = "Medium";
+                break;
+            case settings::TextureQuality::Full:
+                texture_quality_selected = 2;
+                texture_quality_label = "Full";
+                break;
+            case settings::TextureQuality::Custom:
+            {
+                texture_quality_label = "Custom";
+                char status[64];
+                std::snprintf(status, sizeof(status),
+                    "Requested limit: %d px", state.texture_size_limit);
+                texture_quality_status = status;
+                break;
+            }
+        }
+
+        model.DirtyVariable("texture_quality_available");
+        model.DirtyVariable("texture_quality_selected");
+        model.DirtyVariable("texture_quality_label");
+        model.DirtyVariable("texture_quality_status");
+    }
+
+    void RmlSettings::selecttexturequality(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !texture_quality_available)
+            return;
+
+        settings::TextureQuality quality;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: quality = settings::TextureQuality::Low; break;
+            case 1: quality = settings::TextureQuality::Medium; break;
+            case 2: quality = settings::TextureQuality::Full; break;
+            default: return;
+        }
+
+        settings::TextureQualityState state = {};
+        const bool accepted = settings::writetexturequality(quality, state);
+        const bool available = accepted ||
+            settings::readtexturequality(state);
+        presenttexturequality(state, available);
+        if(!accepted && available)
+        {
+            const Rml::String rejected =
+                "Change not accepted; current engine state is shown";
+            if(texture_quality_status.empty())
+            {
+                texture_quality_status = rejected;
+            }
+            else
+            {
+                texture_quality_status = rejected + " · " +
+                    texture_quality_status;
+            }
+            model.DirtyVariable("texture_quality_status");
         }
     }
 

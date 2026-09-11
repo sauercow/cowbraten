@@ -1663,6 +1663,74 @@ namespace cowui
                 result.blur_radius == blur_radius;
         }
 
+        static TextureQuality classifytexturequality(int texture_size_limit)
+        {
+            switch(texture_size_limit)
+            {
+                case 256: return TextureQuality::Low;
+                case 512: return TextureQuality::Medium;
+                case 0: return TextureQuality::Full;
+                default: return TextureQuality::Custom;
+            }
+        }
+
+        bool readtexturequality(TextureQualityState &result)
+        {
+            result.quality = TextureQuality::Custom;
+            result.texture_size_limit = 0;
+
+            ident *id = getident("maxtexsize");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.texture_size_limit = *id->storage.i;
+            result.quality = classifytexturequality(
+                result.texture_size_limit);
+            return true;
+        }
+
+        bool writetexturequality(
+            TextureQuality quality,
+            TextureQualityState &result)
+        {
+            if(!readtexturequality(result))
+                return false;
+
+            int target = 0;
+            switch(quality)
+            {
+                case TextureQuality::Low: target = 256; break;
+                case TextureQuality::Medium: target = 512; break;
+                case TextureQuality::Full: target = 0; break;
+                case TextureQuality::Custom: return false;
+                default: return false;
+            }
+
+            ident *id = getident("maxtexsize");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               target < id->minval || target > id->maxval)
+            {
+                return false;
+            }
+
+            const bool changed = *id->storage.i != target;
+            if(!changed)
+            {
+                if(!readtexturequality(result))
+                    return false;
+                return result.texture_size_limit == target &&
+                    result.quality == quality;
+            }
+
+            setvarchecked(id, target);
+
+            if(!readtexturequality(result))
+                return false;
+            return result.texture_size_limit == target &&
+                result.quality == quality;
+        }
+
         static void copyshaderdetail(const ::ShaderDetailState &source, ShaderDetailState &result)
         {
             result.requested = source.requested;

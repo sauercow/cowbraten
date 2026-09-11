@@ -999,6 +999,39 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Texture Quality</div>
+                                    <div class="settings-control-description">
+                                        Lower limits reduce detail in world, model, effect, and sky textures; higher limits can use more graphics memory. Applying changes may briefly pause.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ texture_quality_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_quality_selected == 0"
+                                    data-attrif-disabled="!texture_quality_available"
+                                    data-event-click="select_texture_quality(0)">Low</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_quality_selected == 1"
+                                    data-attrif-disabled="!texture_quality_available"
+                                    data-event-click="select_texture_quality(1)">Medium</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_quality_selected == 2"
+                                    data-attrif-disabled="!texture_quality_available"
+                                    data-event-click="select_texture_quality(2)">Full</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="texture_quality_status != ''">
+                                <span>{{ texture_quality_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">

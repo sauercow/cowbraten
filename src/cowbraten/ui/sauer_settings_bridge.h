@@ -181,6 +181,19 @@ namespace cowui
             int blur_radius;
         };
 
+        enum class TextureQuality
+        {
+            Low,
+            Medium,
+            Full,
+            Custom
+        };
+        struct TextureQualityState
+        {
+            TextureQuality quality;
+            int texture_size_limit;
+        };
+
         enum class ShaderDetailLevel { Performance = 0, Low = 1, Medium = 2, Full = 3 };
         struct ShaderDetailState
         {
@@ -399,6 +412,11 @@ namespace cowui
 
         bool readglarepreset(GlarePresetState &result);
         bool writeglarepreset(GlarePreset preset, GlarePresetState &result);
+
+        bool readtexturequality(TextureQualityState &result);
+        // Custom is output-only and is rejected as a write request.
+        bool writetexturequality(TextureQuality quality,
+            TextureQualityState &result);
 
         bool readanisotropy(AnisotropyState &result);
         // Returns the callback's verification result without a second scan.

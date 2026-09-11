@@ -887,6 +887,67 @@ namespace cowui
             return accepted;
         }
 
+        static TextureQuality texturequality(
+            sauersettings::TextureQuality quality)
+        {
+            switch(quality)
+            {
+                case sauersettings::TextureQuality::Low:
+                    return TextureQuality::Low;
+                case sauersettings::TextureQuality::Medium:
+                    return TextureQuality::Medium;
+                case sauersettings::TextureQuality::Full:
+                    return TextureQuality::Full;
+                case sauersettings::TextureQuality::Custom:
+                    return TextureQuality::Custom;
+            }
+            return TextureQuality::Custom;
+        }
+
+        static sauersettings::TextureQuality texturequality(
+            TextureQuality quality)
+        {
+            switch(quality)
+            {
+                case TextureQuality::Low:
+                    return sauersettings::TextureQuality::Low;
+                case TextureQuality::Medium:
+                    return sauersettings::TextureQuality::Medium;
+                case TextureQuality::Full:
+                    return sauersettings::TextureQuality::Full;
+                case TextureQuality::Custom:
+                    return sauersettings::TextureQuality::Custom;
+            }
+            return sauersettings::TextureQuality::Custom;
+        }
+
+        static void copytexturequality(
+            const sauersettings::TextureQualityState &source,
+            TextureQualityState &result)
+        {
+            result.quality = texturequality(source.quality);
+            result.texture_size_limit = source.texture_size_limit;
+        }
+
+        bool readtexturequality(TextureQualityState &result)
+        {
+            sauersettings::TextureQualityState legacy = {};
+            const bool read = sauersettings::readtexturequality(legacy);
+            copytexturequality(legacy, result);
+            return read;
+        }
+
+        bool writetexturequality(
+            TextureQuality quality,
+            TextureQualityState &result)
+        {
+            sauersettings::TextureQualityState legacy = {};
+            const bool accepted = sauersettings::writetexturequality(
+                texturequality(quality), legacy);
+            copytexturequality(legacy, result);
+            return accepted;
+        }
+
         static void copyshaderdetail(const sauersettings::ShaderDetailState &source, ShaderDetailState &result)
         {
             result.requested = source.requested;
