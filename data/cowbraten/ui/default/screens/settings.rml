@@ -750,6 +750,35 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Decal Persistence</div>
+                                    <div class="settings-control-description">
+                                        Controls how long marks remain and how much decal geometry can be stored. Longer persistence can use more CPU and GPU memory. Changing presets may clear existing marks.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ decal_persistence_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="decal_persistence_selected == 0"
+                                    data-attrif-disabled="!decal_persistence_available"
+                                    data-event-click="select_decal_persistence(0)">Short</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="decal_persistence_selected == 1"
+                                    data-attrif-disabled="!decal_persistence_available"
+                                    data-event-click="select_decal_persistence(1)">Long</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="decal_persistence_status != ''">
+                                <span>{{ decal_persistence_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">

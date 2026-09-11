@@ -1233,6 +1233,114 @@ namespace cowui
             return result.enabled == enabled;
         }
 
+        static DecalPersistence classifydecalpersistence(
+            int fade_start_milliseconds,
+            int triangle_budget_per_type)
+        {
+            if(fade_start_milliseconds == 10000 &&
+               triangle_budget_per_type == 1024)
+            {
+                return DecalPersistence::Short;
+            }
+            if(fade_start_milliseconds == 60000 &&
+               triangle_budget_per_type == 4096)
+            {
+                return DecalPersistence::Long;
+            }
+            return DecalPersistence::Custom;
+        }
+
+        static bool decalpersistencevalues(
+            DecalPersistence persistence,
+            int &fade_start_milliseconds,
+            int &triangle_budget_per_type)
+        {
+            switch(persistence)
+            {
+                case DecalPersistence::Short:
+                    fade_start_milliseconds = 10000;
+                    triangle_budget_per_type = 1024;
+                    return true;
+                case DecalPersistence::Long:
+                    fade_start_milliseconds = 60000;
+                    triangle_budget_per_type = 4096;
+                    return true;
+                case DecalPersistence::Custom:
+                    return false;
+            }
+            return false;
+        }
+
+        bool readdecalpersistence(DecalPersistenceState &result)
+        {
+            result.persistence = DecalPersistence::Custom;
+            result.fade_start_milliseconds = 0;
+            result.triangle_budget_per_type = 0;
+
+            ident *fade_id = getident("decalfade");
+            ident *limit_id = getident("maxdecaltris");
+            if(!fade_id || fade_id->type != ID_VAR || !fade_id->storage.i ||
+               !limit_id || limit_id->type != ID_VAR || !limit_id->storage.i)
+            {
+                return false;
+            }
+
+            result.fade_start_milliseconds = *fade_id->storage.i;
+            result.triangle_budget_per_type = *limit_id->storage.i;
+            result.persistence = classifydecalpersistence(
+                result.fade_start_milliseconds,
+                result.triangle_budget_per_type);
+            return true;
+        }
+
+        bool writedecalpersistence(
+            DecalPersistence persistence,
+            DecalPersistenceState &result)
+        {
+            if(!readdecalpersistence(result))
+                return false;
+
+            int fade_start_milliseconds = 0;
+            int triangle_budget_per_type = 0;
+            if(!decalpersistencevalues(persistence,
+                fade_start_milliseconds, triangle_budget_per_type))
+            {
+                return false;
+            }
+
+            ident *fade_id = getident("decalfade");
+            ident *limit_id = getident("maxdecaltris");
+            if(!fade_id || fade_id->type != ID_VAR || !fade_id->storage.i ||
+               fade_id->flags&IDF_READONLY ||
+               fade_start_milliseconds < fade_id->minval ||
+               fade_start_milliseconds > fade_id->maxval ||
+               !limit_id || limit_id->type != ID_VAR ||
+               !limit_id->storage.i || limit_id->flags&IDF_READONLY ||
+               triangle_budget_per_type < limit_id->minval ||
+               triangle_budget_per_type > limit_id->maxval)
+            {
+                return false;
+            }
+
+            const bool fade_changed =
+                *fade_id->storage.i != fade_start_milliseconds;
+            const bool limit_changed =
+                *limit_id->storage.i != triangle_budget_per_type;
+            if(limit_changed && !SDL_GL_GetCurrentContext())
+                return false;
+
+            if(fade_changed)
+                setvarchecked(fade_id, fade_start_milliseconds);
+            if(limit_changed)
+                setvarchecked(limit_id, triangle_budget_per_type);
+
+            if(!readdecalpersistence(result))
+                return false;
+            return result.persistence == persistence &&
+                result.fade_start_milliseconds == fade_start_milliseconds &&
+                result.triangle_budget_per_type == triangle_budget_per_type;
+        }
+
         static GrassDistance classifygrassdistance(int value)
         {
             switch(value)

@@ -32,6 +32,7 @@ namespace cowui
         struct SoftParticlesState;
         struct SoftParticleQualityState;
         struct DecalsState;
+        struct DecalPersistenceState;
         struct GrassDistanceState;
         struct MotionBlurIntensityState;
         struct GlarePresetState;
@@ -191,6 +192,12 @@ namespace cowui
             bool available);
         void selectdecals(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
+        void refreshdecalpersistence();
+        void presentdecalpersistence(
+            const settings::DecalPersistenceState &state,
+            bool available);
+        void selectdecalpersistence(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
         void refreshanisotropy();
         void refreshmipmapblending();
         void presentmipmapblending(const settings::MipmapBlendingState &state);
@@ -389,6 +396,10 @@ namespace cowui
         bool decals_available = false;
         bool decals = false;
         Rml::String decals_status;
+        bool decal_persistence_available = false;
+        int decal_persistence_selected = -1;
+        Rml::String decal_persistence_label;
+        Rml::String decal_persistence_status;
         bool grass = false;
         bool grass_distance_available = false;
         int grass_distance_selected = -1;

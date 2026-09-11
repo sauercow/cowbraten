@@ -130,6 +130,19 @@ namespace cowui
             bool enabled;
         };
 
+        enum class DecalPersistence
+        {
+            Short,
+            Long,
+            Custom
+        };
+        struct DecalPersistenceState
+        {
+            DecalPersistence persistence;
+            int fade_start_milliseconds;
+            int triangle_budget_per_type;
+        };
+
         enum class GrassDistance
         {
             Quick,
@@ -350,6 +363,11 @@ namespace cowui
 
         bool readdecals(DecalsState &result);
         bool writedecals(bool enabled, DecalsState &result);
+
+        bool readdecalpersistence(DecalPersistenceState &result);
+        // Custom is output-only and is rejected as a write request.
+        bool writedecalpersistence(DecalPersistence persistence,
+            DecalPersistenceState &result);
 
         bool readgrassdistance(GrassDistanceState &result);
         // Custom is output-only and is rejected as a write request.

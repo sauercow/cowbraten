@@ -591,6 +591,66 @@ namespace cowui
             return accepted;
         }
 
+        static DecalPersistence decalpersistence(
+            sauersettings::DecalPersistence persistence)
+        {
+            switch(persistence)
+            {
+                case sauersettings::DecalPersistence::Short:
+                    return DecalPersistence::Short;
+                case sauersettings::DecalPersistence::Long:
+                    return DecalPersistence::Long;
+                case sauersettings::DecalPersistence::Custom:
+                    return DecalPersistence::Custom;
+            }
+            return DecalPersistence::Custom;
+        }
+
+        static sauersettings::DecalPersistence decalpersistence(
+            DecalPersistence persistence)
+        {
+            switch(persistence)
+            {
+                case DecalPersistence::Short:
+                    return sauersettings::DecalPersistence::Short;
+                case DecalPersistence::Long:
+                    return sauersettings::DecalPersistence::Long;
+                case DecalPersistence::Custom:
+                    return sauersettings::DecalPersistence::Custom;
+            }
+            return sauersettings::DecalPersistence::Custom;
+        }
+
+        static void copydecalpersistence(
+            const sauersettings::DecalPersistenceState &source,
+            DecalPersistenceState &result)
+        {
+            result.persistence = decalpersistence(source.persistence);
+            result.fade_start_milliseconds =
+                source.fade_start_milliseconds;
+            result.triangle_budget_per_type =
+                source.triangle_budget_per_type;
+        }
+
+        bool readdecalpersistence(DecalPersistenceState &result)
+        {
+            sauersettings::DecalPersistenceState legacy = {};
+            const bool read = sauersettings::readdecalpersistence(legacy);
+            copydecalpersistence(legacy, result);
+            return read;
+        }
+
+        bool writedecalpersistence(
+            DecalPersistence persistence,
+            DecalPersistenceState &result)
+        {
+            sauersettings::DecalPersistenceState legacy = {};
+            const bool accepted = sauersettings::writedecalpersistence(
+                decalpersistence(persistence), legacy);
+            copydecalpersistence(legacy, result);
+            return accepted;
+        }
+
         static GrassDistance grassdistance(
             sauersettings::GrassDistance distance)
         {

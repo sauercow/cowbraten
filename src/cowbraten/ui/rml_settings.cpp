@@ -368,6 +368,11 @@ namespace cowui
             constructor.Bind("decals", &decals) &&
             constructor.Bind("decals_status", &decals_status) &&
             constructor.BindEventCallback("select_decals", &RmlSettings::selectdecals, this) &&
+            constructor.Bind("decal_persistence_available", &decal_persistence_available) &&
+            constructor.Bind("decal_persistence_selected", &decal_persistence_selected) &&
+            constructor.Bind("decal_persistence_label", &decal_persistence_label) &&
+            constructor.Bind("decal_persistence_status", &decal_persistence_status) &&
+            constructor.BindEventCallback("select_decal_persistence", &RmlSettings::selectdecalpersistence, this) &&
             constructor.Bind("grass", &grass) &&
             constructor.Bind("grass_distance_available", &grass_distance_available) &&
             constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
@@ -899,6 +904,10 @@ namespace cowui
         decals_available = false;
         decals = false;
         decals_status.clear();
+        decal_persistence_available = false;
+        decal_persistence_selected = -1;
+        decal_persistence_label.clear();
+        decal_persistence_status.clear();
         grass = false;
         grass_distance_available = false;
         grass_distance_selected = -1;
@@ -1119,6 +1128,7 @@ namespace cowui
         refreshsoftparticles();
         refreshsoftparticlequality();
         refreshdecals();
+        refreshdecalpersistence();
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
@@ -3459,6 +3469,95 @@ namespace cowui
             decals_status =
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("decals_status");
+        }
+    }
+
+    void RmlSettings::refreshdecalpersistence()
+    {
+        settings::DecalPersistenceState state = {};
+        const bool available = settings::readdecalpersistence(state);
+        presentdecalpersistence(state, available);
+    }
+
+    void RmlSettings::presentdecalpersistence(
+        const settings::DecalPersistenceState &state,
+        bool available)
+    {
+        decal_persistence_available = available;
+        decal_persistence_selected = -1;
+        decal_persistence_status.clear();
+
+        if(!available)
+        {
+            decal_persistence_label = "Unavailable";
+            decal_persistence_status =
+                "Decal Persistence state is unavailable";
+        }
+        else switch(state.persistence)
+        {
+            case settings::DecalPersistence::Short:
+                decal_persistence_selected = 0;
+                decal_persistence_label = "Short";
+                break;
+            case settings::DecalPersistence::Long:
+                decal_persistence_selected = 1;
+                decal_persistence_label = "Long";
+                break;
+            case settings::DecalPersistence::Custom:
+            {
+                decal_persistence_label = "Custom";
+                char status[128];
+                std::snprintf(status, sizeof(status),
+                    "Fade start: %d ms · Triangle budget per type: %d",
+                    state.fade_start_milliseconds,
+                    state.triangle_budget_per_type);
+                decal_persistence_status = status;
+                break;
+            }
+        }
+
+        model.DirtyVariable("decal_persistence_available");
+        model.DirtyVariable("decal_persistence_selected");
+        model.DirtyVariable("decal_persistence_label");
+        model.DirtyVariable("decal_persistence_status");
+    }
+
+    void RmlSettings::selectdecalpersistence(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !decal_persistence_available)
+            return;
+
+        settings::DecalPersistence persistence;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: persistence = settings::DecalPersistence::Short; break;
+            case 1: persistence = settings::DecalPersistence::Long; break;
+            default: return;
+        }
+
+        settings::DecalPersistenceState state = {};
+        const bool accepted = settings::writedecalpersistence(
+            persistence, state);
+        const bool available = accepted ||
+            settings::readdecalpersistence(state);
+        presentdecalpersistence(state, available);
+        if(!accepted && available)
+        {
+            const Rml::String rejected =
+                "Change not accepted; current engine state is shown";
+            if(decal_persistence_status.empty())
+            {
+                decal_persistence_status = rejected;
+            }
+            else
+            {
+                decal_persistence_status = rejected + " · " +
+                    decal_persistence_status;
+            }
+            model.DirtyVariable("decal_persistence_status");
         }
     }
 
