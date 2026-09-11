@@ -1029,6 +1029,52 @@ namespace cowui
             return result.enabled == enabled;
         }
 
+        bool readmodelreflections(ModelReflectionsState &result)
+        {
+            result.enabled = false;
+
+            ident *id = getident("envmapmodels");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writemodelreflections(
+            bool enabled,
+            ModelReflectionsState &result)
+        {
+            if(!readmodelreflections(result))
+                return false;
+
+            ident *id = getident("envmapmodels");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            const bool changed = *id->storage.i != value;
+            if(!changed)
+            {
+                if(!readmodelreflections(result))
+                    return false;
+                return result.enabled == enabled;
+            }
+
+            if(!SDL_GL_GetCurrentContext())
+                return false;
+
+            setvarchecked(id, value);
+
+            if(!readmodelreflections(result))
+                return false;
+            return result.enabled == enabled;
+        }
+
         static DynamicLights classifydynamiclights(int max_lights)
         {
             switch(max_lights)

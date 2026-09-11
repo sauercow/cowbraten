@@ -29,6 +29,7 @@ namespace cowui
         struct WaterSurfaceEffectsState;
         struct WaterfallEffectsState;
         struct GlassReflectionsState;
+        struct ModelReflectionsState;
         struct DynamicLightsState;
         struct SoftParticlesState;
         struct SoftParticleQualityState;
@@ -175,6 +176,12 @@ namespace cowui
             const settings::GlassReflectionsState &state,
             bool available);
         void selectglassreflections(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void refreshmodelreflections();
+        void presentmodelreflections(
+            const settings::ModelReflectionsState &state,
+            bool available);
+        void selectmodelreflections(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void refreshdynamiclights();
         void presentdynamiclights(
@@ -392,6 +399,9 @@ namespace cowui
         bool glass_reflections_available = false;
         bool glass_reflections = false;
         Rml::String glass_reflections_status;
+        bool model_reflections_available = false;
+        bool model_reflections = false;
+        Rml::String model_reflections_status;
         bool dynamic_lights_available = false;
         int dynamic_lights_selected = -1;
         Rml::String dynamic_lights_label;

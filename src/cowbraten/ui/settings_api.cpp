@@ -444,6 +444,32 @@ namespace cowui
             return accepted;
         }
 
+        static void copymodelreflections(
+            const sauersettings::ModelReflectionsState &source,
+            ModelReflectionsState &result)
+        {
+            result.enabled = source.enabled;
+        }
+
+        bool readmodelreflections(ModelReflectionsState &result)
+        {
+            sauersettings::ModelReflectionsState legacy = {};
+            const bool read = sauersettings::readmodelreflections(legacy);
+            copymodelreflections(legacy, result);
+            return read;
+        }
+
+        bool writemodelreflections(
+            bool enabled,
+            ModelReflectionsState &result)
+        {
+            sauersettings::ModelReflectionsState legacy = {};
+            const bool accepted = sauersettings::writemodelreflections(
+                enabled, legacy);
+            copymodelreflections(legacy, result);
+            return accepted;
+        }
+
         static DynamicLights dynamiclights(
             sauersettings::DynamicLights setting)
         {

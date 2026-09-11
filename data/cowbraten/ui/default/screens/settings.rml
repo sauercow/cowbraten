@@ -661,6 +661,29 @@
                             </div>
                         </div>
 
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Model Reflections</div>
+                                    <div class="settings-control-description">
+                                        Add reflections of the surrounding environment to model materials designed to use them.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="model_reflections"
+                                        data-attrif-disabled="!model_reflections_available"
+                                        data-event-change="select_model_reflections(ev.checked)" />
+                                    <span data-if="model_reflections">On</span>
+                                    <span data-if="!model_reflections">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="model_reflections_status != ''">
+                                <span>{{ model_reflections_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section settings-antialiasing-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">
