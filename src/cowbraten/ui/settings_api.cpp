@@ -418,6 +418,32 @@ namespace cowui
             return accepted;
         }
 
+        static void copyglassreflections(
+            const sauersettings::GlassReflectionsState &source,
+            GlassReflectionsState &result)
+        {
+            result.enabled = source.enabled;
+        }
+
+        bool readglassreflections(GlassReflectionsState &result)
+        {
+            sauersettings::GlassReflectionsState legacy = {};
+            const bool read = sauersettings::readglassreflections(legacy);
+            copyglassreflections(legacy, result);
+            return read;
+        }
+
+        bool writeglassreflections(
+            bool enabled,
+            GlassReflectionsState &result)
+        {
+            sauersettings::GlassReflectionsState legacy = {};
+            const bool accepted = sauersettings::writeglassreflections(
+                enabled, legacy);
+            copyglassreflections(legacy, result);
+            return accepted;
+        }
+
         static DynamicLights dynamiclights(
             sauersettings::DynamicLights setting)
         {

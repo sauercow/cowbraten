@@ -993,6 +993,42 @@ namespace cowui
             return result.reflections == enabled;
         }
 
+        bool readglassreflections(GlassReflectionsState &result)
+        {
+            result.enabled = false;
+
+            ident *id = getident("glassenv");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writeglassreflections(
+            bool enabled,
+            GlassReflectionsState &result)
+        {
+            if(!readglassreflections(result))
+                return false;
+
+            ident *id = getident("glassenv");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readglassreflections(result))
+                return false;
+            return result.enabled == enabled;
+        }
+
         static DynamicLights classifydynamiclights(int max_lights)
         {
             switch(max_lights)

@@ -93,6 +93,11 @@ namespace cowui
             bool render_targets_available;
         };
 
+        struct GlassReflectionsState
+        {
+            bool enabled;
+        };
+
         enum class DynamicLights
         {
             Off,
@@ -347,6 +352,10 @@ namespace cowui
             WaterfallEffectsState &result);
         bool writewaterfallreflections(bool enabled,
             WaterfallEffectsState &result);
+
+        bool readglassreflections(GlassReflectionsState &result);
+        bool writeglassreflections(bool enabled,
+            GlassReflectionsState &result);
 
         bool readdynamiclights(DynamicLightsState &result);
         // Custom is output-only and is rejected as a write request.

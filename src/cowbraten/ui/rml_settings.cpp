@@ -350,6 +350,10 @@ namespace cowui
             constructor.Bind("waterfall_status", &waterfall_status) &&
             constructor.BindEventCallback("select_waterfall_refraction", &RmlSettings::selectwaterfallrefraction, this) &&
             constructor.BindEventCallback("select_waterfall_reflections", &RmlSettings::selectwaterfallreflections, this) &&
+            constructor.Bind("glass_reflections_available", &glass_reflections_available) &&
+            constructor.Bind("glass_reflections", &glass_reflections) &&
+            constructor.Bind("glass_reflections_status", &glass_reflections_status) &&
+            constructor.BindEventCallback("select_glass_reflections", &RmlSettings::selectglassreflections, this) &&
             constructor.Bind("dynamic_lights_available", &dynamic_lights_available) &&
             constructor.Bind("dynamic_lights_selected", &dynamic_lights_selected) &&
             constructor.Bind("dynamic_lights_label", &dynamic_lights_label) &&
@@ -890,6 +894,9 @@ namespace cowui
         waterfall_refraction_available = false;
         waterfall_reflections = false;
         waterfall_status.clear();
+        glass_reflections_available = false;
+        glass_reflections = false;
+        glass_reflections_status.clear();
         dynamic_lights_available = false;
         dynamic_lights_selected = -1;
         dynamic_lights_label.clear();
@@ -1124,6 +1131,7 @@ namespace cowui
         refreshshadowquality();
         refreshwatersurfaceeffects();
         refreshwaterfalleffects();
+        refreshglassreflections();
         refreshdynamiclights();
         refreshsoftparticles();
         refreshsoftparticlequality();
@@ -3202,6 +3210,51 @@ namespace cowui
             waterfall_status =
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("waterfall_status");
+        }
+    }
+
+    void RmlSettings::refreshglassreflections()
+    {
+        settings::GlassReflectionsState state = {};
+        const bool available = settings::readglassreflections(state);
+        presentglassreflections(state, available);
+    }
+
+    void RmlSettings::presentglassreflections(
+        const settings::GlassReflectionsState &state,
+        bool available)
+    {
+        glass_reflections_available = available;
+        glass_reflections = state.enabled;
+        glass_reflections_status = available
+            ? ""
+            : "Glass reflections state is unavailable";
+
+        model.DirtyVariable("glass_reflections_available");
+        model.DirtyVariable("glass_reflections");
+        model.DirtyVariable("glass_reflections_status");
+    }
+
+    void RmlSettings::selectglassreflections(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !glass_reflections_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GlassReflectionsState state = {};
+        const bool accepted = settings::writeglassreflections(
+            enabled, state);
+        const bool available = accepted ||
+            settings::readglassreflections(state);
+        presentglassreflections(state, available);
+        if(!accepted && available)
+        {
+            glass_reflections_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("glass_reflections_status");
         }
     }
 
