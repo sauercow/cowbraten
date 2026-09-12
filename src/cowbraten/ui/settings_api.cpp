@@ -974,6 +974,32 @@ namespace cowui
             return accepted;
         }
 
+        static void copybilinearfiltering(
+            const sauersettings::BilinearFilteringState &source,
+            BilinearFilteringState &result)
+        {
+            result.enabled = source.enabled;
+        }
+
+        bool readbilinearfiltering(BilinearFilteringState &result)
+        {
+            sauersettings::BilinearFilteringState legacy = {};
+            const bool read = sauersettings::readbilinearfiltering(legacy);
+            copybilinearfiltering(legacy, result);
+            return read;
+        }
+
+        bool writebilinearfiltering(
+            bool enabled,
+            BilinearFilteringState &result)
+        {
+            sauersettings::BilinearFilteringState legacy = {};
+            const bool accepted = sauersettings::writebilinearfiltering(
+                enabled, legacy);
+            copybilinearfiltering(legacy, result);
+            return accepted;
+        }
+
         static void copymipmapblending(const sauersettings::MipmapBlendingState &source, MipmapBlendingState &result)
         {
             switch(source.status)

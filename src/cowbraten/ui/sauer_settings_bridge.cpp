@@ -1759,6 +1759,45 @@ namespace cowui
             return *id->storage.i == value;
         }
 
+        bool readbilinearfiltering(BilinearFilteringState &result)
+        {
+            result.enabled = false;
+
+            ident *id = getident("bilinear");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 0 || id->maxval != 1 ||
+               (*id->storage.i != 0 && *id->storage.i != 1))
+            {
+                return false;
+            }
+
+            result.enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writebilinearfiltering(
+            bool enabled,
+            BilinearFilteringState &result)
+        {
+            if(!readbilinearfiltering(result))
+                return false;
+
+            ident *id = getident("bilinear");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 0 || id->maxval != 1)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readbilinearfiltering(result))
+                return false;
+            return result.enabled == enabled;
+        }
+
         static void copymipmapblending(const ::MipmapBlendingState &source, MipmapBlendingState &result)
         {
             switch(source.status)

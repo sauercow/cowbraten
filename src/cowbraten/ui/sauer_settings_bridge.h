@@ -206,6 +206,14 @@ namespace cowui
         // Native write acceptance, independent of shader selection health.
         bool writeshaderdetail(ShaderDetailLevel level, ShaderDetailState &result);
 
+        struct BilinearFilteringState
+        {
+            bool enabled;
+        };
+        bool readbilinearfiltering(BilinearFilteringState &result);
+        bool writebilinearfiltering(bool enabled,
+            BilinearFilteringState &result);
+
         enum class MipmapBlendingStatus { Unavailable, NoTextures, Verified, Mismatch, Mixed };
         struct MipmapBlendingState
         {

@@ -22,6 +22,7 @@ namespace cowui
         struct CrosshairChoice;
         struct SoundpackChoice;
         struct AnisotropyState;
+        struct BilinearFilteringState;
         struct MipmapBlendingState;
         struct ShaderDetailState;
         struct ShadowState;
@@ -214,6 +215,12 @@ namespace cowui
         void selectdecalpersistence(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void refreshanisotropy();
+        void refreshbilinearfiltering();
+        void presentbilinearfiltering(
+            const settings::BilinearFilteringState &state,
+            bool available);
+        void selectbilinearfiltering(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
         void refreshmipmapblending();
         void presentmipmapblending(const settings::MipmapBlendingState &state);
         void selectmipmapblending(Rml::DataModelHandle, Rml::Event &event,
@@ -449,6 +456,9 @@ namespace cowui
         Rml::String texture_quality_status;
         Rml::String graphics_quality_status;
         bool anisotropy_enabled = false;
+        bool bilinear_filtering = false;
+        bool bilinear_filtering_available = false;
+        Rml::String bilinear_filtering_status;
         bool mipmap_blending = false;
         bool mipmap_blending_available = false;
         Rml::String mipmap_blending_status;

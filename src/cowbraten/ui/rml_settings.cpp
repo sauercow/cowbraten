@@ -413,6 +413,10 @@ namespace cowui
             constructor.Bind("shader_detail_label", &shader_detail_label) &&
             constructor.Bind("shader_detail_status", &shader_detail_status) &&
             constructor.BindEventCallback("select_shader_detail", &RmlSettings::selectshaderdetail, this) &&
+            constructor.Bind("bilinear_filtering", &bilinear_filtering) &&
+            constructor.Bind("bilinear_filtering_available", &bilinear_filtering_available) &&
+            constructor.Bind("bilinear_filtering_status", &bilinear_filtering_status) &&
+            constructor.BindEventCallback("select_bilinear_filtering", &RmlSettings::selectbilinearfiltering, this) &&
             constructor.Bind("mipmap_blending", &mipmap_blending) &&
             constructor.Bind("mipmap_blending_available", &mipmap_blending_available) &&
             constructor.Bind("mipmap_blending_status", &mipmap_blending_status) &&
@@ -948,6 +952,8 @@ namespace cowui
         texture_quality_status.clear();
         graphics_quality_status.clear();
         anisotropy_enabled = false;
+        bilinear_filtering = bilinear_filtering_available = false;
+        bilinear_filtering_status.clear();
         mipmap_blending = mipmap_blending_available = false;
         mipmap_blending_status.clear();
         anisotropy_maximum = 0;
@@ -1159,6 +1165,7 @@ namespace cowui
         refreshglarepreset();
         refreshtexturequality();
         refreshanisotropy();
+        refreshbilinearfiltering();
         refreshmipmapblending();
         settings::Video current;
         if(!settings::readvideo(current))
@@ -2668,6 +2675,13 @@ namespace cowui
         presentanisotropy(state);
     }
 
+    void RmlSettings::refreshbilinearfiltering()
+    {
+        settings::BilinearFilteringState state = {};
+        const bool available = settings::readbilinearfiltering(state);
+        presentbilinearfiltering(state, available);
+    }
+
     void RmlSettings::refreshmipmapblending()
     {
         settings::MipmapBlendingState state = {};
@@ -2736,6 +2750,44 @@ namespace cowui
         {
             shader_detail_status = "Change not accepted. " + shader_detail_status;
             model.DirtyVariable("shader_detail_status");
+        }
+    }
+
+    void RmlSettings::presentbilinearfiltering(
+        const settings::BilinearFilteringState &state,
+        bool available)
+    {
+        bilinear_filtering_available = available;
+        bilinear_filtering = state.enabled;
+        bilinear_filtering_status = available
+            ? ""
+            : "Bilinear filtering state is unavailable";
+
+        model.DirtyVariable("bilinear_filtering_available");
+        model.DirtyVariable("bilinear_filtering");
+        model.DirtyVariable("bilinear_filtering_status");
+    }
+
+    void RmlSettings::selectbilinearfiltering(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !bilinear_filtering_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::BilinearFilteringState state = {};
+        const bool accepted = settings::writebilinearfiltering(
+            enabled, state);
+        const bool available = accepted ||
+            settings::readbilinearfiltering(state);
+        presentbilinearfiltering(state, available);
+        if(!accepted && available)
+        {
+            bilinear_filtering_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("bilinear_filtering_status");
         }
     }
 
