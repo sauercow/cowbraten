@@ -1731,6 +1731,55 @@ namespace cowui
                 result.quality == quality;
         }
 
+        bool readtexturereduction(TextureReductionState &result)
+        {
+            result.levels = 0;
+            result.minimum = 0;
+            result.maximum = 0;
+
+            ident *id = getident("texreduce");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 0 ||
+               id->maxval != 12 || *id->storage.i < id->minval ||
+               *id->storage.i > id->maxval)
+            {
+                return false;
+            }
+
+            result.levels = *id->storage.i;
+            result.minimum = id->minval;
+            result.maximum = id->maxval;
+            return true;
+        }
+
+        bool writetexturereduction(
+            int levels,
+            TextureReductionState &result)
+        {
+            if(!readtexturereduction(result) || levels < result.minimum ||
+               levels > result.maximum)
+            {
+                return false;
+            }
+
+            if(levels == result.levels)
+                return true;
+
+            ident *id = getident("texreduce");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != result.minimum ||
+               id->maxval != result.maximum)
+            {
+                return false;
+            }
+
+            setvarchecked(id, levels);
+
+            if(!readtexturereduction(result))
+                return false;
+            return result.levels == levels;
+        }
+
         static void copyshaderdetail(const ::ShaderDetailState &source, ShaderDetailState &result)
         {
             result.requested = source.requested;

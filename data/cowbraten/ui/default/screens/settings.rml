@@ -1032,6 +1032,40 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Texture Reduction</div>
+                                    <div class="settings-control-description">
+                                        Reduces the width and height of eligible world and material textures before upload. Each step halves both dimensions, lowering texture memory use at the cost of detail. Existing textures update when graphics changes are applied.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ texture_reduction_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">Off</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="12"
+                                    step="1"
+                                    value="0"
+                                    data-attr-min="texture_reduction_minimum"
+                                    data-attr-max="texture_reduction_maximum"
+                                    data-attr-value="texture_reduction"
+                                    data-attrif-disabled="!texture_reduction_available"
+                                    onchange="settings.texture-reduction" />
+                                <span class="settings-range-bound settings-range-maximum">1/4096</span>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="texture_reduction_status != ''">
+                                <span>{{ texture_reduction_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">

@@ -406,6 +406,12 @@ namespace cowui
             constructor.Bind("texture_quality_label", &texture_quality_label) &&
             constructor.Bind("texture_quality_status", &texture_quality_status) &&
             constructor.BindEventCallback("select_texture_quality", &RmlSettings::selecttexturequality, this) &&
+            constructor.Bind("texture_reduction", &texture_reduction) &&
+            constructor.Bind("texture_reduction_minimum", &texture_reduction_minimum) &&
+            constructor.Bind("texture_reduction_maximum", &texture_reduction_maximum) &&
+            constructor.Bind("texture_reduction_available", &texture_reduction_available) &&
+            constructor.Bind("texture_reduction_label", &texture_reduction_label) &&
+            constructor.Bind("texture_reduction_status", &texture_reduction_status) &&
             constructor.Bind("graphics_quality_status", &graphics_quality_status) &&
             constructor.Bind("anisotropy_enabled", &anisotropy_enabled) &&
             constructor.Bind("shader_detail_available", &shader_detail_available) &&
@@ -711,6 +717,10 @@ namespace cowui
             router.registeraction(
                 "settings.fps-limit",
                 changefpslimitaction
+            ) &&
+            router.registeraction(
+                "settings.texture-reduction",
+                changetexturereductionaction
             ) &&
             router.registeraction(
                 "settings.audio.sound-volume",
@@ -1164,6 +1174,7 @@ namespace cowui
         refreshmotionblurintensity();
         refreshglarepreset();
         refreshtexturequality();
+        refreshtexturereduction();
         refreshanisotropy();
         refreshbilinearfiltering();
         refreshmipmapblending();
@@ -4136,6 +4147,76 @@ namespace cowui
             }
             model.DirtyVariable("texture_quality_status");
         }
+    }
+
+    void RmlSettings::refreshtexturereduction()
+    {
+        settings::TextureReductionState state = {};
+        const bool available = settings::readtexturereduction(state);
+        presenttexturereduction(state, available);
+    }
+
+    void RmlSettings::presenttexturereduction(
+        const settings::TextureReductionState &state,
+        bool available)
+    {
+        texture_reduction_available = available;
+        texture_reduction_status.clear();
+
+        if(!available)
+        {
+            texture_reduction_label = "Unavailable";
+            texture_reduction_status =
+                "Texture Reduction state is unavailable";
+        }
+        else
+        {
+            texture_reduction = state.levels;
+            texture_reduction_minimum = state.minimum;
+            texture_reduction_maximum = state.maximum;
+            if(!state.levels)
+            {
+                texture_reduction_label = "Off";
+            }
+            else
+            {
+                char label[64];
+                std::snprintf(label, sizeof(label),
+                    "1/%d width & height", 1 << state.levels);
+                texture_reduction_label = label;
+            }
+        }
+
+        model.DirtyVariable("texture_reduction");
+        model.DirtyVariable("texture_reduction_minimum");
+        model.DirtyVariable("texture_reduction_maximum");
+        model.DirtyVariable("texture_reduction_available");
+        model.DirtyVariable("texture_reduction_label");
+        model.DirtyVariable("texture_reduction_status");
+    }
+
+    void RmlSettings::changetexturereductionaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->texture_reduction
+        );
+        settings::TextureReductionState state = {};
+        const bool accepted = settings::writetexturereduction(
+            requested, state);
+        const bool available = accepted ||
+            settings::readtexturereduction(state);
+        instance->presenttexturereduction(state, available);
+        if(!accepted && available)
+        {
+            instance->texture_reduction_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("texture_reduction_status");
+        }
+        event.StopPropagation();
     }
 
     void RmlSettings::vsyncaction(Rml::Event &event)

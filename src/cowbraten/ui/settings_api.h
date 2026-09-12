@@ -194,6 +194,13 @@ namespace cowui
             int texture_size_limit;
         };
 
+        struct TextureReductionState
+        {
+            int levels;
+            int minimum;
+            int maximum;
+        };
+
         enum class ShaderDetailLevel { Performance = 0, Low = 1, Medium = 2, Full = 3 };
         struct ShaderDetailState
         {
@@ -425,6 +432,10 @@ namespace cowui
         // Custom is output-only and is rejected as a write request.
         bool writetexturequality(TextureQuality quality,
             TextureQualityState &result);
+
+        bool readtexturereduction(TextureReductionState &result);
+        bool writetexturereduction(int levels,
+            TextureReductionState &result);
 
         bool readanisotropy(AnisotropyState &result);
         // Returns the callback's verification result without a second scan.

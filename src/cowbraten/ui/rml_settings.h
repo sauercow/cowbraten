@@ -40,6 +40,7 @@ namespace cowui
         struct MotionBlurIntensityState;
         struct GlarePresetState;
         struct TextureQualityState;
+        struct TextureReductionState;
     }
 
     class RmlActionRouter;
@@ -249,6 +250,10 @@ namespace cowui
             bool available);
         void selecttexturequality(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
+        void refreshtexturereduction();
+        void presenttexturereduction(
+            const settings::TextureReductionState &state,
+            bool available);
         void presentanisotropy(const settings::AnisotropyState &state);
         void selectanisotropy(Rml::DataModelHandle, Rml::Event &event,
                               const Rml::VariantList &arguments);
@@ -321,6 +326,7 @@ namespace cowui
         static void grassaction(Rml::Event &event);
         static void motionbluraction(Rml::Event &event);
         static void changefpslimitaction(Rml::Event &event);
+        static void changetexturereductionaction(Rml::Event &event);
         static void changesoundvolumeaction(Rml::Event &event);
         static void changemusicvolumeaction(Rml::Event &event);
         static void decreasesensitivityaction(Rml::Event &event);
@@ -454,6 +460,12 @@ namespace cowui
         int texture_quality_selected = -1;
         Rml::String texture_quality_label;
         Rml::String texture_quality_status;
+        int texture_reduction = 0;
+        int texture_reduction_minimum = 0;
+        int texture_reduction_maximum = 12;
+        bool texture_reduction_available = false;
+        Rml::String texture_reduction_label;
+        Rml::String texture_reduction_status;
         Rml::String graphics_quality_status;
         bool anisotropy_enabled = false;
         bool bilinear_filtering = false;

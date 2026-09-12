@@ -948,6 +948,34 @@ namespace cowui
             return accepted;
         }
 
+        static void copytexturereduction(
+            const sauersettings::TextureReductionState &source,
+            TextureReductionState &result)
+        {
+            result.levels = source.levels;
+            result.minimum = source.minimum;
+            result.maximum = source.maximum;
+        }
+
+        bool readtexturereduction(TextureReductionState &result)
+        {
+            sauersettings::TextureReductionState legacy = {};
+            const bool read = sauersettings::readtexturereduction(legacy);
+            copytexturereduction(legacy, result);
+            return read;
+        }
+
+        bool writetexturereduction(
+            int levels,
+            TextureReductionState &result)
+        {
+            sauersettings::TextureReductionState legacy = {};
+            const bool accepted = sauersettings::writetexturereduction(
+                levels, legacy);
+            copytexturereduction(legacy, result);
+            return accepted;
+        }
+
         static void copyshaderdetail(const sauersettings::ShaderDetailState &source, ShaderDetailState &result)
         {
             result.requested = source.requested;
