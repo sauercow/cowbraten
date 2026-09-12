@@ -48,6 +48,10 @@ namespace cowui
     void showsettings();
     void showtest();
     void close();
+    // The modal session survives temporary console/chat ownership.
+    bool modalactive();
+    // RmlUi receives events only while the console is not taking its turn.
+    bool receivesinput();
     bool visible();
 }
 

@@ -1052,7 +1052,6 @@ void checkinput()
 {
     if(interceptkeysym) clearinterceptkey();
     //int lasttype = 0, lastbut = 0;
-    const bool ui_visible = cowui::visible();
     int previousdrawablewidth, previousdrawableheight;
     getdrawabledimensions(previousdrawablewidth, previousdrawableheight);
     bool mousemoved = false;
@@ -1072,7 +1071,8 @@ void checkinput()
                 return;
 
             case SDL_TEXTINPUT:
-                if(cowui::processevent(event))
+            {
+                if(cowui::processevent(event) || cowui::receivesinput())
                     break;
 
                 if(textinputmask && int(event.text.timestamp-textinputtime) >= textinputfilter)
@@ -1082,15 +1082,21 @@ void checkinput()
                     if(len > 0) { buf[len] = '\0'; processtextinput((const char *)buf, len); }
                 }
                 break;
+            }
 
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                if(cowui::processevent(event))
+            {
+                if(cowui::processevent(event) || cowui::receivesinput())
+                    break;
+
+                if(event.key.keysym.sym == SDLK_ESCAPE && event.key.repeat)
                     break;
 
                 if(keyrepeatmask || !event.key.repeat)
                     processkey(event.key.keysym.sym, event.key.state==SDL_PRESSED, event.key.keysym.mod | SDL_GetModState());
                 break;
+            }
 
             case SDL_WINDOWEVENT:
                 switch(event.window.event)
@@ -1168,26 +1174,27 @@ void checkinput()
                 break;
 
             case SDL_MOUSEMOTION:
-                if(ui_visible)
-                {
-                    cowui::processevent(event);
+            {
+                const bool ui_modal = cowui::modalactive();
+                if(cowui::processevent(event) || ui_modal || cowui::modalactive())
                     break;
-                }
 
                 if(grabinput)
                 {
                     int dx = event.motion.xrel, dy = event.motion.yrel;
-                    if(!ui_visible)
-                        checkmousemotion(dx, dy);
+                    checkmousemotion(dx, dy);
                     if(!g3d_movecursor(dx, dy)) mousemove(dx, dy);
                     mousemoved = true;
                 }
                 else if(shouldgrab) inputgrab(grabinput = true);
                 break;
+            }
 
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
-                if(cowui::processevent(event) || ui_visible)
+            {
+                const bool ui_modal = cowui::modalactive();
+                if(cowui::processevent(event) || ui_modal || cowui::modalactive())
                     break;
 
                 //if(lasttype==event.type && lastbut==event.button.button) break; // why?? get event twice without it
@@ -1205,19 +1212,20 @@ void checkinput()
                 //lasttype = event.type;
                 //lastbut = event.button.button;
                 break;
+            }
 
             case SDL_MOUSEWHEEL:
-                if(ui_visible)
-                {
-                    cowui::processevent(event);
+            {
+                const bool ui_modal = cowui::modalactive();
+                if(cowui::processevent(event) || ui_modal || cowui::modalactive())
                     break;
-                }
 
                 if(event.wheel.y > 0) { processkey(-4, true); processkey(-4, false); }
                 else if(event.wheel.y < 0) { processkey(-5, true); processkey(-5, false); }
                 else if(event.wheel.x > 0) { processkey(-8, true); processkey(-8, false); }
                 else if(event.wheel.x < 0) { processkey(-9, true); processkey(-9, false); }
                 break;
+            }
         }
     }
     // RESIZED and SIZE_CHANGED commonly arrive together; query once per batch.

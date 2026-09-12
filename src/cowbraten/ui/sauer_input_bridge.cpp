@@ -10,12 +10,18 @@ namespace cowui
     {
         void beginmenu()
         {
+            releasepressedbinds();
             setinputgrabinhibited(true);
         }
 
         void endmenu()
         {
             setinputgrabinhibited(false);
+        }
+
+        bool canclosemenu()
+        {
+            return isconnected(true);
         }
 
         void keyrepeat(bool enabled)

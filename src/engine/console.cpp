@@ -436,6 +436,11 @@ static char *&getbindaction(keym &key)
         : key.actions[keym::ACTION_DEFAULT];
 }
 
+static bool releasepressedbindspending = false;
+static bool releasingpressedbinds = false;
+
+static void releasepressedbindsnow();
+
 void execbind(keym &k, bool isdown)
 {
     loopv(releaseactions)
@@ -458,6 +463,46 @@ void execbind(keym &k, bool isdown)
         if(keyaction != action) delete[] keyaction;
     }
     k.pressed = isdown;
+
+    if(releasepressedbindspending && !keypressed && !releasingpressedbinds)
+        releasepressedbinds();
+}
+
+static void releasepressedbindsnow()
+{
+    vector<int> pressed;
+    enumerate(keyms, keym, key,
+    {
+        if(key.pressed)
+            pressed.add(key.code);
+    });
+
+    loopv(pressed)
+    {
+        keym *key = keyms.access(pressed[i]);
+        if(key && key->pressed)
+            execbind(*key, false);
+    }
+}
+
+void releasepressedbinds()
+{
+    // Opening a UI can be the action of the key currently being dispatched.
+    // Defer until that press has entered the normal pressed bookkeeping.
+    if(keypressed || releasingpressedbinds)
+    {
+        releasepressedbindspending = true;
+        return;
+    }
+
+    do
+    {
+        releasepressedbindspending = false;
+        releasingpressedbinds = true;
+        releasepressedbindsnow();
+        releasingpressedbinds = false;
+    }
+    while(releasepressedbindspending);
 }
 
 bool commandlineactive()

@@ -9,6 +9,7 @@ namespace cowui
     {
         void beginmenu();
         void endmenu();
+        bool canclosemenu();
 
         void keyrepeat(bool enabled);
         void textinput(bool enabled);

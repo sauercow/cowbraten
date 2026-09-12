@@ -796,7 +796,18 @@ namespace cowui
             case SDL_KEYDOWN:
             {
                 if(event.key.keysym.sym == SDLK_ESCAPE)
+                {
+                    if(!event.key.repeat)
+                    {
+                        const bool can_close = sauerinput::canclosemenu();
+                        if(active_screen->id != ScreenId::Main &&
+                           !can_close)
+                            show(ScreenId::Main);
+                        else if(can_close)
+                            close();
+                    }
                     return true;
+                }
 
                 const bool capture = text_input_handler.active();
                 bool propagate = context->ProcessKeyDown(
@@ -816,12 +827,6 @@ namespace cowui
 
             case SDL_KEYUP:
             {
-                if(event.key.keysym.sym == SDLK_ESCAPE)
-                {
-                    close();
-                    return true;
-                }
-
                 const bool capture = text_input_handler.active();
                 const bool propagate = context->ProcessKeyUp(
                     keyidentifier(event.key.keysym.sym),
@@ -983,8 +988,18 @@ namespace cowui
         sauerinput::endmenu();
     }
 
-    bool visible()
+    bool modalactive()
     {
         return active_screen != nullptr;
+    }
+
+    bool receivesinput()
+    {
+        return modalactive() && !console_suspended;
+    }
+
+    bool visible()
+    {
+        return modalactive();
     }
 }
