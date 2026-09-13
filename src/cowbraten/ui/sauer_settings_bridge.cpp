@@ -913,6 +913,60 @@ namespace cowui
             return result.liquid_animation == enabled;
         }
 
+        bool readwaterenvironmentreflections(
+            WaterEnvironmentReflectionsState &result)
+        {
+            result.enabled = false;
+
+            ident *id = getident("waterenvmap");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 0 ||
+               id->maxval != 1 ||
+               (*id->storage.i != 0 && *id->storage.i != 1))
+            {
+                return false;
+            }
+
+            result.enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writewaterenvironmentreflections(
+            bool enabled,
+            WaterEnvironmentReflectionsState &result)
+        {
+            if(!readwaterenvironmentreflections(result))
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(result.enabled == enabled)
+                return true;
+
+            if(!SDL_GL_GetCurrentContext())
+                return false;
+
+            ident *id = getident("waterenvmap");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 0 ||
+               id->maxval != 1 ||
+               (*id->storage.i != 0 && *id->storage.i != 1))
+            {
+                return false;
+            }
+            if(*id->storage.i == value)
+            {
+                if(!readwaterenvironmentreflections(result))
+                    return false;
+                return result.enabled == enabled;
+            }
+
+            setvarchecked(id, value);
+
+            if(!readwaterenvironmentreflections(result))
+                return false;
+            return result.enabled == enabled;
+        }
+
         static bool waterrenderresolution(
             int exponent,
             WaterRenderResolution &level)

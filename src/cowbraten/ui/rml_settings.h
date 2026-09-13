@@ -28,6 +28,7 @@ namespace cowui
         struct ShadowState;
         struct ShadowQualityState;
         struct WaterSurfaceEffectsState;
+        struct WaterEnvironmentReflectionsState;
         struct WaterRenderResolutionState;
         struct WaterfallEffectsState;
         struct GlassReflectionsState;
@@ -168,6 +169,12 @@ namespace cowui
         void selectwatercaustics(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void selectliquidanimation(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void refreshwaterenvironmentreflections();
+        void presentwaterenvironmentreflections(
+            const settings::WaterEnvironmentReflectionsState &state,
+            bool available);
+        void selectwaterenvironmentreflections(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void refreshwaterrenderresolution();
         void presentwaterrenderresolution(
@@ -432,6 +439,9 @@ namespace cowui
         bool water_caustics = false;
         bool liquid_surface_animation = false;
         Rml::String water_surface_status;
+        bool water_environment_reflections = false;
+        bool water_environment_reflections_available = false;
+        Rml::String water_environment_reflections_status;
         bool water_render_resolution_available = false;
         int water_render_resolution_selected = -1;
         Rml::String water_render_resolution_label;

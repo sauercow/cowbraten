@@ -378,6 +378,35 @@ namespace cowui
             return accepted;
         }
 
+        static void copywaterenvironmentreflections(
+            const sauersettings::WaterEnvironmentReflectionsState &source,
+            WaterEnvironmentReflectionsState &result)
+        {
+            result.enabled = source.enabled;
+        }
+
+        bool readwaterenvironmentreflections(
+            WaterEnvironmentReflectionsState &result)
+        {
+            sauersettings::WaterEnvironmentReflectionsState legacy = {};
+            const bool read =
+                sauersettings::readwaterenvironmentreflections(legacy);
+            copywaterenvironmentreflections(legacy, result);
+            return read;
+        }
+
+        bool writewaterenvironmentreflections(
+            bool enabled,
+            WaterEnvironmentReflectionsState &result)
+        {
+            sauersettings::WaterEnvironmentReflectionsState legacy = {};
+            const bool accepted =
+                sauersettings::writewaterenvironmentreflections(
+                    enabled, legacy);
+            copywaterenvironmentreflections(legacy, result);
+            return accepted;
+        }
+
         static WaterRenderResolution waterrenderresolution(
             sauersettings::WaterRenderResolution level)
         {

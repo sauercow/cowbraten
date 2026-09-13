@@ -343,6 +343,10 @@ namespace cowui
             constructor.BindEventCallback("select_water_reflections", &RmlSettings::selectwaterreflections, this) &&
             constructor.BindEventCallback("select_water_caustics", &RmlSettings::selectwatercaustics, this) &&
             constructor.BindEventCallback("select_liquid_animation", &RmlSettings::selectliquidanimation, this) &&
+            constructor.Bind("water_environment_reflections", &water_environment_reflections) &&
+            constructor.Bind("water_environment_reflections_available", &water_environment_reflections_available) &&
+            constructor.Bind("water_environment_reflections_status", &water_environment_reflections_status) &&
+            constructor.BindEventCallback("select_water_environment_reflections", &RmlSettings::selectwaterenvironmentreflections, this) &&
             constructor.Bind("water_render_resolution_available", &water_render_resolution_available) &&
             constructor.Bind("water_render_resolution_selected", &water_render_resolution_selected) &&
             constructor.Bind("water_render_resolution_label", &water_render_resolution_label) &&
@@ -930,6 +934,9 @@ namespace cowui
         water_caustics = false;
         liquid_surface_animation = false;
         water_surface_status.clear();
+        water_environment_reflections = false;
+        water_environment_reflections_available = false;
+        water_environment_reflections_status.clear();
         water_render_resolution_available = false;
         water_render_resolution_selected = -1;
         water_render_resolution_label.clear();
@@ -1195,6 +1202,7 @@ namespace cowui
         refreshshadows();
         refreshshadowquality();
         refreshwatersurfaceeffects();
+        refreshwaterenvironmentreflections();
         refreshwaterrenderresolution();
         refreshwaterfalleffects();
         refreshglassreflections();
@@ -3254,6 +3262,55 @@ namespace cowui
             water_surface_status =
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("water_surface_status");
+        }
+    }
+
+    void RmlSettings::refreshwaterenvironmentreflections()
+    {
+        settings::WaterEnvironmentReflectionsState state = {};
+        const bool available =
+            settings::readwaterenvironmentreflections(state);
+        presentwaterenvironmentreflections(state, available);
+    }
+
+    void RmlSettings::presentwaterenvironmentreflections(
+        const settings::WaterEnvironmentReflectionsState &state,
+        bool available)
+    {
+        water_environment_reflections_available = available;
+        water_environment_reflections = state.enabled;
+        water_environment_reflections_status = available
+            ? ""
+            : "Water environment reflections state is unavailable";
+
+        model.DirtyVariable("water_environment_reflections_available");
+        model.DirtyVariable("water_environment_reflections");
+        model.DirtyVariable("water_environment_reflections_status");
+    }
+
+    void RmlSettings::selectwaterenvironmentreflections(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 ||
+           !water_environment_reflections_available)
+        {
+            return;
+        }
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::WaterEnvironmentReflectionsState state = {};
+        const bool accepted =
+            settings::writewaterenvironmentreflections(enabled, state);
+        const bool available = accepted ||
+            settings::readwaterenvironmentreflections(state);
+        presentwaterenvironmentreflections(state, available);
+        if(!accepted && available)
+        {
+            water_environment_reflections_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("water_environment_reflections_status");
         }
     }
 

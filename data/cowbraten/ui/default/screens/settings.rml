@@ -550,6 +550,29 @@
                             </div>
                         </div>
 
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Water Environment Reflections</div>
+                                    <div class="settings-control-description">
+                                        Use a cubemap for lower-cost water reflections when Dynamic Water Reflections are off. Appearance depends on the map's water material and sky.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="water_environment_reflections"
+                                        data-attrif-disabled="!water_environment_reflections_available"
+                                        data-event-change="select_water_environment_reflections(ev.checked)" />
+                                    <span data-if="water_environment_reflections">On</span>
+                                    <span data-if="!water_environment_reflections">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="water_environment_reflections_status != ''">
+                                <span>{{ water_environment_reflections_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section settings-antialiasing-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">

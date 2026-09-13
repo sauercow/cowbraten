@@ -86,6 +86,11 @@ namespace cowui
             bool render_targets_available;
         };
 
+        struct WaterEnvironmentReflectionsState
+        {
+            bool enabled;
+        };
+
         enum class WaterRenderResolution
         {
             Minimum,
@@ -433,6 +438,11 @@ namespace cowui
         bool writecaustics(bool enabled, WaterSurfaceEffectsState &result);
         bool writeliquidanimation(bool enabled,
             WaterSurfaceEffectsState &result);
+
+        bool readwaterenvironmentreflections(
+            WaterEnvironmentReflectionsState &result);
+        bool writewaterenvironmentreflections(bool enabled,
+            WaterEnvironmentReflectionsState &result);
 
         bool readwaterrenderresolution(
             WaterRenderResolutionState &result);
