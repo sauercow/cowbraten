@@ -2613,7 +2613,7 @@ extern const cubemapside cubemapsides[6] =
     { GL_TEXTURE_CUBE_MAP_POSITIVE_Z, "up", false, false, true  },
 };
 
-VARFP(envmapsize, 4, 7, 10, setupmaterials());
+VARFP(envmapsize, 4, 7, 10, initwarning("texture quality", INIT_LOAD));
 
 Texture *cubemaploadwildcard(Texture *t, const char *name, bool mipit, bool msg, bool transient = false)
 {
