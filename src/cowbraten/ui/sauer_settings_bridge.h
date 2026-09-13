@@ -86,6 +86,22 @@ namespace cowui
             bool render_targets_available;
         };
 
+        enum class WaterRenderResolution
+        {
+            Minimum,
+            Low,
+            Medium,
+            High,
+            VeryHigh,
+            Ultra
+        };
+        struct WaterRenderResolutionState
+        {
+            WaterRenderResolution level;
+            int configured_exponent;
+            int requested_dimension;
+        };
+
         struct WaterfallEffectsState
         {
             bool refraction;
@@ -400,6 +416,11 @@ namespace cowui
         bool writecaustics(bool enabled, WaterSurfaceEffectsState &result);
         bool writeliquidanimation(bool enabled,
             WaterSurfaceEffectsState &result);
+
+        bool readwaterrenderresolution(
+            WaterRenderResolutionState &result);
+        bool writewaterrenderresolution(WaterRenderResolution level,
+            WaterRenderResolutionState &result);
 
         bool readwaterfalleffects(WaterfallEffectsState &result);
         bool writewaterfallrefraction(bool enabled,

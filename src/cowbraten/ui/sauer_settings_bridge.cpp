@@ -913,6 +913,91 @@ namespace cowui
             return result.liquid_animation == enabled;
         }
 
+        static bool waterrenderresolution(
+            int exponent,
+            WaterRenderResolution &level)
+        {
+            switch(exponent)
+            {
+                case 6: level = WaterRenderResolution::Minimum; return true;
+                case 7: level = WaterRenderResolution::Low; return true;
+                case 8: level = WaterRenderResolution::Medium; return true;
+                case 9: level = WaterRenderResolution::High; return true;
+                case 10: level = WaterRenderResolution::VeryHigh; return true;
+                case 11: level = WaterRenderResolution::Ultra; return true;
+            }
+            return false;
+        }
+
+        static bool waterrenderresolution(
+            WaterRenderResolution level,
+            int &exponent)
+        {
+            switch(level)
+            {
+                case WaterRenderResolution::Minimum: exponent = 6; return true;
+                case WaterRenderResolution::Low: exponent = 7; return true;
+                case WaterRenderResolution::Medium: exponent = 8; return true;
+                case WaterRenderResolution::High: exponent = 9; return true;
+                case WaterRenderResolution::VeryHigh: exponent = 10; return true;
+                case WaterRenderResolution::Ultra: exponent = 11; return true;
+            }
+            return false;
+        }
+
+        bool readwaterrenderresolution(
+            WaterRenderResolutionState &result)
+        {
+            result.level = WaterRenderResolution::Minimum;
+            result.configured_exponent = 0;
+            result.requested_dimension = 0;
+
+            ident *id = getident("reflectsize");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 6 ||
+               id->maxval != 11 || *id->storage.i < id->minval ||
+               *id->storage.i > id->maxval ||
+               !waterrenderresolution(*id->storage.i, result.level))
+            {
+                return false;
+            }
+
+            result.configured_exponent = *id->storage.i;
+            result.requested_dimension = 1 << result.configured_exponent;
+            return true;
+        }
+
+        bool writewaterrenderresolution(
+            WaterRenderResolution level,
+            WaterRenderResolutionState &result)
+        {
+            if(!readwaterrenderresolution(result))
+                return false;
+
+            int exponent = 0;
+            if(!waterrenderresolution(level, exponent))
+                return false;
+            if(result.configured_exponent == exponent)
+                return true;
+
+            ident *id = getident("reflectsize");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 6 ||
+               id->maxval != 11 || *id->storage.i < id->minval ||
+               *id->storage.i > id->maxval ||
+               !SDL_GL_GetCurrentContext())
+            {
+                return false;
+            }
+
+            setvarchecked(id, exponent);
+
+            if(!readwaterrenderresolution(result))
+                return false;
+            return result.level == level &&
+                result.configured_exponent == exponent;
+        }
+
         bool readwaterfalleffects(WaterfallEffectsState &result)
         {
             result.refraction = false;

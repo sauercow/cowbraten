@@ -343,6 +343,12 @@ namespace cowui
             constructor.BindEventCallback("select_water_reflections", &RmlSettings::selectwaterreflections, this) &&
             constructor.BindEventCallback("select_water_caustics", &RmlSettings::selectwatercaustics, this) &&
             constructor.BindEventCallback("select_liquid_animation", &RmlSettings::selectliquidanimation, this) &&
+            constructor.Bind("water_render_resolution_available", &water_render_resolution_available) &&
+            constructor.Bind("water_render_resolution_selected", &water_render_resolution_selected) &&
+            constructor.Bind("water_render_resolution_label", &water_render_resolution_label) &&
+            constructor.Bind("water_render_resolution_dimension", &water_render_resolution_dimension) &&
+            constructor.Bind("water_render_resolution_status", &water_render_resolution_status) &&
+            constructor.BindEventCallback("select_water_render_resolution", &RmlSettings::selectwaterrenderresolution, this) &&
             constructor.Bind("waterfall_state_available", &waterfall_state_available) &&
             constructor.Bind("waterfall_refraction", &waterfall_refraction) &&
             constructor.Bind("waterfall_refraction_available", &waterfall_refraction_available) &&
@@ -918,6 +924,11 @@ namespace cowui
         water_caustics = false;
         liquid_surface_animation = false;
         water_surface_status.clear();
+        water_render_resolution_available = false;
+        water_render_resolution_selected = -1;
+        water_render_resolution_label.clear();
+        water_render_resolution_dimension.clear();
+        water_render_resolution_status.clear();
         waterfall_state_available = false;
         waterfall_refraction = false;
         waterfall_refraction_available = false;
@@ -1173,6 +1184,7 @@ namespace cowui
         refreshshadows();
         refreshshadowquality();
         refreshwatersurfaceeffects();
+        refreshwaterrenderresolution();
         refreshwaterfalleffects();
         refreshglassreflections();
         refreshmodelreflections();
@@ -3230,6 +3242,105 @@ namespace cowui
             water_surface_status =
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("water_surface_status");
+        }
+    }
+
+    void RmlSettings::refreshwaterrenderresolution()
+    {
+        settings::WaterRenderResolutionState state = {};
+        const bool available = settings::readwaterrenderresolution(state);
+        presentwaterrenderresolution(state, available);
+    }
+
+    void RmlSettings::presentwaterrenderresolution(
+        const settings::WaterRenderResolutionState &state,
+        bool available)
+    {
+        water_render_resolution_available = available;
+        water_render_resolution_selected = -1;
+        water_render_resolution_dimension.clear();
+        water_render_resolution_status.clear();
+
+        if(!available)
+        {
+            water_render_resolution_label = "Unavailable";
+            water_render_resolution_status =
+                "Water reflection/refraction resolution state is unavailable";
+        }
+        else
+        {
+            switch(state.level)
+            {
+                case settings::WaterRenderResolution::Minimum:
+                    water_render_resolution_selected = 0;
+                    water_render_resolution_label = "Minimum";
+                    break;
+                case settings::WaterRenderResolution::Low:
+                    water_render_resolution_selected = 1;
+                    water_render_resolution_label = "Low";
+                    break;
+                case settings::WaterRenderResolution::Medium:
+                    water_render_resolution_selected = 2;
+                    water_render_resolution_label = "Medium";
+                    break;
+                case settings::WaterRenderResolution::High:
+                    water_render_resolution_selected = 3;
+                    water_render_resolution_label = "High";
+                    break;
+                case settings::WaterRenderResolution::VeryHigh:
+                    water_render_resolution_selected = 4;
+                    water_render_resolution_label = "Very High";
+                    break;
+                case settings::WaterRenderResolution::Ultra:
+                    water_render_resolution_selected = 5;
+                    water_render_resolution_label = "Ultra";
+                    break;
+            }
+
+            char dimension[32];
+            std::snprintf(dimension, sizeof(dimension), "%dx%d",
+                state.requested_dimension, state.requested_dimension);
+            water_render_resolution_dimension = dimension;
+        }
+
+        model.DirtyVariable("water_render_resolution_available");
+        model.DirtyVariable("water_render_resolution_selected");
+        model.DirtyVariable("water_render_resolution_label");
+        model.DirtyVariable("water_render_resolution_dimension");
+        model.DirtyVariable("water_render_resolution_status");
+    }
+
+    void RmlSettings::selectwaterrenderresolution(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !water_render_resolution_available)
+            return;
+
+        settings::WaterRenderResolution level;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: level = settings::WaterRenderResolution::Minimum; break;
+            case 1: level = settings::WaterRenderResolution::Low; break;
+            case 2: level = settings::WaterRenderResolution::Medium; break;
+            case 3: level = settings::WaterRenderResolution::High; break;
+            case 4: level = settings::WaterRenderResolution::VeryHigh; break;
+            case 5: level = settings::WaterRenderResolution::Ultra; break;
+            default: return;
+        }
+
+        settings::WaterRenderResolutionState state = {};
+        const bool accepted = settings::writewaterrenderresolution(
+            level, state);
+        const bool available = accepted ||
+            settings::readwaterrenderresolution(state);
+        presentwaterrenderresolution(state, available);
+        if(!accepted && available)
+        {
+            water_render_resolution_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("water_render_resolution_status");
         }
     }
 

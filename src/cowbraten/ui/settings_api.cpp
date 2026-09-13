@@ -378,6 +378,93 @@ namespace cowui
             return accepted;
         }
 
+        static WaterRenderResolution waterrenderresolution(
+            sauersettings::WaterRenderResolution level)
+        {
+            switch(level)
+            {
+                case sauersettings::WaterRenderResolution::Minimum:
+                    return WaterRenderResolution::Minimum;
+                case sauersettings::WaterRenderResolution::Low:
+                    return WaterRenderResolution::Low;
+                case sauersettings::WaterRenderResolution::Medium:
+                    return WaterRenderResolution::Medium;
+                case sauersettings::WaterRenderResolution::High:
+                    return WaterRenderResolution::High;
+                case sauersettings::WaterRenderResolution::VeryHigh:
+                    return WaterRenderResolution::VeryHigh;
+                case sauersettings::WaterRenderResolution::Ultra:
+                    return WaterRenderResolution::Ultra;
+            }
+            return WaterRenderResolution::Minimum;
+        }
+
+        static bool waterrenderresolution(
+            WaterRenderResolution level,
+            sauersettings::WaterRenderResolution &legacy)
+        {
+            switch(level)
+            {
+                case WaterRenderResolution::Minimum:
+                    legacy = sauersettings::WaterRenderResolution::Minimum;
+                    return true;
+                case WaterRenderResolution::Low:
+                    legacy = sauersettings::WaterRenderResolution::Low;
+                    return true;
+                case WaterRenderResolution::Medium:
+                    legacy = sauersettings::WaterRenderResolution::Medium;
+                    return true;
+                case WaterRenderResolution::High:
+                    legacy = sauersettings::WaterRenderResolution::High;
+                    return true;
+                case WaterRenderResolution::VeryHigh:
+                    legacy = sauersettings::WaterRenderResolution::VeryHigh;
+                    return true;
+                case WaterRenderResolution::Ultra:
+                    legacy = sauersettings::WaterRenderResolution::Ultra;
+                    return true;
+            }
+            return false;
+        }
+
+        static void copywaterrenderresolution(
+            const sauersettings::WaterRenderResolutionState &source,
+            WaterRenderResolutionState &result)
+        {
+            result.level = waterrenderresolution(source.level);
+            result.configured_exponent = source.configured_exponent;
+            result.requested_dimension = source.requested_dimension;
+        }
+
+        bool readwaterrenderresolution(
+            WaterRenderResolutionState &result)
+        {
+            sauersettings::WaterRenderResolutionState legacy = {};
+            const bool read =
+                sauersettings::readwaterrenderresolution(legacy);
+            copywaterrenderresolution(legacy, result);
+            return read;
+        }
+
+        bool writewaterrenderresolution(
+            WaterRenderResolution level,
+            WaterRenderResolutionState &result)
+        {
+            sauersettings::WaterRenderResolution legacy_level;
+            if(!waterrenderresolution(level, legacy_level))
+            {
+                readwaterrenderresolution(result);
+                return false;
+            }
+
+            sauersettings::WaterRenderResolutionState legacy = {};
+            const bool accepted =
+                sauersettings::writewaterrenderresolution(
+                    legacy_level, legacy);
+            copywaterrenderresolution(legacy, result);
+            return accepted;
+        }
+
         static void copywaterfalleffects(
             const sauersettings::WaterfallEffectsState &source,
             WaterfallEffectsState &result)

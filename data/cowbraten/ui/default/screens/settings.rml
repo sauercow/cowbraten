@@ -550,6 +550,56 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Water Reflection/Refraction Resolution</div>
+                                    <div class="settings-control-description">
+                                        Sets the requested resolution of live water reflections, water refraction, and waterfall refraction. Higher resolutions look sharper but use more graphics memory and rendering time. The renderer may reduce the requested resolution to fit hardware limits.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ water_render_resolution_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="water_render_resolution_selected == 0"
+                                    data-attrif-disabled="!water_render_resolution_available"
+                                    data-event-click="select_water_render_resolution(0)">Minimum</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="water_render_resolution_selected == 1"
+                                    data-attrif-disabled="!water_render_resolution_available"
+                                    data-event-click="select_water_render_resolution(1)">Low</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="water_render_resolution_selected == 2"
+                                    data-attrif-disabled="!water_render_resolution_available"
+                                    data-event-click="select_water_render_resolution(2)">Medium</button>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="water_render_resolution_selected == 3"
+                                    data-attrif-disabled="!water_render_resolution_available"
+                                    data-event-click="select_water_render_resolution(3)">High</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="water_render_resolution_selected == 4"
+                                    data-attrif-disabled="!water_render_resolution_available"
+                                    data-event-click="select_water_render_resolution(4)">Very High</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="water_render_resolution_selected == 5"
+                                    data-attrif-disabled="!water_render_resolution_available"
+                                    data-event-click="select_water_render_resolution(5)">Ultra</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="water_render_resolution_available || water_render_resolution_status != ''">
+                                <span data-if="water_render_resolution_available">
+                                    Requested target: {{ water_render_resolution_dimension }}
+                                </span>
+                                <span data-if="water_render_resolution_status != ''">{{ water_render_resolution_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
