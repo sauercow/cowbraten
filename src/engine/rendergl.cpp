@@ -3,6 +3,7 @@
 #include "engine.h"
 
 bool hasVAO = false, hasFBO = false, hasAFBO = false, hasDS = false, hasTF = false, hasTRG = false, hasTSW = false, hasS3TC = false, hasFXT1 = false, hasLATC = false, hasRGTC = false, hasAF = false, hasFBB = false, hasUBO = false, hasMBR = false;
+bool cantexcompressrgtc = false, cantexcompresslatc = false;
 
 VAR(glversion, 1, 0, 0);
 VAR(glslversion, 1, 0, 0);
@@ -216,6 +217,100 @@ void parseglexts()
 bool hasext(const char *ext)
 {
     return glexts.access(ext)!=NULL;
+}
+
+static bool probeonlinecompressionformat(GLenum internal, GLenum format, int expectedsize, const uchar *pixels)
+{
+    GLuint tex = 0;
+    glGenTextures(1, &tex);
+    bool supported = glGetError() == GL_NO_ERROR && tex != 0;
+    if(supported)
+    {
+        glBindTexture(GL_TEXTURE_2D, tex);
+        supported = glGetError() == GL_NO_ERROR;
+    }
+    if(supported)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, internal, 8, 8, 0, format, GL_UNSIGNED_BYTE, pixels);
+        supported = glGetError() == GL_NO_ERROR;
+    }
+    if(supported)
+    {
+        GLint compressed = GL_FALSE, actualformat = 0, actualsize = 0;
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED, &compressed);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &actualformat);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, &actualsize);
+        supported = glGetError() == GL_NO_ERROR &&
+                    compressed == GL_TRUE &&
+                    actualformat == GLint(internal) &&
+                    actualsize == expectedsize;
+    }
+    if(tex) glDeleteTextures(1, &tex);
+    if(glGetError() != GL_NO_ERROR) supported = false;
+    return supported;
+}
+
+static void setuptexcompresscaps()
+{
+    cantexcompressrgtc = false;
+    cantexcompresslatc = false;
+    const char *renderer = (const char *)glGetString(GL_RENDERER), *version = (const char *)glGetString(GL_VERSION);
+    const bool mesa = (renderer && strstr(renderer, "Mesa")) || (version && strstr(version, "Mesa"));
+    if(!mesa)
+    {
+        cantexcompressrgtc = hasRGTC;
+        cantexcompresslatc = hasLATC;
+        return;
+    }
+
+    usetexcompress = hasFXT1 ? 1 : 0;
+    if(!hasS3TC) return;
+
+    GLenum error = glGetError();
+    if(error != GL_NO_ERROR)
+    {
+        if(dbgexts) conoutf(CON_INIT, "Mesa online texture compression probe skipped due to pre-existing GL error 0x%X.", error);
+        return;
+    }
+
+    GLint original = 0;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &original);
+    if(glGetError() != GL_NO_ERROR) return;
+
+    uchar pixels[8*8*4];
+    loopi(sizeof(pixels)) pixels[i] = uchar((i*37 + 17) & 0xFF);
+
+    const bool dxt1 = probeonlinecompressionformat(GL_COMPRESSED_RGB_S3TC_DXT1_EXT, GL_RGB, 32, pixels);
+    const bool dxt5 = probeonlinecompressionformat(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_RGBA, 64, pixels);
+    const bool s3tc = dxt1 && dxt5;
+    bool rgtc = false, latc = false;
+    if(s3tc && hasRGTC)
+    {
+        const bool rgtc1 = probeonlinecompressionformat(GL_COMPRESSED_RED_RGTC1, GL_RED, 32, pixels);
+        const bool rgtc2 = probeonlinecompressionformat(GL_COMPRESSED_RG_RGTC2, GL_RG, 64, pixels);
+        rgtc = rgtc1 && rgtc2;
+    }
+    if(s3tc && hasLATC)
+    {
+        const bool latc1 = probeonlinecompressionformat(GL_COMPRESSED_LUMINANCE_LATC1_EXT, GL_LUMINANCE, 32, pixels);
+        const bool latc2 = probeonlinecompressionformat(GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT, GL_LUMINANCE_ALPHA, 64, pixels);
+        latc = latc1 && latc2;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, original);
+    if(glGetError() == GL_NO_ERROR && s3tc)
+    {
+        usetexcompress = 2;
+        cantexcompressrgtc = rgtc;
+        cantexcompresslatc = latc;
+    }
+
+    if(dbgexts)
+    {
+        conoutf(CON_INIT, "Mesa online S3TC texture compression %s.", usetexcompress > 1 ? "supported" : "not supported");
+        if(hasRGTC) conoutf(CON_INIT, "Mesa online RGTC texture compression %s.", cantexcompressrgtc ? "supported" : "not supported");
+        if(hasLATC) conoutf(CON_INIT, "Mesa online LATC texture compression %s.", cantexcompresslatc ? "supported" : "not supported");
+    }
 }
 
 void gl_checkextensions()
@@ -597,6 +692,8 @@ void gl_resize()
 
 void gl_init()
 {
+    setuptexcompresscaps();
+
     glClearColor(0, 0, 0, 0);
     glClearDepth(1);
     glDepthFunc(GL_LESS);

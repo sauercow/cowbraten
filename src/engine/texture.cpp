@@ -645,13 +645,13 @@ GLenum compressedformat(GLenum format, int w, int h, int force = 0)
         case GL_RGB5_A1: return usetexcompress > 1 ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA;
         case GL_RGBA: return usetexcompress > 1 ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_COMPRESSED_RGBA;
         case GL_RED:
-        case GL_R8: return hasRGTC ? (usetexcompress > 1 ? GL_COMPRESSED_RED_RGTC1 : GL_COMPRESSED_RED) : (usetexcompress > 1 ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_COMPRESSED_RGB);
+        case GL_R8: return usetexcompress > 1 ? (cantexcompressrgtc ? GL_COMPRESSED_RED_RGTC1 : GL_COMPRESSED_RGB_S3TC_DXT1_EXT) : (hasRGTC ? GL_COMPRESSED_RED : GL_COMPRESSED_RGB);
         case GL_RG:
-        case GL_RG8: return hasRGTC ? (usetexcompress > 1 ? GL_COMPRESSED_RG_RGTC2 : GL_COMPRESSED_RG) : (usetexcompress > 1 ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_COMPRESSED_RGBA);
+        case GL_RG8: return usetexcompress > 1 ? (cantexcompressrgtc ? GL_COMPRESSED_RG_RGTC2 : GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) : (hasRGTC ? GL_COMPRESSED_RG : GL_COMPRESSED_RGBA);
         case GL_LUMINANCE:
-        case GL_LUMINANCE8: return hasLATC ? (usetexcompress > 1 ? GL_COMPRESSED_LUMINANCE_LATC1_EXT : GL_COMPRESSED_LUMINANCE) : (usetexcompress > 1 ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_COMPRESSED_RGB);
+        case GL_LUMINANCE8: return usetexcompress > 1 ? (cantexcompresslatc ? GL_COMPRESSED_LUMINANCE_LATC1_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT) : (hasLATC ? GL_COMPRESSED_LUMINANCE : GL_COMPRESSED_RGB);
         case GL_LUMINANCE_ALPHA:
-        case GL_LUMINANCE8_ALPHA8: return hasLATC ? (usetexcompress > 1 ? GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT : GL_COMPRESSED_LUMINANCE_ALPHA) : (usetexcompress > 1 ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : GL_COMPRESSED_RGBA);
+        case GL_LUMINANCE8_ALPHA8: return usetexcompress > 1 ? (cantexcompresslatc ? GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT : GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) : (hasLATC ? GL_COMPRESSED_LUMINANCE_ALPHA : GL_COMPRESSED_RGBA);
     }
     return format;
 }
