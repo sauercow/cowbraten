@@ -1066,6 +1066,61 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Automatic Texture Compression</div>
+                                    <div class="settings-control-description">
+                                        Compresses eligible decoded textures when either final dimension reaches the selected threshold. Lower thresholds affect more textures and can reduce graphics-memory use with possible quality loss. Texture sizing happens first; precompressed DDS textures are independent. Existing textures update when graphics changes are applied.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ texture_compression_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_compression_selected == 0"
+                                    data-attrif-disabled="!texture_compression_available || !texture_compression_supported"
+                                    data-event-click="select_texture_compression(0)">Off</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_compression_selected == 1"
+                                    data-attrif-disabled="!texture_compression_available || !texture_compression_supported"
+                                    data-event-click="select_texture_compression(1)">All eligible textures</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_compression_selected == 2"
+                                    data-attrif-disabled="!texture_compression_available || !texture_compression_supported"
+                                    data-event-click="select_texture_compression(2)">256 px and larger</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_compression_selected == 3"
+                                    data-attrif-disabled="!texture_compression_available || !texture_compression_supported"
+                                    data-event-click="select_texture_compression(3)">512 px and larger</button>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_compression_selected == 4"
+                                    data-attrif-disabled="!texture_compression_available || !texture_compression_supported"
+                                    data-event-click="select_texture_compression(4)">1024 px and larger</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_compression_selected == 5"
+                                    data-attrif-disabled="!texture_compression_available || !texture_compression_supported"
+                                    data-event-click="select_texture_compression(5)">Above 1024 px</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_compression_selected == 6"
+                                    data-attrif-disabled="!texture_compression_available || !texture_compression_supported"
+                                    data-event-click="select_texture_compression(6)">2048 px and larger</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="texture_compression_selected == 7"
+                                    data-attrif-disabled="!texture_compression_available || !texture_compression_supported"
+                                    data-event-click="select_texture_compression(7)">4096 px and larger</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="texture_compression_status != ''">
+                                <span>{{ texture_compression_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">

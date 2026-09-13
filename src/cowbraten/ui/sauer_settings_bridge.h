@@ -201,6 +201,27 @@ namespace cowui
             int maximum;
         };
 
+        enum class TextureCompressionPreset
+        {
+            Off,
+            AllEligible,
+            AtLeast256,
+            AtLeast512,
+            AtLeast1024,
+            Above1024,
+            AtLeast2048,
+            AtLeast4096,
+            Custom
+        };
+        struct TextureCompressionState
+        {
+            TextureCompressionPreset preset;
+            int threshold;
+            int minimum;
+            int maximum;
+            bool supported;
+        };
+
         enum class ShaderDetailLevel { Performance = 0, Low = 1, Medium = 2, Full = 3 };
         struct ShaderDetailState
         {
@@ -436,6 +457,10 @@ namespace cowui
         bool readtexturereduction(TextureReductionState &result);
         bool writetexturereduction(int levels,
             TextureReductionState &result);
+
+        bool readtexturecompression(TextureCompressionState &result);
+        bool writetexturecompression(int threshold,
+            TextureCompressionState &result);
 
         bool readanisotropy(AnisotropyState &result);
         // Returns the callback's verification result without a second scan.

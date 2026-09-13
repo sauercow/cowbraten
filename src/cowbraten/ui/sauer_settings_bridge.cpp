@@ -1780,6 +1780,87 @@ namespace cowui
             return result.levels == levels;
         }
 
+        static TextureCompressionPreset classifytexturecompression(
+            int threshold)
+        {
+            switch(threshold)
+            {
+                case 0: return TextureCompressionPreset::Off;
+                case 1: return TextureCompressionPreset::AllEligible;
+                case 256: return TextureCompressionPreset::AtLeast256;
+                case 512: return TextureCompressionPreset::AtLeast512;
+                case 1024: return TextureCompressionPreset::AtLeast1024;
+                case 1025: return TextureCompressionPreset::Above1024;
+                case 2048: return TextureCompressionPreset::AtLeast2048;
+                case 4096: return TextureCompressionPreset::AtLeast4096;
+                default: return TextureCompressionPreset::Custom;
+            }
+        }
+
+        bool readtexturecompression(TextureCompressionState &result)
+        {
+            result.preset = TextureCompressionPreset::Custom;
+            result.threshold = 0;
+            result.minimum = 0;
+            result.maximum = 0;
+            result.supported = false;
+
+            ident *id = getident("texcompress");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 0 ||
+               id->maxval != 4096 || *id->storage.i < id->minval ||
+               *id->storage.i > id->maxval)
+            {
+                return false;
+            }
+
+            ident *capability_id = getident("usetexcompress");
+            if(!capability_id || capability_id->type != ID_VAR ||
+               !capability_id->storage.i ||
+               !(capability_id->flags&IDF_READONLY) ||
+               *capability_id->storage.i < 0 ||
+               *capability_id->storage.i > 2)
+            {
+                return false;
+            }
+
+            result.threshold = *id->storage.i;
+            result.minimum = id->minval;
+            result.maximum = id->maxval;
+            result.supported = *capability_id->storage.i != 0;
+            result.preset = classifytexturecompression(result.threshold);
+            return true;
+        }
+
+        bool writetexturecompression(
+            int threshold,
+            TextureCompressionState &result)
+        {
+            if(!readtexturecompression(result) ||
+               threshold < result.minimum || threshold > result.maximum ||
+               !result.supported)
+            {
+                return false;
+            }
+
+            if(threshold == result.threshold)
+                return true;
+
+            ident *id = getident("texcompress");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != result.minimum ||
+               id->maxval != result.maximum)
+            {
+                return false;
+            }
+
+            setvarchecked(id, threshold);
+
+            if(!readtexturecompression(result))
+                return false;
+            return result.threshold == threshold;
+        }
+
         static void copyshaderdetail(const ::ShaderDetailState &source, ShaderDetailState &result)
         {
             result.requested = source.requested;

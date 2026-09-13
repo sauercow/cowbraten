@@ -412,6 +412,12 @@ namespace cowui
             constructor.Bind("texture_reduction_available", &texture_reduction_available) &&
             constructor.Bind("texture_reduction_label", &texture_reduction_label) &&
             constructor.Bind("texture_reduction_status", &texture_reduction_status) &&
+            constructor.Bind("texture_compression_selected", &texture_compression_selected) &&
+            constructor.Bind("texture_compression_available", &texture_compression_available) &&
+            constructor.Bind("texture_compression_supported", &texture_compression_supported) &&
+            constructor.Bind("texture_compression_label", &texture_compression_label) &&
+            constructor.Bind("texture_compression_status", &texture_compression_status) &&
+            constructor.BindEventCallback("select_texture_compression", &RmlSettings::selecttexturecompression, this) &&
             constructor.Bind("graphics_quality_status", &graphics_quality_status) &&
             constructor.Bind("anisotropy_enabled", &anisotropy_enabled) &&
             constructor.Bind("shader_detail_available", &shader_detail_available) &&
@@ -960,6 +966,11 @@ namespace cowui
         texture_quality_selected = -1;
         texture_quality_label.clear();
         texture_quality_status.clear();
+        texture_compression_selected = -1;
+        texture_compression_available = false;
+        texture_compression_supported = false;
+        texture_compression_label.clear();
+        texture_compression_status.clear();
         graphics_quality_status.clear();
         anisotropy_enabled = false;
         bilinear_filtering = bilinear_filtering_available = false;
@@ -1175,6 +1186,7 @@ namespace cowui
         refreshglarepreset();
         refreshtexturequality();
         refreshtexturereduction();
+        refreshtexturecompression();
         refreshanisotropy();
         refreshbilinearfiltering();
         refreshmipmapblending();
@@ -4217,6 +4229,128 @@ namespace cowui
             instance->model.DirtyVariable("texture_reduction_status");
         }
         event.StopPropagation();
+    }
+
+    void RmlSettings::refreshtexturecompression()
+    {
+        settings::TextureCompressionState state = {};
+        const bool available = settings::readtexturecompression(state);
+        presenttexturecompression(state, available);
+    }
+
+    void RmlSettings::presenttexturecompression(
+        const settings::TextureCompressionState &state,
+        bool available)
+    {
+        using Preset = settings::TextureCompressionPreset;
+        texture_compression_available = available;
+        texture_compression_supported = available && state.supported;
+        texture_compression_selected = -1;
+        texture_compression_status.clear();
+
+        if(!available)
+        {
+            texture_compression_label = "Unavailable";
+            texture_compression_status =
+                "Automatic Texture Compression state is unavailable";
+        }
+        else
+        {
+            switch(state.preset)
+            {
+                case Preset::Off:
+                    texture_compression_selected = 0;
+                    texture_compression_label = "Off";
+                    break;
+                case Preset::AllEligible:
+                    texture_compression_selected = 1;
+                    texture_compression_label = "All eligible textures";
+                    break;
+                case Preset::AtLeast256:
+                    texture_compression_selected = 2;
+                    texture_compression_label = "256 px and larger";
+                    break;
+                case Preset::AtLeast512:
+                    texture_compression_selected = 3;
+                    texture_compression_label = "512 px and larger";
+                    break;
+                case Preset::AtLeast1024:
+                    texture_compression_selected = 4;
+                    texture_compression_label = "1024 px and larger";
+                    break;
+                case Preset::Above1024:
+                    texture_compression_selected = 5;
+                    texture_compression_label = "Above 1024 px";
+                    break;
+                case Preset::AtLeast2048:
+                    texture_compression_selected = 6;
+                    texture_compression_label = "2048 px and larger";
+                    break;
+                case Preset::AtLeast4096:
+                    texture_compression_selected = 7;
+                    texture_compression_label = "4096 px and larger";
+                    break;
+                case Preset::Custom:
+                {
+                    char label[64];
+                    std::snprintf(label, sizeof(label),
+                        "Custom: %d px and larger", state.threshold);
+                    texture_compression_label = label;
+                    break;
+                }
+            }
+
+            if(!state.supported)
+            {
+                texture_compression_status =
+                    "Automatic texture compression is unavailable on the current renderer; the configured threshold is retained.";
+            }
+        }
+
+        model.DirtyVariable("texture_compression_selected");
+        model.DirtyVariable("texture_compression_available");
+        model.DirtyVariable("texture_compression_supported");
+        model.DirtyVariable("texture_compression_label");
+        model.DirtyVariable("texture_compression_status");
+    }
+
+    void RmlSettings::selecttexturecompression(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !texture_compression_available ||
+           !texture_compression_supported)
+        {
+            return;
+        }
+
+        int threshold = 0;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: threshold = 0; break;
+            case 1: threshold = 1; break;
+            case 2: threshold = 256; break;
+            case 3: threshold = 512; break;
+            case 4: threshold = 1024; break;
+            case 5: threshold = 1025; break;
+            case 6: threshold = 2048; break;
+            case 7: threshold = 4096; break;
+            default: return;
+        }
+
+        settings::TextureCompressionState state = {};
+        const bool accepted = settings::writetexturecompression(
+            threshold, state);
+        const bool available = accepted ||
+            settings::readtexturecompression(state);
+        presenttexturecompression(state, available);
+        if(!accepted && available && state.supported)
+        {
+            texture_compression_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("texture_compression_status");
+        }
     }
 
     void RmlSettings::vsyncaction(Rml::Event &event)

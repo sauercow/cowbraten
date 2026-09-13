@@ -41,6 +41,7 @@ namespace cowui
         struct GlarePresetState;
         struct TextureQualityState;
         struct TextureReductionState;
+        struct TextureCompressionState;
     }
 
     class RmlActionRouter;
@@ -254,6 +255,12 @@ namespace cowui
         void presenttexturereduction(
             const settings::TextureReductionState &state,
             bool available);
+        void refreshtexturecompression();
+        void presenttexturecompression(
+            const settings::TextureCompressionState &state,
+            bool available);
+        void selecttexturecompression(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
         void presentanisotropy(const settings::AnisotropyState &state);
         void selectanisotropy(Rml::DataModelHandle, Rml::Event &event,
                               const Rml::VariantList &arguments);
@@ -466,6 +473,11 @@ namespace cowui
         bool texture_reduction_available = false;
         Rml::String texture_reduction_label;
         Rml::String texture_reduction_status;
+        int texture_compression_selected = -1;
+        bool texture_compression_available = false;
+        bool texture_compression_supported = false;
+        Rml::String texture_compression_label;
+        Rml::String texture_compression_status;
         Rml::String graphics_quality_status;
         bool anisotropy_enabled = false;
         bool bilinear_filtering = false;

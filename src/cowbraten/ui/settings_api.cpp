@@ -976,6 +976,63 @@ namespace cowui
             return accepted;
         }
 
+        static TextureCompressionPreset texturecompressionpreset(
+            sauersettings::TextureCompressionPreset preset)
+        {
+            switch(preset)
+            {
+                case sauersettings::TextureCompressionPreset::Off:
+                    return TextureCompressionPreset::Off;
+                case sauersettings::TextureCompressionPreset::AllEligible:
+                    return TextureCompressionPreset::AllEligible;
+                case sauersettings::TextureCompressionPreset::AtLeast256:
+                    return TextureCompressionPreset::AtLeast256;
+                case sauersettings::TextureCompressionPreset::AtLeast512:
+                    return TextureCompressionPreset::AtLeast512;
+                case sauersettings::TextureCompressionPreset::AtLeast1024:
+                    return TextureCompressionPreset::AtLeast1024;
+                case sauersettings::TextureCompressionPreset::Above1024:
+                    return TextureCompressionPreset::Above1024;
+                case sauersettings::TextureCompressionPreset::AtLeast2048:
+                    return TextureCompressionPreset::AtLeast2048;
+                case sauersettings::TextureCompressionPreset::AtLeast4096:
+                    return TextureCompressionPreset::AtLeast4096;
+                case sauersettings::TextureCompressionPreset::Custom:
+                    return TextureCompressionPreset::Custom;
+            }
+            return TextureCompressionPreset::Custom;
+        }
+
+        static void copytexturecompression(
+            const sauersettings::TextureCompressionState &source,
+            TextureCompressionState &result)
+        {
+            result.preset = texturecompressionpreset(source.preset);
+            result.threshold = source.threshold;
+            result.minimum = source.minimum;
+            result.maximum = source.maximum;
+            result.supported = source.supported;
+        }
+
+        bool readtexturecompression(TextureCompressionState &result)
+        {
+            sauersettings::TextureCompressionState legacy = {};
+            const bool read = sauersettings::readtexturecompression(legacy);
+            copytexturecompression(legacy, result);
+            return read;
+        }
+
+        bool writetexturecompression(
+            int threshold,
+            TextureCompressionState &result)
+        {
+            sauersettings::TextureCompressionState legacy = {};
+            const bool accepted = sauersettings::writetexturecompression(
+                threshold, legacy);
+            copytexturecompression(legacy, result);
+            return accepted;
+        }
+
         static void copyshaderdetail(const sauersettings::ShaderDetailState &source, ShaderDetailState &result)
         {
             result.requested = source.requested;
