@@ -557,6 +557,98 @@ namespace cowui
             return accepted;
         }
 
+        static EnvironmentMapResolution environmentmapresolution(
+            sauersettings::EnvironmentMapResolution level)
+        {
+            switch(level)
+            {
+                case sauersettings::EnvironmentMapResolution::Minimum:
+                    return EnvironmentMapResolution::Minimum;
+                case sauersettings::EnvironmentMapResolution::VeryLow:
+                    return EnvironmentMapResolution::VeryLow;
+                case sauersettings::EnvironmentMapResolution::Low:
+                    return EnvironmentMapResolution::Low;
+                case sauersettings::EnvironmentMapResolution::Medium:
+                    return EnvironmentMapResolution::Medium;
+                case sauersettings::EnvironmentMapResolution::High:
+                    return EnvironmentMapResolution::High;
+                case sauersettings::EnvironmentMapResolution::VeryHigh:
+                    return EnvironmentMapResolution::VeryHigh;
+                case sauersettings::EnvironmentMapResolution::Ultra:
+                    return EnvironmentMapResolution::Ultra;
+            }
+            return EnvironmentMapResolution::Minimum;
+        }
+
+        static bool environmentmapresolution(
+            EnvironmentMapResolution level,
+            sauersettings::EnvironmentMapResolution &legacy)
+        {
+            switch(level)
+            {
+                case EnvironmentMapResolution::Minimum:
+                    legacy = sauersettings::EnvironmentMapResolution::Minimum;
+                    return true;
+                case EnvironmentMapResolution::VeryLow:
+                    legacy = sauersettings::EnvironmentMapResolution::VeryLow;
+                    return true;
+                case EnvironmentMapResolution::Low:
+                    legacy = sauersettings::EnvironmentMapResolution::Low;
+                    return true;
+                case EnvironmentMapResolution::Medium:
+                    legacy = sauersettings::EnvironmentMapResolution::Medium;
+                    return true;
+                case EnvironmentMapResolution::High:
+                    legacy = sauersettings::EnvironmentMapResolution::High;
+                    return true;
+                case EnvironmentMapResolution::VeryHigh:
+                    legacy = sauersettings::EnvironmentMapResolution::VeryHigh;
+                    return true;
+                case EnvironmentMapResolution::Ultra:
+                    legacy = sauersettings::EnvironmentMapResolution::Ultra;
+                    return true;
+            }
+            return false;
+        }
+
+        static void copyenvironmentmapresolution(
+            const sauersettings::EnvironmentMapResolutionState &source,
+            EnvironmentMapResolutionState &result)
+        {
+            result.level = environmentmapresolution(source.level);
+            result.configured_exponent = source.configured_exponent;
+            result.requested_dimension = source.requested_dimension;
+        }
+
+        bool readenvironmentmapresolution(
+            EnvironmentMapResolutionState &result)
+        {
+            sauersettings::EnvironmentMapResolutionState legacy = {};
+            const bool read =
+                sauersettings::readenvironmentmapresolution(legacy);
+            copyenvironmentmapresolution(legacy, result);
+            return read;
+        }
+
+        bool writeenvironmentmapresolution(
+            EnvironmentMapResolution level,
+            EnvironmentMapResolutionState &result)
+        {
+            sauersettings::EnvironmentMapResolution legacy_level;
+            if(!environmentmapresolution(level, legacy_level))
+            {
+                readenvironmentmapresolution(result);
+                return false;
+            }
+
+            sauersettings::EnvironmentMapResolutionState legacy = {};
+            const bool accepted =
+                sauersettings::writeenvironmentmapresolution(
+                    legacy_level, legacy);
+            copyenvironmentmapresolution(legacy, result);
+            return accepted;
+        }
+
         static DynamicLights dynamiclights(
             sauersettings::DynamicLights setting)
         {

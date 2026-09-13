@@ -737,6 +737,60 @@
                         <div class="settings-section settings-antialiasing-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">
+                                    <div class="settings-control-title">Environment Reflection Resolution</div>
+                                    <div class="settings-control-description">
+                                        Sets the requested face resolution for environment-map reflections used by compatible world materials, glass, models, waterfalls, and water fallback. Higher resolutions can look sharper but increase generation time and graphics memory use. Source, window, hardware, and other texture limits may reduce the effective size.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ environment_map_resolution_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="environment_map_resolution_selected == 0"
+                                    data-attrif-disabled="!environment_map_resolution_available"
+                                    data-event-click="select_environment_map_resolution(0)">Minimum</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="environment_map_resolution_selected == 1"
+                                    data-attrif-disabled="!environment_map_resolution_available"
+                                    data-event-click="select_environment_map_resolution(1)">Very Low</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="environment_map_resolution_selected == 2"
+                                    data-attrif-disabled="!environment_map_resolution_available"
+                                    data-event-click="select_environment_map_resolution(2)">Low</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="environment_map_resolution_selected == 3"
+                                    data-attrif-disabled="!environment_map_resolution_available"
+                                    data-event-click="select_environment_map_resolution(3)">Medium</button>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="environment_map_resolution_selected == 4"
+                                    data-attrif-disabled="!environment_map_resolution_available"
+                                    data-event-click="select_environment_map_resolution(4)">High</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="environment_map_resolution_selected == 5"
+                                    data-attrif-disabled="!environment_map_resolution_available"
+                                    data-event-click="select_environment_map_resolution(5)">Very High</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="environment_map_resolution_selected == 6"
+                                    data-attrif-disabled="!environment_map_resolution_available"
+                                    data-event-click="select_environment_map_resolution(6)">Ultra</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="environment_map_resolution_available || environment_map_resolution_status != ''">
+                                <span data-if="environment_map_resolution_available">
+                                    Requested face: {{ environment_map_resolution_dimension }}
+                                </span>
+                                <span data-if="environment_map_resolution_status != ''">{{ environment_map_resolution_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
                                     <div class="settings-control-title">Dynamic Lights</div>
                                     <div class="settings-control-description">
                                         Controls how many nearby dynamic lights can illuminate world surfaces in each map area. Higher levels add GPU lighting work.

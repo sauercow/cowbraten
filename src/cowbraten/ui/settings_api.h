@@ -119,6 +119,23 @@ namespace cowui
             bool enabled;
         };
 
+        enum class EnvironmentMapResolution
+        {
+            Minimum,
+            VeryLow,
+            Low,
+            Medium,
+            High,
+            VeryHigh,
+            Ultra
+        };
+        struct EnvironmentMapResolutionState
+        {
+            EnvironmentMapResolution level;
+            int configured_exponent;
+            int requested_dimension;
+        };
+
         enum class DynamicLights
         {
             Off,
@@ -435,6 +452,11 @@ namespace cowui
         bool readmodelreflections(ModelReflectionsState &result);
         bool writemodelreflections(bool enabled,
             ModelReflectionsState &result);
+
+        bool readenvironmentmapresolution(
+            EnvironmentMapResolutionState &result);
+        bool writeenvironmentmapresolution(EnvironmentMapResolution level,
+            EnvironmentMapResolutionState &result);
 
         bool readdynamiclights(DynamicLightsState &result);
         // Custom is output-only and is rejected as a write request.

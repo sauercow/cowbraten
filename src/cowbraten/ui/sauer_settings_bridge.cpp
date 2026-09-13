@@ -1160,6 +1160,101 @@ namespace cowui
             return result.enabled == enabled;
         }
 
+        static bool environmentmapresolution(
+            int exponent,
+            EnvironmentMapResolution &level)
+        {
+            switch(exponent)
+            {
+                case 4: level = EnvironmentMapResolution::Minimum; return true;
+                case 5: level = EnvironmentMapResolution::VeryLow; return true;
+                case 6: level = EnvironmentMapResolution::Low; return true;
+                case 7: level = EnvironmentMapResolution::Medium; return true;
+                case 8: level = EnvironmentMapResolution::High; return true;
+                case 9: level = EnvironmentMapResolution::VeryHigh; return true;
+                case 10: level = EnvironmentMapResolution::Ultra; return true;
+            }
+            return false;
+        }
+
+        static bool environmentmapresolution(
+            EnvironmentMapResolution level,
+            int &exponent)
+        {
+            switch(level)
+            {
+                case EnvironmentMapResolution::Minimum: exponent = 4; return true;
+                case EnvironmentMapResolution::VeryLow: exponent = 5; return true;
+                case EnvironmentMapResolution::Low: exponent = 6; return true;
+                case EnvironmentMapResolution::Medium: exponent = 7; return true;
+                case EnvironmentMapResolution::High: exponent = 8; return true;
+                case EnvironmentMapResolution::VeryHigh: exponent = 9; return true;
+                case EnvironmentMapResolution::Ultra: exponent = 10; return true;
+            }
+            return false;
+        }
+
+        bool readenvironmentmapresolution(
+            EnvironmentMapResolutionState &result)
+        {
+            result.level = EnvironmentMapResolution::Minimum;
+            result.configured_exponent = 0;
+            result.requested_dimension = 0;
+
+            ident *id = getident("envmapsize");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 4 ||
+               id->maxval != 10 || *id->storage.i < 4 ||
+               *id->storage.i > 10 ||
+               !environmentmapresolution(*id->storage.i, result.level))
+            {
+                return false;
+            }
+
+            result.configured_exponent = *id->storage.i;
+            result.requested_dimension = 1 << result.configured_exponent;
+            return true;
+        }
+
+        bool writeenvironmentmapresolution(
+            EnvironmentMapResolution level,
+            EnvironmentMapResolutionState &result)
+        {
+            if(!readenvironmentmapresolution(result))
+                return false;
+
+            int exponent = 0;
+            if(!environmentmapresolution(level, exponent))
+                return false;
+            if(result.configured_exponent == exponent)
+                return true;
+
+            ident *id = getident("envmapsize");
+            EnvironmentMapResolution current_level;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 4 ||
+               id->maxval != 10 || *id->storage.i < 4 ||
+               *id->storage.i > 10 ||
+               !environmentmapresolution(*id->storage.i, current_level))
+            {
+                return false;
+            }
+            if(*id->storage.i == exponent)
+            {
+                if(!readenvironmentmapresolution(result))
+                    return false;
+                return result.configured_exponent == exponent &&
+                    result.level == level;
+            }
+
+            setvarchecked(id, exponent);
+
+            if(!readenvironmentmapresolution(result))
+                return false;
+            return result.configured_exponent == exponent &&
+                result.level == level;
+        }
+
         static DynamicLights classifydynamiclights(int max_lights)
         {
             switch(max_lights)

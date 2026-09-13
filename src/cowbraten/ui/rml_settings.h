@@ -32,6 +32,7 @@ namespace cowui
         struct WaterfallEffectsState;
         struct GlassReflectionsState;
         struct ModelReflectionsState;
+        struct EnvironmentMapResolutionState;
         struct DynamicLightsState;
         struct SoftParticlesState;
         struct SoftParticleQualityState;
@@ -193,6 +194,12 @@ namespace cowui
             const settings::ModelReflectionsState &state,
             bool available);
         void selectmodelreflections(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void refreshenvironmentmapresolution();
+        void presentenvironmentmapresolution(
+            const settings::EnvironmentMapResolutionState &state,
+            bool available);
+        void selectenvironmentmapresolution(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void refreshdynamiclights();
         void presentdynamiclights(
@@ -441,6 +448,11 @@ namespace cowui
         bool model_reflections_available = false;
         bool model_reflections = false;
         Rml::String model_reflections_status;
+        bool environment_map_resolution_available = false;
+        int environment_map_resolution_selected = -1;
+        Rml::String environment_map_resolution_label;
+        Rml::String environment_map_resolution_dimension;
+        Rml::String environment_map_resolution_status;
         bool dynamic_lights_available = false;
         int dynamic_lights_selected = -1;
         Rml::String dynamic_lights_label;

@@ -364,6 +364,12 @@ namespace cowui
             constructor.Bind("model_reflections", &model_reflections) &&
             constructor.Bind("model_reflections_status", &model_reflections_status) &&
             constructor.BindEventCallback("select_model_reflections", &RmlSettings::selectmodelreflections, this) &&
+            constructor.Bind("environment_map_resolution_available", &environment_map_resolution_available) &&
+            constructor.Bind("environment_map_resolution_selected", &environment_map_resolution_selected) &&
+            constructor.Bind("environment_map_resolution_label", &environment_map_resolution_label) &&
+            constructor.Bind("environment_map_resolution_dimension", &environment_map_resolution_dimension) &&
+            constructor.Bind("environment_map_resolution_status", &environment_map_resolution_status) &&
+            constructor.BindEventCallback("select_environment_map_resolution", &RmlSettings::selectenvironmentmapresolution, this) &&
             constructor.Bind("dynamic_lights_available", &dynamic_lights_available) &&
             constructor.Bind("dynamic_lights_selected", &dynamic_lights_selected) &&
             constructor.Bind("dynamic_lights_label", &dynamic_lights_label) &&
@@ -940,6 +946,11 @@ namespace cowui
         model_reflections_available = false;
         model_reflections = false;
         model_reflections_status.clear();
+        environment_map_resolution_available = false;
+        environment_map_resolution_selected = -1;
+        environment_map_resolution_label.clear();
+        environment_map_resolution_dimension.clear();
+        environment_map_resolution_status.clear();
         dynamic_lights_available = false;
         dynamic_lights_selected = -1;
         dynamic_lights_label.clear();
@@ -1188,6 +1199,7 @@ namespace cowui
         refreshwaterfalleffects();
         refreshglassreflections();
         refreshmodelreflections();
+        refreshenvironmentmapresolution();
         refreshdynamiclights();
         refreshsoftparticles();
         refreshsoftparticlequality();
@@ -3504,6 +3516,129 @@ namespace cowui
             model_reflections_status =
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("model_reflections_status");
+        }
+    }
+
+    void RmlSettings::refreshenvironmentmapresolution()
+    {
+        settings::EnvironmentMapResolutionState state = {};
+        const bool available =
+            settings::readenvironmentmapresolution(state);
+        presentenvironmentmapresolution(state, available);
+    }
+
+    void RmlSettings::presentenvironmentmapresolution(
+        const settings::EnvironmentMapResolutionState &state,
+        bool available)
+    {
+        environment_map_resolution_available = available;
+        environment_map_resolution_selected = -1;
+        environment_map_resolution_dimension.clear();
+        environment_map_resolution_status.clear();
+
+        if(!available)
+        {
+            environment_map_resolution_label = "Unavailable";
+            environment_map_resolution_status =
+                "Environment reflection resolution state is unavailable";
+        }
+        else
+        {
+            switch(state.level)
+            {
+                case settings::EnvironmentMapResolution::Minimum:
+                    environment_map_resolution_selected = 0;
+                    environment_map_resolution_label = "Minimum";
+                    break;
+                case settings::EnvironmentMapResolution::VeryLow:
+                    environment_map_resolution_selected = 1;
+                    environment_map_resolution_label = "Very Low";
+                    break;
+                case settings::EnvironmentMapResolution::Low:
+                    environment_map_resolution_selected = 2;
+                    environment_map_resolution_label = "Low";
+                    break;
+                case settings::EnvironmentMapResolution::Medium:
+                    environment_map_resolution_selected = 3;
+                    environment_map_resolution_label = "Medium";
+                    break;
+                case settings::EnvironmentMapResolution::High:
+                    environment_map_resolution_selected = 4;
+                    environment_map_resolution_label = "High";
+                    break;
+                case settings::EnvironmentMapResolution::VeryHigh:
+                    environment_map_resolution_selected = 5;
+                    environment_map_resolution_label = "Very High";
+                    break;
+                case settings::EnvironmentMapResolution::Ultra:
+                    environment_map_resolution_selected = 6;
+                    environment_map_resolution_label = "Ultra";
+                    break;
+            }
+
+            char dimension[32];
+            std::snprintf(dimension, sizeof(dimension), "%dx%d",
+                state.requested_dimension, state.requested_dimension);
+            environment_map_resolution_dimension = dimension;
+        }
+
+        model.DirtyVariable("environment_map_resolution_available");
+        model.DirtyVariable("environment_map_resolution_selected");
+        model.DirtyVariable("environment_map_resolution_label");
+        model.DirtyVariable("environment_map_resolution_dimension");
+        model.DirtyVariable("environment_map_resolution_status");
+    }
+
+    void RmlSettings::selectenvironmentmapresolution(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 ||
+           !environment_map_resolution_available)
+        {
+            return;
+        }
+
+        settings::EnvironmentMapResolution level;
+        switch(arguments[0].Get<int>())
+        {
+            case 0:
+                level = settings::EnvironmentMapResolution::Minimum;
+                break;
+            case 1:
+                level = settings::EnvironmentMapResolution::VeryLow;
+                break;
+            case 2:
+                level = settings::EnvironmentMapResolution::Low;
+                break;
+            case 3:
+                level = settings::EnvironmentMapResolution::Medium;
+                break;
+            case 4:
+                level = settings::EnvironmentMapResolution::High;
+                break;
+            case 5:
+                level = settings::EnvironmentMapResolution::VeryHigh;
+                break;
+            case 6:
+                level = settings::EnvironmentMapResolution::Ultra;
+                break;
+            default:
+                return;
+        }
+
+        settings::EnvironmentMapResolutionState state = {};
+        const bool accepted = settings::writeenvironmentmapresolution(
+            level, state);
+        const bool available = accepted ||
+            settings::readenvironmentmapresolution(state);
+        presentenvironmentmapresolution(state, available);
+        if(!accepted && available)
+        {
+            environment_map_resolution_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("environment_map_resolution_status");
         }
     }
 
