@@ -42,6 +42,7 @@ namespace cowui
         struct GrassDistanceState;
         struct MotionBlurIntensityState;
         struct GlarePresetState;
+        struct GlareResolutionState;
         struct TextureQualityState;
         struct TextureReductionState;
         struct TextureCompressionState;
@@ -265,6 +266,12 @@ namespace cowui
         void presentglarepreset(const settings::GlarePresetState &state,
             bool available);
         void selectglarepreset(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void refreshglareresolution();
+        void presentglareresolution(
+            const settings::GlareResolutionState &state,
+            bool available);
+        void selectglareresolution(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
         void refreshtexturequality();
         void presenttexturequality(
@@ -497,6 +504,11 @@ namespace cowui
         int glare_preset_selected = -1;
         Rml::String glare_preset_label;
         Rml::String glare_preset_status;
+        bool glare_resolution_available = false;
+        int glare_resolution_selected = -1;
+        Rml::String glare_resolution_label;
+        int glare_resolution_requested_width = 0;
+        Rml::String glare_resolution_status;
         bool texture_quality_available = false;
         int texture_quality_selected = -1;
         Rml::String texture_quality_label;

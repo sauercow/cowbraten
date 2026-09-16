@@ -219,6 +219,21 @@ namespace cowui
             int blur_radius;
         };
 
+        enum class GlareResolution
+        {
+            Minimum,
+            Low,
+            Medium,
+            High,
+            Ultra
+        };
+        struct GlareResolutionState
+        {
+            GlareResolution level;
+            int configured_exponent;
+            int requested_width;
+        };
+
         enum class TextureQuality
         {
             Low,
@@ -501,6 +516,10 @@ namespace cowui
 
         bool readglarepreset(GlarePresetState &result);
         bool writeglarepreset(GlarePreset preset, GlarePresetState &result);
+
+        bool readglareresolution(GlareResolutionState &result);
+        bool writeglareresolution(GlareResolution level,
+            GlareResolutionState &result);
 
         bool readtexturequality(TextureQualityState &result);
         // Custom is output-only and is rejected as a write request.

@@ -1095,6 +1095,85 @@ namespace cowui
             return accepted;
         }
 
+        static GlareResolution glareresolution(
+            sauersettings::GlareResolution level)
+        {
+            switch(level)
+            {
+                case sauersettings::GlareResolution::Minimum:
+                    return GlareResolution::Minimum;
+                case sauersettings::GlareResolution::Low:
+                    return GlareResolution::Low;
+                case sauersettings::GlareResolution::Medium:
+                    return GlareResolution::Medium;
+                case sauersettings::GlareResolution::High:
+                    return GlareResolution::High;
+                case sauersettings::GlareResolution::Ultra:
+                    return GlareResolution::Ultra;
+            }
+            return GlareResolution::Minimum;
+        }
+
+        static bool glareresolution(
+            GlareResolution level,
+            sauersettings::GlareResolution &legacy)
+        {
+            switch(level)
+            {
+                case GlareResolution::Minimum:
+                    legacy = sauersettings::GlareResolution::Minimum;
+                    return true;
+                case GlareResolution::Low:
+                    legacy = sauersettings::GlareResolution::Low;
+                    return true;
+                case GlareResolution::Medium:
+                    legacy = sauersettings::GlareResolution::Medium;
+                    return true;
+                case GlareResolution::High:
+                    legacy = sauersettings::GlareResolution::High;
+                    return true;
+                case GlareResolution::Ultra:
+                    legacy = sauersettings::GlareResolution::Ultra;
+                    return true;
+            }
+            return false;
+        }
+
+        static void copyglareresolution(
+            const sauersettings::GlareResolutionState &source,
+            GlareResolutionState &result)
+        {
+            result.level = glareresolution(source.level);
+            result.configured_exponent = source.configured_exponent;
+            result.requested_width = source.requested_width;
+        }
+
+        bool readglareresolution(GlareResolutionState &result)
+        {
+            sauersettings::GlareResolutionState legacy = {};
+            const bool read = sauersettings::readglareresolution(legacy);
+            copyglareresolution(legacy, result);
+            return read;
+        }
+
+        bool writeglareresolution(
+            GlareResolution level,
+            GlareResolutionState &result)
+        {
+            sauersettings::GlareResolution legacy_level;
+            if(!glareresolution(level, legacy_level))
+            {
+                readglareresolution(result);
+                return false;
+            }
+
+            sauersettings::GlareResolutionState legacy = {};
+            const bool accepted = sauersettings::writeglareresolution(
+                legacy_level, legacy);
+            copyglareresolution(legacy, result);
+            return accepted;
+        }
+
         static TextureQuality texturequality(
             sauersettings::TextureQuality quality)
         {

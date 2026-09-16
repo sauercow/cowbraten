@@ -1129,6 +1129,55 @@
                         <div class="settings-section settings-antialiasing-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">
+                                    <div class="settings-control-title">Glare Render Resolution</div>
+                                    <div class="settings-control-description">
+                                        Controls the off-screen target used to render Glare. Higher levels can preserve finer effect detail, but increase GPU pixel work and graphics memory use.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Configured</span>
+                                    <span class="settings-resolution-current-value">{{ glare_resolution_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="glare_resolution_selected == 0"
+                                    data-attrif-disabled="!glare_resolution_available"
+                                    data-event-click="select_glare_resolution(0)">Minimum</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="glare_resolution_selected == 1"
+                                    data-attrif-disabled="!glare_resolution_available"
+                                    data-event-click="select_glare_resolution(1)">Low</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="glare_resolution_selected == 2"
+                                    data-attrif-disabled="!glare_resolution_available"
+                                    data-event-click="select_glare_resolution(2)">Medium</button>
+                            </div>
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="glare_resolution_selected == 3"
+                                    data-attrif-disabled="!glare_resolution_available"
+                                    data-event-click="select_glare_resolution(3)">High</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="glare_resolution_selected == 4"
+                                    data-attrif-disabled="!glare_resolution_available"
+                                    data-event-click="select_glare_resolution(4)">Ultra</button>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="glare_resolution_available || glare_resolution_status != ''">
+                                <span data-if="glare_resolution_available">
+                                    Requested target width: {{ glare_resolution_requested_width }} px
+                                </span>
+                                <span data-if="!glare &amp;&amp; glare_resolution_available">
+                                    Glare is off; this resolution will apply when enabled.
+                                </span>
+                                <span data-if="glare_resolution_status != ''">{{ glare_resolution_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
                                     <div class="settings-control-title">Texture Quality</div>
                                     <div class="settings-control-description">
                                         Lower limits reduce detail in world, model, effect, and sky textures; higher limits can use more graphics memory. Applying changes may briefly pause.

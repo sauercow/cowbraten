@@ -417,6 +417,12 @@ namespace cowui
             constructor.Bind("glare_preset_label", &glare_preset_label) &&
             constructor.Bind("glare_preset_status", &glare_preset_status) &&
             constructor.BindEventCallback("select_glare_preset", &RmlSettings::selectglarepreset, this) &&
+            constructor.Bind("glare_resolution_available", &glare_resolution_available) &&
+            constructor.Bind("glare_resolution_selected", &glare_resolution_selected) &&
+            constructor.Bind("glare_resolution_label", &glare_resolution_label) &&
+            constructor.Bind("glare_resolution_requested_width", &glare_resolution_requested_width) &&
+            constructor.Bind("glare_resolution_status", &glare_resolution_status) &&
+            constructor.BindEventCallback("select_glare_resolution", &RmlSettings::selectglareresolution, this) &&
             constructor.Bind("texture_quality_available", &texture_quality_available) &&
             constructor.Bind("texture_quality_selected", &texture_quality_selected) &&
             constructor.Bind("texture_quality_label", &texture_quality_label) &&
@@ -991,6 +997,11 @@ namespace cowui
         glare_preset_selected = -1;
         glare_preset_label.clear();
         glare_preset_status.clear();
+        glare_resolution_available = false;
+        glare_resolution_selected = -1;
+        glare_resolution_label.clear();
+        glare_resolution_requested_width = 0;
+        glare_resolution_status.clear();
         texture_quality_available = false;
         texture_quality_selected = -1;
         texture_quality_label.clear();
@@ -1216,6 +1227,7 @@ namespace cowui
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
+        refreshglareresolution();
         refreshtexturequality();
         refreshtexturereduction();
         refreshtexturecompression();
@@ -4370,6 +4382,95 @@ namespace cowui
                 glare_preset_status = "Change not accepted; current engine state is shown";
             else glare_preset_status = "Change not accepted. " + glare_preset_status;
             model.DirtyVariable("glare_preset_status");
+        }
+    }
+
+    void RmlSettings::refreshglareresolution()
+    {
+        settings::GlareResolutionState state = {};
+        const bool available = settings::readglareresolution(state);
+        presentglareresolution(state, available);
+    }
+
+    void RmlSettings::presentglareresolution(
+        const settings::GlareResolutionState &state,
+        bool available)
+    {
+        glare_resolution_available = available;
+        glare_resolution_selected = -1;
+        glare_resolution_requested_width = 0;
+        glare_resolution_status.clear();
+
+        if(!available)
+        {
+            glare_resolution_label = "Unavailable";
+            glare_resolution_status =
+                "Glare render resolution state is unavailable";
+        }
+        else
+        {
+            switch(state.level)
+            {
+                case settings::GlareResolution::Minimum:
+                    glare_resolution_selected = 0;
+                    glare_resolution_label = "Minimum";
+                    break;
+                case settings::GlareResolution::Low:
+                    glare_resolution_selected = 1;
+                    glare_resolution_label = "Low";
+                    break;
+                case settings::GlareResolution::Medium:
+                    glare_resolution_selected = 2;
+                    glare_resolution_label = "Medium";
+                    break;
+                case settings::GlareResolution::High:
+                    glare_resolution_selected = 3;
+                    glare_resolution_label = "High";
+                    break;
+                case settings::GlareResolution::Ultra:
+                    glare_resolution_selected = 4;
+                    glare_resolution_label = "Ultra";
+                    break;
+            }
+            glare_resolution_requested_width = state.requested_width;
+        }
+
+        model.DirtyVariable("glare_resolution_available");
+        model.DirtyVariable("glare_resolution_selected");
+        model.DirtyVariable("glare_resolution_label");
+        model.DirtyVariable("glare_resolution_requested_width");
+        model.DirtyVariable("glare_resolution_status");
+    }
+
+    void RmlSettings::selectglareresolution(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !glare_resolution_available)
+            return;
+
+        settings::GlareResolution level;
+        switch(arguments[0].Get<int>())
+        {
+            case 0: level = settings::GlareResolution::Minimum; break;
+            case 1: level = settings::GlareResolution::Low; break;
+            case 2: level = settings::GlareResolution::Medium; break;
+            case 3: level = settings::GlareResolution::High; break;
+            case 4: level = settings::GlareResolution::Ultra; break;
+            default: return;
+        }
+
+        settings::GlareResolutionState state = {};
+        const bool accepted = settings::writeglareresolution(level, state);
+        const bool available = accepted ||
+            settings::readglareresolution(state);
+        presentglareresolution(state, available);
+        if(!accepted && available)
+        {
+            glare_resolution_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("glare_resolution_status");
         }
     }
 

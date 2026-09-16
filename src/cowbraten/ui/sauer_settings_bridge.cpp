@@ -1897,6 +1897,101 @@ namespace cowui
                 result.blur_radius == blur_radius;
         }
 
+        static bool glareresolution(
+            int exponent,
+            GlareResolution &level)
+        {
+            switch(exponent)
+            {
+                case 6: level = GlareResolution::Minimum; return true;
+                case 7: level = GlareResolution::Low; return true;
+                case 8: level = GlareResolution::Medium; return true;
+                case 9: level = GlareResolution::High; return true;
+                case 10: level = GlareResolution::Ultra; return true;
+            }
+            return false;
+        }
+
+        static bool glareresolution(
+            GlareResolution level,
+            int &exponent)
+        {
+            switch(level)
+            {
+                case GlareResolution::Minimum: exponent = 6; return true;
+                case GlareResolution::Low: exponent = 7; return true;
+                case GlareResolution::Medium: exponent = 8; return true;
+                case GlareResolution::High: exponent = 9; return true;
+                case GlareResolution::Ultra: exponent = 10; return true;
+            }
+            return false;
+        }
+
+        bool readglareresolution(GlareResolutionState &result)
+        {
+            result.level = GlareResolution::Minimum;
+            result.configured_exponent = 0;
+            result.requested_width = 0;
+
+            ident *id = getident("glaresize");
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 6 ||
+               id->maxval != 10 || *id->storage.i < 6 ||
+               *id->storage.i > 10 ||
+               !glareresolution(*id->storage.i, result.level))
+            {
+                return false;
+            }
+
+            result.configured_exponent = *id->storage.i;
+            result.requested_width = 1 << result.configured_exponent;
+            return true;
+        }
+
+        bool writeglareresolution(
+            GlareResolution level,
+            GlareResolutionState &result)
+        {
+            if(!readglareresolution(result))
+                return false;
+
+            int exponent = 0;
+            if(!glareresolution(level, exponent))
+                return false;
+            if(result.configured_exponent == exponent)
+                return true;
+
+            if(!SDL_GL_GetCurrentContext())
+                return false;
+
+            ident *id = getident("glaresize");
+            GlareResolution current_level;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY || id->minval != 6 ||
+               id->maxval != 10 || *id->storage.i < 6 ||
+               *id->storage.i > 10 ||
+               !glareresolution(*id->storage.i, current_level))
+            {
+                return false;
+            }
+            if(*id->storage.i == exponent)
+            {
+                if(!readglareresolution(result))
+                    return false;
+                return result.level == level &&
+                    result.configured_exponent == exponent &&
+                    result.requested_width == (1 << exponent);
+            }
+
+            setvarchecked(id, exponent);
+
+            if(!readglareresolution(result))
+                return false;
+            return result.level == level &&
+                result.configured_exponent == exponent &&
+                result.requested_width == (1 << exponent);
+        }
+
         static TextureQuality classifytexturequality(int texture_size_limit)
         {
             switch(texture_size_limit)
