@@ -417,6 +417,10 @@ namespace cowui
             constructor.Bind("glare_preset_label", &glare_preset_label) &&
             constructor.Bind("glare_preset_status", &glare_preset_status) &&
             constructor.BindEventCallback("select_glare_preset", &RmlSettings::selectglarepreset, this) &&
+            constructor.Bind("glare_intensity_available", &glare_intensity_available) &&
+            constructor.Bind("glare_intensity_slider", &glare_intensity_slider) &&
+            constructor.Bind("glare_intensity_label", &glare_intensity_label) &&
+            constructor.Bind("glare_intensity_status", &glare_intensity_status) &&
             constructor.Bind("glare_resolution_available", &glare_resolution_available) &&
             constructor.Bind("glare_resolution_selected", &glare_resolution_selected) &&
             constructor.Bind("glare_resolution_label", &glare_resolution_label) &&
@@ -741,6 +745,10 @@ namespace cowui
             router.registeraction(
                 "settings.motion-blur",
                 motionbluraction
+            ) &&
+            router.registeraction(
+                "settings.glare-intensity",
+                changeglareintensityaction
             ) &&
             router.registeraction(
                 "settings.fps-limit",
@@ -1227,6 +1235,7 @@ namespace cowui
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
+        refreshglareintensity();
         refreshglareresolution();
         refreshtexturequality();
         refreshtexturereduction();
@@ -4383,6 +4392,77 @@ namespace cowui
             else glare_preset_status = "Change not accepted. " + glare_preset_status;
             model.DirtyVariable("glare_preset_status");
         }
+        refreshglareintensity();
+    }
+
+    void RmlSettings::refreshglareintensity()
+    {
+        settings::GlareIntensityState state = {};
+        const bool available = settings::readglareintensity(state);
+        presentglareintensity(state, available);
+    }
+
+    void RmlSettings::presentglareintensity(
+        const settings::GlareIntensityState &state,
+        bool available)
+    {
+        glare_intensity_available = available;
+        glare_intensity_status.clear();
+
+        if(!available)
+        {
+            glare_intensity_slider = 0.0f;
+            glare_intensity_label = "Unavailable";
+            glare_intensity_status = "Glare Intensity state is unavailable";
+        }
+        else
+        {
+            const float step = 0.1f;
+            glare_intensity_slider =
+                std::round(state.configured_scale / step) * step;
+
+            char label[32];
+            std::snprintf(label, sizeof(label), "%.6gx",
+                double(state.configured_scale));
+            glare_intensity_label = label;
+        }
+
+        model.DirtyVariable("glare_intensity_available");
+        model.DirtyVariable("glare_intensity_slider");
+        model.DirtyVariable("glare_intensity_label");
+        model.DirtyVariable("glare_intensity_status");
+    }
+
+    void RmlSettings::changeglareintensityaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = event.GetParameter<float>(
+            "value", instance->glare_intensity_slider);
+
+        // RmlUi snaps programmatic range values to the declared step and
+        // emits change. Ignore that presentation event so an off-step native
+        // value remains authoritative until the user moves the slider.
+        if(requested == instance->glare_intensity_slider)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::GlareIntensityState state = {};
+        const bool accepted = settings::writeglareintensity(requested, state);
+        const bool available = accepted ||
+            settings::readglareintensity(state);
+        instance->presentglareintensity(state, available);
+        instance->refreshglarepreset();
+        if(!accepted && available)
+        {
+            instance->glare_intensity_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("glare_intensity_status");
+        }
+        event.StopPropagation();
     }
 
     void RmlSettings::refreshglareresolution()

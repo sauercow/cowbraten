@@ -1095,6 +1095,32 @@ namespace cowui
             return accepted;
         }
 
+        static void copyglareintensity(
+            const sauersettings::GlareIntensityState &source,
+            GlareIntensityState &result)
+        {
+            result.configured_scale = source.configured_scale;
+        }
+
+        bool readglareintensity(GlareIntensityState &result)
+        {
+            sauersettings::GlareIntensityState legacy = {};
+            const bool read = sauersettings::readglareintensity(legacy);
+            copyglareintensity(legacy, result);
+            return read;
+        }
+
+        bool writeglareintensity(
+            float configured_scale,
+            GlareIntensityState &result)
+        {
+            sauersettings::GlareIntensityState legacy = {};
+            const bool accepted = sauersettings::writeglareintensity(
+                configured_scale, legacy);
+            copyglareintensity(legacy, result);
+            return accepted;
+        }
+
         static GlareResolution glareresolution(
             sauersettings::GlareResolution level)
         {

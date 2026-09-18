@@ -1126,6 +1126,37 @@
                             </div>
                         </div>
 
+                        <div class="settings-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Glare Intensity</div>
+                                    <div class="settings-control-description">
+                                        Adjusts how strongly Glare is blended into the final image. Lower values reduce its visible strength but do not reduce rendering work.
+                                    </div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ glare_intensity_label }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">0x</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="8"
+                                    step="0.1"
+                                    value="1"
+                                    data-attr-value="glare_intensity_slider"
+                                    data-attrif-disabled="!glare_intensity_available"
+                                    onchange="settings.glare-intensity" />
+                                <span class="settings-range-bound settings-range-maximum">8x</span>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="glare_intensity_status != ''">
+                                <span>{{ glare_intensity_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section settings-antialiasing-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">

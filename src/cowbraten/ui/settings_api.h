@@ -219,6 +219,11 @@ namespace cowui
             int blur_radius;
         };
 
+        struct GlareIntensityState
+        {
+            float configured_scale;
+        };
+
         enum class GlareResolution
         {
             Minimum,
@@ -516,6 +521,10 @@ namespace cowui
 
         bool readglarepreset(GlarePresetState &result);
         bool writeglarepreset(GlarePreset preset, GlarePresetState &result);
+
+        bool readglareintensity(GlareIntensityState &result);
+        bool writeglareintensity(float configured_scale,
+            GlareIntensityState &result);
 
         bool readglareresolution(GlareResolutionState &result);
         bool writeglareresolution(GlareResolution level,

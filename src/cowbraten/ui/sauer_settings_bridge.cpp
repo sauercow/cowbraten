@@ -1897,6 +1897,58 @@ namespace cowui
                 result.blur_radius == blur_radius;
         }
 
+        bool readglareintensity(GlareIntensityState &result)
+        {
+            result.configured_scale = 0.0f;
+
+            ident *id = getident("glarescale");
+            if(!id || id->type != ID_FVAR || !id->storage.f ||
+               id->flags&IDF_READONLY || id->minvalf != 0.0f ||
+               id->maxvalf != 8.0f || !finitefloat(*id->storage.f) ||
+               *id->storage.f < 0.0f || *id->storage.f > 8.0f)
+            {
+                return false;
+            }
+
+            result.configured_scale = *id->storage.f;
+            return true;
+        }
+
+        bool writeglareintensity(
+            float configured_scale,
+            GlareIntensityState &result)
+        {
+            if(!readglareintensity(result))
+                return false;
+            if(!finitefloat(configured_scale) ||
+               configured_scale < 0.0f || configured_scale > 8.0f)
+            {
+                return false;
+            }
+            if(result.configured_scale == configured_scale)
+                return true;
+
+            ident *id = getident("glarescale");
+            if(!id || id->type != ID_FVAR || !id->storage.f ||
+               id->flags&IDF_READONLY || id->minvalf != 0.0f ||
+               id->maxvalf != 8.0f || !finitefloat(*id->storage.f) ||
+               *id->storage.f < 0.0f || *id->storage.f > 8.0f)
+            {
+                return false;
+            }
+            if(*id->storage.f == configured_scale)
+            {
+                result.configured_scale = *id->storage.f;
+                return true;
+            }
+
+            setfvarchecked(id, configured_scale);
+
+            if(!readglareintensity(result))
+                return false;
+            return result.configured_scale == configured_scale;
+        }
+
         static bool glareresolution(
             int exponent,
             GlareResolution &level)
