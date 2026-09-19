@@ -657,6 +657,270 @@
                         <div class="settings-section settings-compact-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
+                                    <div class="settings-control-title">Ammobar</div>
+                                    <div class="settings-control-description">
+                                        Draws Sauer's existing HUD ammo icon strip. Off by default. The renderer still hides it in instagib.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="ammobar_visible"
+                                        data-attrif-disabled="!ammobar_available"
+                                        data-event-change="select_ammobar(ev.checked)" />
+                                    <span data-if="ammobar_visible">On</span>
+                                    <span data-if="!ammobar_visible">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-if="ammobar_visible">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Horizontal</div>
+                                        <div class="settings-control-description">
+                                            Lays icons out left to right instead of top to bottom.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="ammobar_horizontal"
+                                            data-attrif-disabled="!ammobar_available"
+                                            data-event-change="select_ammobar_horizontal(ev.checked)" />
+                                        <span data-if="ammobar_horizontal">On</span>
+                                        <span data-if="!ammobar_horizontal">Off</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Flip</div>
+                                        <div class="settings-control-description">
+                                            Reverses the ammo-count offset relative to each icon.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="ammobar_flip"
+                                            data-attrif-disabled="!ammobar_available"
+                                            data-event-change="select_ammobar_flip(ev.checked)" />
+                                        <span data-if="ammobar_flip">On</span>
+                                        <span data-if="!ammobar_flip">Off</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Size</div>
+                                        <div class="settings-control-description">
+                                            Overall scale of the ammo bar. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.scale.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="ammobar_scale_input"
+                                            data-class-is-invalid="ammobar_scale_invalid"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onfocus="settings.hud.ammobar.scale.focus"
+                                            onblur="settings.hud.ammobar.scale.blur"
+                                            onkeyup="settings.hud.ammobar.scale.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.scale.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ ammobar_scale_minimum }} - {{ ammobar_scale_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Icon Spacing</div>
+                                        <div class="settings-control-description">
+                                            Extra pixels between ammo icons.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ ammobar_icon_spacing }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ ammobar_icon_spacing_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="0"
+                                        max="500"
+                                        step="1"
+                                        data-attr-min="ammobar_icon_spacing_minimum"
+                                        data-attr-max="ammobar_icon_spacing_maximum"
+                                        data-attr-value="ammobar_icon_spacing"
+                                        data-attrif-disabled="!ammobar_available"
+                                        onchange="settings.hud.ammobar.icon-spacing" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ ammobar_icon_spacing_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Label Size</div>
+                                        <div class="settings-control-description">
+                                            Scale of the ammo-count text. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.label-size.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="ammobar_label_size_input"
+                                            data-class-is-invalid="ammobar_label_size_invalid"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onfocus="settings.hud.ammobar.label-size.focus"
+                                            onblur="settings.hud.ammobar.label-size.blur"
+                                            onkeyup="settings.hud.ammobar.label-size.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.label-size.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ ammobar_label_size_minimum }} - {{ ammobar_label_size_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Label Offset</div>
+                                        <div class="settings-control-description">
+                                            Extra pixels between each icon and its ammo count.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ ammobar_label_offset }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ ammobar_label_offset_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="0"
+                                        max="500"
+                                        step="1"
+                                        data-attr-min="ammobar_label_offset_minimum"
+                                        data-attr-max="ammobar_label_offset_maximum"
+                                        data-attr-value="ammobar_label_offset"
+                                        data-attrif-disabled="!ammobar_available"
+                                        onchange="settings.hud.ammobar.label-offset" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ ammobar_label_offset_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Anchor</div>
+                                        <div class="settings-control-description">
+                                            Which icon sits on the configured x/y point: first icon, center, or last icon.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="ammobar_align_first"
+                                        data-attrif-disabled="!ammobar_available"
+                                        data-event-click="select_ammobar_align(-1)">First icon</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="ammobar_align_center"
+                                        data-attrif-disabled="!ammobar_available"
+                                        data-event-click="select_ammobar_align(0)">Center</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="ammobar_align_last"
+                                        data-attrif-disabled="!ammobar_available"
+                                        data-event-click="select_ammobar_align(1)">Last icon</button>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">X</div>
+                                        <div class="settings-control-description">
+                                            Horizontal HUD position. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.x.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="ammobar_x_input"
+                                            data-class-is-invalid="ammobar_x_invalid"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onfocus="settings.hud.ammobar.x.focus"
+                                            onblur="settings.hud.ammobar.x.blur"
+                                            onkeyup="settings.hud.ammobar.x.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.x.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ ammobar_x_minimum }} - {{ ammobar_x_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Y</div>
+                                        <div class="settings-control-description">
+                                            Vertical HUD position. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.y.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="ammobar_y_input"
+                                            data-class-is-invalid="ammobar_y_invalid"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onfocus="settings.hud.ammobar.y.focus"
+                                            onblur="settings.hud.ammobar.y.blur"
+                                            onkeyup="settings.hud.ammobar.y.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.y.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ ammobar_y_minimum }} - {{ ammobar_y_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Hide Empty Stacks</div>
+                                        <div class="settings-control-description">
+                                            Hides guns with no ammo unless that gun is selected. On by default.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="ammobar_hide_empty"
+                                            data-attrif-disabled="!ammobar_available"
+                                            data-event-change="select_ammobar_hide_empty(ev.checked)" />
+                                        <span data-if="ammobar_hide_empty">On</span>
+                                        <span data-if="!ammobar_hide_empty">Off</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="ammobar_status != ''">
+                                <span>{{ ammobar_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
                                     <div class="settings-control-title">Frag &amp; Streak Messages</div>
                                     <div class="settings-control-description">
                                         Shows p1x frag messages and Cowbraten streak milestones using their existing shared HUD path.

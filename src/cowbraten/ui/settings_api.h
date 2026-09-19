@@ -455,6 +455,33 @@ namespace cowui
             float streak_milestone_scale_maximum;
         };
 
+        struct Ammobar
+        {
+            bool visible;
+            bool horizontal;
+            bool flip;
+            float scale;
+            float scale_minimum;
+            float scale_maximum;
+            int icon_spacing;
+            int icon_spacing_minimum;
+            int icon_spacing_maximum;
+            float label_size;
+            float label_size_minimum;
+            float label_size_maximum;
+            int label_offset;
+            int label_offset_minimum;
+            int label_offset_maximum;
+            int align;
+            float x;
+            float x_minimum;
+            float x_maximum;
+            float y;
+            float y_minimum;
+            float y_maximum;
+            bool hide_empty;
+        };
+
         struct Chat
         {
             bool public_messages_in_top_feed;
@@ -679,6 +706,19 @@ namespace cowui
         bool writemuzzlelight(bool enabled);
         bool writefragmessages(FragMessagesMode mode);
         bool writestreakmilestonescale(float value);
+
+        bool readammobar(Ammobar &result);
+        bool writeammobar(bool enabled, Ammobar &result);
+        bool writeammobarhorizontal(bool enabled, Ammobar &result);
+        bool writeammobarflip(bool enabled, Ammobar &result);
+        bool writeammobarscale(float value, Ammobar &result);
+        bool writeammobarsep(int value, Ammobar &result);
+        bool writeammobarcountscale(float value, Ammobar &result);
+        bool writeammobarcountsep(int value, Ammobar &result);
+        bool writeammobaralign(int value, Ammobar &result);
+        bool writeammobarx(float value, Ammobar &result);
+        bool writeammobary(float value, Ammobar &result);
+        bool writeammobarhideempty(bool enabled, Ammobar &result);
 
         bool readchat(Chat &result);
         bool writepublicchatintopfeed(bool enabled);

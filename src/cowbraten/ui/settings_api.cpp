@@ -2011,6 +2011,142 @@ namespace cowui
             return sauersettings::writestreakmilestonescale(value);
         }
 
+        static void copyammobar(
+            const sauersettings::Ammobar &source,
+            Ammobar &result)
+        {
+            result.visible = source.visible;
+            result.horizontal = source.horizontal;
+            result.flip = source.flip;
+            result.scale = source.scale;
+            result.scale_minimum = source.scale_minimum;
+            result.scale_maximum = source.scale_maximum;
+            result.icon_spacing = source.icon_spacing;
+            result.icon_spacing_minimum = source.icon_spacing_minimum;
+            result.icon_spacing_maximum = source.icon_spacing_maximum;
+            result.label_size = source.label_size;
+            result.label_size_minimum = source.label_size_minimum;
+            result.label_size_maximum = source.label_size_maximum;
+            result.label_offset = source.label_offset;
+            result.label_offset_minimum = source.label_offset_minimum;
+            result.label_offset_maximum = source.label_offset_maximum;
+            result.align = source.align;
+            result.x = source.x;
+            result.x_minimum = source.x_minimum;
+            result.x_maximum = source.x_maximum;
+            result.y = source.y;
+            result.y_minimum = source.y_minimum;
+            result.y_maximum = source.y_maximum;
+            result.hide_empty = source.hide_empty;
+        }
+
+        bool readammobar(Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool read = sauersettings::readammobar(legacy);
+            copyammobar(legacy, result);
+            return read;
+        }
+
+        bool writeammobar(bool enabled, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobar(
+                enabled, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarhorizontal(bool enabled, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarhorizontal(
+                enabled, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarflip(bool enabled, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarflip(
+                enabled, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarscale(float value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarscale(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarsep(int value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarsep(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarcountscale(float value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarcountscale(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarcountsep(int value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarcountsep(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobaralign(int value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobaralign(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarx(float value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarx(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobary(float value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobary(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarhideempty(bool enabled, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarhideempty(
+                enabled, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
         bool readchat(Chat &result)
         {
             sauersettings::Chat legacy;

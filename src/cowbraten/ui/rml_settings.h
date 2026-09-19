@@ -35,6 +35,7 @@ namespace cowui
         struct GameFeedback;
         struct GameRadar;
         struct GameModels;
+        struct Ammobar;
         struct GlassReflectionsState;
         struct ModelReflectionsState;
         struct BumpModelsState;
@@ -181,6 +182,19 @@ namespace cowui
             Rml::Event &event, const Rml::VariantList &arguments);
         void selectalwaysuseteamskins(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
+        bool refreshammobar();
+        void presentammobar(const settings::Ammobar &state, bool available);
+        void finishammobarwrite(bool accepted, settings::Ammobar &state);
+        void selectammobar(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectammobarhorizontal(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectammobarflip(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectammobarhideempty(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectammobaralign(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
         bool refreshvideo();
         void refreshshaderdetail();
         void presentshaderdetail(const settings::ShaderDetailState &state);
@@ -372,6 +386,10 @@ namespace cowui
         void commitsensitivity();
         void commitcrosshairsize();
         void commitstreakscale();
+        void commitammobarscale();
+        void commitammobarlabelsize();
+        void commitammobarx();
+        void commitammobary();
         void setcategory(Category category);
         void setpresentation(
             settings::PresentationMode presentation,
@@ -465,6 +483,28 @@ namespace cowui
         static void focusstreakscaleaction(Rml::Event &event);
         static void blurstreakscaleaction(Rml::Event &event);
         static void commitstreakscaleaction(Rml::Event &event);
+        static void changeammobariconspacingaction(Rml::Event &event);
+        static void changeammobarlabeloffsetaction(Rml::Event &event);
+        static void decreaseammobarscaleaction(Rml::Event &event);
+        static void increaseammobarscaleaction(Rml::Event &event);
+        static void focusammobarscaleaction(Rml::Event &event);
+        static void blurammobarscaleaction(Rml::Event &event);
+        static void commitammobarscaleaction(Rml::Event &event);
+        static void decreaseammobarlabelsizeaction(Rml::Event &event);
+        static void increaseammobarlabelsizeaction(Rml::Event &event);
+        static void focusammobarlabelsizeaction(Rml::Event &event);
+        static void blurammobarlabelsizeaction(Rml::Event &event);
+        static void commitammobarlabelsizeaction(Rml::Event &event);
+        static void decreaseammobarxaction(Rml::Event &event);
+        static void increaseammobarxaction(Rml::Event &event);
+        static void focusammobarxaction(Rml::Event &event);
+        static void blurammobarxaction(Rml::Event &event);
+        static void commitammobarxaction(Rml::Event &event);
+        static void decreaseammobaryaction(Rml::Event &event);
+        static void increaseammobaryaction(Rml::Event &event);
+        static void focusammobaryaction(Rml::Event &event);
+        static void blurammobaryaction(Rml::Event &event);
+        static void commitammobaryaction(Rml::Event &event);
         static void publicchatintopfeedaction(Rml::Event &event);
         static void teamchatintopfeedaction(Rml::Event &event);
         static void publicchatinbottomboxaction(Rml::Event &event);
@@ -520,6 +560,47 @@ namespace cowui
         bool force_matching_player_models = false;
         bool always_use_team_skins = false;
         Rml::String game_models_status;
+        bool ammobar_available = false;
+        bool ammobar_visible = false;
+        bool ammobar_horizontal = false;
+        bool ammobar_flip = false;
+        float ammobar_scale = 0.5f;
+        float ammobar_scale_minimum = 0.1f;
+        float ammobar_scale_maximum = 1.0f;
+        Rml::String ammobar_scale_input;
+        bool ammobar_scale_invalid = false;
+        bool ammobar_scale_editing = false;
+        int ammobar_icon_spacing = 20;
+        int ammobar_icon_spacing_minimum = 0;
+        int ammobar_icon_spacing_maximum = 500;
+        bool ammobar_icon_spacing_armed = false;
+        float ammobar_label_size = 1.5f;
+        float ammobar_label_size_minimum = 0.5f;
+        float ammobar_label_size_maximum = 2.0f;
+        Rml::String ammobar_label_size_input;
+        bool ammobar_label_size_invalid = false;
+        bool ammobar_label_size_editing = false;
+        int ammobar_label_offset = 20;
+        int ammobar_label_offset_minimum = 0;
+        int ammobar_label_offset_maximum = 500;
+        bool ammobar_label_offset_armed = false;
+        bool ammobar_align_first = false;
+        bool ammobar_align_center = true;
+        bool ammobar_align_last = false;
+        float ammobar_x = 0.025f;
+        float ammobar_x_minimum = 0.0f;
+        float ammobar_x_maximum = 1.0f;
+        Rml::String ammobar_x_input;
+        bool ammobar_x_invalid = false;
+        bool ammobar_x_editing = false;
+        float ammobar_y = 0.5f;
+        float ammobar_y_minimum = 0.0f;
+        float ammobar_y_maximum = 1.0f;
+        Rml::String ammobar_y_input;
+        bool ammobar_y_invalid = false;
+        bool ammobar_y_editing = false;
+        bool ammobar_hide_empty = true;
+        Rml::String ammobar_status;
 
         Rml::String resolution_label;
         Rml::String render_resolution_label;

@@ -341,7 +341,26 @@ modes. The default theme therefore presents an Enabled toggle plus a subordinate
 Show in Instagib toggle, while the typed settings API retains the exact engine
 enum as its source of truth.
 
-The legacy `ammobar`, `gameclock`, `hudscore`, `scoreboard`, and
+HUD ammo bar inlines the legacy `ammobar` adjust document onto the Settings HUD
+page. The typed snapshot owns Sauer's persistent `ammobar` master switch plus
+the layout idents that native GUI already exposes: orientation
+(`ammobarhorizontal`, `ammobarflip`), size (`ammobarscale`), icon spacing
+(`ammobarsep`), label size (`ammobarcountscale`), label offset
+(`ammobarcountsep`), anchor (`ammobaralign` as exact `-1` / `0` / `1`),
+normalized position (`ammobarx`, `ammobary`), and hide-empty
+(`ammobarhideempty`, default on). Each control has a typed writer through
+`setvarchecked()` / `setfvarchecked()`. All apply immediately through
+`gamehud()` / `drawammobar()` with no ident callback and no GL reset. Turning
+the master off does not rewrite layout idents; the default theme hides those
+subordinates until the bar is on, matching `if $ammobar`. Integer sliders bind
+min/max from the idents, omit a hardcoded RML `value`, and ignore programmatic
+range change during document construct. Float fields use the same local
+edit/commit/readback policy as streak scale, with native `0.01` steps.
+Anchor radios write only on user select and select only on an exact `-1/0/1`
+match. `showgui "ammobar"` remains the legacy standalone document; Settings no
+longer needs that nested GUI.
+
+The legacy `gameclock`, `hudscore`, `scoreboard`, and
 `hudfragmessages` adjustment documents contain substantially more controls
 than this initial production slice. Their exact `showgui` names therefore
 continue through the legacy fallback. No HUD or Crosshair compatibility alias

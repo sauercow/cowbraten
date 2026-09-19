@@ -390,6 +390,94 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *ammobarident()
+        {
+            ident *id = getident("ammobar");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarhorizontalident()
+        {
+            ident *id = getident("ammobarhorizontal");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarflipident()
+        {
+            ident *id = getident("ammobarflip");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarhideemptyident()
+        {
+            ident *id = getident("ammobarhideempty");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarsepident()
+        {
+            ident *id = getident("ammobarsep");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarcountsepident()
+        {
+            ident *id = getident("ammobarcountsep");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobaralignident()
+        {
+            ident *id = getident("ammobaralign");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarscaleident()
+        {
+            ident *id = getident("ammobarscale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarcountscaleident()
+        {
+            ident *id = getident("ammobarcountscale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarxident()
+        {
+            ident *id = getident("ammobarx");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobaryident()
+        {
+            ident *id = getident("ammobary");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
         static ident *consolefilterident()
         {
             ident *id = getident("confilter");
@@ -3514,6 +3602,204 @@ namespace cowui
 
             setfvarchecked(id, value);
             return *id->storage.f == value;
+        }
+
+        bool readammobar(Ammobar &result)
+        {
+            ident *visible_id = ammobarident();
+            ident *horizontal_id = ammobarhorizontalident();
+            ident *flip_id = ammobarflipident();
+            ident *scale_id = ammobarscaleident();
+            ident *sep_id = ammobarsepident();
+            ident *count_scale_id = ammobarcountscaleident();
+            ident *count_sep_id = ammobarcountsepident();
+            ident *align_id = ammobaralignident();
+            ident *x_id = ammobarxident();
+            ident *y_id = ammobaryident();
+            ident *hide_empty_id = ammobarhideemptyident();
+            if(!visible_id || !visible_id->storage.i ||
+               !horizontal_id || !horizontal_id->storage.i ||
+               !flip_id || !flip_id->storage.i ||
+               !scale_id || !scale_id->storage.f ||
+               !sep_id || !sep_id->storage.i ||
+               !count_scale_id || !count_scale_id->storage.f ||
+               !count_sep_id || !count_sep_id->storage.i ||
+               !align_id || !align_id->storage.i ||
+               !x_id || !x_id->storage.f ||
+               !y_id || !y_id->storage.f ||
+               !hide_empty_id || !hide_empty_id->storage.i)
+            {
+                return false;
+            }
+
+            result.visible = *visible_id->storage.i != 0;
+            result.horizontal = *horizontal_id->storage.i != 0;
+            result.flip = *flip_id->storage.i != 0;
+            result.scale = *scale_id->storage.f;
+            result.scale_minimum = scale_id->minvalf;
+            result.scale_maximum = scale_id->maxvalf;
+            result.icon_spacing = *sep_id->storage.i;
+            result.icon_spacing_minimum = sep_id->minval;
+            result.icon_spacing_maximum = sep_id->maxval;
+            result.label_size = *count_scale_id->storage.f;
+            result.label_size_minimum = count_scale_id->minvalf;
+            result.label_size_maximum = count_scale_id->maxvalf;
+            result.label_offset = *count_sep_id->storage.i;
+            result.label_offset_minimum = count_sep_id->minval;
+            result.label_offset_maximum = count_sep_id->maxval;
+            result.align = *align_id->storage.i;
+            result.x = *x_id->storage.f;
+            result.x_minimum = x_id->minvalf;
+            result.x_maximum = x_id->maxvalf;
+            result.y = *y_id->storage.f;
+            result.y_minimum = y_id->minvalf;
+            result.y_maximum = y_id->maxvalf;
+            result.hide_empty = *hide_empty_id->storage.i != 0;
+            return true;
+        }
+
+        static bool writeammobarboolean(
+            ident *id,
+            bool enabled,
+            Ammobar &result)
+        {
+            if(!readammobar(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readammobar(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        static bool writeammobarinteger(
+            ident *id,
+            int value,
+            Ammobar &result)
+        {
+            if(!readammobar(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readammobar(result))
+                return false;
+            return *id->storage.i == value;
+        }
+
+        static bool writeammobarfloat(
+            ident *id,
+            float value,
+            Ammobar &result)
+        {
+            if(!readammobar(result))
+                return false;
+
+            if(!id || !id->storage.f || id->flags&IDF_READONLY ||
+               !finitefloat(value))
+            {
+                return false;
+            }
+
+            float clamped = value;
+            if(clamped < id->minvalf)
+                clamped = id->minvalf;
+            else if(clamped > id->maxvalf)
+                clamped = id->maxvalf;
+
+            if(*id->storage.f == clamped)
+                return true;
+
+            setfvarchecked(id, value);
+            if(!readammobar(result))
+                return false;
+            return true;
+        }
+
+        bool writeammobar(bool enabled, Ammobar &result)
+        {
+            return writeammobarboolean(ammobarident(), enabled, result);
+        }
+
+        bool writeammobarhorizontal(bool enabled, Ammobar &result)
+        {
+            return writeammobarboolean(
+                ammobarhorizontalident(),
+                enabled,
+                result);
+        }
+
+        bool writeammobarflip(bool enabled, Ammobar &result)
+        {
+            return writeammobarboolean(ammobarflipident(), enabled, result);
+        }
+
+        bool writeammobarscale(float value, Ammobar &result)
+        {
+            return writeammobarfloat(ammobarscaleident(), value, result);
+        }
+
+        bool writeammobarsep(int value, Ammobar &result)
+        {
+            return writeammobarinteger(ammobarsepident(), value, result);
+        }
+
+        bool writeammobarcountscale(float value, Ammobar &result)
+        {
+            return writeammobarfloat(
+                ammobarcountscaleident(),
+                value,
+                result);
+        }
+
+        bool writeammobarcountsep(int value, Ammobar &result)
+        {
+            return writeammobarinteger(ammobarcountsepident(), value, result);
+        }
+
+        bool writeammobaralign(int value, Ammobar &result)
+        {
+            if(value != -1 && value != 0 && value != 1)
+            {
+                readammobar(result);
+                return false;
+            }
+
+            return writeammobarinteger(ammobaralignident(), value, result);
+        }
+
+        bool writeammobarx(float value, Ammobar &result)
+        {
+            return writeammobarfloat(ammobarxident(), value, result);
+        }
+
+        bool writeammobary(float value, Ammobar &result)
+        {
+            return writeammobarfloat(ammobaryident(), value, result);
+        }
+
+        bool writeammobarhideempty(bool enabled, Ammobar &result)
+        {
+            return writeammobarboolean(
+                ammobarhideemptyident(),
+                enabled,
+                result);
         }
 
         bool readchat(Chat &result)

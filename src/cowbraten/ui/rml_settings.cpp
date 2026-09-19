@@ -223,6 +223,14 @@ namespace cowui
         return float(stepped);
     }
 
+    static float stepammobarfloat(float value, int direction)
+    {
+        const double stepped = std::round(
+            (double(value) + double(direction) * 0.01) * 100.0
+        ) / 100.0;
+        return float(stepped);
+    }
+
     static Rml::String rmlcrosshairresource(const char *path)
     {
         if(!path || !path[0])
@@ -416,6 +424,70 @@ namespace cowui
             constructor.BindEventCallback("select_fullbright_intensity", &RmlSettings::selectfullbrightintensity, this) &&
             constructor.BindEventCallback("select_force_player_models", &RmlSettings::selectforceplayermodels, this) &&
             constructor.BindEventCallback("select_always_use_team_skins", &RmlSettings::selectalwaysuseteamskins, this) &&
+            constructor.Bind("ammobar_available", &ammobar_available) &&
+            constructor.Bind("ammobar_visible", &ammobar_visible) &&
+            constructor.Bind("ammobar_horizontal", &ammobar_horizontal) &&
+            constructor.Bind("ammobar_flip", &ammobar_flip) &&
+            constructor.Bind("ammobar_scale", &ammobar_scale) &&
+            constructor.Bind("ammobar_scale_minimum", &ammobar_scale_minimum) &&
+            constructor.Bind("ammobar_scale_maximum", &ammobar_scale_maximum) &&
+            constructor.Bind("ammobar_scale_input", &ammobar_scale_input) &&
+            constructor.Bind("ammobar_scale_invalid", &ammobar_scale_invalid) &&
+            constructor.Bind("ammobar_icon_spacing", &ammobar_icon_spacing) &&
+            constructor.Bind(
+                "ammobar_icon_spacing_minimum",
+                &ammobar_icon_spacing_minimum
+            ) &&
+            constructor.Bind(
+                "ammobar_icon_spacing_maximum",
+                &ammobar_icon_spacing_maximum
+            ) &&
+            constructor.Bind("ammobar_label_size", &ammobar_label_size) &&
+            constructor.Bind(
+                "ammobar_label_size_minimum",
+                &ammobar_label_size_minimum
+            ) &&
+            constructor.Bind(
+                "ammobar_label_size_maximum",
+                &ammobar_label_size_maximum
+            ) &&
+            constructor.Bind(
+                "ammobar_label_size_input",
+                &ammobar_label_size_input
+            ) &&
+            constructor.Bind(
+                "ammobar_label_size_invalid",
+                &ammobar_label_size_invalid
+            ) &&
+            constructor.Bind("ammobar_label_offset", &ammobar_label_offset) &&
+            constructor.Bind(
+                "ammobar_label_offset_minimum",
+                &ammobar_label_offset_minimum
+            ) &&
+            constructor.Bind(
+                "ammobar_label_offset_maximum",
+                &ammobar_label_offset_maximum
+            ) &&
+            constructor.Bind("ammobar_align_first", &ammobar_align_first) &&
+            constructor.Bind("ammobar_align_center", &ammobar_align_center) &&
+            constructor.Bind("ammobar_align_last", &ammobar_align_last) &&
+            constructor.Bind("ammobar_x", &ammobar_x) &&
+            constructor.Bind("ammobar_x_minimum", &ammobar_x_minimum) &&
+            constructor.Bind("ammobar_x_maximum", &ammobar_x_maximum) &&
+            constructor.Bind("ammobar_x_input", &ammobar_x_input) &&
+            constructor.Bind("ammobar_x_invalid", &ammobar_x_invalid) &&
+            constructor.Bind("ammobar_y", &ammobar_y) &&
+            constructor.Bind("ammobar_y_minimum", &ammobar_y_minimum) &&
+            constructor.Bind("ammobar_y_maximum", &ammobar_y_maximum) &&
+            constructor.Bind("ammobar_y_input", &ammobar_y_input) &&
+            constructor.Bind("ammobar_y_invalid", &ammobar_y_invalid) &&
+            constructor.Bind("ammobar_hide_empty", &ammobar_hide_empty) &&
+            constructor.Bind("ammobar_status", &ammobar_status) &&
+            constructor.BindEventCallback("select_ammobar", &RmlSettings::selectammobar, this) &&
+            constructor.BindEventCallback("select_ammobar_horizontal", &RmlSettings::selectammobarhorizontal, this) &&
+            constructor.BindEventCallback("select_ammobar_flip", &RmlSettings::selectammobarflip, this) &&
+            constructor.BindEventCallback("select_ammobar_hide_empty", &RmlSettings::selectammobarhideempty, this) &&
+            constructor.BindEventCallback("select_ammobar_align", &RmlSettings::selectammobaralign, this) &&
             constructor.Bind("resolution_label", &resolution_label) &&
             constructor.Bind(
                 "render_resolution_label",
@@ -1080,6 +1152,94 @@ namespace cowui
                 commitstreakscaleaction
             ) &&
             router.registeraction(
+                "settings.hud.ammobar.icon-spacing",
+                changeammobariconspacingaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-offset",
+                changeammobarlabeloffsetaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.scale.decrease",
+                decreaseammobarscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.scale.increase",
+                increaseammobarscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.scale.focus",
+                focusammobarscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.scale.blur",
+                blurammobarscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.scale.commit",
+                commitammobarscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-size.decrease",
+                decreaseammobarlabelsizeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-size.increase",
+                increaseammobarlabelsizeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-size.focus",
+                focusammobarlabelsizeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-size.blur",
+                blurammobarlabelsizeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-size.commit",
+                commitammobarlabelsizeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.x.decrease",
+                decreaseammobarxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.x.increase",
+                increaseammobarxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.x.focus",
+                focusammobarxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.x.blur",
+                blurammobarxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.x.commit",
+                commitammobarxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.y.decrease",
+                decreaseammobaryaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.y.increase",
+                increaseammobaryaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.y.focus",
+                focusammobaryaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.y.blur",
+                blurammobaryaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.y.commit",
+                commitammobaryaction
+            ) &&
+            router.registeraction(
                 "settings.chat.top.public",
                 publicchatintopfeedaction
             ) &&
@@ -1157,6 +1317,47 @@ namespace cowui
         force_matching_player_models = false;
         always_use_team_skins = false;
         game_models_status.clear();
+        ammobar_available = false;
+        ammobar_visible = false;
+        ammobar_horizontal = false;
+        ammobar_flip = false;
+        ammobar_scale = 0.5f;
+        ammobar_scale_minimum = 0.1f;
+        ammobar_scale_maximum = 1.0f;
+        ammobar_scale_input.clear();
+        ammobar_scale_invalid = false;
+        ammobar_scale_editing = false;
+        ammobar_icon_spacing = 20;
+        ammobar_icon_spacing_minimum = 0;
+        ammobar_icon_spacing_maximum = 500;
+        ammobar_icon_spacing_armed = false;
+        ammobar_label_size = 1.5f;
+        ammobar_label_size_minimum = 0.5f;
+        ammobar_label_size_maximum = 2.0f;
+        ammobar_label_size_input.clear();
+        ammobar_label_size_invalid = false;
+        ammobar_label_size_editing = false;
+        ammobar_label_offset = 20;
+        ammobar_label_offset_minimum = 0;
+        ammobar_label_offset_maximum = 500;
+        ammobar_label_offset_armed = false;
+        ammobar_align_first = false;
+        ammobar_align_center = true;
+        ammobar_align_last = false;
+        ammobar_x = 0.025f;
+        ammobar_x_minimum = 0.0f;
+        ammobar_x_maximum = 1.0f;
+        ammobar_x_input.clear();
+        ammobar_x_invalid = false;
+        ammobar_x_editing = false;
+        ammobar_y = 0.5f;
+        ammobar_y_minimum = 0.0f;
+        ammobar_y_maximum = 1.0f;
+        ammobar_y_input.clear();
+        ammobar_y_invalid = false;
+        ammobar_y_editing = false;
+        ammobar_hide_empty = true;
+        ammobar_status.clear();
         resolution_label.clear();
         render_resolution_label.clear();
         video_status.clear();
@@ -1525,6 +1726,8 @@ namespace cowui
         if(!refreshgameradar())
             return false;
         if(!refreshgamemodels())
+            return false;
+        if(!refreshammobar())
             return false;
         if(!refreshvideo())
             return false;
@@ -2829,6 +3032,111 @@ namespace cowui
         model.DirtyVariable("hud_status");
     }
 
+    void RmlSettings::commitammobarscale()
+    {
+        float requested = 0.0f;
+        settings::Ammobar state = {};
+        const bool accepted = parsefloat(ammobar_scale_input, requested) &&
+            ammobar_available &&
+            settings::writeammobarscale(requested, state);
+        ammobar_scale_invalid = !accepted;
+        model.DirtyVariable("ammobar_scale_invalid");
+        const bool was_editing = ammobar_scale_editing;
+        ammobar_scale_editing = false;
+        finishammobarwrite(accepted, state);
+        ammobar_scale_editing = was_editing;
+        if(accepted)
+        {
+            ammobar_status = "Size applied";
+            model.DirtyVariable("ammobar_status");
+        }
+        else if(ammobar_available)
+        {
+            ammobar_status =
+                "Invalid size; restored the last effective setting";
+            model.DirtyVariable("ammobar_status");
+        }
+    }
+
+    void RmlSettings::commitammobarlabelsize()
+    {
+        float requested = 0.0f;
+        settings::Ammobar state = {};
+        const bool accepted =
+            parsefloat(ammobar_label_size_input, requested) &&
+            ammobar_available &&
+            settings::writeammobarcountscale(requested, state);
+        ammobar_label_size_invalid = !accepted;
+        model.DirtyVariable("ammobar_label_size_invalid");
+        const bool was_editing = ammobar_label_size_editing;
+        ammobar_label_size_editing = false;
+        finishammobarwrite(accepted, state);
+        ammobar_label_size_editing = was_editing;
+        if(accepted)
+        {
+            ammobar_status = "Label size applied";
+            model.DirtyVariable("ammobar_status");
+        }
+        else if(ammobar_available)
+        {
+            ammobar_status =
+                "Invalid label size; restored the last effective setting";
+            model.DirtyVariable("ammobar_status");
+        }
+    }
+
+    void RmlSettings::commitammobarx()
+    {
+        float requested = 0.0f;
+        settings::Ammobar state = {};
+        const bool accepted = parsefloat(ammobar_x_input, requested) &&
+            ammobar_available &&
+            settings::writeammobarx(requested, state);
+        ammobar_x_invalid = !accepted;
+        model.DirtyVariable("ammobar_x_invalid");
+        const bool was_editing = ammobar_x_editing;
+        ammobar_x_editing = false;
+        finishammobarwrite(accepted, state);
+        ammobar_x_editing = was_editing;
+        if(accepted)
+        {
+            ammobar_status = "X position applied";
+            model.DirtyVariable("ammobar_status");
+        }
+        else if(ammobar_available)
+        {
+            ammobar_status =
+                "Invalid x; restored the last effective setting";
+            model.DirtyVariable("ammobar_status");
+        }
+    }
+
+    void RmlSettings::commitammobary()
+    {
+        float requested = 0.0f;
+        settings::Ammobar state = {};
+        const bool accepted = parsefloat(ammobar_y_input, requested) &&
+            ammobar_available &&
+            settings::writeammobary(requested, state);
+        ammobar_y_invalid = !accepted;
+        model.DirtyVariable("ammobar_y_invalid");
+        const bool was_editing = ammobar_y_editing;
+        ammobar_y_editing = false;
+        finishammobarwrite(accepted, state);
+        ammobar_y_editing = was_editing;
+        if(accepted)
+        {
+            ammobar_status = "Y position applied";
+            model.DirtyVariable("ammobar_status");
+        }
+        else if(ammobar_available)
+        {
+            ammobar_status =
+                "Invalid y; restored the last effective setting";
+            model.DirtyVariable("ammobar_status");
+        }
+    }
+
     void RmlSettings::setcategory(Category category)
     {
         if(category != Category::MouseKeyboard)
@@ -2880,7 +3188,10 @@ namespace cowui
         if(audio)
             refreshaudio();
         else if(hud)
+        {
             refreshhud(!streak_milestone_scale_editing);
+            refreshammobar();
+        }
         else if(game)
         {
             refreshgamefeedback();
@@ -3665,6 +3976,287 @@ namespace cowui
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("game_models_status");
         }
+    }
+
+    bool RmlSettings::refreshammobar()
+    {
+        settings::Ammobar state = {};
+        const bool available = settings::readammobar(state);
+        presentammobar(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentammobar(
+        const settings::Ammobar &state,
+        bool available)
+    {
+        if(ammobar_available != available)
+        {
+            ammobar_available = available;
+            model.DirtyVariable("ammobar_available");
+        }
+
+        const char *status = available
+            ? ""
+            : "Ammobar settings are unavailable";
+        if(ammobar_status != status)
+        {
+            ammobar_status = status;
+            model.DirtyVariable("ammobar_status");
+        }
+
+        if(!available)
+            return;
+
+        if(ammobar_visible != state.visible)
+        {
+            ammobar_visible = state.visible;
+            model.DirtyVariable("ammobar_visible");
+            if(ammobar_visible)
+            {
+                ammobar_icon_spacing_armed = false;
+                ammobar_label_offset_armed = false;
+            }
+        }
+        if(ammobar_horizontal != state.horizontal)
+        {
+            ammobar_horizontal = state.horizontal;
+            model.DirtyVariable("ammobar_horizontal");
+        }
+        if(ammobar_flip != state.flip)
+        {
+            ammobar_flip = state.flip;
+            model.DirtyVariable("ammobar_flip");
+        }
+        if(ammobar_scale != state.scale)
+        {
+            ammobar_scale = state.scale;
+            model.DirtyVariable("ammobar_scale");
+        }
+        if(ammobar_scale_minimum != state.scale_minimum)
+        {
+            ammobar_scale_minimum = state.scale_minimum;
+            model.DirtyVariable("ammobar_scale_minimum");
+        }
+        if(ammobar_scale_maximum != state.scale_maximum)
+        {
+            ammobar_scale_maximum = state.scale_maximum;
+            model.DirtyVariable("ammobar_scale_maximum");
+        }
+        if(ammobar_icon_spacing != state.icon_spacing)
+        {
+            ammobar_icon_spacing = state.icon_spacing;
+            model.DirtyVariable("ammobar_icon_spacing");
+        }
+        if(ammobar_icon_spacing_minimum != state.icon_spacing_minimum)
+        {
+            ammobar_icon_spacing_minimum = state.icon_spacing_minimum;
+            model.DirtyVariable("ammobar_icon_spacing_minimum");
+        }
+        if(ammobar_icon_spacing_maximum != state.icon_spacing_maximum)
+        {
+            ammobar_icon_spacing_maximum = state.icon_spacing_maximum;
+            model.DirtyVariable("ammobar_icon_spacing_maximum");
+        }
+        if(ammobar_label_size != state.label_size)
+        {
+            ammobar_label_size = state.label_size;
+            model.DirtyVariable("ammobar_label_size");
+        }
+        if(ammobar_label_size_minimum != state.label_size_minimum)
+        {
+            ammobar_label_size_minimum = state.label_size_minimum;
+            model.DirtyVariable("ammobar_label_size_minimum");
+        }
+        if(ammobar_label_size_maximum != state.label_size_maximum)
+        {
+            ammobar_label_size_maximum = state.label_size_maximum;
+            model.DirtyVariable("ammobar_label_size_maximum");
+        }
+        if(ammobar_label_offset != state.label_offset)
+        {
+            ammobar_label_offset = state.label_offset;
+            model.DirtyVariable("ammobar_label_offset");
+        }
+        if(ammobar_label_offset_minimum != state.label_offset_minimum)
+        {
+            ammobar_label_offset_minimum = state.label_offset_minimum;
+            model.DirtyVariable("ammobar_label_offset_minimum");
+        }
+        if(ammobar_label_offset_maximum != state.label_offset_maximum)
+        {
+            ammobar_label_offset_maximum = state.label_offset_maximum;
+            model.DirtyVariable("ammobar_label_offset_maximum");
+        }
+
+        const bool align_first = state.align == -1;
+        const bool align_center = state.align == 0;
+        const bool align_last = state.align == 1;
+        if(ammobar_align_first != align_first)
+        {
+            ammobar_align_first = align_first;
+            model.DirtyVariable("ammobar_align_first");
+        }
+        if(ammobar_align_center != align_center)
+        {
+            ammobar_align_center = align_center;
+            model.DirtyVariable("ammobar_align_center");
+        }
+        if(ammobar_align_last != align_last)
+        {
+            ammobar_align_last = align_last;
+            model.DirtyVariable("ammobar_align_last");
+        }
+
+        if(ammobar_x != state.x)
+        {
+            ammobar_x = state.x;
+            model.DirtyVariable("ammobar_x");
+        }
+        if(ammobar_x_minimum != state.x_minimum)
+        {
+            ammobar_x_minimum = state.x_minimum;
+            model.DirtyVariable("ammobar_x_minimum");
+        }
+        if(ammobar_x_maximum != state.x_maximum)
+        {
+            ammobar_x_maximum = state.x_maximum;
+            model.DirtyVariable("ammobar_x_maximum");
+        }
+        if(ammobar_y != state.y)
+        {
+            ammobar_y = state.y;
+            model.DirtyVariable("ammobar_y");
+        }
+        if(ammobar_y_minimum != state.y_minimum)
+        {
+            ammobar_y_minimum = state.y_minimum;
+            model.DirtyVariable("ammobar_y_minimum");
+        }
+        if(ammobar_y_maximum != state.y_maximum)
+        {
+            ammobar_y_maximum = state.y_maximum;
+            model.DirtyVariable("ammobar_y_maximum");
+        }
+        if(ammobar_hide_empty != state.hide_empty)
+        {
+            ammobar_hide_empty = state.hide_empty;
+            model.DirtyVariable("ammobar_hide_empty");
+        }
+
+        const Rml::String scale_text = formatsensitivity(state.scale);
+        if(!ammobar_scale_editing && ammobar_scale_input != scale_text)
+        {
+            ammobar_scale_input = scale_text;
+            model.DirtyVariable("ammobar_scale_input");
+        }
+        const Rml::String label_size_text =
+            formatsensitivity(state.label_size);
+        if(!ammobar_label_size_editing &&
+           ammobar_label_size_input != label_size_text)
+        {
+            ammobar_label_size_input = label_size_text;
+            model.DirtyVariable("ammobar_label_size_input");
+        }
+        const Rml::String x_text = formatsensitivity(state.x);
+        if(!ammobar_x_editing && ammobar_x_input != x_text)
+        {
+            ammobar_x_input = x_text;
+            model.DirtyVariable("ammobar_x_input");
+        }
+        const Rml::String y_text = formatsensitivity(state.y);
+        if(!ammobar_y_editing && ammobar_y_input != y_text)
+        {
+            ammobar_y_input = y_text;
+            model.DirtyVariable("ammobar_y_input");
+        }
+    }
+
+    void RmlSettings::finishammobarwrite(
+        bool accepted,
+        settings::Ammobar &state)
+    {
+        const bool available = accepted || settings::readammobar(state);
+        presentammobar(state, available);
+        if(!accepted && available)
+        {
+            ammobar_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("ammobar_status");
+        }
+    }
+
+    void RmlSettings::selectammobar(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !ammobar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobar(enabled, state);
+        finishammobarwrite(accepted, state);
+    }
+
+    void RmlSettings::selectammobarhorizontal(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !ammobar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarhorizontal(enabled, state);
+        finishammobarwrite(accepted, state);
+    }
+
+    void RmlSettings::selectammobarflip(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !ammobar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarflip(enabled, state);
+        finishammobarwrite(accepted, state);
+    }
+
+    void RmlSettings::selectammobarhideempty(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !ammobar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarhideempty(enabled, state);
+        finishammobarwrite(accepted, state);
+    }
+
+    void RmlSettings::selectammobaralign(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !ammobar_available)
+            return;
+
+        const int requested = arguments[0].Get<int>();
+        if(requested != -1 && requested != 0 && requested != 1)
+            return;
+
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobaralign(requested, state);
+        finishammobarwrite(accepted, state);
     }
 
     void RmlSettings::gamecategoryaction(Rml::Event &event)
@@ -6107,6 +6699,92 @@ namespace cowui
         event.StopPropagation();
     }
 
+    void RmlSettings::changeammobariconspacingaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->ammobar_icon_spacing
+        );
+
+        // Ignore programmatic range updates so opening Settings or revealing
+        // the data-if layout cannot rewrite the native ident. RmlUi emits
+        // change for an RML default during InstanceElement. Do not arm until
+        // the bound engine value has been applied.
+        if(!instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+        if(!instance->ammobar_icon_spacing_armed)
+        {
+            if(requested == instance->ammobar_icon_spacing)
+                instance->ammobar_icon_spacing_armed = true;
+            event.StopPropagation();
+            return;
+        }
+        if(requested == instance->ammobar_icon_spacing)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarsep(requested, state);
+        instance->finishammobarwrite(accepted, state);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changeammobarlabeloffsetaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->ammobar_label_offset
+        );
+
+        if(!instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+        if(!instance->ammobar_label_offset_armed)
+        {
+            if(requested == instance->ammobar_label_offset)
+                instance->ammobar_label_offset_armed = true;
+            event.StopPropagation();
+            return;
+        }
+        if(requested == instance->ammobar_label_offset)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarcountsep(requested, state);
+        instance->finishammobarwrite(accepted, state);
+        event.StopPropagation();
+    }
+
     void RmlSettings::changefpslimitaction(Rml::Event &event)
     {
         if(!instance)
@@ -6633,6 +7311,360 @@ namespace cowui
            key == Rml::Input::KI_NUMPADENTER)
         {
             instance->commitstreakscale();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreaseammobarscaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->ammobar_scale_minimum,
+            stepammobarfloat(instance->ammobar_scale, -1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarscale(requested, state);
+        instance->ammobar_scale_invalid = false;
+        instance->model.DirtyVariable("ammobar_scale_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Size adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increaseammobarscaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->ammobar_scale_maximum,
+            stepammobarfloat(instance->ammobar_scale, 1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarscale(requested, state);
+        instance->ammobar_scale_invalid = false;
+        instance->model.DirtyVariable("ammobar_scale_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Size adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusammobarscaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->ammobar_scale_editing = true;
+            if(instance->ammobar_scale_invalid)
+            {
+                instance->ammobar_scale_invalid = false;
+                instance->model.DirtyVariable("ammobar_scale_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurammobarscaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitammobarscale();
+            instance->ammobar_scale_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitammobarscaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitammobarscale();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreaseammobarlabelsizeaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->ammobar_label_size_minimum,
+            stepammobarfloat(instance->ammobar_label_size, -1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarcountscale(
+            requested, state);
+        instance->ammobar_label_size_invalid = false;
+        instance->model.DirtyVariable("ammobar_label_size_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Label size adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increaseammobarlabelsizeaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->ammobar_label_size_maximum,
+            stepammobarfloat(instance->ammobar_label_size, 1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarcountscale(
+            requested, state);
+        instance->ammobar_label_size_invalid = false;
+        instance->model.DirtyVariable("ammobar_label_size_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Label size adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusammobarlabelsizeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->ammobar_label_size_editing = true;
+            if(instance->ammobar_label_size_invalid)
+            {
+                instance->ammobar_label_size_invalid = false;
+                instance->model.DirtyVariable("ammobar_label_size_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurammobarlabelsizeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitammobarlabelsize();
+            instance->ammobar_label_size_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitammobarlabelsizeaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitammobarlabelsize();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreaseammobarxaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->ammobar_x_minimum,
+            stepammobarfloat(instance->ammobar_x, -1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarx(requested, state);
+        instance->ammobar_x_invalid = false;
+        instance->model.DirtyVariable("ammobar_x_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "X adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increaseammobarxaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->ammobar_x_maximum,
+            stepammobarfloat(instance->ammobar_x, 1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarx(requested, state);
+        instance->ammobar_x_invalid = false;
+        instance->model.DirtyVariable("ammobar_x_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "X adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusammobarxaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->ammobar_x_editing = true;
+            if(instance->ammobar_x_invalid)
+            {
+                instance->ammobar_x_invalid = false;
+                instance->model.DirtyVariable("ammobar_x_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurammobarxaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitammobarx();
+            instance->ammobar_x_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitammobarxaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitammobarx();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreaseammobaryaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->ammobar_y_minimum,
+            stepammobarfloat(instance->ammobar_y, -1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobary(requested, state);
+        instance->ammobar_y_invalid = false;
+        instance->model.DirtyVariable("ammobar_y_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Y adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increaseammobaryaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->ammobar_y_maximum,
+            stepammobarfloat(instance->ammobar_y, 1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobary(requested, state);
+        instance->ammobar_y_invalid = false;
+        instance->model.DirtyVariable("ammobar_y_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Y adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusammobaryaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->ammobar_y_editing = true;
+            if(instance->ammobar_y_invalid)
+            {
+                instance->ammobar_y_invalid = false;
+                instance->model.DirtyVariable("ammobar_y_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurammobaryaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitammobary();
+            instance->ammobar_y_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitammobaryaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitammobary();
             event.StopPropagation();
         }
     }
