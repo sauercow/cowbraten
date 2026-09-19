@@ -39,6 +39,7 @@ namespace cowui
         struct SoftParticleQualityState;
         struct DecalsState;
         struct DecalPersistenceState;
+        struct FixTJointsState;
         struct GrassDistanceState;
         struct MotionBlurIntensityState;
         struct GlarePresetState;
@@ -239,6 +240,11 @@ namespace cowui
             bool available);
         void selectdecalpersistence(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
+        void refreshfixtjoints();
+        void presentfixtjoints(const settings::FixTJointsState &state,
+            bool available);
+        void selectfixtjoints(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
         void refreshanisotropy();
         void refreshbilinearfiltering();
         void presentbilinearfiltering(
@@ -494,6 +500,9 @@ namespace cowui
         int decal_persistence_selected = -1;
         Rml::String decal_persistence_label;
         Rml::String decal_persistence_status;
+        bool fix_t_joints_available = false;
+        bool fix_t_joints = false;
+        Rml::String fix_t_joints_status;
         bool grass = false;
         bool grass_distance_available = false;
         int grass_distance_selected = -1;

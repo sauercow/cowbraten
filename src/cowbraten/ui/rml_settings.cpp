@@ -397,6 +397,10 @@ namespace cowui
             constructor.Bind("decal_persistence_label", &decal_persistence_label) &&
             constructor.Bind("decal_persistence_status", &decal_persistence_status) &&
             constructor.BindEventCallback("select_decal_persistence", &RmlSettings::selectdecalpersistence, this) &&
+            constructor.Bind("fix_t_joints_available", &fix_t_joints_available) &&
+            constructor.Bind("fix_t_joints", &fix_t_joints) &&
+            constructor.Bind("fix_t_joints_status", &fix_t_joints_status) &&
+            constructor.BindEventCallback("select_fix_t_joints", &RmlSettings::selectfixtjoints, this) &&
             constructor.Bind("grass", &grass) &&
             constructor.Bind("grass_distance_available", &grass_distance_available) &&
             constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
@@ -990,6 +994,9 @@ namespace cowui
         decal_persistence_selected = -1;
         decal_persistence_label.clear();
         decal_persistence_status.clear();
+        fix_t_joints_available = false;
+        fix_t_joints = false;
+        fix_t_joints_status.clear();
         grass = false;
         grass_distance_available = false;
         grass_distance_selected = -1;
@@ -1232,6 +1239,7 @@ namespace cowui
         refreshsoftparticlequality();
         refreshdecals();
         refreshdecalpersistence();
+        refreshfixtjoints();
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
@@ -4073,6 +4081,49 @@ namespace cowui
                     decal_persistence_status;
             }
             model.DirtyVariable("decal_persistence_status");
+        }
+    }
+
+    void RmlSettings::refreshfixtjoints()
+    {
+        settings::FixTJointsState state = {};
+        const bool available = settings::readfixtjoints(state);
+        presentfixtjoints(state, available);
+    }
+
+    void RmlSettings::presentfixtjoints(
+        const settings::FixTJointsState &state,
+        bool available)
+    {
+        fix_t_joints_available = available;
+        fix_t_joints = state.enabled;
+        fix_t_joints_status = available
+            ? ""
+            : "Fix T-Joints state is unavailable";
+
+        model.DirtyVariable("fix_t_joints_available");
+        model.DirtyVariable("fix_t_joints");
+        model.DirtyVariable("fix_t_joints_status");
+    }
+
+    void RmlSettings::selectfixtjoints(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !fix_t_joints_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::FixTJointsState state = {};
+        const bool accepted = settings::writefixtjoints(enabled, state);
+        const bool available = accepted || settings::readfixtjoints(state);
+        presentfixtjoints(state, available);
+        if(!accepted && available)
+        {
+            fix_t_joints_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("fix_t_joints_status");
         }
     }
 

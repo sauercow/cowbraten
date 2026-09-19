@@ -178,6 +178,11 @@ namespace cowui
             bool enabled;
         };
 
+        struct FixTJointsState
+        {
+            bool enabled;
+        };
+
         enum class DecalPersistence
         {
             Short,
@@ -503,6 +508,9 @@ namespace cowui
 
         bool readdecals(DecalsState &result);
         bool writedecals(bool enabled, DecalsState &result);
+
+        bool readfixtjoints(FixTJointsState &result);
+        bool writefixtjoints(bool enabled, FixTJointsState &result);
 
         bool readdecalpersistence(DecalPersistenceState &result);
         // Custom is output-only and is rejected as a write request.

@@ -851,6 +851,30 @@ namespace cowui
             return accepted;
         }
 
+        static void copyfixtjoints(
+            const sauersettings::FixTJointsState &source,
+            FixTJointsState &result)
+        {
+            result.enabled = source.enabled;
+        }
+
+        bool readfixtjoints(FixTJointsState &result)
+        {
+            sauersettings::FixTJointsState legacy = {};
+            const bool read = sauersettings::readfixtjoints(legacy);
+            copyfixtjoints(legacy, result);
+            return read;
+        }
+
+        bool writefixtjoints(bool enabled, FixTJointsState &result)
+        {
+            sauersettings::FixTJointsState legacy = {};
+            const bool accepted = sauersettings::writefixtjoints(
+                enabled, legacy);
+            copyfixtjoints(legacy, result);
+            return accepted;
+        }
+
         static DecalPersistence decalpersistence(
             sauersettings::DecalPersistence persistence)
         {

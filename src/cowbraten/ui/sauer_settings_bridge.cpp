@@ -1549,6 +1549,44 @@ namespace cowui
             return result.enabled == enabled;
         }
 
+        bool readfixtjoints(FixTJointsState &result)
+        {
+            result.enabled = false;
+
+            ident *id = getident("filltjoints");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writefixtjoints(bool enabled, FixTJointsState &result)
+        {
+            if(!readfixtjoints(result))
+                return false;
+
+            ident *id = getident("filltjoints");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+            {
+                if(!SDL_GL_GetCurrentContext())
+                    return false;
+                setvarchecked(id, value);
+            }
+
+            if(!readfixtjoints(result))
+                return false;
+            return result.enabled == enabled;
+        }
+
         static DecalPersistence classifydecalpersistence(
             int fade_start_milliseconds,
             int triangle_budget_per_type)
