@@ -764,6 +764,22 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *fullconsolefilterident()
+        {
+            ident *id = getident("fullconfilter");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *consolesizeident()
+        {
+            ident *id = getident("consize");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         struct CrosshairCatalogEntry
         {
             const char *label;
@@ -4896,6 +4912,282 @@ namespace cowui
         bool writeteamcoloredchatnames(bool enabled)
         {
             return writeboolean(teamcolorchatident(), enabled);
+        }
+
+        // Native guibitfield "important information" uses 0x11.
+        static const int console_important_mask = CON_INFO | CON_INIT;
+
+        static void defaultconsole(Console &result)
+        {
+            result.important_information_in_top_feed = true;
+            result.warnings_in_top_feed = true;
+            result.errors_in_top_feed = true;
+            result.script_messages_in_top_feed = true;
+            result.game_events_in_top_feed = true;
+            result.self_frags_in_top_feed = true;
+            result.other_player_frags_in_top_feed = true;
+            result.team_kills_in_top_feed = true;
+            result.important_information_in_full_console = true;
+            result.warnings_in_full_console = true;
+            result.errors_in_full_console = true;
+            result.script_messages_in_full_console = true;
+            result.public_messages_in_full_console = true;
+            result.team_messages_in_full_console = true;
+            result.game_events_in_full_console = true;
+            result.self_frags_in_full_console = true;
+            result.other_player_frags_in_full_console = true;
+            result.team_kills_in_full_console = true;
+            result.size = 5;
+            result.size_minimum = 0;
+            result.size_maximum = 100;
+        }
+
+        static void fillconsolefilters(int top, int full, Console &result)
+        {
+            result.important_information_in_top_feed =
+                (top & console_important_mask) != 0;
+            result.warnings_in_top_feed = (top & CON_WARN) != 0;
+            result.errors_in_top_feed = (top & CON_ERROR) != 0;
+            result.script_messages_in_top_feed = (top & CON_ECHO) != 0;
+            result.game_events_in_top_feed = (top & CON_GAMEINFO) != 0;
+            result.self_frags_in_top_feed = (top & CON_FRAG_SELF) != 0;
+            result.other_player_frags_in_top_feed =
+                (top & CON_FRAG_OTHER) != 0;
+            result.team_kills_in_top_feed = (top & CON_TEAMKILL) != 0;
+            result.important_information_in_full_console =
+                (full & console_important_mask) != 0;
+            result.warnings_in_full_console = (full & CON_WARN) != 0;
+            result.errors_in_full_console = (full & CON_ERROR) != 0;
+            result.script_messages_in_full_console =
+                (full & CON_ECHO) != 0;
+            result.public_messages_in_full_console =
+                (full & CON_CHAT) != 0;
+            result.team_messages_in_full_console =
+                (full & CON_TEAMCHAT) != 0;
+            result.game_events_in_full_console =
+                (full & CON_GAMEINFO) != 0;
+            result.self_frags_in_full_console =
+                (full & CON_FRAG_SELF) != 0;
+            result.other_player_frags_in_full_console =
+                (full & CON_FRAG_OTHER) != 0;
+            result.team_kills_in_full_console =
+                (full & CON_TEAMKILL) != 0;
+        }
+
+        bool readconsole(Console &result)
+        {
+            defaultconsole(result);
+
+            ident *top_id = consolefilterident();
+            ident *full_id = fullconsolefilterident();
+            ident *size_id = consolesizeident();
+            if(!top_id || !top_id->storage.i ||
+               !full_id || !full_id->storage.i ||
+               !size_id || !size_id->storage.i)
+            {
+                return false;
+            }
+
+            fillconsolefilters(*top_id->storage.i, *full_id->storage.i,
+                result);
+            result.size = *size_id->storage.i;
+            result.size_minimum = size_id->minval;
+            result.size_maximum = size_id->maxval;
+            return true;
+        }
+
+        static bool writeconsolefilterbit(
+            ident *id,
+            int mask,
+            bool enabled,
+            Console &result)
+        {
+            const bool accepted = writefilterbit(id, mask, enabled);
+            if(!readconsole(result))
+                return false;
+            return accepted;
+        }
+
+        bool writeimportantintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                console_important_mask,
+                enabled,
+                result);
+        }
+
+        bool writewarningsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_WARN,
+                enabled,
+                result);
+        }
+
+        bool writeerrorsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_ERROR,
+                enabled,
+                result);
+        }
+
+        bool writescriptmessagesintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_ECHO,
+                enabled,
+                result);
+        }
+
+        bool writegameeventsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_GAMEINFO,
+                enabled,
+                result);
+        }
+
+        bool writeselffragsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_FRAG_SELF,
+                enabled,
+                result);
+        }
+
+        bool writeotherplayerfragsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_FRAG_OTHER,
+                enabled,
+                result);
+        }
+
+        bool writeteamkillsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_TEAMKILL,
+                enabled,
+                result);
+        }
+
+        bool writeimportantinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                console_important_mask,
+                enabled,
+                result);
+        }
+
+        bool writewarningsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_WARN,
+                enabled,
+                result);
+        }
+
+        bool writeerrorsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_ERROR,
+                enabled,
+                result);
+        }
+
+        bool writescriptmessagesinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_ECHO,
+                enabled,
+                result);
+        }
+
+        bool writepublicchatinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_CHAT,
+                enabled,
+                result);
+        }
+
+        bool writeteamchatinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_TEAMCHAT,
+                enabled,
+                result);
+        }
+
+        bool writegameeventsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_GAMEINFO,
+                enabled,
+                result);
+        }
+
+        bool writeselffragsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_FRAG_SELF,
+                enabled,
+                result);
+        }
+
+        bool writeotherplayerfragsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_FRAG_OTHER,
+                enabled,
+                result);
+        }
+
+        bool writeteamkillsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_TEAMKILL,
+                enabled,
+                result);
+        }
+
+        bool writeconsolesize(int value, Console &result)
+        {
+            if(!readconsole(result))
+                return false;
+
+            ident *id = consolesizeident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readconsole(result))
+                return false;
+            return *id->storage.i == value;
         }
     }
 }

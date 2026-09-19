@@ -452,15 +452,34 @@ custom filter bit. `teamcolorchat` remains a separate persistent boolean that
 controls player-name coloring when chat lines are formatted. All five values
 apply immediately and are read back from their fixed legacy idents after each
 write, on Chat activation, on Settings activation, and after legacy-console
-handoff. The full-console `fullconfilter`, message delivery, `saycommand`,
-`sayteamcommand`, input ownership, and scrollback are unchanged.
+handoff. Message delivery, `saycommand`, `sayteamcommand`, input ownership,
+and scrollback are unchanged.
 
-`confade` and `consize` affect the complete top-left console feed, while
-`miniconfade`, `miniconsize`, and `miniconwidth` affect every message type a
-user may route into the mini-console. They are intentionally not represented
-as chat-only duration or size settings. Chat highlight sounds are absent from
-the current Cowbraten source, player ignore state is transient per-connection
-behavior, and the server's `specchat` policy is not a client preference, so
-none are exposed by this slice. There is no dedicated legacy Chat settings
-document to replace; the console tab remains available through the existing
-legacy `options` content, and no new `showgui` mapping is added.
+`confade` affects the complete top-left console feed, while `miniconfade`,
+`miniconsize`, and `miniconwidth` affect every message type a user may route
+into the mini-console. They are intentionally not represented as chat-only
+duration or size settings. Chat highlight sounds are absent from the current
+Cowbraten source, player ignore state is transient per-connection behavior,
+and the server's `specchat` policy is not a client preference, so none are
+exposed by this slice. There is no dedicated legacy Chat settings document to
+replace; the console tab remains available through the existing legacy
+`options` content, and no new `showgui` mapping is added.
+
+The Console category owns the rest of the native Settings `console` tab. The
+typed snapshot reads `confilter`, `fullconfilter`, and `consize`. Top-left
+writers toggle only the remaining native `confilter` masks: important
+information `CON_INFO|CON_INIT` (`0x11`), warnings `CON_WARN`, errors
+`CON_ERROR`, script messages `CON_ECHO`, game events `CON_GAMEINFO`, self
+frags `CON_FRAG_SELF`, other player frags `CON_FRAG_OTHER`, and team kills
+`CON_TEAMKILL`. Each write uses the same `writefilterbit` path as Chat and
+preserves every unrelated bit, including `CON_CHAT` and `CON_TEAMCHAT`.
+`fullconfilter` includes those chat bits because Chat does not own the
+full-console mask. The native combined `miniconfilter 0x300` "chat box
+(bottom left)" checkbox stays on the Chat page as independent public and team
+toggles; Console does not add a second copy. `consize` is a local integer
+edit buffer with native `+/- 1` steps through `setvarchecked()`. Opening
+Settings, returning from the legacy console, and activating the Console
+category only read these values. A typed write then reads the accepted
+snapshot back. `confade`, `miniconfade`, `miniconsize`, `miniconwidth`,
+`CON_DEBUG`, and ignore lists are not native console-tab controls and stay
+unexposed. No new `showgui` mapping is added.

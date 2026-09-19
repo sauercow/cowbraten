@@ -1193,6 +1193,91 @@ namespace cowui
                 "team_colored_chat_names",
                 &team_colored_chat_names
             ) &&
+            constructor.Bind("console_available", &console_available) &&
+            constructor.Bind(
+                "console_top_important",
+                &console_top_important
+            ) &&
+            constructor.Bind(
+                "console_top_warnings",
+                &console_top_warnings
+            ) &&
+            constructor.Bind(
+                "console_top_errors",
+                &console_top_errors
+            ) &&
+            constructor.Bind(
+                "console_top_script",
+                &console_top_script
+            ) &&
+            constructor.Bind(
+                "console_top_game_events",
+                &console_top_game_events
+            ) &&
+            constructor.Bind(
+                "console_top_self_frags",
+                &console_top_self_frags
+            ) &&
+            constructor.Bind(
+                "console_top_other_frags",
+                &console_top_other_frags
+            ) &&
+            constructor.Bind(
+                "console_top_team_kills",
+                &console_top_team_kills
+            ) &&
+            constructor.Bind(
+                "console_full_important",
+                &console_full_important
+            ) &&
+            constructor.Bind(
+                "console_full_warnings",
+                &console_full_warnings
+            ) &&
+            constructor.Bind(
+                "console_full_errors",
+                &console_full_errors
+            ) &&
+            constructor.Bind(
+                "console_full_script",
+                &console_full_script
+            ) &&
+            constructor.Bind("console_full_chat", &console_full_chat) &&
+            constructor.Bind(
+                "console_full_team_chat",
+                &console_full_team_chat
+            ) &&
+            constructor.Bind(
+                "console_full_game_events",
+                &console_full_game_events
+            ) &&
+            constructor.Bind(
+                "console_full_self_frags",
+                &console_full_self_frags
+            ) &&
+            constructor.Bind(
+                "console_full_other_frags",
+                &console_full_other_frags
+            ) &&
+            constructor.Bind(
+                "console_full_team_kills",
+                &console_full_team_kills
+            ) &&
+            constructor.Bind("console_size", &console_size) &&
+            constructor.Bind(
+                "console_size_minimum",
+                &console_size_minimum
+            ) &&
+            constructor.Bind(
+                "console_size_maximum",
+                &console_size_maximum
+            ) &&
+            constructor.Bind("console_size_input", &console_size_input) &&
+            constructor.Bind(
+                "console_size_invalid",
+                &console_size_invalid
+            ) &&
+            constructor.Bind("console_status", &console_status) &&
             constructor.Bind("category_game", &category_game) &&
             constructor.Bind("category_hud", &category_hud) &&
             constructor.Bind(
@@ -1214,6 +1299,10 @@ namespace cowui
             constructor.Bind(
                 "category_chat",
                 &category_chat
+            ) &&
+            constructor.Bind(
+                "category_console",
+                &category_console
             ) &&
             constructor.BindEventCallback(
                 "select_resolution",
@@ -1277,6 +1366,10 @@ namespace cowui
             router.registeraction(
                 "settings.category.chat",
                 chatcategoryaction
+            ) &&
+            router.registeraction(
+                "settings.category.console",
+                consolecategoryaction
             ) &&
             router.registeraction(
                 "settings.presentation.windowed",
@@ -1801,6 +1894,98 @@ namespace cowui
             router.registeraction(
                 "settings.chat.team-colors",
                 teamcoloredchatnamesaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.important",
+                consoletopimportantaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.warnings",
+                consoletopwarningsaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.errors",
+                consoletoperrorsaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.script",
+                consoletopscriptaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.game-events",
+                consoletopgameeventsaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.self-frags",
+                consoletopselffragsaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.other-frags",
+                consoletopotherfragsaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.team-kills",
+                consoletopteamkillsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.important",
+                consolefullimportantaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.warnings",
+                consolefullwarningsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.errors",
+                consolefullerrorsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.script",
+                consolefullscriptaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.chat",
+                consolefullchataction
+            ) &&
+            router.registeraction(
+                "settings.console.full.team-chat",
+                consolefullteamchataction
+            ) &&
+            router.registeraction(
+                "settings.console.full.game-events",
+                consolefullgameeventsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.self-frags",
+                consolefullselffragsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.other-frags",
+                consolefullotherfragsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.team-kills",
+                consolefullteamkillsaction
+            ) &&
+            router.registeraction(
+                "settings.console.size.decrease",
+                decreaseconsolesizeaction
+            ) &&
+            router.registeraction(
+                "settings.console.size.increase",
+                increaseconsolesizeaction
+            ) &&
+            router.registeraction(
+                "settings.console.size.focus",
+                focusconsolesizeaction
+            ) &&
+            router.registeraction(
+                "settings.console.size.blur",
+                blurconsolesizeaction
+            ) &&
+            router.registeraction(
+                "settings.console.size.commit",
+                commitconsolesizeaction
             );
 
         if(!valid)
@@ -2214,6 +2399,32 @@ namespace cowui
         public_chat_in_bottom_box = false;
         team_chat_in_bottom_box = false;
         team_colored_chat_names = true;
+        console_available = false;
+        console_top_important = true;
+        console_top_warnings = true;
+        console_top_errors = true;
+        console_top_script = true;
+        console_top_game_events = true;
+        console_top_self_frags = true;
+        console_top_other_frags = true;
+        console_top_team_kills = true;
+        console_full_important = true;
+        console_full_warnings = true;
+        console_full_errors = true;
+        console_full_script = true;
+        console_full_chat = true;
+        console_full_team_chat = true;
+        console_full_game_events = true;
+        console_full_self_frags = true;
+        console_full_other_frags = true;
+        console_full_team_kills = true;
+        console_size = 5;
+        console_size_minimum = 0;
+        console_size_maximum = 100;
+        console_size_input.clear();
+        console_size_invalid = false;
+        console_size_editing = false;
+        console_status.clear();
         category_game = true;
         category_hud = false;
         category_graphics = false;
@@ -2221,6 +2432,7 @@ namespace cowui
         category_mouse_keyboard = false;
         category_crosshair = false;
         category_chat = false;
+        category_console = false;
     }
 
     void RmlSettings::activate()
@@ -2393,6 +2605,8 @@ namespace cowui
         if(!refreshhudscore())
             return false;
         if(!refreshchat())
+            return false;
+        if(!refreshconsole())
             return false;
         return refreshkeybindings();
     }
@@ -3789,6 +4003,151 @@ namespace cowui
         return true;
     }
 
+    static Rml::String formatconsoleinteger(int value)
+    {
+        char text[16];
+        std::snprintf(text, sizeof(text), "%d", value);
+        return text;
+    }
+
+    bool RmlSettings::refreshconsole()
+    {
+        settings::Console state = {};
+        const bool available = settings::readconsole(state);
+        presentconsole(state, available, !console_size_editing);
+        return available;
+    }
+
+    void RmlSettings::presentconsole(
+        const settings::Console &state,
+        bool available,
+        bool update_size_input)
+    {
+        if(console_available != available)
+        {
+            console_available = available;
+            model.DirtyVariable("console_available");
+        }
+
+        const auto setbool = [this](bool &field, const char *name,
+            bool value)
+        {
+            if(field != value)
+            {
+                field = value;
+                model.DirtyVariable(name);
+            }
+        };
+        const auto setint = [this](int &field, const char *name,
+            int value)
+        {
+            if(field != value)
+            {
+                field = value;
+                model.DirtyVariable(name);
+            }
+        };
+
+        setbool(console_top_important, "console_top_important",
+            state.important_information_in_top_feed);
+        setbool(console_top_warnings, "console_top_warnings",
+            state.warnings_in_top_feed);
+        setbool(console_top_errors, "console_top_errors",
+            state.errors_in_top_feed);
+        setbool(console_top_script, "console_top_script",
+            state.script_messages_in_top_feed);
+        setbool(console_top_game_events, "console_top_game_events",
+            state.game_events_in_top_feed);
+        setbool(console_top_self_frags, "console_top_self_frags",
+            state.self_frags_in_top_feed);
+        setbool(console_top_other_frags, "console_top_other_frags",
+            state.other_player_frags_in_top_feed);
+        setbool(console_top_team_kills, "console_top_team_kills",
+            state.team_kills_in_top_feed);
+        setbool(console_full_important, "console_full_important",
+            state.important_information_in_full_console);
+        setbool(console_full_warnings, "console_full_warnings",
+            state.warnings_in_full_console);
+        setbool(console_full_errors, "console_full_errors",
+            state.errors_in_full_console);
+        setbool(console_full_script, "console_full_script",
+            state.script_messages_in_full_console);
+        setbool(console_full_chat, "console_full_chat",
+            state.public_messages_in_full_console);
+        setbool(console_full_team_chat, "console_full_team_chat",
+            state.team_messages_in_full_console);
+        setbool(console_full_game_events, "console_full_game_events",
+            state.game_events_in_full_console);
+        setbool(console_full_self_frags, "console_full_self_frags",
+            state.self_frags_in_full_console);
+        setbool(console_full_other_frags, "console_full_other_frags",
+            state.other_player_frags_in_full_console);
+        setbool(console_full_team_kills, "console_full_team_kills",
+            state.team_kills_in_full_console);
+        setint(console_size, "console_size", state.size);
+        setint(console_size_minimum, "console_size_minimum",
+            state.size_minimum);
+        setint(console_size_maximum, "console_size_maximum",
+            state.size_maximum);
+
+        if(update_size_input)
+        {
+            const Rml::String text = formatconsoleinteger(state.size);
+            if(console_size_input != text)
+            {
+                console_size_input = text;
+                model.DirtyVariable("console_size_input");
+            }
+        }
+
+        const char *status = !available
+            ? "Console settings are unavailable"
+            : "Filters apply immediately to the existing console feeds";
+        if(console_status != status)
+        {
+            console_status = status;
+            model.DirtyVariable("console_status");
+        }
+    }
+
+    void RmlSettings::applyconsolefilter(
+        bool (*writer)(bool, settings::Console &),
+        bool current)
+    {
+        if(!writer)
+            return;
+
+        settings::Console state = {};
+        const bool accepted = writer(!current, state);
+        const bool available = accepted || settings::readconsole(state);
+        presentconsole(state, available, !console_size_editing);
+        if(!accepted && available)
+        {
+            console_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("console_status");
+        }
+    }
+
+    void RmlSettings::commitconsolesize()
+    {
+        int requested = 0;
+        settings::Console state = {};
+        const bool accepted = parseinteger(console_size_input, requested) &&
+            console_available &&
+            settings::writeconsolesize(requested, state);
+        const bool available = accepted || settings::readconsole(state);
+        console_size_invalid = !accepted;
+        model.DirtyVariable("console_size_invalid");
+        presentconsole(state, available, true);
+        console_status = accepted
+            ? "Top-left console size applied"
+            : (available
+                ? "Invalid size; restored the last effective setting"
+                : "Console settings are unavailable");
+        model.DirtyVariable("console_status");
+    }
+
     bool RmlSettings::refreshkeybindings()
     {
         std::vector<KeyBindingRow> movement;
@@ -4628,6 +4987,7 @@ namespace cowui
             Category::MouseKeyboard;
         const bool crosshair = category == Category::Crosshair;
         const bool chat = category == Category::Chat;
+        const bool console = category == Category::Console;
         if(category_game != game)
         {
             category_game = game;
@@ -4663,6 +5023,11 @@ namespace cowui
             category_chat = chat;
             model.DirtyVariable("category_chat");
         }
+        if(category_console != console)
+        {
+            category_console = console;
+            model.DirtyVariable("category_console");
+        }
 
         if(audio)
             refreshaudio();
@@ -4684,6 +5049,8 @@ namespace cowui
             refreshcrosshair(!crosshair_size_editing);
         else if(chat)
             refreshchat();
+        else if(console)
+            refreshconsole();
     }
 
     void RmlSettings::setpresentation(
@@ -6109,6 +6476,13 @@ namespace cowui
     {
         if(instance)
             instance->setcategory(Category::Chat);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolecategoryaction(Rml::Event &event)
+    {
+        if(instance)
+            instance->setcategory(Category::Console);
         event.StopPropagation();
     }
 
@@ -10734,5 +11108,293 @@ namespace cowui
             instance->refreshchat();
         }
         event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopimportantaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeimportantintopfeed,
+                instance->console_top_important);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopwarningsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writewarningsintopfeed,
+                instance->console_top_warnings);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletoperrorsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeerrorsintopfeed,
+                instance->console_top_errors);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopscriptaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writescriptmessagesintopfeed,
+                instance->console_top_script);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopgameeventsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writegameeventsintopfeed,
+                instance->console_top_game_events);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopselffragsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeselffragsintopfeed,
+                instance->console_top_self_frags);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopotherfragsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeotherplayerfragsintopfeed,
+                instance->console_top_other_frags);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopteamkillsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeteamkillsintopfeed,
+                instance->console_top_team_kills);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullimportantaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeimportantinfullconsole,
+                instance->console_full_important);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullwarningsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writewarningsinfullconsole,
+                instance->console_full_warnings);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullerrorsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeerrorsinfullconsole,
+                instance->console_full_errors);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullscriptaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writescriptmessagesinfullconsole,
+                instance->console_full_script);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullchataction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writepublicchatinfullconsole,
+                instance->console_full_chat);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullteamchataction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeteamchatinfullconsole,
+                instance->console_full_team_chat);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullgameeventsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writegameeventsinfullconsole,
+                instance->console_full_game_events);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullselffragsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeselffragsinfullconsole,
+                instance->console_full_self_frags);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullotherfragsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeotherplayerfragsinfullconsole,
+                instance->console_full_other_frags);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullteamkillsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeteamkillsinfullconsole,
+                instance->console_full_team_kills);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::decreaseconsolesizeaction(Rml::Event &event)
+    {
+        if(instance && instance->console_available)
+        {
+            const int requested = std::max(
+                instance->console_size_minimum,
+                instance->console_size - 1
+            );
+            settings::Console state = {};
+            const bool accepted = settings::writeconsolesize(
+                requested, state);
+            const bool available = accepted ||
+                settings::readconsole(state);
+            instance->console_size_invalid = false;
+            instance->model.DirtyVariable("console_size_invalid");
+            instance->presentconsole(state, available, true);
+            instance->console_status = accepted
+                ? "Top-left console size adjusted by 1"
+                : (available
+                    ? "Console size change was rejected"
+                    : "Console settings are unavailable");
+            instance->model.DirtyVariable("console_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increaseconsolesizeaction(Rml::Event &event)
+    {
+        if(instance && instance->console_available)
+        {
+            const int requested = std::min(
+                instance->console_size_maximum,
+                instance->console_size + 1
+            );
+            settings::Console state = {};
+            const bool accepted = settings::writeconsolesize(
+                requested, state);
+            const bool available = accepted ||
+                settings::readconsole(state);
+            instance->console_size_invalid = false;
+            instance->model.DirtyVariable("console_size_invalid");
+            instance->presentconsole(state, available, true);
+            instance->console_status = accepted
+                ? "Top-left console size adjusted by 1"
+                : (available
+                    ? "Console size change was rejected"
+                    : "Console settings are unavailable");
+            instance->model.DirtyVariable("console_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusconsolesizeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->console_size_editing = true;
+            if(instance->console_size_invalid)
+            {
+                instance->console_size_invalid = false;
+                instance->model.DirtyVariable("console_size_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurconsolesizeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitconsolesize();
+            instance->console_size_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitconsolesizeaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitconsolesize();
+            event.StopPropagation();
+        }
     }
 }

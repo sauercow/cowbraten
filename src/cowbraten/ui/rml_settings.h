@@ -40,6 +40,7 @@ namespace cowui
         struct HudScore;
         struct ScoreboardColumns;
         struct Hud;
+        struct Console;
         struct GlassReflectionsState;
         struct ModelReflectionsState;
         struct BumpModelsState;
@@ -147,7 +148,8 @@ namespace cowui
             Audio,
             MouseKeyboard,
             Crosshair,
-            Chat
+            Chat,
+            Console
         };
 
         bool refresh();
@@ -430,6 +432,14 @@ namespace cowui
         void commithudscorex();
         void commithudscorey();
         bool refreshchat();
+        bool refreshconsole();
+        void presentconsole(const settings::Console &state,
+            bool available,
+            bool update_size_input);
+        void applyconsolefilter(
+            bool (*writer)(bool, settings::Console &),
+            bool current);
+        void commitconsolesize();
         bool refreshkeybindings();
         bool refreshkeyconflict();
         void clearkeyremoval();
@@ -501,6 +511,7 @@ namespace cowui
         static void mousekeyboardcategoryaction(Rml::Event &event);
         static void crosshaircategoryaction(Rml::Event &event);
         static void chatcategoryaction(Rml::Event &event);
+        static void consolecategoryaction(Rml::Event &event);
         static void windowedaction(Rml::Event &event);
         static void exclusivefullscreenaction(Rml::Event &event);
         static void desktopfullscreenaction(Rml::Event &event);
@@ -632,6 +643,29 @@ namespace cowui
         static void publicchatinbottomboxaction(Rml::Event &event);
         static void teamchatinbottomboxaction(Rml::Event &event);
         static void teamcoloredchatnamesaction(Rml::Event &event);
+        static void consoletopimportantaction(Rml::Event &event);
+        static void consoletopwarningsaction(Rml::Event &event);
+        static void consoletoperrorsaction(Rml::Event &event);
+        static void consoletopscriptaction(Rml::Event &event);
+        static void consoletopgameeventsaction(Rml::Event &event);
+        static void consoletopselffragsaction(Rml::Event &event);
+        static void consoletopotherfragsaction(Rml::Event &event);
+        static void consoletopteamkillsaction(Rml::Event &event);
+        static void consolefullimportantaction(Rml::Event &event);
+        static void consolefullwarningsaction(Rml::Event &event);
+        static void consolefullerrorsaction(Rml::Event &event);
+        static void consolefullscriptaction(Rml::Event &event);
+        static void consolefullchataction(Rml::Event &event);
+        static void consolefullteamchataction(Rml::Event &event);
+        static void consolefullgameeventsaction(Rml::Event &event);
+        static void consolefullselffragsaction(Rml::Event &event);
+        static void consolefullotherfragsaction(Rml::Event &event);
+        static void consolefullteamkillsaction(Rml::Event &event);
+        static void decreaseconsolesizeaction(Rml::Event &event);
+        static void increaseconsolesizeaction(Rml::Event &event);
+        static void focusconsolesizeaction(Rml::Event &event);
+        static void blurconsolesizeaction(Rml::Event &event);
+        static void commitconsolesizeaction(Rml::Event &event);
 
         Rml::DataModelHandle model;
         std::vector<Resolution> resolutions;
@@ -1051,6 +1085,32 @@ namespace cowui
         bool public_chat_in_bottom_box = false;
         bool team_chat_in_bottom_box = false;
         bool team_colored_chat_names = true;
+        bool console_available = false;
+        bool console_top_important = true;
+        bool console_top_warnings = true;
+        bool console_top_errors = true;
+        bool console_top_script = true;
+        bool console_top_game_events = true;
+        bool console_top_self_frags = true;
+        bool console_top_other_frags = true;
+        bool console_top_team_kills = true;
+        bool console_full_important = true;
+        bool console_full_warnings = true;
+        bool console_full_errors = true;
+        bool console_full_script = true;
+        bool console_full_chat = true;
+        bool console_full_team_chat = true;
+        bool console_full_game_events = true;
+        bool console_full_self_frags = true;
+        bool console_full_other_frags = true;
+        bool console_full_team_kills = true;
+        int console_size = 5;
+        int console_size_minimum = 0;
+        int console_size_maximum = 100;
+        Rml::String console_size_input;
+        bool console_size_invalid = false;
+        bool console_size_editing = false;
+        Rml::String console_status;
         bool category_game = true;
         bool category_hud = false;
         bool category_graphics = false;
@@ -1058,6 +1118,7 @@ namespace cowui
         bool category_mouse_keyboard = false;
         bool category_crosshair = false;
         bool category_chat = false;
+        bool category_console = false;
 
         static RmlSettings *instance;
     };

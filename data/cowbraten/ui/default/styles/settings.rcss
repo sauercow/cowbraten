@@ -830,6 +830,21 @@ body
     margin-top: var(--space-3);
 }
 
+.settings-console-columns
+{
+    display: flex;
+    margin-top: var(--space-3);
+    gap: var(--space-3);
+}
+
+.settings-console-column
+{
+    display: block;
+    flex: 1;
+    min-width: 0;
+    margin-top: 0;
+}
+
 .settings-control-divider
 {
     margin-top: var(--space-2);

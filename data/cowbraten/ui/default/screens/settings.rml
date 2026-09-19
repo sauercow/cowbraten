@@ -69,8 +69,14 @@
                             <span class="settings-nav-index">07</span>
                             <span>Chat</span>
                         </button>
-                        <button class="nav-item settings-nav-item" disabled="true">
+                        <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_console"
+                            onclick="settings.category.console">
                             <span class="settings-nav-index">08</span>
+                            <span>Console</span>
+                        </button>
+                        <button class="nav-item settings-nav-item" disabled="true">
+                            <span class="settings-nav-index">09</span>
                             <span>Advanced / Network</span>
                         </button>
                     </div>
@@ -115,6 +121,12 @@
                         <div class="settings-scope-kicker">Message Routing</div>
                         <div class="settings-scope-copy">
                             Public and team chat remain in Sauer's console buffer. These controls choose which live feeds present each message type.
+                        </div>
+                    </div>
+                    <div class="settings-scope-note" data-if="category_console">
+                        <div class="settings-scope-kicker">Console Feeds</div>
+                        <div class="settings-scope-copy">
+                            Remaining top-left message types, the full-console history filter, and top-left size. Chat message routing stays on the Chat page.
                         </div>
                     </div>
                 </div>
@@ -3675,6 +3687,315 @@
                         </div>
                     </div>
 
+                    <div class="settings-page" data-if="category_console">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Console</div>
+                            <div class="settings-stage-title">Console</div>
+                            <div class="settings-stage-copy">
+                                Choose which message types appear in the top-left feed and the full-console history. Public and team chat for the live feeds stay on the Chat page.
+                            </div>
+                        </div>
+
+                        <div class="settings-console-columns">
+                            <div class="settings-section settings-compact-section panel settings-console-column">
+                                <div class="settings-control-title">Top-left Filter</div>
+                                <div class="settings-control-description">
+                                    Remaining message types for the normal in-game console. Chat and team chat are configured on the Chat page.
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Important Information</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_important"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.important" />
+                                        <span data-if="console_top_important">Shown</span>
+                                        <span data-if="!console_top_important">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Warnings</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_warnings"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.warnings" />
+                                        <span data-if="console_top_warnings">Shown</span>
+                                        <span data-if="!console_top_warnings">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Errors</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_errors"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.errors" />
+                                        <span data-if="console_top_errors">Shown</span>
+                                        <span data-if="!console_top_errors">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Script Messages</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_script"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.script" />
+                                        <span data-if="console_top_script">Shown</span>
+                                        <span data-if="!console_top_script">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Game Events</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_game_events"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.game-events" />
+                                        <span data-if="console_top_game_events">Shown</span>
+                                        <span data-if="!console_top_game_events">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Self Frags</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_self_frags"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.self-frags" />
+                                        <span data-if="console_top_self_frags">Shown</span>
+                                        <span data-if="!console_top_self_frags">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Other Player Frags</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_other_frags"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.other-frags" />
+                                        <span data-if="console_top_other_frags">Shown</span>
+                                        <span data-if="!console_top_other_frags">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Team Kills</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_team_kills"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.team-kills" />
+                                        <span data-if="console_top_team_kills">Shown</span>
+                                        <span data-if="!console_top_team_kills">Hidden</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-section settings-compact-section panel settings-console-column">
+                                <div class="settings-control-title">Full Console Filter</div>
+                                <div class="settings-control-description">
+                                    Message types kept in the full-console history, including public and team chat.
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Important Information</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_important"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.important" />
+                                        <span data-if="console_full_important">Shown</span>
+                                        <span data-if="!console_full_important">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Warnings</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_warnings"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.warnings" />
+                                        <span data-if="console_full_warnings">Shown</span>
+                                        <span data-if="!console_full_warnings">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Errors</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_errors"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.errors" />
+                                        <span data-if="console_full_errors">Shown</span>
+                                        <span data-if="!console_full_errors">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Script Messages</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_script"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.script" />
+                                        <span data-if="console_full_script">Shown</span>
+                                        <span data-if="!console_full_script">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Chat</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_chat"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.chat" />
+                                        <span data-if="console_full_chat">Shown</span>
+                                        <span data-if="!console_full_chat">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Team Chat</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_team_chat"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.team-chat" />
+                                        <span data-if="console_full_team_chat">Shown</span>
+                                        <span data-if="!console_full_team_chat">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Game Events</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_game_events"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.game-events" />
+                                        <span data-if="console_full_game_events">Shown</span>
+                                        <span data-if="!console_full_game_events">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Self Frags</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_self_frags"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.self-frags" />
+                                        <span data-if="console_full_self_frags">Shown</span>
+                                        <span data-if="!console_full_self_frags">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Other Player Frags</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_other_frags"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.other-frags" />
+                                        <span data-if="console_full_other_frags">Shown</span>
+                                        <span data-if="!console_full_other_frags">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Team Kills</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_team_kills"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.team-kills" />
+                                        <span data-if="console_full_team_kills">Shown</span>
+                                        <span data-if="!console_full_team_kills">Hidden</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Top-left Size</div>
+                                    <div class="settings-control-description">
+                                        Height of the top-left console in lines. Native Settings steps this by 1.
+                                    </div>
+                                </div>
+                                <div class="settings-stepper">
+                                    <button class="button settings-stepper-button"
+                                        data-attrif-disabled="!console_available"
+                                        onclick="settings.console.size.decrease">-</button>
+                                    <input class="text-input settings-stepper-value"
+                                        type="text" maxlength="3"
+                                        data-value="console_size_input"
+                                        data-class-is-invalid="console_size_invalid"
+                                        data-attrif-disabled="!console_available"
+                                        onfocus="settings.console.size.focus"
+                                        onblur="settings.console.size.blur"
+                                        onkeyup="settings.console.size.commit" />
+                                    <button class="button settings-stepper-button"
+                                        data-attrif-disabled="!console_available"
+                                        onclick="settings.console.size.increase">+</button>
+                                </div>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact">
+                                <span>Range&nbsp;&nbsp;{{ console_size_minimum }} - {{ console_size_maximum }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-info-row">
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Application</div>
+                                <div class="settings-info-value">Immediate</div>
+                            </div>
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Chat Routing</div>
+                                <div class="settings-info-value">Owned by Chat</div>
+                            </div>
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Persistence</div>
+                                <div class="settings-info-value">Existing Sauer config</div>
+                            </div>
+                        </div>
+                        <div class="settings-control-footer settings-control-footer-compact"
+                            data-if="console_status != ''">
+                            <span>{{ console_status }}</span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -3687,6 +4008,7 @@
                     <span data-if="category_mouse_keyboard">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Mouse / Keyboard</span>
                     <span data-if="category_crosshair">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Crosshair</span>
                     <span data-if="category_chat">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Chat</span>
+                    <span data-if="category_console">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Console</span>
                 </div>
                 <div class="settings-footer-help">Escape returns to gameplay</div>
                 <div class="settings-footer-status">

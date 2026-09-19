@@ -2625,5 +2625,238 @@ namespace cowui
         {
             return sauersettings::writeteamcoloredchatnames(enabled);
         }
+
+        static void copyconsole(
+            const sauersettings::Console &source,
+            Console &result)
+        {
+            result.important_information_in_top_feed =
+                source.important_information_in_top_feed;
+            result.warnings_in_top_feed = source.warnings_in_top_feed;
+            result.errors_in_top_feed = source.errors_in_top_feed;
+            result.script_messages_in_top_feed =
+                source.script_messages_in_top_feed;
+            result.game_events_in_top_feed =
+                source.game_events_in_top_feed;
+            result.self_frags_in_top_feed =
+                source.self_frags_in_top_feed;
+            result.other_player_frags_in_top_feed =
+                source.other_player_frags_in_top_feed;
+            result.team_kills_in_top_feed =
+                source.team_kills_in_top_feed;
+            result.important_information_in_full_console =
+                source.important_information_in_full_console;
+            result.warnings_in_full_console =
+                source.warnings_in_full_console;
+            result.errors_in_full_console =
+                source.errors_in_full_console;
+            result.script_messages_in_full_console =
+                source.script_messages_in_full_console;
+            result.public_messages_in_full_console =
+                source.public_messages_in_full_console;
+            result.team_messages_in_full_console =
+                source.team_messages_in_full_console;
+            result.game_events_in_full_console =
+                source.game_events_in_full_console;
+            result.self_frags_in_full_console =
+                source.self_frags_in_full_console;
+            result.other_player_frags_in_full_console =
+                source.other_player_frags_in_full_console;
+            result.team_kills_in_full_console =
+                source.team_kills_in_full_console;
+            result.size = source.size;
+            result.size_minimum = source.size_minimum;
+            result.size_maximum = source.size_maximum;
+        }
+
+        bool readconsole(Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool read = sauersettings::readconsole(legacy);
+            copyconsole(legacy, result);
+            return read;
+        }
+
+        bool writeimportantintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeimportantintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writewarningsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writewarningsintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeerrorsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeerrorsintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writescriptmessagesintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writescriptmessagesintopfeed(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writegameeventsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writegameeventsintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeselffragsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeselffragsintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeotherplayerfragsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeotherplayerfragsintopfeed(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeteamkillsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeteamkillsintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeimportantinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeimportantinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writewarningsinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writewarningsinfullconsole(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeerrorsinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeerrorsinfullconsole(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writescriptmessagesinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writescriptmessagesinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writepublicchatinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writepublicchatinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeteamchatinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeteamchatinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writegameeventsinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writegameeventsinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeselffragsinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeselffragsinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeotherplayerfragsinfullconsole(bool enabled,
+            Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeotherplayerfragsinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeteamkillsinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeteamkillsinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeconsolesize(int value, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeconsolesize(
+                value, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
     }
 }

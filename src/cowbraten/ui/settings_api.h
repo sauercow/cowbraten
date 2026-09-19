@@ -576,6 +576,35 @@ namespace cowui
             bool team_colored_names;
         };
 
+        // Native Settings console tab minus Chat-owned bits.
+        // Top-left `confilter` omits CON_CHAT / CON_TEAMCHAT; Chat owns
+        // those two bits plus `miniconfilter` and `teamcolorchat`.
+        // `fullconfilter` includes every native checkbox bit.
+        struct Console
+        {
+            bool important_information_in_top_feed;
+            bool warnings_in_top_feed;
+            bool errors_in_top_feed;
+            bool script_messages_in_top_feed;
+            bool game_events_in_top_feed;
+            bool self_frags_in_top_feed;
+            bool other_player_frags_in_top_feed;
+            bool team_kills_in_top_feed;
+            bool important_information_in_full_console;
+            bool warnings_in_full_console;
+            bool errors_in_full_console;
+            bool script_messages_in_full_console;
+            bool public_messages_in_full_console;
+            bool team_messages_in_full_console;
+            bool game_events_in_full_console;
+            bool self_frags_in_full_console;
+            bool other_player_frags_in_full_console;
+            bool team_kills_in_full_console;
+            int size;
+            int size_minimum;
+            int size_maximum;
+        };
+
         struct Resolution
         {
             int width;
@@ -853,6 +882,27 @@ namespace cowui
         bool writepublicchatinbottombox(bool enabled);
         bool writeteamchatinbottombox(bool enabled);
         bool writeteamcoloredchatnames(bool enabled);
+
+        bool readconsole(Console &result);
+        bool writeimportantintopfeed(bool enabled, Console &result);
+        bool writewarningsintopfeed(bool enabled, Console &result);
+        bool writeerrorsintopfeed(bool enabled, Console &result);
+        bool writescriptmessagesintopfeed(bool enabled, Console &result);
+        bool writegameeventsintopfeed(bool enabled, Console &result);
+        bool writeselffragsintopfeed(bool enabled, Console &result);
+        bool writeotherplayerfragsintopfeed(bool enabled, Console &result);
+        bool writeteamkillsintopfeed(bool enabled, Console &result);
+        bool writeimportantinfullconsole(bool enabled, Console &result);
+        bool writewarningsinfullconsole(bool enabled, Console &result);
+        bool writeerrorsinfullconsole(bool enabled, Console &result);
+        bool writescriptmessagesinfullconsole(bool enabled, Console &result);
+        bool writepublicchatinfullconsole(bool enabled, Console &result);
+        bool writeteamchatinfullconsole(bool enabled, Console &result);
+        bool writegameeventsinfullconsole(bool enabled, Console &result);
+        bool writeselffragsinfullconsole(bool enabled, Console &result);
+        bool writeotherplayerfragsinfullconsole(bool enabled, Console &result);
+        bool writeteamkillsinfullconsole(bool enabled, Console &result);
+        bool writeconsolesize(int value, Console &result);
     }
 }
 
