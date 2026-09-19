@@ -1755,6 +1755,10 @@ namespace cowui
             if(!sauersettings::readhud(legacy))
                 return false;
 
+            result.show_fps = legacy.show_fps;
+            result.wall_clock = legacy.wall_clock;
+            result.wall_clock_24_hour = legacy.wall_clock_24_hour;
+            result.wall_clock_seconds = legacy.wall_clock_seconds;
             result.damage_screen = legacy.damage_screen;
             result.damage_compass = legacy.damage_compass;
             result.frag_messages = fragmessagesmode(legacy.frag_messages);
@@ -1764,6 +1768,26 @@ namespace cowui
             result.streak_milestone_scale_maximum =
                 legacy.streak_milestone_scale_maximum;
             return true;
+        }
+
+        bool writeshowfps(bool enabled)
+        {
+            return sauersettings::writeshowfps(enabled);
+        }
+
+        bool writewallclock(bool enabled)
+        {
+            return sauersettings::writewallclock(enabled);
+        }
+
+        bool writewallclock24hour(bool enabled)
+        {
+            return sauersettings::writewallclock24hour(enabled);
+        }
+
+        bool writewallclockseconds(bool enabled)
+        {
+            return sauersettings::writewallclockseconds(enabled);
         }
 
         bool writedamagescreen(bool enabled)

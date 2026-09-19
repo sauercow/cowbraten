@@ -398,6 +398,10 @@ namespace cowui
 
         struct Hud
         {
+            bool show_fps;
+            bool wall_clock;
+            bool wall_clock_24_hour;
+            bool wall_clock_seconds;
             bool damage_screen;
             bool damage_compass;
             FragMessagesMode frag_messages;
@@ -599,6 +603,10 @@ namespace cowui
         bool writecrosshairreloadrotation(bool enabled);
 
         bool readhud(Hud &result);
+        bool writeshowfps(bool enabled);
+        bool writewallclock(bool enabled);
+        bool writewallclock24hour(bool enabled);
+        bool writewallclockseconds(bool enabled);
         bool writedamagescreen(bool enabled);
         bool writedamagecompass(bool enabled);
         bool writefragmessages(FragMessagesMode mode);

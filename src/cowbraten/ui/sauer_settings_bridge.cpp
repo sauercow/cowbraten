@@ -205,6 +205,38 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *showfpsident()
+        {
+            ident *id = getident("showfps");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *wallclockident()
+        {
+            ident *id = getident("wallclock");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *wallclock24ident()
+        {
+            ident *id = getident("wallclock24");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *wallclocksecsident()
+        {
+            ident *id = getident("wallclocksecs");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         static ident *damagescreenident()
         {
             ident *id = getident("damagescreen");
@@ -2845,11 +2877,19 @@ namespace cowui
 
         bool readhud(Hud &result)
         {
+            ident *fps_id = showfpsident();
+            ident *clock_id = wallclockident();
+            ident *clock24_id = wallclock24ident();
+            ident *clocksecs_id = wallclocksecsident();
             ident *screen_id = damagescreenident();
             ident *compass_id = damagecompassident();
             ident *messages_id = fragmessagesident();
             ident *streak_id = streakmilestonescaleident();
-            if(!screen_id || !screen_id->storage.i ||
+            if(!fps_id || !fps_id->storage.i ||
+               !clock_id || !clock_id->storage.i ||
+               !clock24_id || !clock24_id->storage.i ||
+               !clocksecs_id || !clocksecs_id->storage.i ||
+               !screen_id || !screen_id->storage.i ||
                !compass_id || !compass_id->storage.i ||
                !messages_id || !messages_id->storage.i ||
                !streak_id || !streak_id->storage.f)
@@ -2857,6 +2897,10 @@ namespace cowui
                 return false;
             }
 
+            result.show_fps = *fps_id->storage.i != 0;
+            result.wall_clock = *clock_id->storage.i != 0;
+            result.wall_clock_24_hour = *clock24_id->storage.i != 0;
+            result.wall_clock_seconds = *clocksecs_id->storage.i != 0;
             result.damage_screen = *screen_id->storage.i != 0;
             result.damage_compass = *compass_id->storage.i != 0;
             switch(*messages_id->storage.i)
@@ -2875,6 +2919,26 @@ namespace cowui
             result.streak_milestone_scale_minimum = streak_id->minvalf;
             result.streak_milestone_scale_maximum = streak_id->maxvalf;
             return true;
+        }
+
+        bool writeshowfps(bool enabled)
+        {
+            return writeboolean(showfpsident(), enabled);
+        }
+
+        bool writewallclock(bool enabled)
+        {
+            return writeboolean(wallclockident(), enabled);
+        }
+
+        bool writewallclock24hour(bool enabled)
+        {
+            return writeboolean(wallclock24ident(), enabled);
+        }
+
+        bool writewallclockseconds(bool enabled)
+        {
+            return writeboolean(wallclocksecsident(), enabled);
         }
 
         bool writedamagescreen(bool enabled)

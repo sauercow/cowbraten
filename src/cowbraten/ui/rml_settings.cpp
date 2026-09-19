@@ -613,6 +613,13 @@ namespace cowui
                 "crosshair_reload_rotation",
                 &crosshair_reload_rotation
             ) &&
+            constructor.Bind("show_fps", &show_fps) &&
+            constructor.Bind("wall_clock", &wall_clock) &&
+            constructor.Bind("wall_clock_24_hour", &wall_clock_24_hour) &&
+            constructor.Bind(
+                "wall_clock_seconds",
+                &wall_clock_seconds
+            ) &&
             constructor.Bind("damage_screen", &damage_screen) &&
             constructor.Bind("damage_compass", &damage_compass) &&
             constructor.Bind(
@@ -851,6 +858,22 @@ namespace cowui
             router.registeraction(
                 "settings.crosshair.reload-rotation",
                 crosshairreloadrotationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.show-fps",
+                showfpsaction
+            ) &&
+            router.registeraction(
+                "settings.hud.wall-clock",
+                wallclockaction
+            ) &&
+            router.registeraction(
+                "settings.hud.wall-clock.24-hour",
+                wallclock24action
+            ) &&
+            router.registeraction(
+                "settings.hud.wall-clock.seconds",
+                wallclocksecondsaction
             ) &&
             router.registeraction(
                 "settings.hud.damage-screen",
@@ -1122,6 +1145,10 @@ namespace cowui
         hit_crosshair = true;
         crosshair_reload_fade = true;
         crosshair_reload_rotation = true;
+        show_fps = true;
+        wall_clock = false;
+        wall_clock_24_hour = false;
+        wall_clock_seconds = false;
         damage_screen = true;
         damage_compass = true;
         frag_messages_enabled = true;
@@ -1869,6 +1896,26 @@ namespace cowui
         if(!settings::readhud(current))
             return false;
 
+        if(show_fps != current.show_fps)
+        {
+            show_fps = current.show_fps;
+            model.DirtyVariable("show_fps");
+        }
+        if(wall_clock != current.wall_clock)
+        {
+            wall_clock = current.wall_clock;
+            model.DirtyVariable("wall_clock");
+        }
+        if(wall_clock_24_hour != current.wall_clock_24_hour)
+        {
+            wall_clock_24_hour = current.wall_clock_24_hour;
+            model.DirtyVariable("wall_clock_24_hour");
+        }
+        if(wall_clock_seconds != current.wall_clock_seconds)
+        {
+            wall_clock_seconds = current.wall_clock_seconds;
+            model.DirtyVariable("wall_clock_seconds");
+        }
         if(damage_screen != current.damage_screen)
         {
             damage_screen = current.damage_screen;
@@ -5427,6 +5474,46 @@ namespace cowui
                 !instance->crosshair_reload_rotation
             );
             instance->refreshcrosshair();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::showfpsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writeshowfps(!instance->show_fps);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::wallclockaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writewallclock(!instance->wall_clock);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::wallclock24action(Rml::Event &event)
+    {
+        if(instance && instance->wall_clock)
+        {
+            settings::writewallclock24hour(!instance->wall_clock_24_hour);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::wallclocksecondsaction(Rml::Event &event)
+    {
+        if(instance && instance->wall_clock)
+        {
+            settings::writewallclockseconds(!instance->wall_clock_seconds);
+            instance->refreshhud();
         }
         event.StopPropagation();
     }

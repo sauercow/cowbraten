@@ -412,6 +412,10 @@ namespace cowui
         static void hitcrosshairaction(Rml::Event &event);
         static void crosshairreloadfadeaction(Rml::Event &event);
         static void crosshairreloadrotationaction(Rml::Event &event);
+        static void showfpsaction(Rml::Event &event);
+        static void wallclockaction(Rml::Event &event);
+        static void wallclock24action(Rml::Event &event);
+        static void wallclocksecondsaction(Rml::Event &event);
         static void damagescreenaction(Rml::Event &event);
         static void damagecompassaction(Rml::Event &event);
         static void fragmessagesenabledaction(Rml::Event &event);
@@ -647,6 +651,10 @@ namespace cowui
         bool hit_crosshair = true;
         bool crosshair_reload_fade = true;
         bool crosshair_reload_rotation = true;
+        bool show_fps = true;
+        bool wall_clock = false;
+        bool wall_clock_24_hour = false;
+        bool wall_clock_seconds = false;
         bool damage_screen = true;
         bool damage_compass = true;
         bool frag_messages_enabled = true;

@@ -90,7 +90,7 @@
                     <div class="settings-scope-note" data-if="category_hud">
                         <div class="settings-scope-kicker">Combat Information</div>
                         <div class="settings-scope-copy">
-                            Damage feedback and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
+                            FPS and wall-clock overlays, damage feedback, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_audio">
@@ -265,10 +265,78 @@
 
                     <div class="settings-page" data-if="category_hud">
                         <div class="settings-stage-header">
-                            <div class="eyebrow settings-eyebrow">HUD / Combat Feedback</div>
+                            <div class="eyebrow settings-eyebrow">HUD / Overlay &amp; Combat</div>
                             <div class="settings-stage-title">HUD</div>
                             <div class="settings-stage-copy">
-                                Keep critical combat information readable without changing Cowbraten's existing HUD rendering behavior.
+                                Keep overlay stats and combat information readable without changing Cowbraten's existing HUD rendering behavior.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Show FPS</div>
+                                    <div class="settings-control-description">
+                                        Shows Sauer's existing frames-per-second overlay in the HUD stats corner.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="show_fps"
+                                        onclick="settings.hud.show-fps" />
+                                    <span data-if="show_fps">Enabled</span>
+                                    <span data-if="!show_fps">Disabled</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Wall Clock</div>
+                                    <div class="settings-control-description">
+                                        Shows Sauer's existing local time overlay in the HUD stats corner.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="wall_clock"
+                                        onclick="settings.hud.wall-clock" />
+                                    <span data-if="wall_clock">Enabled</span>
+                                    <span data-if="!wall_clock">Disabled</span>
+                                </label>
+                            </div>
+
+                            <div data-if="wall_clock">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">24-hour</div>
+                                        <div class="settings-control-description">
+                                            Formats the wall clock as 24-hour time instead of 12-hour with AM/PM.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="wall_clock_24_hour"
+                                            onclick="settings.hud.wall-clock.24-hour" />
+                                        <span data-if="wall_clock_24_hour">Enabled</span>
+                                        <span data-if="!wall_clock_24_hour">Disabled</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Seconds</div>
+                                        <div class="settings-control-description">
+                                            Includes seconds in the wall-clock overlay.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="wall_clock_seconds"
+                                            onclick="settings.hud.wall-clock.seconds" />
+                                        <span data-if="wall_clock_seconds">Enabled</span>
+                                        <span data-if="!wall_clock_seconds">Disabled</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
 

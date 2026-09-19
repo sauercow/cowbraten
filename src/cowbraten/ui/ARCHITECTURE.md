@@ -280,11 +280,17 @@ additive crosshair blend; the loader converts that mask to premultiplied alpha
 for RmlUi. This keeps previews valid across `resetgl()` without exposing engine
 texture or OpenGL handles or encoding any Settings DOM structure in C++.
 
-The first HUD slice is deliberately limited to combat feedback. It exposes
-vanilla Sauer's persistent `damagescreen` and `damagecompass` toggles, p1x's
-three-state `hudfragmessages` mode, and Cowbraten's persistent
-`streakmilestonescale` float. All apply immediately through their existing
-render paths without resource or GL reset. The streak scale uses its declared
+The HUD category exposes overlay stats and combat feedback. Overlay stats are
+vanilla Sauer's persistent `showfps` and `wallclock` toggles, plus the
+`wallclock24` and `wallclocksecs` format flags that the renderer consults only
+while the clock is on. Combat feedback remains vanilla Sauer's persistent
+`damagescreen` and `damagecompass` toggles, p1x's three-state
+`hudfragmessages` mode, and Cowbraten's persistent `streakmilestonescale`
+float. All apply immediately through their existing render paths without
+resource or GL reset. Turning the wall clock off does not rewrite its 24-hour
+or seconds flags; the default theme hides those subordinates until the clock
+is on again, matching the legacy HUD tab. `showfpsrange` is not a production
+HUD-tab control and is not exposed. The streak scale uses its declared
 `1.0..2.0` range and the same local edit/commit/readback policy as exact mouse
 sensitivity. Settings activation, category activation, local writes, and
 console return refresh these snapshots; there is no frame-loop polling.
