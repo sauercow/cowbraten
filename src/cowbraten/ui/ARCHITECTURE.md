@@ -372,6 +372,33 @@ modes. The default theme therefore presents an Enabled toggle plus a subordinate
 Show in Instagib toggle, while the typed settings API retains the exact engine
 enum as its source of truth.
 
+HUD frag-message layout inlines the native `hudfragmessages` adjust document
+onto the Settings HUD page. The typed snapshot owns the layout idents that
+native GUI already exposes: max (`maxhudfragmessages`, VARFP `1..10`;
+`setvarchecked()` runs the buffer grow/shrink callback), duration
+(`hudfragmessageduration`, `0..10` seconds, native `0.1` steps), the three
+native `hudfragmessagefilter` bits only (`CON_FRAG_SELF` `0x800`,
+`CON_FRAG_OTHER` `0x1000`, `CON_TEAMKILL` `0x2000`; every other bit is
+preserved), size (`hudfragmessagescale`, `0.1..1.0`, native `0.1` steps),
+fade (`hudfragmessagefade`), normalized position (`hudfragmessagex`,
+`hudfragmessagey`, native `0.01` steps), and stack direction
+(`hudfragmessagestackdir` as exact `-1` / `0` / `1`). Each control has a
+typed writer through `setvarchecked()` / `setfvarchecked()`. All apply
+immediately through `drawfragmessages()` with no GL reset. Filter writers skip
+when the requested bit already matches, so opening Settings cannot rewrite the
+default `0x2800`. `hudfragmessagefilter` is an `HVARP` registered as `ID_VAR`
+with `IDF_HEX`; there is no separate hex ident type. Turning frag messages off
+does not rewrite layout idents; the default theme hides those subordinates
+until messages are on, matching `if $hudfragmessages`. The integer max slider
+binds min/max from the ident, omits a hardcoded RML `value`, and ignores
+programmatic range change during document construct or when the enabled
+`data-if` reveals the extras. Float fields use the same local
+edit/commit/readback policy as streak scale. Stack radios write only on user
+select and select only on an exact `-1/0/1` match.
+`hudfragmessageforcecolors` is not in the native Settings GUI and is not
+exposed. `showgui "hudfragmessages"` remains the legacy standalone document;
+Settings no longer needs that nested GUI.
+
 HUD ammo bar inlines the legacy `ammobar` adjust document onto the Settings HUD
 page. The typed snapshot owns Sauer's persistent `ammobar` master switch plus
 the layout idents that native GUI already exposes: orientation
@@ -410,10 +437,9 @@ selected. `scoreboard2d`, `showservinfo`, `showspectators`, `highlightscore`,
 `tiesort`, and related non-column scoreboard options stay unexposed.
 `showgui "scoreboard"` remains the legacy document.
 
-The legacy `hudfragmessages` adjustment document contains substantially more controls than this
-production Settings HUD slice. Their exact `showgui` names therefore
-continue through the legacy fallback, as does `showgui gameclock` until an
-explicit mapping is added. No HUD or Crosshair compatibility alias is added
+Native `showgui gameclock`, `showgui hudscore`, and `showgui scoreboard` remain
+on the legacy path because those slices inline Settings HUD rather than mapping
+the adjust document names. No HUD or Crosshair compatibility alias is added
 until the corresponding RmlUi surface is a sufficiently complete semantic
 replacement.
 

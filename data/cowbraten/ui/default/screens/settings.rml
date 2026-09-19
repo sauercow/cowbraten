@@ -1492,6 +1492,217 @@
                                     <span data-if="!frag_messages_in_insta">Hidden</span>
                                 </label>
                             </div>
+
+                            <div data-if="frag_messages_enabled">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Max</div>
+                                        <div class="settings-control-description">
+                                            How many p1x frag messages stay on the HUD. Changing this grows or shrinks the existing message buffer immediately.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ max_frag_messages }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ max_frag_messages_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="1"
+                                        max="10"
+                                        step="1"
+                                        data-attr-min="max_frag_messages_minimum"
+                                        data-attr-max="max_frag_messages_maximum"
+                                        data-attr-value="max_frag_messages"
+                                        onchange="settings.hud.frag-messages.max" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ max_frag_messages_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Duration</div>
+                                        <div class="settings-control-description">
+                                            Seconds each frag message stays visible. Native +/- steps of 0.1.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.duration.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="frag_message_duration_input"
+                                            data-class-is-invalid="frag_message_duration_invalid"
+                                            onfocus="settings.hud.frag-messages.duration.focus"
+                                            onblur="settings.hud.frag-messages.duration.blur"
+                                            onkeyup="settings.hud.frag-messages.duration.commit" />
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.duration.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ frag_message_duration_minimum }} - {{ frag_message_duration_maximum }} seconds</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Self Frags</div>
+                                        <div class="settings-control-description">
+                                            Show your own kills in the frag message list.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="frag_message_self_frags"
+                                            onclick="settings.hud.frag-messages.self" />
+                                        <span data-if="frag_message_self_frags">Shown</span>
+                                        <span data-if="!frag_message_self_frags">Hidden</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Other Player Frags</div>
+                                        <div class="settings-control-description">
+                                            Show kills by other players in the frag message list.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="frag_message_other_frags"
+                                            onclick="settings.hud.frag-messages.other" />
+                                        <span data-if="frag_message_other_frags">Shown</span>
+                                        <span data-if="!frag_message_other_frags">Hidden</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Team Kills</div>
+                                        <div class="settings-control-description">
+                                            Show team kills in the frag message list.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="frag_message_team_kills"
+                                            onclick="settings.hud.frag-messages.team-kills" />
+                                        <span data-if="frag_message_team_kills">Shown</span>
+                                        <span data-if="!frag_message_team_kills">Hidden</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Size</div>
+                                        <div class="settings-control-description">
+                                            Scale of p1x frag messages. Native +/- steps of 0.1.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.scale.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="frag_message_scale_input"
+                                            data-class-is-invalid="frag_message_scale_invalid"
+                                            onfocus="settings.hud.frag-messages.scale.focus"
+                                            onblur="settings.hud.frag-messages.scale.blur"
+                                            onkeyup="settings.hud.frag-messages.scale.commit" />
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.scale.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ frag_message_scale_minimum }} - {{ frag_message_scale_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Fade Out</div>
+                                        <div class="settings-control-description">
+                                            Fades each message after its duration instead of removing it immediately.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="frag_message_fade"
+                                            onclick="settings.hud.frag-messages.fade" />
+                                        <span data-if="frag_message_fade">On</span>
+                                        <span data-if="!frag_message_fade">Off</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">X</div>
+                                        <div class="settings-control-description">
+                                            Horizontal HUD position. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.x.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="frag_message_x_input"
+                                            data-class-is-invalid="frag_message_x_invalid"
+                                            onfocus="settings.hud.frag-messages.x.focus"
+                                            onblur="settings.hud.frag-messages.x.blur"
+                                            onkeyup="settings.hud.frag-messages.x.commit" />
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.x.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ frag_message_x_minimum }} - {{ frag_message_x_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Y</div>
+                                        <div class="settings-control-description">
+                                            Vertical HUD position. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.y.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="frag_message_y_input"
+                                            data-class-is-invalid="frag_message_y_invalid"
+                                            onfocus="settings.hud.frag-messages.y.focus"
+                                            onblur="settings.hud.frag-messages.y.blur"
+                                            onkeyup="settings.hud.frag-messages.y.commit" />
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.y.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ frag_message_y_minimum }} - {{ frag_message_y_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Stack Direction</div>
+                                        <div class="settings-control-description">
+                                            Newer messages stack up, toward the nearest vertical edge, or down from the configured position.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="frag_message_stack_up"
+                                        data-event-click="select_frag_message_stack_dir(-1)">Up</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="frag_message_stack_auto"
+                                        data-event-click="select_frag_message_stack_dir(0)">Auto</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="frag_message_stack_down"
+                                        data-event-click="select_frag_message_stack_dir(1)">Down</button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="settings-section settings-compact-section panel">

@@ -223,6 +223,14 @@ namespace cowui
         return float(stepped);
     }
 
+    static float stepfragmessagefloat(float value, int direction, double step)
+    {
+        const double stepped = std::round(
+            (double(value) + double(direction) * step) / step
+        ) * step;
+        return float(stepped);
+    }
+
     static float stepammobarfloat(float value, int direction)
     {
         const double stepped = std::round(
@@ -531,6 +539,7 @@ namespace cowui
             constructor.BindEventCallback("select_scoreboard_ping", &RmlSettings::selectscoreboardping, this) &&
             constructor.BindEventCallback("select_scoreboard_pj", &RmlSettings::selectscoreboardpj, this) &&
             constructor.BindEventCallback("select_scoreboard_clientnum", &RmlSettings::selectscoreboardclientnum, this) &&
+            constructor.BindEventCallback("select_frag_message_stack_dir", &RmlSettings::selectfragmessagestackdir, this) &&
             constructor.Bind("resolution_label", &resolution_label) &&
             constructor.Bind(
                 "render_resolution_label",
@@ -883,6 +892,117 @@ namespace cowui
             constructor.Bind(
                 "frag_messages_in_insta",
                 &frag_messages_in_insta
+            ) &&
+            constructor.Bind(
+                "max_frag_messages",
+                &max_frag_messages
+            ) &&
+            constructor.Bind(
+                "max_frag_messages_minimum",
+                &max_frag_messages_minimum
+            ) &&
+            constructor.Bind(
+                "max_frag_messages_maximum",
+                &max_frag_messages_maximum
+            ) &&
+            constructor.Bind(
+                "frag_message_duration",
+                &frag_message_duration
+            ) &&
+            constructor.Bind(
+                "frag_message_duration_minimum",
+                &frag_message_duration_minimum
+            ) &&
+            constructor.Bind(
+                "frag_message_duration_maximum",
+                &frag_message_duration_maximum
+            ) &&
+            constructor.Bind(
+                "frag_message_duration_input",
+                &frag_message_duration_input
+            ) &&
+            constructor.Bind(
+                "frag_message_duration_invalid",
+                &frag_message_duration_invalid
+            ) &&
+            constructor.Bind(
+                "frag_message_self_frags",
+                &frag_message_self_frags
+            ) &&
+            constructor.Bind(
+                "frag_message_other_frags",
+                &frag_message_other_frags
+            ) &&
+            constructor.Bind(
+                "frag_message_team_kills",
+                &frag_message_team_kills
+            ) &&
+            constructor.Bind(
+                "frag_message_scale",
+                &frag_message_scale
+            ) &&
+            constructor.Bind(
+                "frag_message_scale_minimum",
+                &frag_message_scale_minimum
+            ) &&
+            constructor.Bind(
+                "frag_message_scale_maximum",
+                &frag_message_scale_maximum
+            ) &&
+            constructor.Bind(
+                "frag_message_scale_input",
+                &frag_message_scale_input
+            ) &&
+            constructor.Bind(
+                "frag_message_scale_invalid",
+                &frag_message_scale_invalid
+            ) &&
+            constructor.Bind("frag_message_fade", &frag_message_fade) &&
+            constructor.Bind("frag_message_x", &frag_message_x) &&
+            constructor.Bind(
+                "frag_message_x_minimum",
+                &frag_message_x_minimum
+            ) &&
+            constructor.Bind(
+                "frag_message_x_maximum",
+                &frag_message_x_maximum
+            ) &&
+            constructor.Bind(
+                "frag_message_x_input",
+                &frag_message_x_input
+            ) &&
+            constructor.Bind(
+                "frag_message_x_invalid",
+                &frag_message_x_invalid
+            ) &&
+            constructor.Bind("frag_message_y", &frag_message_y) &&
+            constructor.Bind(
+                "frag_message_y_minimum",
+                &frag_message_y_minimum
+            ) &&
+            constructor.Bind(
+                "frag_message_y_maximum",
+                &frag_message_y_maximum
+            ) &&
+            constructor.Bind(
+                "frag_message_y_input",
+                &frag_message_y_input
+            ) &&
+            constructor.Bind(
+                "frag_message_y_invalid",
+                &frag_message_y_invalid
+            ) &&
+            constructor.Bind(
+                "frag_message_stack_up",
+                &frag_message_stack_up
+            ) &&
+            constructor.Bind(
+                "frag_message_stack_auto",
+                &frag_message_stack_auto
+            ) &&
+            constructor.Bind(
+                "frag_message_stack_down",
+                &frag_message_stack_down
             ) &&
             constructor.Bind(
                 "streak_milestone_scale",
@@ -1321,6 +1441,106 @@ namespace cowui
             router.registeraction(
                 "settings.hud.frag-messages.insta",
                 fragmessagesinstaaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.self",
+                fragmessageselffragsaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.other",
+                fragmessageotherfragsaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.team-kills",
+                fragmessageteamkillsaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.fade",
+                fragmessagefadeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.max",
+                changemaxfragmessagesaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.duration.decrease",
+                decreasefragmessagedurationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.duration.increase",
+                increasefragmessagedurationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.duration.focus",
+                focusfragmessagedurationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.duration.blur",
+                blurfragmessagedurationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.duration.commit",
+                commitfragmessagedurationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.scale.decrease",
+                decreasefragmessagescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.scale.increase",
+                increasefragmessagescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.scale.focus",
+                focusfragmessagescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.scale.blur",
+                blurfragmessagescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.scale.commit",
+                commitfragmessagescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.x.decrease",
+                decreasefragmessagexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.x.increase",
+                increasefragmessagexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.x.focus",
+                focusfragmessagexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.x.blur",
+                blurfragmessagexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.x.commit",
+                commitfragmessagexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.y.decrease",
+                decreasefragmessageyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.y.increase",
+                increasefragmessageyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.y.focus",
+                focusfragmessageyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.y.blur",
+                blurfragmessageyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.y.commit",
+                commitfragmessageyaction
             ) &&
             router.registeraction(
                 "settings.hud.streak-scale.decrease",
@@ -1894,6 +2114,41 @@ namespace cowui
         muzzle_light = true;
         frag_messages_enabled = true;
         frag_messages_in_insta = true;
+        max_frag_messages = 3;
+        max_frag_messages_minimum = 1;
+        max_frag_messages_maximum = 10;
+        max_frag_messages_armed = false;
+        frag_message_duration = 2.0f;
+        frag_message_duration_minimum = 0.0f;
+        frag_message_duration_maximum = 10.0f;
+        frag_message_duration_input.clear();
+        frag_message_duration_invalid = false;
+        frag_message_duration_editing = false;
+        frag_message_self_frags = true;
+        frag_message_other_frags = false;
+        frag_message_team_kills = true;
+        frag_message_scale = 0.5f;
+        frag_message_scale_minimum = 0.1f;
+        frag_message_scale_maximum = 1.0f;
+        frag_message_scale_input.clear();
+        frag_message_scale_invalid = false;
+        frag_message_scale_editing = false;
+        frag_message_fade = true;
+        frag_message_x = 0.5f;
+        frag_message_x_minimum = 0.0f;
+        frag_message_x_maximum = 1.0f;
+        frag_message_x_input.clear();
+        frag_message_x_invalid = false;
+        frag_message_x_editing = false;
+        frag_message_y = 0.25f;
+        frag_message_y_minimum = 0.0f;
+        frag_message_y_maximum = 1.0f;
+        frag_message_y_input.clear();
+        frag_message_y_invalid = false;
+        frag_message_y_editing = false;
+        frag_message_stack_up = false;
+        frag_message_stack_auto = true;
+        frag_message_stack_down = false;
         streak_milestone_scale = 1.25f;
         streak_milestone_scale_minimum = 1.0f;
         streak_milestone_scale_maximum = 2.0f;
@@ -2827,6 +3082,14 @@ namespace cowui
         if(!settings::readhud(current))
             return false;
 
+        presenthud(current, update_edit_buffer);
+        return true;
+    }
+
+    void RmlSettings::presenthud(
+        const settings::Hud &current,
+        bool update_edit_buffer)
+    {
         if(show_fps != current.show_fps)
         {
             show_fps = current.show_fps;
@@ -2886,11 +3149,172 @@ namespace cowui
         {
             frag_messages_enabled = messages_enabled;
             model.DirtyVariable("frag_messages_enabled");
+            if(messages_enabled)
+                max_frag_messages_armed = false;
         }
         if(frag_messages_in_insta != messages_in_insta)
         {
             frag_messages_in_insta = messages_in_insta;
             model.DirtyVariable("frag_messages_in_insta");
+        }
+
+        if(max_frag_messages != current.max_frag_messages)
+        {
+            max_frag_messages = current.max_frag_messages;
+            model.DirtyVariable("max_frag_messages");
+        }
+        if(max_frag_messages_minimum != current.max_frag_messages_minimum)
+        {
+            max_frag_messages_minimum = current.max_frag_messages_minimum;
+            model.DirtyVariable("max_frag_messages_minimum");
+        }
+        if(max_frag_messages_maximum != current.max_frag_messages_maximum)
+        {
+            max_frag_messages_maximum = current.max_frag_messages_maximum;
+            model.DirtyVariable("max_frag_messages_maximum");
+        }
+
+        if(frag_message_duration != current.frag_message_duration)
+        {
+            frag_message_duration = current.frag_message_duration;
+            model.DirtyVariable("frag_message_duration");
+        }
+        if(frag_message_duration_minimum !=
+           current.frag_message_duration_minimum)
+        {
+            frag_message_duration_minimum =
+                current.frag_message_duration_minimum;
+            model.DirtyVariable("frag_message_duration_minimum");
+        }
+        if(frag_message_duration_maximum !=
+           current.frag_message_duration_maximum)
+        {
+            frag_message_duration_maximum =
+                current.frag_message_duration_maximum;
+            model.DirtyVariable("frag_message_duration_maximum");
+        }
+        const Rml::String duration_text = formatsensitivity(
+            current.frag_message_duration
+        );
+        if(!frag_message_duration_editing &&
+           frag_message_duration_input != duration_text)
+        {
+            frag_message_duration_input = duration_text;
+            model.DirtyVariable("frag_message_duration_input");
+        }
+
+        if(frag_message_self_frags != current.frag_message_self_frags)
+        {
+            frag_message_self_frags = current.frag_message_self_frags;
+            model.DirtyVariable("frag_message_self_frags");
+        }
+        if(frag_message_other_frags != current.frag_message_other_frags)
+        {
+            frag_message_other_frags = current.frag_message_other_frags;
+            model.DirtyVariable("frag_message_other_frags");
+        }
+        if(frag_message_team_kills != current.frag_message_team_kills)
+        {
+            frag_message_team_kills = current.frag_message_team_kills;
+            model.DirtyVariable("frag_message_team_kills");
+        }
+
+        if(frag_message_scale != current.frag_message_scale)
+        {
+            frag_message_scale = current.frag_message_scale;
+            model.DirtyVariable("frag_message_scale");
+        }
+        if(frag_message_scale_minimum != current.frag_message_scale_minimum)
+        {
+            frag_message_scale_minimum = current.frag_message_scale_minimum;
+            model.DirtyVariable("frag_message_scale_minimum");
+        }
+        if(frag_message_scale_maximum != current.frag_message_scale_maximum)
+        {
+            frag_message_scale_maximum = current.frag_message_scale_maximum;
+            model.DirtyVariable("frag_message_scale_maximum");
+        }
+        const Rml::String message_scale_text = formatsensitivity(
+            current.frag_message_scale
+        );
+        if(!frag_message_scale_editing &&
+           frag_message_scale_input != message_scale_text)
+        {
+            frag_message_scale_input = message_scale_text;
+            model.DirtyVariable("frag_message_scale_input");
+        }
+
+        if(frag_message_fade != current.frag_message_fade)
+        {
+            frag_message_fade = current.frag_message_fade;
+            model.DirtyVariable("frag_message_fade");
+        }
+
+        if(frag_message_x != current.frag_message_x)
+        {
+            frag_message_x = current.frag_message_x;
+            model.DirtyVariable("frag_message_x");
+        }
+        if(frag_message_x_minimum != current.frag_message_x_minimum)
+        {
+            frag_message_x_minimum = current.frag_message_x_minimum;
+            model.DirtyVariable("frag_message_x_minimum");
+        }
+        if(frag_message_x_maximum != current.frag_message_x_maximum)
+        {
+            frag_message_x_maximum = current.frag_message_x_maximum;
+            model.DirtyVariable("frag_message_x_maximum");
+        }
+        const Rml::String message_x_text = formatsensitivity(
+            current.frag_message_x
+        );
+        if(!frag_message_x_editing && frag_message_x_input != message_x_text)
+        {
+            frag_message_x_input = message_x_text;
+            model.DirtyVariable("frag_message_x_input");
+        }
+
+        if(frag_message_y != current.frag_message_y)
+        {
+            frag_message_y = current.frag_message_y;
+            model.DirtyVariable("frag_message_y");
+        }
+        if(frag_message_y_minimum != current.frag_message_y_minimum)
+        {
+            frag_message_y_minimum = current.frag_message_y_minimum;
+            model.DirtyVariable("frag_message_y_minimum");
+        }
+        if(frag_message_y_maximum != current.frag_message_y_maximum)
+        {
+            frag_message_y_maximum = current.frag_message_y_maximum;
+            model.DirtyVariable("frag_message_y_maximum");
+        }
+        const Rml::String message_y_text = formatsensitivity(
+            current.frag_message_y
+        );
+        if(!frag_message_y_editing && frag_message_y_input != message_y_text)
+        {
+            frag_message_y_input = message_y_text;
+            model.DirtyVariable("frag_message_y_input");
+        }
+
+        const bool stack_up = current.frag_message_stack_dir == -1;
+        const bool stack_auto = current.frag_message_stack_dir == 0;
+        const bool stack_down = current.frag_message_stack_dir == 1;
+        if(frag_message_stack_up != stack_up)
+        {
+            frag_message_stack_up = stack_up;
+            model.DirtyVariable("frag_message_stack_up");
+        }
+        if(frag_message_stack_auto != stack_auto)
+        {
+            frag_message_stack_auto = stack_auto;
+            model.DirtyVariable("frag_message_stack_auto");
+        }
+        if(frag_message_stack_down != stack_down)
+        {
+            frag_message_stack_down = stack_down;
+            model.DirtyVariable("frag_message_stack_down");
         }
 
         if(streak_milestone_scale != current.streak_milestone_scale)
@@ -2933,7 +3357,24 @@ namespace cowui
             hud_status = status;
             model.DirtyVariable("hud_status");
         }
-        return true;
+    }
+
+    void RmlSettings::finishhudwrite(bool accepted, settings::Hud &state)
+    {
+        const bool available = accepted || settings::readhud(state);
+        if(available)
+        {
+            presenthud(
+                state,
+                !streak_milestone_scale_editing
+            );
+        }
+        if(!accepted && available)
+        {
+            hud_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("hud_status");
+        }
     }
 
     bool RmlSettings::refreshgameclock()
@@ -3799,6 +4240,122 @@ namespace cowui
             ? "Streak milestone scale applied"
             : "Invalid scale; restored the last effective setting";
         model.DirtyVariable("hud_status");
+    }
+
+    void RmlSettings::commitfragmessageduration()
+    {
+        float requested = 0.0f;
+        settings::Hud state = {};
+        const bool accepted = parsefloat(
+                frag_message_duration_input,
+                requested
+            ) &&
+            frag_messages_enabled &&
+            settings::writefragmessageduration(requested, state);
+        frag_message_duration_invalid = !accepted;
+        model.DirtyVariable("frag_message_duration_invalid");
+        const bool was_editing = frag_message_duration_editing;
+        frag_message_duration_editing = false;
+        finishhudwrite(accepted, state);
+        frag_message_duration_editing = was_editing;
+        if(accepted)
+        {
+            hud_status = "Duration applied";
+            model.DirtyVariable("hud_status");
+        }
+        else if(frag_messages_enabled)
+        {
+            hud_status =
+                "Invalid duration; restored the last effective setting";
+            model.DirtyVariable("hud_status");
+        }
+    }
+
+    void RmlSettings::commitfragmessagescale()
+    {
+        float requested = 0.0f;
+        settings::Hud state = {};
+        const bool accepted = parsefloat(
+                frag_message_scale_input,
+                requested
+            ) &&
+            frag_messages_enabled &&
+            settings::writefragmessagescale(requested, state);
+        frag_message_scale_invalid = !accepted;
+        model.DirtyVariable("frag_message_scale_invalid");
+        const bool was_editing = frag_message_scale_editing;
+        frag_message_scale_editing = false;
+        finishhudwrite(accepted, state);
+        frag_message_scale_editing = was_editing;
+        if(accepted)
+        {
+            hud_status = "Size applied";
+            model.DirtyVariable("hud_status");
+        }
+        else if(frag_messages_enabled)
+        {
+            hud_status =
+                "Invalid size; restored the last effective setting";
+            model.DirtyVariable("hud_status");
+        }
+    }
+
+    void RmlSettings::commitfragmessagex()
+    {
+        float requested = 0.0f;
+        settings::Hud state = {};
+        const bool accepted = parsefloat(
+                frag_message_x_input,
+                requested
+            ) &&
+            frag_messages_enabled &&
+            settings::writefragmessagex(requested, state);
+        frag_message_x_invalid = !accepted;
+        model.DirtyVariable("frag_message_x_invalid");
+        const bool was_editing = frag_message_x_editing;
+        frag_message_x_editing = false;
+        finishhudwrite(accepted, state);
+        frag_message_x_editing = was_editing;
+        if(accepted)
+        {
+            hud_status = "X position applied";
+            model.DirtyVariable("hud_status");
+        }
+        else if(frag_messages_enabled)
+        {
+            hud_status =
+                "Invalid X; restored the last effective setting";
+            model.DirtyVariable("hud_status");
+        }
+    }
+
+    void RmlSettings::commitfragmessagey()
+    {
+        float requested = 0.0f;
+        settings::Hud state = {};
+        const bool accepted = parsefloat(
+                frag_message_y_input,
+                requested
+            ) &&
+            frag_messages_enabled &&
+            settings::writefragmessagey(requested, state);
+        frag_message_y_invalid = !accepted;
+        model.DirtyVariable("frag_message_y_invalid");
+        const bool was_editing = frag_message_y_editing;
+        frag_message_y_editing = false;
+        finishhudwrite(accepted, state);
+        frag_message_y_editing = was_editing;
+        if(accepted)
+        {
+            hud_status = "Y position applied";
+            model.DirtyVariable("hud_status");
+        }
+        else if(frag_messages_enabled)
+        {
+            hud_status =
+                "Invalid Y; restored the last effective setting";
+            model.DirtyVariable("hud_status");
+        }
     }
 
     void RmlSettings::commitammobarscale()
@@ -5486,6 +6043,24 @@ namespace cowui
         settings::ScoreboardColumns state = {};
         const bool accepted = settings::writeshowclientnum(enabled, state);
         finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectfragmessagestackdir(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !frag_messages_enabled)
+            return;
+
+        const int requested = arguments[0].Get<int>();
+        if(requested != -1 && requested != 0 && requested != 1)
+            return;
+
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagestackdir(
+            requested, state);
+        finishhudwrite(accepted, state);
     }
 
     void RmlSettings::gamecategoryaction(Rml::Event &event)
@@ -8458,6 +9033,462 @@ namespace cowui
             instance->refreshhud();
         }
         event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessageselffragsaction(Rml::Event &event)
+    {
+        if(instance && instance->frag_messages_enabled)
+        {
+            settings::Hud state = {};
+            const bool accepted = settings::writefragmessageselffrags(
+                !instance->frag_message_self_frags,
+                state
+            );
+            instance->finishhudwrite(accepted, state);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessageotherfragsaction(Rml::Event &event)
+    {
+        if(instance && instance->frag_messages_enabled)
+        {
+            settings::Hud state = {};
+            const bool accepted = settings::writefragmessageotherfrags(
+                !instance->frag_message_other_frags,
+                state
+            );
+            instance->finishhudwrite(accepted, state);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessageteamkillsaction(Rml::Event &event)
+    {
+        if(instance && instance->frag_messages_enabled)
+        {
+            settings::Hud state = {};
+            const bool accepted = settings::writefragmessageteamkills(
+                !instance->frag_message_team_kills,
+                state
+            );
+            instance->finishhudwrite(accepted, state);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessagefadeaction(Rml::Event &event)
+    {
+        if(instance && instance->frag_messages_enabled)
+        {
+            settings::Hud state = {};
+            const bool accepted = settings::writefragmessagefade(
+                !instance->frag_message_fade,
+                state
+            );
+            instance->finishhudwrite(accepted, state);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changemaxfragmessagesaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->max_frag_messages
+        );
+
+        if(!instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+        if(!instance->max_frag_messages_armed)
+        {
+            if(requested == instance->max_frag_messages)
+                instance->max_frag_messages_armed = true;
+            event.StopPropagation();
+            return;
+        }
+        if(requested == instance->max_frag_messages)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Hud state = {};
+        const bool accepted = settings::writemaxfragmessages(
+            requested, state);
+        instance->finishhudwrite(accepted, state);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::decreasefragmessagedurationaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->frag_message_duration_minimum,
+            stepfragmessagefloat(instance->frag_message_duration, -1, 0.1)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessageduration(
+            requested, state);
+        instance->frag_message_duration_invalid = false;
+        instance->model.DirtyVariable("frag_message_duration_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Duration adjusted by 0.1";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasefragmessagedurationaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->frag_message_duration_maximum,
+            stepfragmessagefloat(instance->frag_message_duration, 1, 0.1)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessageduration(
+            requested, state);
+        instance->frag_message_duration_invalid = false;
+        instance->model.DirtyVariable("frag_message_duration_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Duration adjusted by 0.1";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusfragmessagedurationaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->frag_message_duration_editing = true;
+            if(instance->frag_message_duration_invalid)
+            {
+                instance->frag_message_duration_invalid = false;
+                instance->model.DirtyVariable(
+                    "frag_message_duration_invalid"
+                );
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurfragmessagedurationaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitfragmessageduration();
+            instance->frag_message_duration_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitfragmessagedurationaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitfragmessageduration();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasefragmessagescaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->frag_message_scale_minimum,
+            stepfragmessagefloat(instance->frag_message_scale, -1, 0.1)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagescale(
+            requested, state);
+        instance->frag_message_scale_invalid = false;
+        instance->model.DirtyVariable("frag_message_scale_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Size adjusted by 0.1";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasefragmessagescaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->frag_message_scale_maximum,
+            stepfragmessagefloat(instance->frag_message_scale, 1, 0.1)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagescale(
+            requested, state);
+        instance->frag_message_scale_invalid = false;
+        instance->model.DirtyVariable("frag_message_scale_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Size adjusted by 0.1";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusfragmessagescaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->frag_message_scale_editing = true;
+            if(instance->frag_message_scale_invalid)
+            {
+                instance->frag_message_scale_invalid = false;
+                instance->model.DirtyVariable("frag_message_scale_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurfragmessagescaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitfragmessagescale();
+            instance->frag_message_scale_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitfragmessagescaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitfragmessagescale();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasefragmessagexaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->frag_message_x_minimum,
+            stepfragmessagefloat(instance->frag_message_x, -1, 0.01)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagex(requested, state);
+        instance->frag_message_x_invalid = false;
+        instance->model.DirtyVariable("frag_message_x_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "X adjusted by 0.01";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasefragmessagexaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->frag_message_x_maximum,
+            stepfragmessagefloat(instance->frag_message_x, 1, 0.01)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagex(requested, state);
+        instance->frag_message_x_invalid = false;
+        instance->model.DirtyVariable("frag_message_x_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "X adjusted by 0.01";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusfragmessagexaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->frag_message_x_editing = true;
+            if(instance->frag_message_x_invalid)
+            {
+                instance->frag_message_x_invalid = false;
+                instance->model.DirtyVariable("frag_message_x_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurfragmessagexaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitfragmessagex();
+            instance->frag_message_x_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitfragmessagexaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitfragmessagex();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasefragmessageyaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->frag_message_y_minimum,
+            stepfragmessagefloat(instance->frag_message_y, -1, 0.01)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagey(requested, state);
+        instance->frag_message_y_invalid = false;
+        instance->model.DirtyVariable("frag_message_y_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Y adjusted by 0.01";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasefragmessageyaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->frag_message_y_maximum,
+            stepfragmessagefloat(instance->frag_message_y, 1, 0.01)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagey(requested, state);
+        instance->frag_message_y_invalid = false;
+        instance->model.DirtyVariable("frag_message_y_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Y adjusted by 0.01";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusfragmessageyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->frag_message_y_editing = true;
+            if(instance->frag_message_y_invalid)
+            {
+                instance->frag_message_y_invalid = false;
+                instance->model.DirtyVariable("frag_message_y_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurfragmessageyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitfragmessagey();
+            instance->frag_message_y_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitfragmessageyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitfragmessagey();
+            event.StopPropagation();
+        }
     }
 
     void RmlSettings::decreasestreakscaleaction(Rml::Event &event)

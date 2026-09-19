@@ -1924,28 +1924,61 @@ namespace cowui
             return sauersettings::writecrosshairreloadrotation(enabled);
         }
 
+        static void copyhud(
+            const sauersettings::Hud &source,
+            Hud &result)
+        {
+            result.show_fps = source.show_fps;
+            result.wall_clock = source.wall_clock;
+            result.wall_clock_24_hour = source.wall_clock_24_hour;
+            result.wall_clock_seconds = source.wall_clock_seconds;
+            result.damage_screen = source.damage_screen;
+            result.damage_compass = source.damage_compass;
+            result.hud_guns = source.hud_guns;
+            result.hud_gun_sway = source.hud_gun_sway;
+            result.muzzle_flash = source.muzzle_flash;
+            result.muzzle_light = source.muzzle_light;
+            result.frag_messages = fragmessagesmode(source.frag_messages);
+            result.max_frag_messages = source.max_frag_messages;
+            result.max_frag_messages_minimum =
+                source.max_frag_messages_minimum;
+            result.max_frag_messages_maximum =
+                source.max_frag_messages_maximum;
+            result.frag_message_duration = source.frag_message_duration;
+            result.frag_message_duration_minimum =
+                source.frag_message_duration_minimum;
+            result.frag_message_duration_maximum =
+                source.frag_message_duration_maximum;
+            result.frag_message_self_frags = source.frag_message_self_frags;
+            result.frag_message_other_frags = source.frag_message_other_frags;
+            result.frag_message_team_kills = source.frag_message_team_kills;
+            result.frag_message_scale = source.frag_message_scale;
+            result.frag_message_scale_minimum =
+                source.frag_message_scale_minimum;
+            result.frag_message_scale_maximum =
+                source.frag_message_scale_maximum;
+            result.frag_message_fade = source.frag_message_fade;
+            result.frag_message_x = source.frag_message_x;
+            result.frag_message_x_minimum = source.frag_message_x_minimum;
+            result.frag_message_x_maximum = source.frag_message_x_maximum;
+            result.frag_message_y = source.frag_message_y;
+            result.frag_message_y_minimum = source.frag_message_y_minimum;
+            result.frag_message_y_maximum = source.frag_message_y_maximum;
+            result.frag_message_stack_dir = source.frag_message_stack_dir;
+            result.streak_milestone_scale = source.streak_milestone_scale;
+            result.streak_milestone_scale_minimum =
+                source.streak_milestone_scale_minimum;
+            result.streak_milestone_scale_maximum =
+                source.streak_milestone_scale_maximum;
+        }
+
         bool readhud(Hud &result)
         {
             sauersettings::Hud legacy;
             if(!sauersettings::readhud(legacy))
                 return false;
 
-            result.show_fps = legacy.show_fps;
-            result.wall_clock = legacy.wall_clock;
-            result.wall_clock_24_hour = legacy.wall_clock_24_hour;
-            result.wall_clock_seconds = legacy.wall_clock_seconds;
-            result.damage_screen = legacy.damage_screen;
-            result.damage_compass = legacy.damage_compass;
-            result.hud_guns = legacy.hud_guns;
-            result.hud_gun_sway = legacy.hud_gun_sway;
-            result.muzzle_flash = legacy.muzzle_flash;
-            result.muzzle_light = legacy.muzzle_light;
-            result.frag_messages = fragmessagesmode(legacy.frag_messages);
-            result.streak_milestone_scale = legacy.streak_milestone_scale;
-            result.streak_milestone_scale_minimum =
-                legacy.streak_milestone_scale_minimum;
-            result.streak_milestone_scale_maximum =
-                legacy.streak_milestone_scale_maximum;
+            copyhud(legacy, result);
             return true;
         }
 
@@ -2009,6 +2042,96 @@ namespace cowui
         bool writestreakmilestonescale(float value)
         {
             return sauersettings::writestreakmilestonescale(value);
+        }
+
+        bool writemaxfragmessages(int value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writemaxfragmessages(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessageduration(float value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessageduration(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessageselffrags(bool enabled, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessageselffrags(
+                enabled, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessageotherfrags(bool enabled, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessageotherfrags(
+                enabled, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessageteamkills(bool enabled, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessageteamkills(
+                enabled, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessagescale(float value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessagescale(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessagefade(bool enabled, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessagefade(
+                enabled, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessagex(float value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessagex(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessagey(float value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessagey(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessagestackdir(int value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessagestackdir(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
         }
 
         static void copyammobar(

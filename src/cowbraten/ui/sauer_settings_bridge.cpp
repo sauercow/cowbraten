@@ -390,6 +390,71 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *maxhudfragmessagesident()
+        {
+            ident *id = getident("maxhudfragmessages");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagedurationident()
+        {
+            ident *id = getident("hudfragmessageduration");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagefilterident()
+        {
+            // HVARP is ID_VAR with IDF_HEX; there is no ID_HVAR type.
+            ident *id = getident("hudfragmessagefilter");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagescaleident()
+        {
+            ident *id = getident("hudfragmessagescale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagefadeident()
+        {
+            ident *id = getident("hudfragmessagefade");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagexident()
+        {
+            ident *id = getident("hudfragmessagex");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessageyident()
+        {
+            ident *id = getident("hudfragmessagey");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagestackdirident()
+        {
+            ident *id = getident("hudfragmessagestackdir");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         static ident *ammobarident()
         {
             ident *id = getident("ammobar");
@@ -3668,6 +3733,14 @@ namespace cowui
             ident *flash_id = muzzleflashident();
             ident *light_id = muzzlelightident();
             ident *messages_id = fragmessagesident();
+            ident *max_id = maxhudfragmessagesident();
+            ident *duration_id = hudfragmessagedurationident();
+            ident *filter_id = hudfragmessagefilterident();
+            ident *scale_id = hudfragmessagescaleident();
+            ident *fade_id = hudfragmessagefadeident();
+            ident *x_id = hudfragmessagexident();
+            ident *y_id = hudfragmessageyident();
+            ident *stack_id = hudfragmessagestackdirident();
             ident *streak_id = streakmilestonescaleident();
             if(!fps_id || !fps_id->storage.i ||
                !clock_id || !clock_id->storage.i ||
@@ -3680,6 +3753,14 @@ namespace cowui
                !flash_id || !flash_id->storage.i ||
                !light_id || !light_id->storage.i ||
                !messages_id || !messages_id->storage.i ||
+               !max_id || !max_id->storage.i ||
+               !duration_id || !duration_id->storage.f ||
+               !filter_id || !filter_id->storage.i ||
+               !scale_id || !scale_id->storage.f ||
+               !fade_id || !fade_id->storage.i ||
+               !x_id || !x_id->storage.f ||
+               !y_id || !y_id->storage.f ||
+               !stack_id || !stack_id->storage.i ||
                !streak_id || !streak_id->storage.f)
             {
                 return false;
@@ -3707,6 +3788,29 @@ namespace cowui
                     result.frag_messages = FragMessagesMode::AllModes;
                     break;
             }
+            result.max_frag_messages = *max_id->storage.i;
+            result.max_frag_messages_minimum = max_id->minval;
+            result.max_frag_messages_maximum = max_id->maxval;
+            result.frag_message_duration = *duration_id->storage.f;
+            result.frag_message_duration_minimum = duration_id->minvalf;
+            result.frag_message_duration_maximum = duration_id->maxvalf;
+            result.frag_message_self_frags =
+                (*filter_id->storage.i & CON_FRAG_SELF) != 0;
+            result.frag_message_other_frags =
+                (*filter_id->storage.i & CON_FRAG_OTHER) != 0;
+            result.frag_message_team_kills =
+                (*filter_id->storage.i & CON_TEAMKILL) != 0;
+            result.frag_message_scale = *scale_id->storage.f;
+            result.frag_message_scale_minimum = scale_id->minvalf;
+            result.frag_message_scale_maximum = scale_id->maxvalf;
+            result.frag_message_fade = *fade_id->storage.i != 0;
+            result.frag_message_x = *x_id->storage.f;
+            result.frag_message_x_minimum = x_id->minvalf;
+            result.frag_message_x_maximum = x_id->maxvalf;
+            result.frag_message_y = *y_id->storage.f;
+            result.frag_message_y_minimum = y_id->minvalf;
+            result.frag_message_y_maximum = y_id->maxvalf;
+            result.frag_message_stack_dir = *stack_id->storage.i;
             result.streak_milestone_scale = *streak_id->storage.f;
             result.streak_milestone_scale_minimum = streak_id->minvalf;
             result.streak_milestone_scale_maximum = streak_id->maxvalf;
@@ -3786,6 +3890,144 @@ namespace cowui
                 return false;
             setvarchecked(id, value);
             return *id->storage.i == value;
+        }
+
+        static bool writehudboolean(ident *id, bool enabled, Hud &result)
+        {
+            if(!readhud(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readhud(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        static bool writehudinteger(ident *id, int value, Hud &result)
+        {
+            if(!readhud(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readhud(result))
+                return false;
+            return *id->storage.i == value;
+        }
+
+        static bool writehudfloat(ident *id, float value, Hud &result)
+        {
+            if(!readhud(result))
+                return false;
+
+            if(!id || !id->storage.f || id->flags&IDF_READONLY ||
+               !finitefloat(value))
+            {
+                return false;
+            }
+
+            float clamped = value;
+            if(clamped < id->minvalf)
+                clamped = id->minvalf;
+            else if(clamped > id->maxvalf)
+                clamped = id->maxvalf;
+
+            if(*id->storage.f == clamped)
+                return true;
+
+            setfvarchecked(id, value);
+            if(!readhud(result))
+                return false;
+            return true;
+        }
+
+        static bool writehudfilterbit(int bit, bool enabled, Hud &result)
+        {
+            if(!readhud(result))
+                return false;
+
+            if(!writefilterbit(hudfragmessagefilterident(), bit, enabled))
+                return false;
+
+            return readhud(result);
+        }
+
+        bool writemaxfragmessages(int value, Hud &result)
+        {
+            return writehudinteger(maxhudfragmessagesident(), value, result);
+        }
+
+        bool writefragmessageduration(float value, Hud &result)
+        {
+            return writehudfloat(
+                hudfragmessagedurationident(),
+                value,
+                result);
+        }
+
+        bool writefragmessageselffrags(bool enabled, Hud &result)
+        {
+            return writehudfilterbit(CON_FRAG_SELF, enabled, result);
+        }
+
+        bool writefragmessageotherfrags(bool enabled, Hud &result)
+        {
+            return writehudfilterbit(CON_FRAG_OTHER, enabled, result);
+        }
+
+        bool writefragmessageteamkills(bool enabled, Hud &result)
+        {
+            return writehudfilterbit(CON_TEAMKILL, enabled, result);
+        }
+
+        bool writefragmessagescale(float value, Hud &result)
+        {
+            return writehudfloat(hudfragmessagescaleident(), value, result);
+        }
+
+        bool writefragmessagefade(bool enabled, Hud &result)
+        {
+            return writehudboolean(hudfragmessagefadeident(), enabled, result);
+        }
+
+        bool writefragmessagex(float value, Hud &result)
+        {
+            return writehudfloat(hudfragmessagexident(), value, result);
+        }
+
+        bool writefragmessagey(float value, Hud &result)
+        {
+            return writehudfloat(hudfragmessageyident(), value, result);
+        }
+
+        bool writefragmessagestackdir(int value, Hud &result)
+        {
+            if(value != -1 && value != 0 && value != 1)
+            {
+                readhud(result);
+                return false;
+            }
+
+            return writehudinteger(
+                hudfragmessagestackdirident(),
+                value,
+                result);
         }
 
         bool writestreakmilestonescale(float value)
