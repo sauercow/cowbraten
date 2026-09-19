@@ -13,6 +13,7 @@
 #include <cerrno>
 #include <climits>
 #include <cmath>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -45,6 +46,82 @@ namespace cowui
     {
         return left.width == right.width &&
             left.height == right.height;
+    }
+
+    static bool validdepthbufferchoice(int bits)
+    {
+        return bits == 0 || bits == 16 || bits == 24 || bits == 32;
+    }
+
+    static void formatdepthbufferlabel(
+        int actual_bits,
+        char *out,
+        std::size_t out_size)
+    {
+        if(actual_bits > 0)
+        {
+            std::snprintf(out, out_size, "%d-bit", actual_bits);
+            return;
+        }
+
+        std::snprintf(out, out_size, "Unavailable");
+    }
+
+    static void formatdepthbufferstatus(
+        int requested_bits,
+        int actual_bits,
+        const char *actual_label,
+        char *out,
+        std::size_t out_size)
+    {
+        if(requested_bits == 0)
+        {
+            if(actual_bits == 24)
+            {
+                std::snprintf(
+                    out,
+                    out_size,
+                    "Engine default 24-bit depth active"
+                );
+            }
+            else if(actual_bits > 0)
+            {
+                std::snprintf(
+                    out,
+                    out_size,
+                    "Engine default requested; runtime is %d-bit",
+                    actual_bits
+                );
+            }
+            else
+            {
+                std::snprintf(
+                    out,
+                    out_size,
+                    "Engine default requested; runtime depth is unavailable"
+                );
+            }
+            return;
+        }
+
+        if(requested_bits != actual_bits)
+        {
+            std::snprintf(
+                out,
+                out_size,
+                "%d-bit requested; runtime is %s",
+                requested_bits,
+                actual_label
+            );
+            return;
+        }
+
+        std::snprintf(
+            out,
+            out_size,
+            "%d-bit depth buffer active",
+            actual_bits
+        );
     }
 
     static void appendkeyname(const char *key_name, void *data)
@@ -506,6 +583,19 @@ namespace cowui
             constructor.Bind("antialiasing_4x", &antialiasing_4x) &&
             constructor.Bind("antialiasing_8x", &antialiasing_8x) &&
             constructor.Bind("antialiasing_16x", &antialiasing_16x) &&
+            constructor.Bind("depth_buffer", &depth_buffer) &&
+            constructor.Bind(
+                "depth_buffer_label",
+                &depth_buffer_label
+            ) &&
+            constructor.Bind(
+                "depth_buffer_status",
+                &depth_buffer_status
+            ) &&
+            constructor.Bind("depth_buffer_default", &depth_buffer_default) &&
+            constructor.Bind("depth_buffer_16", &depth_buffer_16) &&
+            constructor.Bind("depth_buffer_24", &depth_buffer_24) &&
+            constructor.Bind("depth_buffer_32", &depth_buffer_32) &&
             constructor.Bind("sound_volume", &sound_volume) &&
             constructor.Bind(
                 "sound_volume_minimum",
@@ -701,6 +791,11 @@ namespace cowui
             constructor.BindEventCallback(
                 "select_antialiasing",
                 &RmlSettings::selectantialiasing,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_depth_buffer",
+                &RmlSettings::selectdepthbuffer,
                 this
             ) &&
             constructor.BindEventCallback(
@@ -1096,6 +1191,9 @@ namespace cowui
         antialiasing = 0;
         antialiasing_requested = -1;
         pending_antialiasing = -1;
+        depth_buffer = 0;
+        depth_buffer_requested = -1;
+        pending_depth_buffer = -1;
         pending_shader_detail = shader_detail_selected = -1;
         shader_detail_available = false;
         shader_detail_label.clear();
@@ -1107,6 +1205,12 @@ namespace cowui
         antialiasing_4x = false;
         antialiasing_8x = false;
         antialiasing_16x = false;
+        depth_buffer_label.clear();
+        depth_buffer_status.clear();
+        depth_buffer_default = true;
+        depth_buffer_16 = false;
+        depth_buffer_24 = false;
+        depth_buffer_32 = false;
         sound_volume = 255;
         sound_volume_minimum = 0;
         sound_volume_maximum = 255;
@@ -1190,44 +1294,106 @@ namespace cowui
 
     void RmlSettings::applypending()
     {
-        if(pending_antialiasing < 0)
+        const bool reset_antialiasing = pending_antialiasing >= 0;
+        const bool reset_depth_buffer = pending_depth_buffer >= 0;
+        if(!reset_antialiasing && !reset_depth_buffer)
         {
             applypendingshaderdetail();
             return;
         }
 
-        const int requested = pending_antialiasing;
+        const int requested_antialiasing = pending_antialiasing;
+        const int requested_depth_buffer = pending_depth_buffer;
         pending_antialiasing = -1;
+        pending_depth_buffer = -1;
         settings::resetgraphics();
         refreshvideo();
 
-        char status[96];
-        if(antialiasing == requested)
+        if(reset_antialiasing)
         {
-            if(requested)
+            char status[96];
+            if(antialiasing == requested_antialiasing)
+            {
+                if(requested_antialiasing)
+                {
+                    std::snprintf(
+                        status,
+                        sizeof(status),
+                        "%dx multisample antialiasing active",
+                        requested_antialiasing
+                    );
+                }
+                else std::snprintf(
+                    status,
+                    sizeof(status),
+                    "Antialiasing disabled"
+                );
+            }
+            else
             {
                 std::snprintf(
                     status,
                     sizeof(status),
-                    "%dx multisample antialiasing active",
-                    requested
+                    "%dx was unavailable; runtime is %s",
+                    requested_antialiasing,
+                    antialiasing ? antialiasing_label.c_str() : "off"
                 );
             }
-            else std::snprintf(status, sizeof(status), "Antialiasing disabled");
-        }
-        else
-        {
-            std::snprintf(
-                status,
-                sizeof(status),
-                "%dx was unavailable; runtime is %s",
-                requested,
-                antialiasing ? antialiasing_label.c_str() : "off"
-            );
+
+            antialiasing_status = status;
+            model.DirtyVariable("antialiasing_status");
         }
 
-        antialiasing_status = status;
-        model.DirtyVariable("antialiasing_status");
+        if(reset_depth_buffer)
+        {
+            const int engine_bits = requested_depth_buffer
+                ? requested_depth_buffer
+                : 24;
+            char status[96];
+            if(depth_buffer == engine_bits)
+            {
+                if(requested_depth_buffer == 0)
+                {
+                    std::snprintf(
+                        status,
+                        sizeof(status),
+                        "Engine default 24-bit depth active"
+                    );
+                }
+                else
+                {
+                    std::snprintf(
+                        status,
+                        sizeof(status),
+                        "%d-bit depth buffer active",
+                        requested_depth_buffer
+                    );
+                }
+            }
+            else if(requested_depth_buffer == 0)
+            {
+                std::snprintf(
+                    status,
+                    sizeof(status),
+                    "Engine default 24-bit was unavailable; runtime is %s",
+                    depth_buffer_label.c_str()
+                );
+            }
+            else
+            {
+                std::snprintf(
+                    status,
+                    sizeof(status),
+                    "%d-bit was unavailable; runtime is %s",
+                    requested_depth_buffer,
+                    depth_buffer_label.c_str()
+                );
+            }
+
+            depth_buffer_status = status;
+            model.DirtyVariable("depth_buffer_status");
+        }
+
         refreshshaderdetail(); // resetgraphics has now completed reloadshaders.
         applypendingshaderdetail();
     }
@@ -1598,6 +1764,68 @@ namespace cowui
         {
             antialiasing_status = aa_status;
             model.DirtyVariable("antialiasing_status");
+        }
+
+        settings::DepthBuffer current_depth_buffer;
+        if(!settings::readdepthbits(current_depth_buffer))
+            return false;
+
+        depth_buffer_requested = current_depth_buffer.requested_bits;
+
+        if(depth_buffer != current_depth_buffer.actual_bits)
+        {
+            depth_buffer = current_depth_buffer.actual_bits;
+            model.DirtyVariable("depth_buffer");
+        }
+
+        const bool depth_default = current_depth_buffer.requested_bits == 0;
+        const bool depth_16 = current_depth_buffer.requested_bits == 16;
+        const bool depth_24 = current_depth_buffer.requested_bits == 24;
+        const bool depth_32 = current_depth_buffer.requested_bits == 32;
+        if(depth_buffer_default != depth_default)
+        {
+            depth_buffer_default = depth_default;
+            model.DirtyVariable("depth_buffer_default");
+        }
+        if(depth_buffer_16 != depth_16)
+        {
+            depth_buffer_16 = depth_16;
+            model.DirtyVariable("depth_buffer_16");
+        }
+        if(depth_buffer_24 != depth_24)
+        {
+            depth_buffer_24 = depth_24;
+            model.DirtyVariable("depth_buffer_24");
+        }
+        if(depth_buffer_32 != depth_32)
+        {
+            depth_buffer_32 = depth_32;
+            model.DirtyVariable("depth_buffer_32");
+        }
+
+        formatdepthbufferlabel(
+            current_depth_buffer.actual_bits,
+            label,
+            sizeof(label)
+        );
+        if(depth_buffer_label != label)
+        {
+            depth_buffer_label = label;
+            model.DirtyVariable("depth_buffer_label");
+        }
+
+        char depth_status[96];
+        formatdepthbufferstatus(
+            current_depth_buffer.requested_bits,
+            current_depth_buffer.actual_bits,
+            label,
+            depth_status,
+            sizeof(depth_status)
+        );
+        if(depth_buffer_status != depth_status)
+        {
+            depth_buffer_status = depth_status;
+            model.DirtyVariable("depth_buffer_status");
         }
         return true;
     }
@@ -2636,6 +2864,74 @@ namespace cowui
             pending_antialiasing = samples;
             antialiasing_status = "Rebuilding the graphics context";
             model.DirtyVariable("antialiasing_status");
+        }
+
+        event.StopPropagation();
+    }
+
+    void RmlSettings::selectdepthbuffer(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 1)
+            return;
+
+        const int bits = arguments[0].Get<int>();
+        const bool request_changed = bits != depth_buffer_requested;
+
+        if(!validdepthbufferchoice(bits) || !settings::writedepthbits(bits))
+        {
+            depth_buffer_status = "Depth buffer request was rejected";
+            model.DirtyVariable("depth_buffer_status");
+            event.StopPropagation();
+            return;
+        }
+
+        depth_buffer_requested = bits;
+        const bool depth_default = bits == 0;
+        const bool depth_16 = bits == 16;
+        const bool depth_24 = bits == 24;
+        const bool depth_32 = bits == 32;
+        if(depth_buffer_default != depth_default)
+        {
+            depth_buffer_default = depth_default;
+            model.DirtyVariable("depth_buffer_default");
+        }
+        if(depth_buffer_16 != depth_16)
+        {
+            depth_buffer_16 = depth_16;
+            model.DirtyVariable("depth_buffer_16");
+        }
+        if(depth_buffer_24 != depth_24)
+        {
+            depth_buffer_24 = depth_24;
+            model.DirtyVariable("depth_buffer_24");
+        }
+        if(depth_buffer_32 != depth_32)
+        {
+            depth_buffer_32 = depth_32;
+            model.DirtyVariable("depth_buffer_32");
+        }
+
+        if(!request_changed)
+        {
+            char status[96];
+            formatdepthbufferstatus(
+                bits,
+                depth_buffer,
+                depth_buffer_label.c_str(),
+                status,
+                sizeof(status)
+            );
+            depth_buffer_status = status;
+            model.DirtyVariable("depth_buffer_status");
+        }
+        else
+        {
+            pending_depth_buffer = bits;
+            depth_buffer_status = "Rebuilding the graphics context";
+            model.DirtyVariable("depth_buffer_status");
         }
 
         event.StopPropagation();

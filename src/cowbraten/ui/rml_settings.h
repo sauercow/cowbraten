@@ -358,6 +358,11 @@ namespace cowui
             Rml::Event &event,
             const Rml::VariantList &arguments
         );
+        void selectdepthbuffer(
+            Rml::DataModelHandle,
+            Rml::Event &event,
+            const Rml::VariantList &arguments
+        );
         void selectcrosshair(
             Rml::DataModelHandle,
             Rml::Event &event,
@@ -601,6 +606,9 @@ namespace cowui
         int antialiasing = 0;
         int antialiasing_requested = -1;
         int pending_antialiasing = -1;
+        int depth_buffer = 0;
+        int depth_buffer_requested = -1;
+        int pending_depth_buffer = -1;
         int pending_shader_detail = -1;
         int shader_detail_selected = -1;
         bool shader_detail_available = false;
@@ -613,6 +621,12 @@ namespace cowui
         bool antialiasing_4x = false;
         bool antialiasing_8x = false;
         bool antialiasing_16x = false;
+        Rml::String depth_buffer_label;
+        Rml::String depth_buffer_status;
+        bool depth_buffer_default = true;
+        bool depth_buffer_16 = false;
+        bool depth_buffer_24 = false;
+        bool depth_buffer_32 = false;
         int sound_volume = 255;
         int sound_volume_minimum = 0;
         int sound_volume_maximum = 255;

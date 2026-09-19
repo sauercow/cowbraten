@@ -242,6 +242,22 @@ namespace cowui
             return sauersettings::writeantialiasing(samples);
         }
 
+        bool readdepthbits(DepthBuffer &result)
+        {
+            sauersettings::DepthBuffer legacy;
+            if(!sauersettings::readdepthbits(legacy))
+                return false;
+
+            result.requested_bits = legacy.requested_bits;
+            result.actual_bits = legacy.actual_bits;
+            return true;
+        }
+
+        bool writedepthbits(int bits)
+        {
+            return sauersettings::writedepthbits(bits);
+        }
+
         void resetgraphics()
         {
             sauersettings::resetgraphics();

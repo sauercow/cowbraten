@@ -109,6 +109,14 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *depthbitsident()
+        {
+            ident *id = getident("depthbits");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         static ident *soundvolumeident()
         {
             ident *id = getident("soundvol");
@@ -382,6 +390,20 @@ namespace cowui
                 case 4:
                 case 8:
                 case 16:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        static bool validdepthbits(int bits)
+        {
+            switch(bits)
+            {
+                case 0:
+                case 16:
+                case 24:
+                case 32:
                     return true;
                 default:
                     return false;
@@ -695,6 +717,36 @@ namespace cowui
             if(*id->storage.i != samples)
                 setvarchecked(id, samples);
             return *id->storage.i == samples;
+        }
+
+        bool readdepthbits(DepthBuffer &result)
+        {
+            ident *id = depthbitsident();
+            if(!id || !id->storage.i || !screen)
+                return false;
+
+            int bits = 0;
+            if(SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &bits) < 0)
+                return false;
+
+            result.requested_bits = *id->storage.i;
+            result.actual_bits = max(bits, 0);
+            return true;
+        }
+
+        bool writedepthbits(int bits)
+        {
+            ident *id = depthbitsident();
+            if(!id || !id->storage.i ||
+               !validdepthbits(bits) ||
+               bits < id->minval || bits > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != bits)
+                setvarchecked(id, bits);
+            return *id->storage.i == bits;
         }
 
         void resetgraphics()

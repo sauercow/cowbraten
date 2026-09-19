@@ -574,6 +574,41 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Depth Buffer</div>
+                                    <div class="settings-control-description">
+                                        Requested OpenGL z-buffer precision. Zero keeps the engine default of 24 bits rather than a 0-bit buffer. Changing this option rebuilds the existing OpenGL context.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Actual runtime</span>
+                                    <span class="settings-resolution-current-value">{{ depth_buffer_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="depth_buffer_default"
+                                    data-event-click="select_depth_buffer(0)">Default</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="depth_buffer_16"
+                                    data-event-click="select_depth_buffer(16)">16-bit</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="depth_buffer_24"
+                                    data-event-click="select_depth_buffer(24)">24-bit</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="depth_buffer_32"
+                                    data-event-click="select_depth_buffer(32)">32-bit</button>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ depth_buffer_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">

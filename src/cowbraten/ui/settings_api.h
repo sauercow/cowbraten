@@ -55,6 +55,12 @@ namespace cowui
             int actual_samples;
         };
 
+        struct DepthBuffer
+        {
+            int requested_bits;
+            int actual_bits;
+        };
+
         // Grass reflects the native switch; motion blur also reflects its
         // renderer availability gate, not per-frame visibility.
         struct GraphicsQuality
@@ -462,6 +468,8 @@ namespace cowui
 
         bool readantialiasing(Antialiasing &result);
         bool writeantialiasing(int samples);
+        bool readdepthbits(DepthBuffer &result);
+        bool writedepthbits(int bits);
         void resetgraphics();
 
         bool readgraphicsquality(GraphicsQuality &result);
