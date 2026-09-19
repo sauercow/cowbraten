@@ -20,6 +20,7 @@ namespace cowui
     {
         enum class PresentationMode;
         struct Gamma;
+        struct Audio;
         struct CrosshairChoice;
         struct SoundpackChoice;
         struct AnisotropyState;
@@ -407,6 +408,18 @@ namespace cowui
         void refreshgamma();
         void presentgamma(const settings::Gamma &state, bool available);
         bool refreshaudio();
+        void presentaudio(const settings::Audio &state,
+            std::vector<SoundpackChoice> &available_soundpacks);
+        void selectsoundfrequency(
+            Rml::DataModelHandle,
+            Rml::Event &event,
+            const Rml::VariantList &arguments
+        );
+        void selectmumble(
+            Rml::DataModelHandle,
+            Rml::Event &event,
+            const Rml::VariantList &arguments
+        );
         bool refreshmouseinput(bool update_edit_buffer = false);
         bool refreshcrosshair(bool update_edit_buffer = false);
         bool refreshhud(bool update_edit_buffer = false);
@@ -530,6 +543,8 @@ namespace cowui
         static void changetexturereductionaction(Rml::Event &event);
         static void changesoundvolumeaction(Rml::Event &event);
         static void changemusicvolumeaction(Rml::Event &event);
+        static void changesoundchannelsaction(Rml::Event &event);
+        static void changesoundbufferlengthaction(Rml::Event &event);
         static void decreasesensitivityaction(Rml::Event &event);
         static void increasesensitivityaction(Rml::Event &event);
         static void focussensitivityaction(Rml::Event &event);
@@ -975,6 +990,21 @@ namespace cowui
         Rml::String active_soundpack;
         Rml::String active_soundpack_label;
         Rml::String soundpack_status;
+        int sound_channels = 32;
+        int sound_channels_minimum = 1;
+        int sound_channels_maximum = 128;
+        int effective_sound_channels = 0;
+        Rml::String sound_channels_status;
+        int sound_frequency = 22050;
+        int effective_sound_frequency = 0;
+        Rml::String sound_frequency_label;
+        Rml::String sound_frequency_status;
+        int sound_buffer_length = 1024;
+        int sound_buffer_length_minimum = 128;
+        int sound_buffer_length_maximum = 4096;
+        Rml::String sound_buffer_length_status;
+        bool mumble = false;
+        Rml::String mumble_status;
         float mouse_sensitivity = 3.0f;
         float mouse_sensitivity_minimum = 0.001f;
         float mouse_sensitivity_maximum = 1000.0f;

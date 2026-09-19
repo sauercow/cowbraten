@@ -3,6 +3,12 @@
 
 #include "sauer_settings_bridge.h"
 
+#ifdef __APPLE__
+#include <SDL2_mixer/SDL_mixer.h>
+#else
+#include "SDL_mixer.h"
+#endif
+
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -10,7 +16,9 @@
 extern int scr_w, scr_h, fullscreendesktop;
 extern int grass, motionblur;
 extern bool nosound;
+extern int maxchannels;
 extern void resetgl();
+extern void resetsound();
 extern void screenres(int width, int height);
 extern void loadcrosshair(const char *name, int index);
 extern const char *getcrosshairname(int index);
@@ -258,6 +266,43 @@ namespace cowui
             return id && id->type == ID_SVAR
                 ? id
                 : nullptr;
+        }
+
+        static ident *soundchansident()
+        {
+            ident *id = getident("soundchans");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *soundfreqident()
+        {
+            ident *id = getident("soundfreq");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *soundbufferlenident()
+        {
+            ident *id = getident("soundbufferlen");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *mumbleident()
+        {
+            ident *id = getident("mumble");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static bool nativesoundfrequency(int value)
+        {
+            return value == 11025 || value == 22050 || value == 44100;
         }
 
         static ident *sensitivityident()
@@ -3624,10 +3669,18 @@ namespace cowui
             ident *sound_id = soundvolumeident();
             ident *music_id = musicvolumeident();
             ident *soundpack_id = soundpackident();
+            ident *channels_id = soundchansident();
+            ident *frequency_id = soundfreqident();
+            ident *buffer_id = soundbufferlenident();
+            ident *mumble_id = mumbleident();
             if(!sound_id || !sound_id->storage.i ||
                !music_id || !music_id->storage.i ||
                !soundpack_id || !soundpack_id->storage.s ||
-               !*soundpack_id->storage.s)
+               !*soundpack_id->storage.s ||
+               !channels_id || !channels_id->storage.i ||
+               !frequency_id || !frequency_id->storage.i ||
+               !buffer_id || !buffer_id->storage.i ||
+               !mumble_id || !mumble_id->storage.i)
             {
                 return false;
             }
@@ -3640,6 +3693,24 @@ namespace cowui
             result.music_volume_maximum = music_id->maxval;
             result.active_soundpack = *soundpack_id->storage.s;
             result.backend_active = !::nosound;
+            result.sound_channels = *channels_id->storage.i;
+            result.sound_channels_minimum = channels_id->minval;
+            result.sound_channels_maximum = channels_id->maxval;
+            result.effective_sound_channels = ::nosound ? 0 : maxchannels;
+            result.sound_frequency = *frequency_id->storage.i;
+            result.effective_sound_frequency = 0;
+            if(!::nosound)
+            {
+                int frequency = 0;
+                Uint16 format = 0;
+                int mixer_channels = 0;
+                if(Mix_QuerySpec(&frequency, &format, &mixer_channels))
+                    result.effective_sound_frequency = frequency;
+            }
+            result.sound_buffer_length = *buffer_id->storage.i;
+            result.sound_buffer_length_minimum = buffer_id->minval;
+            result.sound_buffer_length_maximum = buffer_id->maxval;
+            result.mumble = *mumble_id->storage.i != 0;
             return true;
         }
 
@@ -3726,6 +3797,76 @@ namespace cowui
             setsvarchecked(id, requested);
             return *id->storage.s &&
                 !std::strcmp(*id->storage.s, requested);
+        }
+
+        static bool writeaudiointeger(ident *id, int value, Audio &result)
+        {
+            if(!id || !id->storage.i ||
+               value < id->minval || value > id->maxval)
+            {
+                readaudio(result);
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+            if(!readaudio(result))
+                return false;
+            return *id->storage.i == value;
+        }
+
+        bool writesoundchannels(int value, Audio &result)
+        {
+            return writeaudiointeger(soundchansident(), value, result);
+        }
+
+        bool writesoundfrequency(int value, Audio &result)
+        {
+            if(!nativesoundfrequency(value))
+            {
+                readaudio(result);
+                return false;
+            }
+
+            return writeaudiointeger(soundfreqident(), value, result);
+        }
+
+        bool writesoundbufferlength(int value, Audio &result)
+        {
+            return writeaudiointeger(soundbufferlenident(), value, result);
+        }
+
+        bool writemumble(bool enabled, Audio &result)
+        {
+            ident *id = mumbleident();
+            if(!id || !id->storage.i)
+            {
+                readaudio(result);
+                return false;
+            }
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+            {
+                readaudio(result);
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+            if(!readaudio(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        bool hassoundchanges()
+        {
+            return haschanges(CHANGE_SOUND);
+        }
+
+        void resetsound()
+        {
+            ::resetsound();
         }
 
         bool readmouseinput(MouseInput &result)

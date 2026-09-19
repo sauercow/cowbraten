@@ -3546,7 +3546,7 @@
                             <div class="eyebrow settings-eyebrow">Audio / Mix</div>
                             <div class="settings-stage-title">Audio</div>
                             <div class="settings-stage-copy">
-                                Balance gameplay sounds and music through Cowbraten's existing SDL_mixer audio path.
+                                Balance gameplay sounds and music, then configure mixer device settings through Cowbraten's existing SDL_mixer audio path.
                             </div>
                         </div>
 
@@ -3650,6 +3650,125 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Sound Channels</div>
+                                    <div class="settings-control-description">
+                                        Mixer channel count. The ident is stored immediately. The mixer applies it on sound reset when Settings input finishes with CHANGE_SOUND pending.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-audio-value">
+                                    <span class="settings-fps-value-label">{{ sound_channels }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-range-row settings-audio-range-row">
+                                <span class="settings-range-bound">{{ sound_channels_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="1"
+                                    max="128"
+                                    step="1"
+                                    data-attr-min="sound_channels_minimum"
+                                    data-attr-max="sound_channels_maximum"
+                                    data-attr-value="sound_channels"
+                                    onchange="settings.audio.sound-channels" />
+                                <span class="settings-range-bound settings-range-maximum">{{ sound_channels_maximum }}</span>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ sound_channels_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Sound Frequency</div>
+                                    <div class="settings-control-description">
+                                        Native Settings offers 11025, 22050, and 44100 Hz. Opening this page does not coerce another stored ident value.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-audio-value">
+                                    <span class="settings-fps-value-label">{{ sound_frequency_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="sound_frequency == 11025"
+                                    data-event-click="select_sound_frequency(11025)">11025 Hz</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="sound_frequency == 22050"
+                                    data-event-click="select_sound_frequency(22050)">22050 Hz</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="sound_frequency == 44100"
+                                    data-event-click="select_sound_frequency(44100)">44100 Hz</button>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ sound_frequency_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Sound Buffer Length</div>
+                                    <div class="settings-control-description">
+                                        SDL_mixer chunk size. The ident is stored immediately. The mixer applies it on sound reset. SDL_mixer does not report the opened chunk size.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-audio-value">
+                                    <span class="settings-fps-value-label">{{ sound_buffer_length }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-range-row settings-audio-range-row">
+                                <span class="settings-range-bound">{{ sound_buffer_length_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="128"
+                                    max="4096"
+                                    step="1"
+                                    data-attr-min="sound_buffer_length_minimum"
+                                    data-attr-max="sound_buffer_length_maximum"
+                                    data-attr-value="sound_buffer_length"
+                                    onchange="settings.audio.sound-buffer-length" />
+                                <span class="settings-range-bound settings-range-maximum">{{ sound_buffer_length_maximum }}</span>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ sound_buffer_length_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Mumble positional audio</div>
+                                    <div class="settings-control-description">
+                                        Toggles Sauer's Mumble link immediately through the existing ident callback. This does not reset the mixer.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="mumble"
+                                        data-event-change="select_mumble(ev.checked)" />
+                                    <span data-if="mumble">On</span>
+                                    <span data-if="!mumble">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ mumble_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-info-row settings-audio-info-row">
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Runtime</div>
@@ -3657,7 +3776,7 @@
                             </div>
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Application</div>
-                                <div class="settings-info-value">Immediate</div>
+                                <div class="settings-info-value">Volumes, soundpack, and Mumble immediate; device idents reset the mixer from applypending</div>
                             </div>
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Persistence</div>

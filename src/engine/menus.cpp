@@ -776,6 +776,12 @@ void clearchanges(int type)
     if(needsapply.empty()) removegui(&applymenu);
 }
 
+bool haschanges(int type)
+{
+    loopv(needsapply) if(needsapply[i].type&type) return true;
+    return false;
+}
+
 void menuprocess()
 {
     processingmenu = true;

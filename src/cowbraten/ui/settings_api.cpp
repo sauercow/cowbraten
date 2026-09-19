@@ -1816,24 +1816,41 @@ namespace cowui
             return accepted;
         }
 
+        static void copyaudio(
+            const sauersettings::Audio &source,
+            Audio &result)
+        {
+            result.sound_volume = source.sound_volume;
+            result.sound_volume_minimum = source.sound_volume_minimum;
+            result.sound_volume_maximum = source.sound_volume_maximum;
+            result.music_volume = source.music_volume;
+            result.music_volume_minimum = source.music_volume_minimum;
+            result.music_volume_maximum = source.music_volume_maximum;
+            result.active_soundpack = source.active_soundpack;
+            result.backend_active = source.backend_active;
+            result.sound_channels = source.sound_channels;
+            result.sound_channels_minimum = source.sound_channels_minimum;
+            result.sound_channels_maximum = source.sound_channels_maximum;
+            result.effective_sound_channels =
+                source.effective_sound_channels;
+            result.sound_frequency = source.sound_frequency;
+            result.effective_sound_frequency =
+                source.effective_sound_frequency;
+            result.sound_buffer_length = source.sound_buffer_length;
+            result.sound_buffer_length_minimum =
+                source.sound_buffer_length_minimum;
+            result.sound_buffer_length_maximum =
+                source.sound_buffer_length_maximum;
+            result.mumble = source.mumble;
+        }
+
         bool readaudio(Audio &result)
         {
-            sauersettings::Audio legacy;
+            sauersettings::Audio legacy = {};
             if(!sauersettings::readaudio(legacy))
                 return false;
 
-            result.sound_volume = legacy.sound_volume;
-            result.sound_volume_minimum =
-                legacy.sound_volume_minimum;
-            result.sound_volume_maximum =
-                legacy.sound_volume_maximum;
-            result.music_volume = legacy.music_volume;
-            result.music_volume_minimum =
-                legacy.music_volume_minimum;
-            result.music_volume_maximum =
-                legacy.music_volume_maximum;
-            result.active_soundpack = legacy.active_soundpack;
-            result.backend_active = legacy.backend_active;
+            copyaudio(legacy, result);
             return true;
         }
 
@@ -1882,6 +1899,52 @@ namespace cowui
         bool writesoundpack(const char *id)
         {
             return sauersettings::writesoundpack(id);
+        }
+
+        bool writesoundchannels(int value, Audio &result)
+        {
+            sauersettings::Audio legacy = {};
+            const bool accepted =
+                sauersettings::writesoundchannels(value, legacy);
+            copyaudio(legacy, result);
+            return accepted;
+        }
+
+        bool writesoundfrequency(int value, Audio &result)
+        {
+            sauersettings::Audio legacy = {};
+            const bool accepted =
+                sauersettings::writesoundfrequency(value, legacy);
+            copyaudio(legacy, result);
+            return accepted;
+        }
+
+        bool writesoundbufferlength(int value, Audio &result)
+        {
+            sauersettings::Audio legacy = {};
+            const bool accepted =
+                sauersettings::writesoundbufferlength(value, legacy);
+            copyaudio(legacy, result);
+            return accepted;
+        }
+
+        bool writemumble(bool enabled, Audio &result)
+        {
+            sauersettings::Audio legacy = {};
+            const bool accepted =
+                sauersettings::writemumble(enabled, legacy);
+            copyaudio(legacy, result);
+            return accepted;
+        }
+
+        bool hassoundchanges()
+        {
+            return sauersettings::hassoundchanges();
+        }
+
+        void resetsound()
+        {
+            sauersettings::resetsound();
         }
 
         bool readmouseinput(MouseInput &result)

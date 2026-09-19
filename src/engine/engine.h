@@ -506,6 +506,7 @@ extern void textinput(bool on, int mask = ~0);
 extern void menuprocess();
 extern void addchange(const char *desc, int type);
 extern void clearchanges(int type);
+extern bool haschanges(int type);
 
 // physics
 extern void mousemove(int dx, int dy);

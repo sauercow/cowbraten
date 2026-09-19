@@ -851,6 +851,54 @@ namespace cowui
                 &active_soundpack_label
             ) &&
             constructor.Bind("soundpack_status", &soundpack_status) &&
+            constructor.Bind("sound_channels", &sound_channels) &&
+            constructor.Bind(
+                "sound_channels_minimum",
+                &sound_channels_minimum
+            ) &&
+            constructor.Bind(
+                "sound_channels_maximum",
+                &sound_channels_maximum
+            ) &&
+            constructor.Bind(
+                "effective_sound_channels",
+                &effective_sound_channels
+            ) &&
+            constructor.Bind(
+                "sound_channels_status",
+                &sound_channels_status
+            ) &&
+            constructor.Bind("sound_frequency", &sound_frequency) &&
+            constructor.Bind(
+                "effective_sound_frequency",
+                &effective_sound_frequency
+            ) &&
+            constructor.Bind(
+                "sound_frequency_label",
+                &sound_frequency_label
+            ) &&
+            constructor.Bind(
+                "sound_frequency_status",
+                &sound_frequency_status
+            ) &&
+            constructor.Bind(
+                "sound_buffer_length",
+                &sound_buffer_length
+            ) &&
+            constructor.Bind(
+                "sound_buffer_length_minimum",
+                &sound_buffer_length_minimum
+            ) &&
+            constructor.Bind(
+                "sound_buffer_length_maximum",
+                &sound_buffer_length_maximum
+            ) &&
+            constructor.Bind(
+                "sound_buffer_length_status",
+                &sound_buffer_length_status
+            ) &&
+            constructor.Bind("mumble", &mumble) &&
+            constructor.Bind("mumble_status", &mumble_status) &&
             constructor.Bind(
                 "mouse_sensitivity",
                 &mouse_sensitivity
@@ -1381,6 +1429,16 @@ namespace cowui
                 "select_soundpack",
                 &RmlSettings::selectsoundpack,
                 this
+            ) &&
+            constructor.BindEventCallback(
+                "select_sound_frequency",
+                &RmlSettings::selectsoundfrequency,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_mumble",
+                &RmlSettings::selectmumble,
+                this
             );
 
         valid = valid &&
@@ -1471,6 +1529,14 @@ namespace cowui
             router.registeraction(
                 "settings.audio.music-volume",
                 changemusicvolumeaction
+            ) &&
+            router.registeraction(
+                "settings.audio.sound-channels",
+                changesoundchannelsaction
+            ) &&
+            router.registeraction(
+                "settings.audio.sound-buffer-length",
+                changesoundbufferlengthaction
             ) &&
             router.registeraction(
                 "settings.input.sensitivity.decrease",
@@ -2336,6 +2402,21 @@ namespace cowui
         active_soundpack.clear();
         active_soundpack_label.clear();
         soundpack_status.clear();
+        sound_channels = 32;
+        sound_channels_minimum = 1;
+        sound_channels_maximum = 128;
+        effective_sound_channels = 0;
+        sound_channels_status.clear();
+        sound_frequency = 22050;
+        effective_sound_frequency = 0;
+        sound_frequency_label.clear();
+        sound_frequency_status.clear();
+        sound_buffer_length = 1024;
+        sound_buffer_length_minimum = 128;
+        sound_buffer_length_maximum = 4096;
+        sound_buffer_length_status.clear();
+        mumble = false;
+        mumble_status.clear();
         mouse_sensitivity = 3.0f;
         mouse_sensitivity_minimum = 0.001f;
         mouse_sensitivity_maximum = 1000.0f;
@@ -2528,7 +2609,8 @@ namespace cowui
     {
         const bool reset_antialiasing = pending_antialiasing >= 0;
         const bool reset_depth_buffer = pending_depth_buffer >= 0;
-        if(!reset_antialiasing && !reset_depth_buffer)
+        const bool reset_sound = settings::hassoundchanges();
+        if(!reset_antialiasing && !reset_depth_buffer && !reset_sound)
         {
             applypendingshaderdetail();
             return;
@@ -2538,8 +2620,11 @@ namespace cowui
         const int requested_depth_buffer = pending_depth_buffer;
         pending_antialiasing = -1;
         pending_depth_buffer = -1;
-        settings::resetgraphics();
-        refreshvideo();
+        if(reset_antialiasing || reset_depth_buffer)
+        {
+            settings::resetgraphics();
+            refreshvideo();
+        }
 
         if(reset_antialiasing)
         {
@@ -2626,7 +2711,14 @@ namespace cowui
             model.DirtyVariable("depth_buffer_status");
         }
 
-        refreshshaderdetail(); // resetgraphics has now completed reloadshaders.
+        if(reset_sound)
+        {
+            settings::resetsound();
+            refreshaudio();
+        }
+
+        if(reset_antialiasing || reset_depth_buffer)
+            refreshshaderdetail(); // resetgraphics has now completed reloadshaders.
         applypendingshaderdetail();
     }
 
@@ -3093,6 +3185,14 @@ namespace cowui
             return false;
         }
 
+        presentaudio(current, available_soundpacks);
+        return true;
+    }
+
+    void RmlSettings::presentaudio(
+        const settings::Audio &current,
+        std::vector<SoundpackChoice> &available_soundpacks)
+    {
         const Rml::String current_soundpack = current.active_soundpack;
         Rml::String current_soundpack_label = current_soundpack;
         bool active_found = false;
@@ -3215,7 +3315,175 @@ namespace cowui
             audio_status = status;
             model.DirtyVariable("audio_status");
         }
-        return true;
+
+        if(sound_channels != current.sound_channels)
+        {
+            sound_channels = current.sound_channels;
+            model.DirtyVariable("sound_channels");
+        }
+        if(sound_channels_minimum != current.sound_channels_minimum)
+        {
+            sound_channels_minimum = current.sound_channels_minimum;
+            model.DirtyVariable("sound_channels_minimum");
+        }
+        if(sound_channels_maximum != current.sound_channels_maximum)
+        {
+            sound_channels_maximum = current.sound_channels_maximum;
+            model.DirtyVariable("sound_channels_maximum");
+        }
+        if(effective_sound_channels != current.effective_sound_channels)
+        {
+            effective_sound_channels = current.effective_sound_channels;
+            model.DirtyVariable("effective_sound_channels");
+        }
+
+        char channels_status[96];
+        if(!current.backend_active)
+        {
+            std::snprintf(
+                channels_status,
+                sizeof(channels_status),
+                "Audio backend unavailable"
+            );
+        }
+        else if(current.sound_channels != current.effective_sound_channels)
+        {
+            std::snprintf(
+                channels_status,
+                sizeof(channels_status),
+                "Requested %d channels; mixer is still using %d",
+                current.sound_channels,
+                current.effective_sound_channels
+            );
+        }
+        else
+        {
+            std::snprintf(
+                channels_status,
+                sizeof(channels_status),
+                "Mixer using %d channels",
+                current.sound_channels
+            );
+        }
+        if(sound_channels_status != channels_status)
+        {
+            sound_channels_status = channels_status;
+            model.DirtyVariable("sound_channels_status");
+        }
+
+        if(sound_frequency != current.sound_frequency)
+        {
+            sound_frequency = current.sound_frequency;
+            model.DirtyVariable("sound_frequency");
+        }
+        if(effective_sound_frequency != current.effective_sound_frequency)
+        {
+            effective_sound_frequency = current.effective_sound_frequency;
+            model.DirtyVariable("effective_sound_frequency");
+        }
+
+        char frequency_label[32];
+        std::snprintf(
+            frequency_label,
+            sizeof(frequency_label),
+            "%d Hz",
+            current.sound_frequency
+        );
+        if(sound_frequency_label != frequency_label)
+        {
+            sound_frequency_label = frequency_label;
+            model.DirtyVariable("sound_frequency_label");
+        }
+
+        char frequency_status[96];
+        if(!current.backend_active)
+        {
+            std::snprintf(
+                frequency_status,
+                sizeof(frequency_status),
+                "Audio backend unavailable"
+            );
+        }
+        else if(current.sound_frequency != current.effective_sound_frequency)
+        {
+            std::snprintf(
+                frequency_status,
+                sizeof(frequency_status),
+                "Requested %d Hz; mixer is still using %d Hz",
+                current.sound_frequency,
+                current.effective_sound_frequency
+            );
+        }
+        else
+        {
+            std::snprintf(
+                frequency_status,
+                sizeof(frequency_status),
+                "Mixer using %d Hz",
+                current.sound_frequency
+            );
+        }
+        if(sound_frequency_status != frequency_status)
+        {
+            sound_frequency_status = frequency_status;
+            model.DirtyVariable("sound_frequency_status");
+        }
+
+        if(sound_buffer_length != current.sound_buffer_length)
+        {
+            sound_buffer_length = current.sound_buffer_length;
+            model.DirtyVariable("sound_buffer_length");
+        }
+        if(sound_buffer_length_minimum != current.sound_buffer_length_minimum)
+        {
+            sound_buffer_length_minimum = current.sound_buffer_length_minimum;
+            model.DirtyVariable("sound_buffer_length_minimum");
+        }
+        if(sound_buffer_length_maximum != current.sound_buffer_length_maximum)
+        {
+            sound_buffer_length_maximum = current.sound_buffer_length_maximum;
+            model.DirtyVariable("sound_buffer_length_maximum");
+        }
+
+        char buffer_status[128];
+        if(settings::hassoundchanges())
+        {
+            std::snprintf(
+                buffer_status,
+                sizeof(buffer_status),
+                "Stored %d samples; mixer applies this buffer length on sound reset",
+                current.sound_buffer_length
+            );
+        }
+        else
+        {
+            std::snprintf(
+                buffer_status,
+                sizeof(buffer_status),
+                "Requested mixer buffer %d samples; SDL_mixer does not report the opened chunk size",
+                current.sound_buffer_length
+            );
+        }
+        if(sound_buffer_length_status != buffer_status)
+        {
+            sound_buffer_length_status = buffer_status;
+            model.DirtyVariable("sound_buffer_length_status");
+        }
+
+        if(mumble != current.mumble)
+        {
+            mumble = current.mumble;
+            model.DirtyVariable("mumble");
+        }
+
+        const char *mumble_state = current.mumble
+            ? "Positional audio ident is on; applies immediately"
+            : "Positional audio ident is off; applies immediately";
+        if(mumble_status != mumble_state)
+        {
+            mumble_status = mumble_state;
+            model.DirtyVariable("mumble_status");
+        }
     }
 
     bool RmlSettings::refreshmouseinput(bool update_edit_buffer)
@@ -5379,6 +5647,62 @@ namespace cowui
             : "Sound pack change failed; effective selection restored";
         model.DirtyVariable("soundpack_status");
         event.StopPropagation();
+    }
+
+    void RmlSettings::selectsoundfrequency(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 1)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const int requested = arguments[0].Get<int>();
+        if(requested == sound_frequency)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Audio state = {};
+        const bool accepted = settings::writesoundfrequency(requested, state);
+        refreshaudio();
+        if(!accepted)
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected sound frequency %d\n",
+                requested
+            );
+            sound_frequency_status =
+                "Frequency change was not accepted; current engine state is shown";
+            model.DirtyVariable("sound_frequency_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::selectmumble(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::Audio state = {};
+        const bool accepted = settings::writemumble(enabled, state);
+        refreshaudio();
+        if(!accepted)
+        {
+            mumble_status =
+                "Mumble change was not accepted; current engine state is shown";
+            model.DirtyVariable("mumble_status");
+        }
     }
 
     void RmlSettings::changefovaction(Rml::Event &event)
@@ -9413,6 +9737,88 @@ namespace cowui
             std::fprintf(
                 stderr,
                 "Cowbraten UI: rejected the music volume %d\n",
+                requested
+            );
+        }
+
+        instance->refreshaudio();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changesoundchannelsaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->sound_channels
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->sound_channels)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Audio state = {};
+        if(!settings::writesoundchannels(requested, state))
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected sound channels %d\n",
+                requested
+            );
+        }
+
+        instance->refreshaudio();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changesoundbufferlengthaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->sound_buffer_length
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->sound_buffer_length)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Audio state = {};
+        if(!settings::writesoundbufferlength(requested, state))
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected sound buffer length %d\n",
                 requested
             );
         }

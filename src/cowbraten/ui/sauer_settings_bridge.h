@@ -396,6 +396,11 @@ namespace cowui
             float actual; // Only a uniform loaded value when Verified/Mismatch.
         };
 
+        // Volume and soundpack apply immediately. soundchans/soundfreq/
+        // soundbufferlen store the ident (requested) immediately and queue
+        // CHANGE_SOUND; the mixer (effective) updates on resetsound().
+        // Mix_QuerySpec does not report chunk size, so buffer length has
+        // no mixer readback. mumble applies through its VARFP callback.
         struct Audio
         {
             int sound_volume;
@@ -406,6 +411,16 @@ namespace cowui
             int music_volume_maximum;
             const char *active_soundpack;
             bool backend_active;
+            int sound_channels;
+            int sound_channels_minimum;
+            int sound_channels_maximum;
+            int effective_sound_channels;
+            int sound_frequency;
+            int effective_sound_frequency;
+            int sound_buffer_length;
+            int sound_buffer_length_minimum;
+            int sound_buffer_length_maximum;
+            bool mumble;
         };
 
         struct SoundpackChoice
@@ -813,6 +828,14 @@ namespace cowui
         bool writesoundvolume(int value);
         bool writemusicvolume(int value);
         bool writesoundpack(const char *id);
+        bool writesoundchannels(int value, Audio &result);
+        // Native Settings list is 11025/22050/44100 only. Other ident
+        // values are shown on read and are not coerced.
+        bool writesoundfrequency(int value, Audio &result);
+        bool writesoundbufferlength(int value, Audio &result);
+        bool writemumble(bool enabled, Audio &result);
+        bool hassoundchanges();
+        void resetsound();
 
         bool readmouseinput(MouseInput &result);
         bool writesensitivity(float value);

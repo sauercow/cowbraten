@@ -259,9 +259,7 @@ plain boolean snapshot from the legacy bridge. There is no separate legacy
 master-volume ident, so the UI does not fabricate one.
 
 Settings activation, local volume writes, and return from the legacy console
-refresh the Audio model. Sound enablement, channel count, sample frequency,
-buffer length, and driver choice remain outside this first Audio slice because
-they require `resetsound()` and additional runtime fallback/readback policy.
+refresh the Audio model.
 
 Soundpack choices come from the engine's existing `visitsoundpacks()` discovery
 path, which also backs the legacy `listsoundpacks` command. Directory names are
@@ -275,6 +273,38 @@ restarted. The Rml model immediately reads back the effective ID and rebuilds
 only its small choice snapshot on Settings/Audio activation, local selection,
 or console return. No filesystem paths, CubeScript, DOM structure, or theme
 presentation cross this typed boundary.
+
+The remaining native Settings SOUND tab device controls share that typed
+boundary. `soundchans` (1..128), `soundfreq` (declared 0..48000), and
+`soundbufferlen` (128..4096) write through `setvarchecked` immediately. Their
+VARF callbacks queue `initwarning("sound configuration", INIT_RESET,
+CHANGE_SOUND)`. Opening Settings never rewrites those idents. Integer sliders
+have no hardcoded RML value default and ignore a requested value that already
+matches the model or a range that is not yet parented, matching the gamma
+rewrite guard.
+
+Native Settings presents frequency as a list slider of 11025, 22050, and
+44100 Hz only. CowUI writes those three values and does not coerce another
+effective ident (including 0 or 48000) when the page opens; radios select
+only on exact match. After a write, `readaudio` reports the ident as
+requested and the open mixer as effective: channel count from `maxchannels`,
+frequency from `Mix_QuerySpec`. `Mix_QuerySpec` does not report chunk size,
+so buffer length has no mixer readback. `usesound`, `audiodriver`, and
+`fixwav` stay unexposed; they are not on the native Settings sound tab.
+
+When Settings is the active screen, `ui.cpp` `finishinput` already calls
+`RmlSettings::applypending()`. If `haschanges(CHANGE_SOUND)` is true,
+applypending invokes the existing engine `resetsound()` path, which starts by
+`clearchanges(CHANGE_SOUND)` and then reopens the mixer. That matches leaving
+the native GUI and confirming the apply dialog. If `applydialog` is 0, native
+`addchange` does not queue CHANGE_SOUND, so applypending will not reset the
+mixer; the ident still updates immediately and is written to `init.cfg` on
+exit.
+
+`mumble` is a VARFP checkbox ("Mumble positional audio"). Its callback calls
+`initmumble` or `closemumble` immediately. The default is 1 when the platform
+builds the Mumble link (Windows, or POSIX shared memory) and 0 otherwise.
+Mumble does not queue CHANGE_SOUND and does not call `resetsound`.
 
 The first Mouse / Keyboard slice exposes only gameplay sensitivity and
 vertical-look inversion. The bridge targets the fixed persistent
