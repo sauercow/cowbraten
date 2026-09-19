@@ -478,6 +478,59 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *gameclockident()
+        {
+            ident *id = getident("gameclock");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockscaleident()
+        {
+            ident *id = getident("gameclockscale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockalphaident()
+        {
+            ident *id = getident("gameclockalpha");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockalignident()
+        {
+            ident *id = getident("gameclockalign");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockxident()
+        {
+            ident *id = getident("gameclockx");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockyident()
+        {
+            ident *id = getident("gameclocky");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static bool isgameclockalign(int value)
+        {
+            return value == -1 || value == 0 || value == 1;
+        }
+
         static ident *consolefilterident()
         {
             ident *id = getident("confilter");
@@ -3799,6 +3852,184 @@ namespace cowui
             return writeammobarboolean(
                 ammobarhideemptyident(),
                 enabled,
+                result);
+        }
+
+        static void cleargameclock(GameClock &result)
+        {
+            result.enabled = false;
+            result.scale = 1.0f;
+            result.scale_minimum = 0.5f;
+            result.scale_maximum = 2.0f;
+            result.alpha = 255;
+            result.alpha_minimum = 0;
+            result.alpha_maximum = 255;
+            result.align = 0;
+            result.x = 0.50f;
+            result.x_minimum = 0.0f;
+            result.x_maximum = 1.0f;
+            result.y = 0.03f;
+            result.y_minimum = 0.0f;
+            result.y_maximum = 1.0f;
+        }
+
+        bool readgameclock(GameClock &result)
+        {
+            cleargameclock(result);
+
+            ident *enabled_id = gameclockident();
+            ident *scale_id = gameclockscaleident();
+            ident *alpha_id = gameclockalphaident();
+            ident *align_id = gameclockalignident();
+            ident *x_id = gameclockxident();
+            ident *y_id = gameclockyident();
+            if(!enabled_id || !enabled_id->storage.i ||
+               !scale_id || !scale_id->storage.f ||
+               !alpha_id || !alpha_id->storage.i ||
+               !align_id || !align_id->storage.i ||
+               !x_id || !x_id->storage.f ||
+               !y_id || !y_id->storage.f)
+            {
+                return false;
+            }
+
+            result.enabled = *enabled_id->storage.i != 0;
+            result.scale = *scale_id->storage.f;
+            result.scale_minimum = scale_id->minvalf;
+            result.scale_maximum = scale_id->maxvalf;
+            result.alpha = *alpha_id->storage.i;
+            result.alpha_minimum = alpha_id->minval;
+            result.alpha_maximum = alpha_id->maxval;
+            result.align = *align_id->storage.i;
+            result.x = *x_id->storage.f;
+            result.x_minimum = x_id->minvalf;
+            result.x_maximum = x_id->maxvalf;
+            result.y = *y_id->storage.f;
+            result.y_minimum = y_id->minvalf;
+            result.y_maximum = y_id->maxvalf;
+            return true;
+        }
+
+        static bool writegameclockboolean(
+            ident *id,
+            bool enabled,
+            GameClock &result)
+        {
+            if(!readgameclock(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readgameclock(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        static bool writegameclockint(
+            ident *id,
+            int value,
+            GameClock &result)
+        {
+            if(!readgameclock(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readgameclock(result))
+                return false;
+            return *id->storage.i == value;
+        }
+
+        static bool writegameclockfloat(
+            ident *id,
+            float value,
+            GameClock &result)
+        {
+            if(!readgameclock(result))
+                return false;
+
+            if(!id || !id->storage.f || id->flags&IDF_READONLY ||
+               !finitefloat(value))
+            {
+                return false;
+            }
+
+            if(*id->storage.f == value)
+                return true;
+
+            setfvarchecked(id, value);
+            if(!readgameclock(result))
+                return false;
+            return finitefloat(*id->storage.f);
+        }
+
+        bool writegameclock(bool enabled, GameClock &result)
+        {
+            return writegameclockboolean(
+                gameclockident(),
+                enabled,
+                result);
+        }
+
+        bool writegameclockscale(float value, GameClock &result)
+        {
+            return writegameclockfloat(
+                gameclockscaleident(),
+                value,
+                result);
+        }
+
+        bool writegameclockalpha(int value, GameClock &result)
+        {
+            return writegameclockint(
+                gameclockalphaident(),
+                value,
+                result);
+        }
+
+        bool writegameclockalign(int value, GameClock &result)
+        {
+            if(!isgameclockalign(value))
+            {
+                readgameclock(result);
+                return false;
+            }
+
+            return writegameclockint(
+                gameclockalignident(),
+                value,
+                result);
+        }
+
+        bool writegameclockx(float value, GameClock &result)
+        {
+            return writegameclockfloat(
+                gameclockxident(),
+                value,
+                result);
+        }
+
+        bool writegameclocky(float value, GameClock &result)
+        {
+            return writegameclockfloat(
+                gameclockyident(),
+                value,
                 result);
         }
 

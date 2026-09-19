@@ -482,6 +482,26 @@ namespace cowui
             bool hide_empty;
         };
 
+        // Match overlay clock. Align is the native ident; radios select
+        // only on exact -1/0/1. Colour idents stay unexposed.
+        struct GameClock
+        {
+            bool enabled;
+            float scale;
+            float scale_minimum;
+            float scale_maximum;
+            int alpha;
+            int alpha_minimum;
+            int alpha_maximum;
+            int align;
+            float x;
+            float x_minimum;
+            float x_maximum;
+            float y;
+            float y_minimum;
+            float y_maximum;
+        };
+
         struct Chat
         {
             bool public_messages_in_top_feed;
@@ -719,6 +739,14 @@ namespace cowui
         bool writeammobarx(float value, Ammobar &result);
         bool writeammobary(float value, Ammobar &result);
         bool writeammobarhideempty(bool enabled, Ammobar &result);
+
+        bool readgameclock(GameClock &result);
+        bool writegameclock(bool enabled, GameClock &result);
+        bool writegameclockscale(float value, GameClock &result);
+        bool writegameclockalpha(int value, GameClock &result);
+        bool writegameclockalign(int value, GameClock &result);
+        bool writegameclockx(float value, GameClock &result);
+        bool writegameclocky(float value, GameClock &result);
 
         bool readchat(Chat &result);
         bool writepublicchatintopfeed(bool enabled);

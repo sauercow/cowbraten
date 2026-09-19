@@ -231,6 +231,14 @@ namespace cowui
         return float(stepped);
     }
 
+    static float stepgameclockfloat(float value, int direction)
+    {
+        const double stepped = std::round(
+            (double(value) + double(direction) * 0.01) * 100.0
+        ) / 100.0;
+        return float(stepped);
+    }
+
     static Rml::String rmlcrosshairresource(const char *path)
     {
         if(!path || !path[0])
@@ -863,6 +871,95 @@ namespace cowui
             ) &&
             constructor.Bind("hud_status", &hud_status) &&
             constructor.Bind(
+                "game_clock_available",
+                &game_clock_available
+            ) &&
+            constructor.Bind("game_clock", &game_clock) &&
+            constructor.Bind(
+                "game_clock_scale",
+                &game_clock_scale
+            ) &&
+            constructor.Bind(
+                "game_clock_scale_minimum",
+                &game_clock_scale_minimum
+            ) &&
+            constructor.Bind(
+                "game_clock_scale_maximum",
+                &game_clock_scale_maximum
+            ) &&
+            constructor.Bind(
+                "game_clock_scale_input",
+                &game_clock_scale_input
+            ) &&
+            constructor.Bind(
+                "game_clock_scale_invalid",
+                &game_clock_scale_invalid
+            ) &&
+            constructor.Bind(
+                "game_clock_alpha",
+                &game_clock_alpha
+            ) &&
+            constructor.Bind(
+                "game_clock_alpha_minimum",
+                &game_clock_alpha_minimum
+            ) &&
+            constructor.Bind(
+                "game_clock_alpha_maximum",
+                &game_clock_alpha_maximum
+            ) &&
+            constructor.Bind(
+                "game_clock_align",
+                &game_clock_align
+            ) &&
+            constructor.Bind("game_clock_x", &game_clock_x) &&
+            constructor.Bind(
+                "game_clock_x_minimum",
+                &game_clock_x_minimum
+            ) &&
+            constructor.Bind(
+                "game_clock_x_maximum",
+                &game_clock_x_maximum
+            ) &&
+            constructor.Bind(
+                "game_clock_x_input",
+                &game_clock_x_input
+            ) &&
+            constructor.Bind(
+                "game_clock_x_invalid",
+                &game_clock_x_invalid
+            ) &&
+            constructor.Bind("game_clock_y", &game_clock_y) &&
+            constructor.Bind(
+                "game_clock_y_minimum",
+                &game_clock_y_minimum
+            ) &&
+            constructor.Bind(
+                "game_clock_y_maximum",
+                &game_clock_y_maximum
+            ) &&
+            constructor.Bind(
+                "game_clock_y_input",
+                &game_clock_y_input
+            ) &&
+            constructor.Bind(
+                "game_clock_y_invalid",
+                &game_clock_y_invalid
+            ) &&
+            constructor.Bind(
+                "game_clock_status",
+                &game_clock_status
+            ) &&
+            constructor.BindEventCallback(
+                "select_game_clock",
+                &RmlSettings::selectgameclock,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_game_clock_align",
+                &RmlSettings::selectgameclockalign,
+                this
+            ) &&
+            constructor.Bind(
                 "public_chat_in_top_feed",
                 &public_chat_in_top_feed
             ) &&
@@ -1240,6 +1337,70 @@ namespace cowui
                 commitammobaryaction
             ) &&
             router.registeraction(
+                "settings.hud.gameclock.alpha",
+                changegameclockalphaaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.scale.decrease",
+                decreasegameclockscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.scale.increase",
+                increasegameclockscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.scale.focus",
+                focusgameclockscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.scale.blur",
+                blurgameclockscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.scale.commit",
+                commitgameclockscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.x.decrease",
+                decreasegameclockxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.x.increase",
+                increasegameclockxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.x.focus",
+                focusgameclockxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.x.blur",
+                blurgameclockxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.x.commit",
+                commitgameclockxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.y.decrease",
+                decreasegameclockyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.y.increase",
+                increasegameclockyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.y.focus",
+                focusgameclockyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.y.blur",
+                blurgameclockyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.y.commit",
+                commitgameclockyaction
+            ) &&
+            router.registeraction(
                 "settings.chat.top.public",
                 publicchatintopfeedaction
             ) &&
@@ -1563,6 +1724,31 @@ namespace cowui
         hud_status.clear();
         streak_milestone_scale_invalid = false;
         streak_milestone_scale_editing = false;
+        game_clock_available = false;
+        game_clock = false;
+        game_clock_scale = 1.0f;
+        game_clock_scale_minimum = 0.5f;
+        game_clock_scale_maximum = 2.0f;
+        game_clock_scale_input.clear();
+        game_clock_scale_invalid = false;
+        game_clock_scale_editing = false;
+        game_clock_alpha = 255;
+        game_clock_alpha_minimum = 0;
+        game_clock_alpha_maximum = 255;
+        game_clock_align = 0;
+        game_clock_x = 0.50f;
+        game_clock_x_minimum = 0.0f;
+        game_clock_x_maximum = 1.0f;
+        game_clock_x_input.clear();
+        game_clock_x_invalid = false;
+        game_clock_x_editing = false;
+        game_clock_y = 0.03f;
+        game_clock_y_minimum = 0.0f;
+        game_clock_y_maximum = 1.0f;
+        game_clock_y_input.clear();
+        game_clock_y_invalid = false;
+        game_clock_y_editing = false;
+        game_clock_status.clear();
         public_chat_in_top_feed = true;
         team_chat_in_top_feed = true;
         public_chat_in_bottom_box = false;
@@ -1739,6 +1925,8 @@ namespace cowui
         if(!refreshcrosshair(!crosshair_size_editing))
             return false;
         if(!refreshhud(!streak_milestone_scale_editing))
+            return false;
+        if(!refreshgameclock())
             return false;
         if(!refreshchat())
             return false;
@@ -2539,6 +2727,170 @@ namespace cowui
         return true;
     }
 
+    bool RmlSettings::refreshgameclock()
+    {
+        settings::GameClock state = {};
+        const bool available = settings::readgameclock(state);
+        presentgameclock(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentgameclock(
+        const settings::GameClock &state,
+        bool available)
+    {
+        if(game_clock_available != available)
+        {
+            game_clock_available = available;
+            model.DirtyVariable("game_clock_available");
+        }
+        if(game_clock != state.enabled)
+        {
+            game_clock = state.enabled;
+            model.DirtyVariable("game_clock");
+        }
+        if(game_clock_scale != state.scale)
+        {
+            game_clock_scale = state.scale;
+            model.DirtyVariable("game_clock_scale");
+        }
+        if(game_clock_scale_minimum != state.scale_minimum)
+        {
+            game_clock_scale_minimum = state.scale_minimum;
+            model.DirtyVariable("game_clock_scale_minimum");
+        }
+        if(game_clock_scale_maximum != state.scale_maximum)
+        {
+            game_clock_scale_maximum = state.scale_maximum;
+            model.DirtyVariable("game_clock_scale_maximum");
+        }
+        const Rml::String scale_text = formatsensitivity(state.scale);
+        if(!game_clock_scale_editing &&
+           game_clock_scale_input != scale_text)
+        {
+            game_clock_scale_input = scale_text;
+            model.DirtyVariable("game_clock_scale_input");
+        }
+        if(game_clock_alpha != state.alpha)
+        {
+            game_clock_alpha = state.alpha;
+            model.DirtyVariable("game_clock_alpha");
+        }
+        if(game_clock_alpha_minimum != state.alpha_minimum)
+        {
+            game_clock_alpha_minimum = state.alpha_minimum;
+            model.DirtyVariable("game_clock_alpha_minimum");
+        }
+        if(game_clock_alpha_maximum != state.alpha_maximum)
+        {
+            game_clock_alpha_maximum = state.alpha_maximum;
+            model.DirtyVariable("game_clock_alpha_maximum");
+        }
+        if(game_clock_align != state.align)
+        {
+            game_clock_align = state.align;
+            model.DirtyVariable("game_clock_align");
+        }
+        if(game_clock_x != state.x)
+        {
+            game_clock_x = state.x;
+            model.DirtyVariable("game_clock_x");
+        }
+        if(game_clock_x_minimum != state.x_minimum)
+        {
+            game_clock_x_minimum = state.x_minimum;
+            model.DirtyVariable("game_clock_x_minimum");
+        }
+        if(game_clock_x_maximum != state.x_maximum)
+        {
+            game_clock_x_maximum = state.x_maximum;
+            model.DirtyVariable("game_clock_x_maximum");
+        }
+        const Rml::String x_text = formatsensitivity(state.x);
+        if(!game_clock_x_editing && game_clock_x_input != x_text)
+        {
+            game_clock_x_input = x_text;
+            model.DirtyVariable("game_clock_x_input");
+        }
+        if(game_clock_y != state.y)
+        {
+            game_clock_y = state.y;
+            model.DirtyVariable("game_clock_y");
+        }
+        if(game_clock_y_minimum != state.y_minimum)
+        {
+            game_clock_y_minimum = state.y_minimum;
+            model.DirtyVariable("game_clock_y_minimum");
+        }
+        if(game_clock_y_maximum != state.y_maximum)
+        {
+            game_clock_y_maximum = state.y_maximum;
+            model.DirtyVariable("game_clock_y_maximum");
+        }
+        const Rml::String y_text = formatsensitivity(state.y);
+        if(!game_clock_y_editing && game_clock_y_input != y_text)
+        {
+            game_clock_y_input = y_text;
+            model.DirtyVariable("game_clock_y_input");
+        }
+
+        const char *status = available
+            ? ""
+            : "Gameclock settings are unavailable";
+        if(game_clock_status != status)
+        {
+            game_clock_status = status;
+            model.DirtyVariable("game_clock_status");
+        }
+    }
+
+    void RmlSettings::selectgameclock(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_clock_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclock(enabled, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        presentgameclock(state, available);
+        if(!accepted && available)
+        {
+            game_clock_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_clock_status");
+        }
+    }
+
+    void RmlSettings::selectgameclockalign(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_clock_available || !game_clock)
+            return;
+
+        const int value = arguments[0].Get<int>();
+        if(value != -1 && value != 0 && value != 1)
+            return;
+
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockalign(value, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        presentgameclock(state, available);
+        if(!accepted && available)
+        {
+            game_clock_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_clock_status");
+        }
+    }
+
     bool RmlSettings::refreshchat()
     {
         settings::Chat current;
@@ -3137,6 +3489,78 @@ namespace cowui
         }
     }
 
+    void RmlSettings::commitgameclockscale()
+    {
+        float requested = 0.0f;
+        settings::GameClock state = {};
+        const bool accepted = parsefloat(
+                game_clock_scale_input,
+                requested
+            ) &&
+            settings::writegameclockscale(requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+
+        game_clock_scale_invalid = !accepted;
+        model.DirtyVariable("game_clock_scale_invalid");
+        const bool editing = game_clock_scale_editing;
+        game_clock_scale_editing = false;
+        presentgameclock(state, available);
+        game_clock_scale_editing = editing;
+        game_clock_status = accepted
+            ? "Size applied"
+            : "Invalid size; restored the last effective setting";
+        model.DirtyVariable("game_clock_status");
+    }
+
+    void RmlSettings::commitgameclockx()
+    {
+        float requested = 0.0f;
+        settings::GameClock state = {};
+        const bool accepted = parsefloat(
+                game_clock_x_input,
+                requested
+            ) &&
+            settings::writegameclockx(requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+
+        game_clock_x_invalid = !accepted;
+        model.DirtyVariable("game_clock_x_invalid");
+        const bool editing = game_clock_x_editing;
+        game_clock_x_editing = false;
+        presentgameclock(state, available);
+        game_clock_x_editing = editing;
+        game_clock_status = accepted
+            ? "X applied"
+            : "Invalid x; restored the last effective setting";
+        model.DirtyVariable("game_clock_status");
+    }
+
+    void RmlSettings::commitgameclocky()
+    {
+        float requested = 0.0f;
+        settings::GameClock state = {};
+        const bool accepted = parsefloat(
+                game_clock_y_input,
+                requested
+            ) &&
+            settings::writegameclocky(requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+
+        game_clock_y_invalid = !accepted;
+        model.DirtyVariable("game_clock_y_invalid");
+        const bool editing = game_clock_y_editing;
+        game_clock_y_editing = false;
+        presentgameclock(state, available);
+        game_clock_y_editing = editing;
+        game_clock_status = accepted
+            ? "Y applied"
+            : "Invalid y; restored the last effective setting";
+        model.DirtyVariable("game_clock_status");
+    }
+
     void RmlSettings::setcategory(Category category)
     {
         if(category != Category::MouseKeyboard)
@@ -3191,6 +3615,7 @@ namespace cowui
         {
             refreshhud(!streak_milestone_scale_editing);
             refreshammobar();
+            refreshgameclock();
         }
         else if(game)
         {
@@ -7665,6 +8090,355 @@ namespace cowui
            key == Rml::Input::KI_NUMPADENTER)
         {
             instance->commitammobary();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::changegameclockalphaaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->game_clock_alpha
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->game_clock_alpha)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(!instance->game_clock_available || !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockalpha(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->presentgameclock(state, available);
+        if(!accepted && available)
+        {
+            instance->game_clock_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("game_clock_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::decreasegameclockscaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->game_clock_scale_minimum,
+            stepgameclockfloat(instance->game_clock_scale, -1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockscale(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_scale_invalid = false;
+        instance->model.DirtyVariable("game_clock_scale_invalid");
+        const bool editing = instance->game_clock_scale_editing;
+        instance->game_clock_scale_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_scale_editing = editing;
+        instance->game_clock_status = accepted
+            ? "Size adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasegameclockscaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->game_clock_scale_maximum,
+            stepgameclockfloat(instance->game_clock_scale, 1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockscale(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_scale_invalid = false;
+        instance->model.DirtyVariable("game_clock_scale_invalid");
+        const bool editing = instance->game_clock_scale_editing;
+        instance->game_clock_scale_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_scale_editing = editing;
+        instance->game_clock_status = accepted
+            ? "Size adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusgameclockscaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->game_clock_scale_editing = true;
+            if(instance->game_clock_scale_invalid)
+            {
+                instance->game_clock_scale_invalid = false;
+                instance->model.DirtyVariable(
+                    "game_clock_scale_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurgameclockscaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitgameclockscale();
+            instance->game_clock_scale_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitgameclockscaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitgameclockscale();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasegameclockxaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->game_clock_x_minimum,
+            stepgameclockfloat(instance->game_clock_x, -1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockx(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_x_invalid = false;
+        instance->model.DirtyVariable("game_clock_x_invalid");
+        const bool editing = instance->game_clock_x_editing;
+        instance->game_clock_x_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_x_editing = editing;
+        instance->game_clock_status = accepted
+            ? "X adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasegameclockxaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->game_clock_x_maximum,
+            stepgameclockfloat(instance->game_clock_x, 1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockx(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_x_invalid = false;
+        instance->model.DirtyVariable("game_clock_x_invalid");
+        const bool editing = instance->game_clock_x_editing;
+        instance->game_clock_x_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_x_editing = editing;
+        instance->game_clock_status = accepted
+            ? "X adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusgameclockxaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->game_clock_x_editing = true;
+            if(instance->game_clock_x_invalid)
+            {
+                instance->game_clock_x_invalid = false;
+                instance->model.DirtyVariable("game_clock_x_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurgameclockxaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitgameclockx();
+            instance->game_clock_x_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitgameclockxaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitgameclockx();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasegameclockyaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->game_clock_y_minimum,
+            stepgameclockfloat(instance->game_clock_y, -1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclocky(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_y_invalid = false;
+        instance->model.DirtyVariable("game_clock_y_invalid");
+        const bool editing = instance->game_clock_y_editing;
+        instance->game_clock_y_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_y_editing = editing;
+        instance->game_clock_status = accepted
+            ? "Y adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasegameclockyaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->game_clock_y_maximum,
+            stepgameclockfloat(instance->game_clock_y, 1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclocky(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_y_invalid = false;
+        instance->model.DirtyVariable("game_clock_y_invalid");
+        const bool editing = instance->game_clock_y_editing;
+        instance->game_clock_y_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_y_editing = editing;
+        instance->game_clock_status = accepted
+            ? "Y adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusgameclockyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->game_clock_y_editing = true;
+            if(instance->game_clock_y_invalid)
+            {
+                instance->game_clock_y_invalid = false;
+                instance->model.DirtyVariable("game_clock_y_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurgameclockyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitgameclocky();
+            instance->game_clock_y_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitgameclockyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitgameclocky();
             event.StopPropagation();
         }
     }

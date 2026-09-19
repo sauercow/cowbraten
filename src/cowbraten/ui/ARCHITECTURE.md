@@ -334,6 +334,21 @@ HUD guns are off. The default theme groups sway, flash, and light as
 subordinates of HUD Guns without disabling or rewriting those independent
 values. `hudgunsdir` remains unexposed.
 
+Gameclock is a separate typed snapshot of Sauer's match overlay, not the
+HUD wall clock. The master `gameclock` boolean is always shown. Size,
+opacity, alignment, and x/y layout controls are visible only while the
+clock is on, matching the native HUD tab's "adjust gameclock" panel.
+`gameclockscale`, `gameclockx`, and `gameclocky` use the native `+fround`
+0.01 stepper plus exact field commit; `gameclockalpha` is an integer
+slider bound to the ident range with no hardcoded RML value default;
+`gameclockalign` radios write only on user select and light only on the
+exact ident values `-1`, `0`, and `1`. All six writes go through
+`setvarchecked` / `setfvarchecked` and read back into the snapshot.
+Opening Settings does not rewrite these idents. `gameclockcolour` and
+`gameclocklowcolour` are not on the native Settings GUI and stay
+unexposed. No `showgui gameclock` alias is added; the standalone legacy
+document remains reachable by that exact name.
+
 `hudfragmessages` is one p1x enum, not a generic per-game-mode policy: `0`
 disables frag and Cowbraten streak messages, `1` shows them in all modes, and
 `2` shows them outside instagib only. No equivalent exceptions exist for other
@@ -360,12 +375,13 @@ Anchor radios write only on user select and select only on an exact `-1/0/1`
 match. `showgui "ammobar"` remains the legacy standalone document; Settings no
 longer needs that nested GUI.
 
-The legacy `gameclock`, `hudscore`, `scoreboard`, and
-`hudfragmessages` adjustment documents contain substantially more controls
-than this initial production slice. Their exact `showgui` names therefore
-continue through the legacy fallback. No HUD or Crosshair compatibility alias
-is added until the corresponding RmlUi surface is a sufficiently complete
-semantic replacement.
+The legacy `hudscore`, `scoreboard`, and `hudfragmessages`
+adjustment documents contain substantially more controls than this
+production Settings HUD slice. Their exact `showgui` names therefore
+continue through the legacy fallback, as does `showgui gameclock` until an
+explicit mapping is added. No HUD or Crosshair compatibility alias is added
+until the corresponding RmlUi surface is a sufficiently complete semantic
+replacement.
 
 The first Chat slice preserves Sauer's actual console-backed message model.
 Public and team chat enter the shared console buffer as the distinct

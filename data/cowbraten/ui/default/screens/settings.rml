@@ -90,7 +90,7 @@
                     <div class="settings-scope-note" data-if="category_hud">
                         <div class="settings-scope-kicker">Combat Information</div>
                         <div class="settings-scope-copy">
-                            FPS and wall-clock overlays, damage feedback, HUD guns, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
+                            FPS and wall-clock overlays, damage feedback, HUD guns, the match gameclock, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_audio">
@@ -651,6 +651,156 @@
                                     <span data-if="muzzle_light">Enabled</span>
                                     <span data-if="!muzzle_light">Disabled</span>
                                 </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Gameclock</div>
+                                    <div class="settings-control-description">
+                                        Shows Sauer's existing match-time overlay. Layout controls match the native gameclock adjust panel; colour idents stay unexposed.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="game_clock"
+                                        data-attrif-disabled="!game_clock_available"
+                                        data-event-change="select_game_clock(ev.checked)" />
+                                    <span data-if="game_clock">On</span>
+                                    <span data-if="!game_clock">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-if="game_clock">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Size</div>
+                                        <div class="settings-control-description">
+                                            Scales the match overlay. Native Settings steps by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.scale.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="game_clock_scale_input"
+                                            data-class-is-invalid="game_clock_scale_invalid"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onfocus="settings.hud.gameclock.scale.focus"
+                                            onblur="settings.hud.gameclock.scale.blur"
+                                            onkeyup="settings.hud.gameclock.scale.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.scale.increase">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Opacity</div>
+                                        <div class="settings-control-description">
+                                            Sets overlay alpha through Sauer's existing gameclockalpha ident.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ game_clock_alpha }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ game_clock_alpha_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="0"
+                                        max="255"
+                                        step="1"
+                                        data-attr-min="game_clock_alpha_minimum"
+                                        data-attr-max="game_clock_alpha_maximum"
+                                        data-attr-value="game_clock_alpha"
+                                        data-attrif-disabled="!game_clock_available || !game_clock"
+                                        onchange="settings.hud.gameclock.alpha" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ game_clock_alpha_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Anchor</div>
+                                        <div class="settings-control-description">
+                                            Horizontal alignment. Radios write only when you select start, center, or end.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="game_clock_align == -1"
+                                        data-attrif-disabled="!game_clock_available"
+                                        data-event-click="select_game_clock_align(-1)">Start</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="game_clock_align == 0"
+                                        data-attrif-disabled="!game_clock_available"
+                                        data-event-click="select_game_clock_align(0)">Center</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="game_clock_align == 1"
+                                        data-attrif-disabled="!game_clock_available"
+                                        data-event-click="select_game_clock_align(1)">End</button>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">X</div>
+                                        <div class="settings-control-description">
+                                            Horizontal position. Native Settings steps by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.x.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="game_clock_x_input"
+                                            data-class-is-invalid="game_clock_x_invalid"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onfocus="settings.hud.gameclock.x.focus"
+                                            onblur="settings.hud.gameclock.x.blur"
+                                            onkeyup="settings.hud.gameclock.x.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.x.increase">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Y</div>
+                                        <div class="settings-control-description">
+                                            Vertical position. Native Settings steps by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.y.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="game_clock_y_input"
+                                            data-class-is-invalid="game_clock_y_invalid"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onfocus="settings.hud.gameclock.y.focus"
+                                            onblur="settings.hud.gameclock.y.blur"
+                                            onkeyup="settings.hud.gameclock.y.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.y.increase">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="game_clock_status != ''">
+                                <span>{{ game_clock_status }}</span>
                             </div>
                         </div>
 

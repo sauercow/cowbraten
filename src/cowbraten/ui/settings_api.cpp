@@ -2147,6 +2147,88 @@ namespace cowui
             return accepted;
         }
 
+        static void copygameclock(
+            const sauersettings::GameClock &source,
+            GameClock &result)
+        {
+            result.enabled = source.enabled;
+            result.scale = source.scale;
+            result.scale_minimum = source.scale_minimum;
+            result.scale_maximum = source.scale_maximum;
+            result.alpha = source.alpha;
+            result.alpha_minimum = source.alpha_minimum;
+            result.alpha_maximum = source.alpha_maximum;
+            result.align = source.align;
+            result.x = source.x;
+            result.x_minimum = source.x_minimum;
+            result.x_maximum = source.x_maximum;
+            result.y = source.y;
+            result.y_minimum = source.y_minimum;
+            result.y_maximum = source.y_maximum;
+        }
+
+        bool readgameclock(GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool read = sauersettings::readgameclock(legacy);
+            copygameclock(legacy, result);
+            return read;
+        }
+
+        bool writegameclock(bool enabled, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclock(
+                enabled, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        bool writegameclockscale(float value, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclockscale(
+                value, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        bool writegameclockalpha(int value, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclockalpha(
+                value, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        bool writegameclockalign(int value, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclockalign(
+                value, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        bool writegameclockx(float value, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclockx(
+                value, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        bool writegameclocky(float value, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclocky(
+                value, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
         bool readchat(Chat &result)
         {
             sauersettings::Chat legacy;
