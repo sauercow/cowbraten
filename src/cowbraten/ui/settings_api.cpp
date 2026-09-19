@@ -2229,6 +2229,100 @@ namespace cowui
             return accepted;
         }
 
+        static void copyhudscore(
+            const sauersettings::HudScore &source,
+            HudScore &result)
+        {
+            result.enabled = source.enabled;
+            result.scale = source.scale;
+            result.scale_minimum = source.scale_minimum;
+            result.scale_maximum = source.scale_maximum;
+            result.alpha = source.alpha;
+            result.alpha_minimum = source.alpha_minimum;
+            result.alpha_maximum = source.alpha_maximum;
+            result.spacing = source.spacing;
+            result.spacing_minimum = source.spacing_minimum;
+            result.spacing_maximum = source.spacing_maximum;
+            result.align = source.align;
+            result.x = source.x;
+            result.x_minimum = source.x_minimum;
+            result.x_maximum = source.x_maximum;
+            result.y = source.y;
+            result.y_minimum = source.y_minimum;
+            result.y_maximum = source.y_maximum;
+        }
+
+        bool readhudscore(HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool read = sauersettings::readhudscore(legacy);
+            copyhudscore(legacy, result);
+            return read;
+        }
+
+        bool writehudscore(bool enabled, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscore(
+                enabled, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscorescale(float value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscorescale(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscorealpha(int value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscorealpha(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscoresep(int value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscoresep(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscorealign(int value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscorealign(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscorex(float value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscorex(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscorey(float value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscorey(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
         bool readchat(Chat &result)
         {
             sauersettings::Chat legacy;

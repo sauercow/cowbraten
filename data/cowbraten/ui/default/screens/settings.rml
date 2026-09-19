@@ -90,7 +90,7 @@
                     <div class="settings-scope-note" data-if="category_hud">
                         <div class="settings-scope-kicker">Combat Information</div>
                         <div class="settings-scope-copy">
-                            FPS and wall-clock overlays, damage feedback, HUD guns, the match gameclock, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
+                            FPS and wall-clock overlays, damage feedback, HUD guns, the match gameclock, the score overlay, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_audio">
@@ -651,6 +651,182 @@
                                     <span data-if="muzzle_light">Enabled</span>
                                     <span data-if="!muzzle_light">Disabled</span>
                                 </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Score Overlay</div>
+                                    <div class="settings-control-description">
+                                        Draws Sauer's compact HUD scores when at least two teams or players are present. Off by default.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hudscore"
+                                        data-attrif-disabled="!hudscore_available"
+                                        data-event-change="select_hudscore(ev.checked)" />
+                                    <span data-if="hudscore">On</span>
+                                    <span data-if="!hudscore">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-if="hudscore">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Size</div>
+                                        <div class="settings-control-description">
+                                            Scale of the overlay text. Native Settings steps this by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.scale.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="hudscore_scale_input"
+                                            data-class-is-invalid="hudscore_scale_invalid"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onfocus="settings.hud.score.scale.focus"
+                                            onblur="settings.hud.score.scale.blur"
+                                            onkeyup="settings.hud.score.scale.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.scale.increase">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Opacity</div>
+                                        <div class="settings-control-description">
+                                            Overlay text opacity. The range comes from Sauer's existing overlay setting.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ hudscore_alpha }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ hudscore_alpha_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="0"
+                                        max="255"
+                                        step="1"
+                                        data-attr-min="hudscore_alpha_minimum"
+                                        data-attr-max="hudscore_alpha_maximum"
+                                        data-attr-value="hudscore_alpha"
+                                        data-attrif-disabled="!hudscore_available || !hudscore"
+                                        onchange="settings.hud.score.alpha" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ hudscore_alpha_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Spacing</div>
+                                        <div class="settings-control-description">
+                                            Gap between the two scores.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ hudscore_sep }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ hudscore_sep_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="0"
+                                        max="1000"
+                                        step="1"
+                                        data-attr-min="hudscore_sep_minimum"
+                                        data-attr-max="hudscore_sep_maximum"
+                                        data-attr-value="hudscore_sep"
+                                        data-attrif-disabled="!hudscore_available || !hudscore"
+                                        onchange="settings.hud.score.spacing" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ hudscore_sep_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Anchor</div>
+                                        <div class="settings-control-description">
+                                            Horizontal alignment of the overlay. Radios write only when you select them.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="hudscore_align == -1"
+                                        data-attrif-disabled="!hudscore_available"
+                                        data-event-click="select_hudscore_align(-1)">Start</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="hudscore_align == 0"
+                                        data-attrif-disabled="!hudscore_available"
+                                        data-event-click="select_hudscore_align(0)">Center</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="hudscore_align == 1"
+                                        data-attrif-disabled="!hudscore_available"
+                                        data-event-click="select_hudscore_align(1)">End</button>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">X</div>
+                                        <div class="settings-control-description">
+                                            Normalized horizontal position. Native Settings steps this by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.x.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="hudscore_x_input"
+                                            data-class-is-invalid="hudscore_x_invalid"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onfocus="settings.hud.score.x.focus"
+                                            onblur="settings.hud.score.x.blur"
+                                            onkeyup="settings.hud.score.x.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.x.increase">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Y</div>
+                                        <div class="settings-control-description">
+                                            Normalized vertical position. Native Settings steps this by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.y.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="hudscore_y_input"
+                                            data-class-is-invalid="hudscore_y_invalid"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onfocus="settings.hud.score.y.focus"
+                                            onblur="settings.hud.score.y.blur"
+                                            onkeyup="settings.hud.score.y.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.y.increase">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="hudscore_status != ''">
+                                <span>{{ hudscore_status }}</span>
                             </div>
                         </div>
 

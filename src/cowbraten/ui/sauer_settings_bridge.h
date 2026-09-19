@@ -502,6 +502,29 @@ namespace cowui
             float y_maximum;
         };
 
+        // Native Settings HUD tab master plus the hudscore adjust document.
+        // Colour HVARPs are not native Settings GUI controls.
+        struct HudScore
+        {
+            bool enabled;
+            float scale;
+            float scale_minimum;
+            float scale_maximum;
+            int alpha;
+            int alpha_minimum;
+            int alpha_maximum;
+            int spacing;
+            int spacing_minimum;
+            int spacing_maximum;
+            int align;
+            float x;
+            float x_minimum;
+            float x_maximum;
+            float y;
+            float y_minimum;
+            float y_maximum;
+        };
+
         struct Chat
         {
             bool public_messages_in_top_feed;
@@ -747,6 +770,15 @@ namespace cowui
         bool writegameclockalign(int value, GameClock &result);
         bool writegameclockx(float value, GameClock &result);
         bool writegameclocky(float value, GameClock &result);
+
+        bool readhudscore(HudScore &result);
+        bool writehudscore(bool enabled, HudScore &result);
+        bool writehudscorescale(float value, HudScore &result);
+        bool writehudscorealpha(int value, HudScore &result);
+        bool writehudscoresep(int value, HudScore &result);
+        bool writehudscorealign(int value, HudScore &result);
+        bool writehudscorex(float value, HudScore &result);
+        bool writehudscorey(float value, HudScore &result);
 
         bool readchat(Chat &result);
         bool writepublicchatintopfeed(bool enabled);

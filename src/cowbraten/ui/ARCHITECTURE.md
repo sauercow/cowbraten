@@ -349,6 +349,22 @@ Opening Settings does not rewrite these idents. `gameclockcolour` and
 unexposed. No `showgui gameclock` alias is added; the standalone legacy
 document remains reachable by that exact name.
 
+HUD score overlay inlines the native HUD-tab `hudscore` master toggle and the
+`hudscore` adjust document. The migrated persistent idents are `hudscore`,
+`hudscorescale`, `hudscorealpha`, `hudscoresep`, `hudscorealign`, `hudscorex`,
+and `hudscorey`. None have a change callback, so they apply immediately on
+`drawhudscore()` when the overlay is on. `hudscoreplayercolour` and
+`hudscoreenemycolour` are not native Settings GUI controls and stay unexposed.
+Opening Settings, returning from the legacy console, and activating the HUD
+category only read these values. Integer opacity and spacing sliders bind
+min/max from the ident and have no hardcoded RML value default; their change
+handlers ignore a requested value that already matches the model or a range
+element that is not yet parented, matching the gamma/deadpush rewrite guard.
+Size, x, and y use local edit buffers and `+fround`-style 0.01 steppers, then
+clamp through `setfvarchecked`. Anchor radios write only on user select and
+light only on an exact `-1`/`0`/`1` match. A typed write then reads the
+accepted snapshot back. The document never supplies ident names.
+
 `hudfragmessages` is one p1x enum, not a generic per-game-mode policy: `0`
 disables frag and Cowbraten streak messages, `1` shows them in all modes, and
 `2` shows them outside instagib only. No equivalent exceptions exist for other
@@ -375,7 +391,7 @@ Anchor radios write only on user select and select only on an exact `-1/0/1`
 match. `showgui "ammobar"` remains the legacy standalone document; Settings no
 longer needs that nested GUI.
 
-The legacy `hudscore`, `scoreboard`, and `hudfragmessages`
+The legacy `scoreboard` and `hudfragmessages`
 adjustment documents contain substantially more controls than this
 production Settings HUD slice. Their exact `showgui` names therefore
 continue through the legacy fallback, as does `showgui gameclock` until an

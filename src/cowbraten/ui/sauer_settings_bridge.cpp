@@ -531,6 +531,62 @@ namespace cowui
             return value == -1 || value == 0 || value == 1;
         }
 
+        static ident *hudscoreident()
+        {
+            ident *id = getident("hudscore");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscorescaleident()
+        {
+            ident *id = getident("hudscorescale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscorealphaident()
+        {
+            ident *id = getident("hudscorealpha");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscoresepident()
+        {
+            ident *id = getident("hudscoresep");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscorealignident()
+        {
+            ident *id = getident("hudscorealign");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscorexident()
+        {
+            ident *id = getident("hudscorex");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscoreyident()
+        {
+            ident *id = getident("hudscorey");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
         static ident *consolefilterident()
         {
             ident *id = getident("confilter");
@@ -4031,6 +4087,181 @@ namespace cowui
                 gameclockyident(),
                 value,
                 result);
+        }
+
+        static void defaulthudscore(HudScore &result)
+        {
+            result.enabled = false;
+            result.scale = 1.0f;
+            result.scale_minimum = 0.5f;
+            result.scale_maximum = 2.0f;
+            result.alpha = 255;
+            result.alpha_minimum = 0;
+            result.alpha_maximum = 255;
+            result.spacing = 200;
+            result.spacing_minimum = 0;
+            result.spacing_maximum = 1000;
+            result.align = 0;
+            result.x = 0.50f;
+            result.x_minimum = 0.0f;
+            result.x_maximum = 1.0f;
+            result.y = 0.03f;
+            result.y_minimum = 0.0f;
+            result.y_maximum = 1.0f;
+        }
+
+        bool readhudscore(HudScore &result)
+        {
+            defaulthudscore(result);
+
+            ident *enabled_id = hudscoreident();
+            ident *scale_id = hudscorescaleident();
+            ident *alpha_id = hudscorealphaident();
+            ident *sep_id = hudscoresepident();
+            ident *align_id = hudscorealignident();
+            ident *x_id = hudscorexident();
+            ident *y_id = hudscoreyident();
+            if(!enabled_id || !enabled_id->storage.i ||
+               !scale_id || !scale_id->storage.f ||
+               !alpha_id || !alpha_id->storage.i ||
+               !sep_id || !sep_id->storage.i ||
+               !align_id || !align_id->storage.i ||
+               !x_id || !x_id->storage.f ||
+               !y_id || !y_id->storage.f)
+            {
+                return false;
+            }
+
+            result.enabled = *enabled_id->storage.i != 0;
+            result.scale = *scale_id->storage.f;
+            result.scale_minimum = scale_id->minvalf;
+            result.scale_maximum = scale_id->maxvalf;
+            result.alpha = *alpha_id->storage.i;
+            result.alpha_minimum = alpha_id->minval;
+            result.alpha_maximum = alpha_id->maxval;
+            result.spacing = *sep_id->storage.i;
+            result.spacing_minimum = sep_id->minval;
+            result.spacing_maximum = sep_id->maxval;
+            result.align = *align_id->storage.i;
+            result.x = *x_id->storage.f;
+            result.x_minimum = x_id->minvalf;
+            result.x_maximum = x_id->maxvalf;
+            result.y = *y_id->storage.f;
+            result.y_minimum = y_id->minvalf;
+            result.y_maximum = y_id->maxvalf;
+            return true;
+        }
+
+        static bool writehudscoreboolean(
+            ident *id,
+            bool enabled,
+            HudScore &result)
+        {
+            if(!readhudscore(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readhudscore(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        static bool writehudscoreint(
+            ident *id,
+            int value,
+            HudScore &result)
+        {
+            if(!readhudscore(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readhudscore(result))
+                return false;
+            return *id->storage.i == value;
+        }
+
+        static bool writehudscorefloat(
+            ident *id,
+            float value,
+            HudScore &result)
+        {
+            if(!readhudscore(result))
+                return false;
+
+            if(!id || !id->storage.f || id->flags&IDF_READONLY ||
+               !finitefloat(value) ||
+               value < id->minvalf || value > id->maxvalf)
+            {
+                return false;
+            }
+
+            if(*id->storage.f == value)
+                return true;
+
+            setfvarchecked(id, value);
+            if(!readhudscore(result))
+                return false;
+            return *id->storage.f == value;
+        }
+
+        bool writehudscore(bool enabled, HudScore &result)
+        {
+            return writehudscoreboolean(hudscoreident(), enabled, result);
+        }
+
+        bool writehudscorescale(float value, HudScore &result)
+        {
+            return writehudscorefloat(hudscorescaleident(), value, result);
+        }
+
+        bool writehudscorealpha(int value, HudScore &result)
+        {
+            return writehudscoreint(hudscorealphaident(), value, result);
+        }
+
+        bool writehudscoresep(int value, HudScore &result)
+        {
+            return writehudscoreint(hudscoresepident(), value, result);
+        }
+
+        bool writehudscorealign(int value, HudScore &result)
+        {
+            if(value != -1 && value != 0 && value != 1)
+            {
+                if(!readhudscore(result))
+                    return false;
+                return false;
+            }
+
+            return writehudscoreint(hudscorealignident(), value, result);
+        }
+
+        bool writehudscorex(float value, HudScore &result)
+        {
+            return writehudscorefloat(hudscorexident(), value, result);
+        }
+
+        bool writehudscorey(float value, HudScore &result)
+        {
+            return writehudscorefloat(hudscoreyident(), value, result);
         }
 
         bool readchat(Chat &result)

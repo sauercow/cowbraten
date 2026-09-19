@@ -37,6 +37,7 @@ namespace cowui
         struct GameModels;
         struct Ammobar;
         struct GameClock;
+        struct HudScore;
         struct GlassReflectionsState;
         struct ModelReflectionsState;
         struct BumpModelsState;
@@ -380,6 +381,19 @@ namespace cowui
         void commitgameclockscale();
         void commitgameclockx();
         void commitgameclocky();
+        bool refreshhudscore();
+        void presenthudscore(const settings::HudScore &state,
+            bool available,
+            bool update_scale_input,
+            bool update_x_input,
+            bool update_y_input);
+        void selecthudscore(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selecthudscorealign(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void commithudscorescale();
+        void commithudscorex();
+        void commithudscorey();
         bool refreshchat();
         bool refreshkeybindings();
         bool refreshkeyconflict();
@@ -532,6 +546,23 @@ namespace cowui
         static void focusgameclockyaction(Rml::Event &event);
         static void blurgameclockyaction(Rml::Event &event);
         static void commitgameclockyaction(Rml::Event &event);
+        static void changehudscorealphaaction(Rml::Event &event);
+        static void changehudscoresepaction(Rml::Event &event);
+        static void decreasehudscorescaleaction(Rml::Event &event);
+        static void increasehudscorescaleaction(Rml::Event &event);
+        static void focushudscorescaleaction(Rml::Event &event);
+        static void blurhudscorescaleaction(Rml::Event &event);
+        static void commithudscorescaleaction(Rml::Event &event);
+        static void decreasehudscorexaction(Rml::Event &event);
+        static void increasehudscorexaction(Rml::Event &event);
+        static void focushudscorexaction(Rml::Event &event);
+        static void blurhudscorexaction(Rml::Event &event);
+        static void commithudscorexaction(Rml::Event &event);
+        static void decreasehudscoreyaction(Rml::Event &event);
+        static void increasehudscoreyaction(Rml::Event &event);
+        static void focushudscoreyaction(Rml::Event &event);
+        static void blurhudscoreyaction(Rml::Event &event);
+        static void commithudscoreyaction(Rml::Event &event);
         static void publicchatintopfeedaction(Rml::Event &event);
         static void teamchatintopfeedaction(Rml::Event &event);
         static void publicchatinbottomboxaction(Rml::Event &event);
@@ -873,6 +904,34 @@ namespace cowui
         bool game_clock_y_invalid = false;
         bool game_clock_y_editing = false;
         Rml::String game_clock_status;
+        bool hudscore_available = false;
+        bool hudscore = false;
+        float hudscore_scale = 1.0f;
+        float hudscore_scale_minimum = 0.5f;
+        float hudscore_scale_maximum = 2.0f;
+        Rml::String hudscore_scale_input;
+        bool hudscore_scale_invalid = false;
+        bool hudscore_scale_editing = false;
+        int hudscore_alpha = 255;
+        int hudscore_alpha_minimum = 0;
+        int hudscore_alpha_maximum = 255;
+        int hudscore_sep = 200;
+        int hudscore_sep_minimum = 0;
+        int hudscore_sep_maximum = 1000;
+        int hudscore_align = 0;
+        float hudscore_x = 0.50f;
+        float hudscore_x_minimum = 0.0f;
+        float hudscore_x_maximum = 1.0f;
+        Rml::String hudscore_x_input;
+        bool hudscore_x_invalid = false;
+        bool hudscore_x_editing = false;
+        float hudscore_y = 0.03f;
+        float hudscore_y_minimum = 0.0f;
+        float hudscore_y_maximum = 1.0f;
+        Rml::String hudscore_y_input;
+        bool hudscore_y_invalid = false;
+        bool hudscore_y_editing = false;
+        Rml::String hudscore_status;
         bool public_chat_in_top_feed = true;
         bool team_chat_in_top_feed = true;
         bool public_chat_in_bottom_box = false;

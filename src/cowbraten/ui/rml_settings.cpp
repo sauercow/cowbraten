@@ -239,6 +239,14 @@ namespace cowui
         return float(stepped);
     }
 
+    static float stephudscore(float value, int direction)
+    {
+        const double stepped = std::round(
+            (double(value) + double(direction) * 0.01) * 100.0
+        ) / 100.0;
+        return float(stepped);
+    }
+
     static Rml::String rmlcrosshairresource(const char *path)
     {
         if(!path || !path[0])
@@ -959,6 +967,65 @@ namespace cowui
                 &RmlSettings::selectgameclockalign,
                 this
             ) &&
+            constructor.Bind("hudscore_available", &hudscore_available) &&
+            constructor.Bind("hudscore", &hudscore) &&
+            constructor.Bind("hudscore_scale", &hudscore_scale) &&
+            constructor.Bind(
+                "hudscore_scale_minimum",
+                &hudscore_scale_minimum
+            ) &&
+            constructor.Bind(
+                "hudscore_scale_maximum",
+                &hudscore_scale_maximum
+            ) &&
+            constructor.Bind(
+                "hudscore_scale_input",
+                &hudscore_scale_input
+            ) &&
+            constructor.Bind(
+                "hudscore_scale_invalid",
+                &hudscore_scale_invalid
+            ) &&
+            constructor.Bind("hudscore_alpha", &hudscore_alpha) &&
+            constructor.Bind(
+                "hudscore_alpha_minimum",
+                &hudscore_alpha_minimum
+            ) &&
+            constructor.Bind(
+                "hudscore_alpha_maximum",
+                &hudscore_alpha_maximum
+            ) &&
+            constructor.Bind("hudscore_sep", &hudscore_sep) &&
+            constructor.Bind(
+                "hudscore_sep_minimum",
+                &hudscore_sep_minimum
+            ) &&
+            constructor.Bind(
+                "hudscore_sep_maximum",
+                &hudscore_sep_maximum
+            ) &&
+            constructor.Bind("hudscore_align", &hudscore_align) &&
+            constructor.Bind("hudscore_x", &hudscore_x) &&
+            constructor.Bind("hudscore_x_minimum", &hudscore_x_minimum) &&
+            constructor.Bind("hudscore_x_maximum", &hudscore_x_maximum) &&
+            constructor.Bind("hudscore_x_input", &hudscore_x_input) &&
+            constructor.Bind("hudscore_x_invalid", &hudscore_x_invalid) &&
+            constructor.Bind("hudscore_y", &hudscore_y) &&
+            constructor.Bind("hudscore_y_minimum", &hudscore_y_minimum) &&
+            constructor.Bind("hudscore_y_maximum", &hudscore_y_maximum) &&
+            constructor.Bind("hudscore_y_input", &hudscore_y_input) &&
+            constructor.Bind("hudscore_y_invalid", &hudscore_y_invalid) &&
+            constructor.Bind("hudscore_status", &hudscore_status) &&
+            constructor.BindEventCallback(
+                "select_hudscore",
+                &RmlSettings::selecthudscore,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_hudscore_align",
+                &RmlSettings::selecthudscorealign,
+                this
+            ) &&
             constructor.Bind(
                 "public_chat_in_top_feed",
                 &public_chat_in_top_feed
@@ -1401,6 +1468,74 @@ namespace cowui
                 commitgameclockyaction
             ) &&
             router.registeraction(
+                "settings.hud.score.alpha",
+                changehudscorealphaaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.spacing",
+                changehudscoresepaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.scale.decrease",
+                decreasehudscorescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.scale.increase",
+                increasehudscorescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.scale.focus",
+                focushudscorescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.scale.blur",
+                blurhudscorescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.scale.commit",
+                commithudscorescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.x.decrease",
+                decreasehudscorexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.x.increase",
+                increasehudscorexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.x.focus",
+                focushudscorexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.x.blur",
+                blurhudscorexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.x.commit",
+                commithudscorexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.y.decrease",
+                decreasehudscoreyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.y.increase",
+                increasehudscoreyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.y.focus",
+                focushudscoreyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.y.blur",
+                blurhudscoreyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.y.commit",
+                commithudscoreyaction
+            ) &&
+            router.registeraction(
                 "settings.chat.top.public",
                 publicchatintopfeedaction
             ) &&
@@ -1749,6 +1884,34 @@ namespace cowui
         game_clock_y_invalid = false;
         game_clock_y_editing = false;
         game_clock_status.clear();
+        hudscore_available = false;
+        hudscore = false;
+        hudscore_scale = 1.0f;
+        hudscore_scale_minimum = 0.5f;
+        hudscore_scale_maximum = 2.0f;
+        hudscore_scale_input.clear();
+        hudscore_scale_invalid = false;
+        hudscore_scale_editing = false;
+        hudscore_alpha = 255;
+        hudscore_alpha_minimum = 0;
+        hudscore_alpha_maximum = 255;
+        hudscore_sep = 200;
+        hudscore_sep_minimum = 0;
+        hudscore_sep_maximum = 1000;
+        hudscore_align = 0;
+        hudscore_x = 0.50f;
+        hudscore_x_minimum = 0.0f;
+        hudscore_x_maximum = 1.0f;
+        hudscore_x_input.clear();
+        hudscore_x_invalid = false;
+        hudscore_x_editing = false;
+        hudscore_y = 0.03f;
+        hudscore_y_minimum = 0.0f;
+        hudscore_y_maximum = 1.0f;
+        hudscore_y_input.clear();
+        hudscore_y_invalid = false;
+        hudscore_y_editing = false;
+        hudscore_status.clear();
         public_chat_in_top_feed = true;
         team_chat_in_top_feed = true;
         public_chat_in_bottom_box = false;
@@ -1927,6 +2090,8 @@ namespace cowui
         if(!refreshhud(!streak_milestone_scale_editing))
             return false;
         if(!refreshgameclock())
+            return false;
+        if(!refreshhudscore())
             return false;
         if(!refreshchat())
             return false;
@@ -2891,6 +3056,214 @@ namespace cowui
         }
     }
 
+    bool RmlSettings::refreshhudscore()
+    {
+        settings::HudScore state = {};
+        const bool available = settings::readhudscore(state);
+        presenthudscore(
+            state,
+            available,
+            !hudscore_scale_editing,
+            !hudscore_x_editing,
+            !hudscore_y_editing);
+        return available;
+    }
+
+    void RmlSettings::presenthudscore(
+        const settings::HudScore &state,
+        bool available,
+        bool update_scale_input,
+        bool update_x_input,
+        bool update_y_input)
+    {
+        if(hudscore_available != available)
+        {
+            hudscore_available = available;
+            model.DirtyVariable("hudscore_available");
+        }
+        if(hudscore != state.enabled)
+        {
+            hudscore = state.enabled;
+            model.DirtyVariable("hudscore");
+        }
+        if(hudscore_scale != state.scale)
+        {
+            hudscore_scale = state.scale;
+            model.DirtyVariable("hudscore_scale");
+        }
+        if(hudscore_scale_minimum != state.scale_minimum)
+        {
+            hudscore_scale_minimum = state.scale_minimum;
+            model.DirtyVariable("hudscore_scale_minimum");
+        }
+        if(hudscore_scale_maximum != state.scale_maximum)
+        {
+            hudscore_scale_maximum = state.scale_maximum;
+            model.DirtyVariable("hudscore_scale_maximum");
+        }
+        if(hudscore_alpha != state.alpha)
+        {
+            hudscore_alpha = state.alpha;
+            model.DirtyVariable("hudscore_alpha");
+        }
+        if(hudscore_alpha_minimum != state.alpha_minimum)
+        {
+            hudscore_alpha_minimum = state.alpha_minimum;
+            model.DirtyVariable("hudscore_alpha_minimum");
+        }
+        if(hudscore_alpha_maximum != state.alpha_maximum)
+        {
+            hudscore_alpha_maximum = state.alpha_maximum;
+            model.DirtyVariable("hudscore_alpha_maximum");
+        }
+        if(hudscore_sep != state.spacing)
+        {
+            hudscore_sep = state.spacing;
+            model.DirtyVariable("hudscore_sep");
+        }
+        if(hudscore_sep_minimum != state.spacing_minimum)
+        {
+            hudscore_sep_minimum = state.spacing_minimum;
+            model.DirtyVariable("hudscore_sep_minimum");
+        }
+        if(hudscore_sep_maximum != state.spacing_maximum)
+        {
+            hudscore_sep_maximum = state.spacing_maximum;
+            model.DirtyVariable("hudscore_sep_maximum");
+        }
+        if(hudscore_align != state.align)
+        {
+            hudscore_align = state.align;
+            model.DirtyVariable("hudscore_align");
+        }
+        if(hudscore_x != state.x)
+        {
+            hudscore_x = state.x;
+            model.DirtyVariable("hudscore_x");
+        }
+        if(hudscore_x_minimum != state.x_minimum)
+        {
+            hudscore_x_minimum = state.x_minimum;
+            model.DirtyVariable("hudscore_x_minimum");
+        }
+        if(hudscore_x_maximum != state.x_maximum)
+        {
+            hudscore_x_maximum = state.x_maximum;
+            model.DirtyVariable("hudscore_x_maximum");
+        }
+        if(hudscore_y != state.y)
+        {
+            hudscore_y = state.y;
+            model.DirtyVariable("hudscore_y");
+        }
+        if(hudscore_y_minimum != state.y_minimum)
+        {
+            hudscore_y_minimum = state.y_minimum;
+            model.DirtyVariable("hudscore_y_minimum");
+        }
+        if(hudscore_y_maximum != state.y_maximum)
+        {
+            hudscore_y_maximum = state.y_maximum;
+            model.DirtyVariable("hudscore_y_maximum");
+        }
+
+        if(update_scale_input)
+        {
+            const Rml::String text = formatsensitivity(state.scale);
+            if(hudscore_scale_input != text)
+            {
+                hudscore_scale_input = text;
+                model.DirtyVariable("hudscore_scale_input");
+            }
+        }
+        if(update_x_input)
+        {
+            const Rml::String text = formatsensitivity(state.x);
+            if(hudscore_x_input != text)
+            {
+                hudscore_x_input = text;
+                model.DirtyVariable("hudscore_x_input");
+            }
+        }
+        if(update_y_input)
+        {
+            const Rml::String text = formatsensitivity(state.y);
+            if(hudscore_y_input != text)
+            {
+                hudscore_y_input = text;
+                model.DirtyVariable("hudscore_y_input");
+            }
+        }
+
+        const char *status = !available
+            ? "Score overlay settings are unavailable"
+            : (state.enabled
+                ? "Score overlay drawn through the existing HUD path"
+                : "Score overlay off");
+        if(hudscore_status != status)
+        {
+            hudscore_status = status;
+            model.DirtyVariable("hudscore_status");
+        }
+    }
+
+    void RmlSettings::selecthudscore(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !hudscore_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscore(enabled, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        presenthudscore(
+            state,
+            available,
+            !hudscore_scale_editing,
+            !hudscore_x_editing,
+            !hudscore_y_editing);
+        if(!accepted && available)
+        {
+            hudscore_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("hudscore_status");
+        }
+    }
+
+    void RmlSettings::selecthudscorealign(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !hudscore_available)
+            return;
+
+        const int value = arguments[0].Get<int>();
+        if(value != -1 && value != 0 && value != 1)
+            return;
+
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorealign(value, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        presenthudscore(
+            state,
+            available,
+            !hudscore_scale_editing,
+            !hudscore_x_editing,
+            !hudscore_y_editing);
+        if(!accepted && available)
+        {
+            hudscore_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("hudscore_status");
+        }
+    }
+
     bool RmlSettings::refreshchat()
     {
         settings::Chat current;
@@ -3561,6 +3934,87 @@ namespace cowui
         model.DirtyVariable("game_clock_status");
     }
 
+    void RmlSettings::commithudscorescale()
+    {
+        float requested = 0.0f;
+        settings::HudScore state = {};
+        const bool accepted = parsefloat(
+                hudscore_scale_input,
+                requested
+            ) &&
+            settings::writehudscorescale(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        hudscore_scale_invalid = !accepted;
+        model.DirtyVariable("hudscore_scale_invalid");
+        presenthudscore(
+            state,
+            available,
+            true,
+            !hudscore_x_editing,
+            !hudscore_y_editing);
+        hudscore_status = accepted
+            ? "Score overlay size applied"
+            : (available
+                ? "Invalid size; restored the last effective setting"
+                : "Score overlay settings are unavailable");
+        model.DirtyVariable("hudscore_status");
+    }
+
+    void RmlSettings::commithudscorex()
+    {
+        float requested = 0.0f;
+        settings::HudScore state = {};
+        const bool accepted = parsefloat(
+                hudscore_x_input,
+                requested
+            ) &&
+            settings::writehudscorex(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        hudscore_x_invalid = !accepted;
+        model.DirtyVariable("hudscore_x_invalid");
+        presenthudscore(
+            state,
+            available,
+            !hudscore_scale_editing,
+            true,
+            !hudscore_y_editing);
+        hudscore_status = accepted
+            ? "Score overlay x applied"
+            : (available
+                ? "Invalid x; restored the last effective setting"
+                : "Score overlay settings are unavailable");
+        model.DirtyVariable("hudscore_status");
+    }
+
+    void RmlSettings::commithudscorey()
+    {
+        float requested = 0.0f;
+        settings::HudScore state = {};
+        const bool accepted = parsefloat(
+                hudscore_y_input,
+                requested
+            ) &&
+            settings::writehudscorey(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        hudscore_y_invalid = !accepted;
+        model.DirtyVariable("hudscore_y_invalid");
+        presenthudscore(
+            state,
+            available,
+            !hudscore_scale_editing,
+            !hudscore_x_editing,
+            true);
+        hudscore_status = accepted
+            ? "Score overlay y applied"
+            : (available
+                ? "Invalid y; restored the last effective setting"
+                : "Score overlay settings are unavailable");
+        model.DirtyVariable("hudscore_status");
+    }
+
     void RmlSettings::setcategory(Category category)
     {
         if(category != Category::MouseKeyboard)
@@ -3616,6 +4070,7 @@ namespace cowui
             refreshhud(!streak_milestone_scale_editing);
             refreshammobar();
             refreshgameclock();
+            refreshhudscore();
         }
         else if(game)
         {
@@ -8439,6 +8894,404 @@ namespace cowui
            key == Rml::Input::KI_NUMPADENTER)
         {
             instance->commitgameclocky();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::changehudscorealphaaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->hudscore_alpha
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->hudscore_alpha)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(!instance->hudscore_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorealpha(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            !instance->hudscore_x_editing,
+            !instance->hudscore_y_editing);
+        if(!accepted && available)
+        {
+            instance->hudscore_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("hudscore_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changehudscoresepaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->hudscore_sep
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->hudscore_sep)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(!instance->hudscore_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscoresep(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            !instance->hudscore_x_editing,
+            !instance->hudscore_y_editing);
+        if(!accepted && available)
+        {
+            instance->hudscore_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("hudscore_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::decreasehudscorescaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::max(
+            instance->hudscore_scale_minimum,
+            stephudscore(instance->hudscore_scale, -1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorescale(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_scale_invalid = false;
+        instance->model.DirtyVariable("hudscore_scale_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            true,
+            !instance->hudscore_x_editing,
+            !instance->hudscore_y_editing);
+        instance->hudscore_status = accepted
+            ? "Score overlay size adjusted by 0.01"
+            : (available
+                ? "Score overlay size change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasehudscorescaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::min(
+            instance->hudscore_scale_maximum,
+            stephudscore(instance->hudscore_scale, 1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorescale(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_scale_invalid = false;
+        instance->model.DirtyVariable("hudscore_scale_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            true,
+            !instance->hudscore_x_editing,
+            !instance->hudscore_y_editing);
+        instance->hudscore_status = accepted
+            ? "Score overlay size adjusted by 0.01"
+            : (available
+                ? "Score overlay size change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focushudscorescaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->hudscore_scale_editing = true;
+            if(instance->hudscore_scale_invalid)
+            {
+                instance->hudscore_scale_invalid = false;
+                instance->model.DirtyVariable("hudscore_scale_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurhudscorescaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commithudscorescale();
+            instance->hudscore_scale_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commithudscorescaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commithudscorescale();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasehudscorexaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::max(
+            instance->hudscore_x_minimum,
+            stephudscore(instance->hudscore_x, -1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorex(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_x_invalid = false;
+        instance->model.DirtyVariable("hudscore_x_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            true,
+            !instance->hudscore_y_editing);
+        instance->hudscore_status = accepted
+            ? "Score overlay x adjusted by 0.01"
+            : (available
+                ? "Score overlay x change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasehudscorexaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::min(
+            instance->hudscore_x_maximum,
+            stephudscore(instance->hudscore_x, 1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorex(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_x_invalid = false;
+        instance->model.DirtyVariable("hudscore_x_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            true,
+            !instance->hudscore_y_editing);
+        instance->hudscore_status = accepted
+            ? "Score overlay x adjusted by 0.01"
+            : (available
+                ? "Score overlay x change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focushudscorexaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->hudscore_x_editing = true;
+            if(instance->hudscore_x_invalid)
+            {
+                instance->hudscore_x_invalid = false;
+                instance->model.DirtyVariable("hudscore_x_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurhudscorexaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commithudscorex();
+            instance->hudscore_x_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commithudscorexaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commithudscorex();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasehudscoreyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::max(
+            instance->hudscore_y_minimum,
+            stephudscore(instance->hudscore_y, -1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorey(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_y_invalid = false;
+        instance->model.DirtyVariable("hudscore_y_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            !instance->hudscore_x_editing,
+            true);
+        instance->hudscore_status = accepted
+            ? "Score overlay y adjusted by 0.01"
+            : (available
+                ? "Score overlay y change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasehudscoreyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::min(
+            instance->hudscore_y_maximum,
+            stephudscore(instance->hudscore_y, 1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorey(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_y_invalid = false;
+        instance->model.DirtyVariable("hudscore_y_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            !instance->hudscore_x_editing,
+            true);
+        instance->hudscore_status = accepted
+            ? "Score overlay y adjusted by 0.01"
+            : (available
+                ? "Score overlay y change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focushudscoreyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->hudscore_y_editing = true;
+            if(instance->hudscore_y_invalid)
+            {
+                instance->hudscore_y_invalid = false;
+                instance->model.DirtyVariable("hudscore_y_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurhudscoreyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commithudscorey();
+            instance->hudscore_y_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commithudscoreyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commithudscorey();
             event.StopPropagation();
         }
     }
