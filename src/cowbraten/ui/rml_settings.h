@@ -38,6 +38,7 @@ namespace cowui
         struct Ammobar;
         struct GameClock;
         struct HudScore;
+        struct ScoreboardColumns;
         struct GlassReflectionsState;
         struct ModelReflectionsState;
         struct BumpModelsState;
@@ -197,6 +198,35 @@ namespace cowui
             Rml::Event &event, const Rml::VariantList &arguments);
         void selectammobaralign(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
+        bool refreshscoreboardcolumns();
+        void presentscoreboardcolumns(
+            const settings::ScoreboardColumns &state, bool available);
+        void finishscoreboardwrite(
+            bool accepted, settings::ScoreboardColumns &state);
+        void selectscoreboardflags(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectscoreboardfrags(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectscoreboarddeaths(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectscoreboardsuicides(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectscoreboardkpd(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectscoreboardaccuracy(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectscoreboarddamage(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectscoreboarddamagemode(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectscoreboarddamagereceived(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectscoreboardping(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectscoreboardpj(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectscoreboardclientnum(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
         bool refreshvideo();
         void refreshshaderdetail();
         void presentshaderdetail(const settings::ShaderDetailState &state);
@@ -659,6 +689,21 @@ namespace cowui
         bool ammobar_y_editing = false;
         bool ammobar_hide_empty = true;
         Rml::String ammobar_status;
+        bool scoreboard_available = false;
+        bool scoreboard_flags = false;
+        bool scoreboard_frags = false;
+        bool scoreboard_deaths = false;
+        bool scoreboard_suicides = false;
+        bool scoreboard_kpd = false;
+        bool scoreboard_accuracy = false;
+        bool scoreboard_damage = false;
+        bool scoreboard_damage_dealt = false;
+        bool scoreboard_damage_net = false;
+        bool scoreboard_damage_received = false;
+        bool scoreboard_ping = true;
+        bool scoreboard_pj = false;
+        bool scoreboard_clientnum = false;
+        Rml::String scoreboard_status;
 
         Rml::String resolution_label;
         Rml::String render_resolution_label;

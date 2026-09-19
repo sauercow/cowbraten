@@ -2323,6 +2323,143 @@ namespace cowui
             return accepted;
         }
 
+        static void copyscoreboardcolumns(
+            const sauersettings::ScoreboardColumns &source,
+            ScoreboardColumns &result)
+        {
+            result.show_flags = source.show_flags;
+            result.show_frags = source.show_frags;
+            result.show_deaths = source.show_deaths;
+            result.show_suicides = source.show_suicides;
+            result.show_kpd = source.show_kpd;
+            result.show_accuracy = source.show_accuracy;
+            result.show_damage = source.show_damage;
+            result.showdamage = source.showdamage;
+            result.show_damage_dealt = source.show_damage_dealt;
+            result.show_damage_net = source.show_damage_net;
+            result.show_damage_received = source.show_damage_received;
+            result.show_ping = source.show_ping;
+            result.showping = source.showping;
+            result.show_pj = source.show_pj;
+            result.show_clientnum = source.show_clientnum;
+        }
+
+        bool readscoreboardcolumns(ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool read = sauersettings::readscoreboardcolumns(legacy);
+            copyscoreboardcolumns(legacy, result);
+            return read;
+        }
+
+        bool writeshowflags(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowflags(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writehidefrags(bool show_column, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writehidefrags(
+                show_column, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowdeaths(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowdeaths(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowsuicides(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowsuicides(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowkpd(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowkpd(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowaccuracy(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowaccuracy(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowdamage(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowdamage(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowdamagemode(int value, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowdamagemode(
+                value, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowdamagereceived(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowdamagereceived(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowping(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowping(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowpj(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowpj(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowclientnum(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowclientnum(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
         bool readchat(Chat &result)
         {
             sauersettings::Chat legacy;

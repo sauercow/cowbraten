@@ -391,8 +391,26 @@ Anchor radios write only on user select and select only on an exact `-1/0/1`
 match. `showgui "ammobar"` remains the legacy standalone document; Settings no
 longer needs that nested GUI.
 
-The legacy `scoreboard` and `hudfragmessages`
-adjustment documents contain substantially more controls than this
+HUD scoreboard columns inline the native `newgui scoreboard` column checkboxes
+onto Settings HUD. They are always presented; native `guibutton "adjust
+scoreboard"` is not gated on `hudscore`, and this slice does not add that gate.
+Show at death remains the Game-tab `deathscore` control and is not duplicated.
+The typed snapshot owns Sauer's persistent column idents: `showflags`, inverted
+`hidefrags` (UI "frags" on writes 0, off writes 1), `showdeaths`,
+`showsuicides`, `showkpd`, `showaccuracy`, `showdamage` 0/1/2, `showdamagereceived`,
+`showping` 0/1/2, `showpj`, and `showclientnum`. Each control has a typed writer
+through `setvarchecked()`. Opening Settings, returning from the legacy console,
+and activating HUD only read these values. Checkbox writes go through the typed
+API, then read the accepted snapshot back. Native `showping` and `showdamage`
+checkboxes write 0/1, but their ident maxima are 2. A non-zero unmatched value
+presents the checkbox on without rewriting until the user toggles; enabling from
+0 writes 1, disabling writes 0. Damage radios are exact-match 1 (dealt) and 2
+(net) only, skip-if-equal, and leave an unmatched non-zero value with no radio
+selected. `scoreboard2d`, `showservinfo`, `showspectators`, `highlightscore`,
+`tiesort`, and related non-column scoreboard options stay unexposed.
+`showgui "scoreboard"` remains the legacy document.
+
+The legacy `hudfragmessages` adjustment document contains substantially more controls than this
 production Settings HUD slice. Their exact `showgui` names therefore
 continue through the legacy fallback, as does `showgui gameclock` until an
 explicit mapping is added. No HUD or Crosshair compatibility alias is added

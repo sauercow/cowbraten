@@ -525,6 +525,28 @@ namespace cowui
             float y_maximum;
         };
 
+        // Native scoreboard column checkboxes. hidefrags is inverted:
+        // UI "frags" on means hidefrags==0. showping and showdamage may
+        // hold non-canonical values; opening Settings must not coerce them.
+        struct ScoreboardColumns
+        {
+            bool show_flags;
+            bool show_frags;
+            bool show_deaths;
+            bool show_suicides;
+            bool show_kpd;
+            bool show_accuracy;
+            bool show_damage;
+            int showdamage;
+            bool show_damage_dealt;
+            bool show_damage_net;
+            bool show_damage_received;
+            bool show_ping;
+            int showping;
+            bool show_pj;
+            bool show_clientnum;
+        };
+
         struct Chat
         {
             bool public_messages_in_top_feed;
@@ -779,6 +801,21 @@ namespace cowui
         bool writehudscorealign(int value, HudScore &result);
         bool writehudscorex(float value, HudScore &result);
         bool writehudscorey(float value, HudScore &result);
+
+        bool readscoreboardcolumns(ScoreboardColumns &result);
+        bool writeshowflags(bool enabled, ScoreboardColumns &result);
+        // UI bool is "show frags column": true writes hidefrags 0, false writes 1.
+        bool writehidefrags(bool show_column, ScoreboardColumns &result);
+        bool writeshowdeaths(bool enabled, ScoreboardColumns &result);
+        bool writeshowsuicides(bool enabled, ScoreboardColumns &result);
+        bool writeshowkpd(bool enabled, ScoreboardColumns &result);
+        bool writeshowaccuracy(bool enabled, ScoreboardColumns &result);
+        bool writeshowdamage(bool enabled, ScoreboardColumns &result);
+        bool writeshowdamagemode(int value, ScoreboardColumns &result);
+        bool writeshowdamagereceived(bool enabled, ScoreboardColumns &result);
+        bool writeshowping(bool enabled, ScoreboardColumns &result);
+        bool writeshowpj(bool enabled, ScoreboardColumns &result);
+        bool writeshowclientnum(bool enabled, ScoreboardColumns &result);
 
         bool readchat(Chat &result);
         bool writepublicchatintopfeed(bool enabled);

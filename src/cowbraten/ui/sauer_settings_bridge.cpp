@@ -587,6 +587,94 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *hidefragsident()
+        {
+            ident *id = getident("hidefrags");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showdeathsident()
+        {
+            ident *id = getident("showdeaths");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showpingident()
+        {
+            ident *id = getident("showping");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showpjident()
+        {
+            ident *id = getident("showpj");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showclientnumident()
+        {
+            ident *id = getident("showclientnum");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showflagsident()
+        {
+            ident *id = getident("showflags");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showsuicidesident()
+        {
+            ident *id = getident("showsuicides");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showkpdident()
+        {
+            ident *id = getident("showkpd");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showaccuracyident()
+        {
+            ident *id = getident("showaccuracy");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showdamageident()
+        {
+            ident *id = getident("showdamage");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showdamagereceivedident()
+        {
+            ident *id = getident("showdamagereceived");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         static ident *consolefilterident()
         {
             ident *id = getident("confilter");
@@ -4262,6 +4350,249 @@ namespace cowui
         bool writehudscorey(float value, HudScore &result)
         {
             return writehudscorefloat(hudscoreyident(), value, result);
+        }
+
+        bool readscoreboardcolumns(ScoreboardColumns &result)
+        {
+            result.show_flags = false;
+            result.show_frags = false;
+            result.show_deaths = false;
+            result.show_suicides = false;
+            result.show_kpd = false;
+            result.show_accuracy = false;
+            result.show_damage = false;
+            result.showdamage = 0;
+            result.show_damage_dealt = false;
+            result.show_damage_net = false;
+            result.show_damage_received = false;
+            result.show_ping = false;
+            result.showping = 0;
+            result.show_pj = false;
+            result.show_clientnum = false;
+
+            ident *flags_id = showflagsident();
+            ident *frags_id = hidefragsident();
+            ident *deaths_id = showdeathsident();
+            ident *suicides_id = showsuicidesident();
+            ident *kpd_id = showkpdident();
+            ident *accuracy_id = showaccuracyident();
+            ident *damage_id = showdamageident();
+            ident *received_id = showdamagereceivedident();
+            ident *ping_id = showpingident();
+            ident *pj_id = showpjident();
+            ident *clientnum_id = showclientnumident();
+            if(!flags_id || !flags_id->storage.i ||
+               !frags_id || !frags_id->storage.i ||
+               !deaths_id || !deaths_id->storage.i ||
+               !suicides_id || !suicides_id->storage.i ||
+               !kpd_id || !kpd_id->storage.i ||
+               !accuracy_id || !accuracy_id->storage.i ||
+               !damage_id || !damage_id->storage.i ||
+               !received_id || !received_id->storage.i ||
+               !ping_id || !ping_id->storage.i ||
+               !pj_id || !pj_id->storage.i ||
+               !clientnum_id || !clientnum_id->storage.i)
+            {
+                return false;
+            }
+
+            result.show_flags = *flags_id->storage.i != 0;
+            // Native guicheckbox "frags" [hidefrags] 0 1: checked when != off(1).
+            result.show_frags = *frags_id->storage.i != 1;
+            result.show_deaths = *deaths_id->storage.i != 0;
+            result.show_suicides = *suicides_id->storage.i != 0;
+            result.show_kpd = *kpd_id->storage.i != 0;
+            result.show_accuracy = *accuracy_id->storage.i != 0;
+            result.showdamage = *damage_id->storage.i;
+            result.show_damage = result.showdamage != 0;
+            result.show_damage_dealt = result.showdamage == 1;
+            result.show_damage_net = result.showdamage == 2;
+            result.show_damage_received = *received_id->storage.i != 0;
+            result.showping = *ping_id->storage.i;
+            result.show_ping = result.showping != 0;
+            result.show_pj = *pj_id->storage.i != 0;
+            result.show_clientnum = *clientnum_id->storage.i != 0;
+            return true;
+        }
+
+        static bool writescoreboardboolean(
+            ident *id,
+            bool enabled,
+            ScoreboardColumns &result)
+        {
+            if(!readscoreboardcolumns(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readscoreboardcolumns(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        // Native Settings checkboxes with a dedicated on-value only write
+        // when the user toggles. A non-off engine value stays put on open
+        // and on a no-op "checked" event.
+        static bool writescoreboardonoff(
+            ident *id,
+            bool enabled,
+            int on_value,
+            int off_value,
+            ScoreboardColumns &result)
+        {
+            if(!readscoreboardcolumns(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            if(enabled)
+            {
+                if(*id->storage.i == off_value)
+                {
+                    if(on_value < id->minval || on_value > id->maxval)
+                        return false;
+                    setvarchecked(id, on_value);
+                }
+            }
+            else if(*id->storage.i != off_value)
+            {
+                if(off_value < id->minval || off_value > id->maxval)
+                    return false;
+                setvarchecked(id, off_value);
+            }
+
+            if(!readscoreboardcolumns(result))
+                return false;
+            return enabled
+                ? *id->storage.i != off_value
+                : *id->storage.i == off_value;
+        }
+
+        bool writeshowflags(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(showflagsident(), enabled, result);
+        }
+
+        bool writehidefrags(bool show_column, ScoreboardColumns &result)
+        {
+            if(!readscoreboardcolumns(result))
+                return false;
+
+            ident *id = hidefragsident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = show_column ? 0 : 1;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readscoreboardcolumns(result))
+                return false;
+            return result.show_frags == show_column;
+        }
+
+        bool writeshowdeaths(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(
+                showdeathsident(),
+                enabled,
+                result);
+        }
+
+        bool writeshowsuicides(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(
+                showsuicidesident(),
+                enabled,
+                result);
+        }
+
+        bool writeshowkpd(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(showkpdident(), enabled, result);
+        }
+
+        bool writeshowaccuracy(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(
+                showaccuracyident(),
+                enabled,
+                result);
+        }
+
+        bool writeshowdamage(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardonoff(
+                showdamageident(),
+                enabled,
+                1,
+                0,
+                result);
+        }
+
+        bool writeshowdamagemode(int value, ScoreboardColumns &result)
+        {
+            if(!readscoreboardcolumns(result))
+                return false;
+
+            ident *id = showdamageident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               (value != 1 && value != 2) ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readscoreboardcolumns(result))
+                return false;
+            return result.showdamage == value;
+        }
+
+        bool writeshowdamagereceived(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(
+                showdamagereceivedident(),
+                enabled,
+                result);
+        }
+
+        bool writeshowping(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardonoff(
+                showpingident(),
+                enabled,
+                1,
+                0,
+                result);
+        }
+
+        bool writeshowpj(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(showpjident(), enabled, result);
+        }
+
+        bool writeshowclientnum(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(
+                showclientnumident(),
+                enabled,
+                result);
         }
 
         bool readchat(Chat &result)

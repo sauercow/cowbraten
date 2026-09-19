@@ -90,7 +90,7 @@
                     <div class="settings-scope-note" data-if="category_hud">
                         <div class="settings-scope-kicker">Combat Information</div>
                         <div class="settings-scope-copy">
-                            FPS and wall-clock overlays, damage feedback, HUD guns, the match gameclock, the score overlay, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
+                            FPS and wall-clock overlays, damage feedback, HUD guns, the match gameclock, the score overlay, scoreboard columns, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_audio">
@@ -977,6 +977,222 @@
                             <div class="settings-control-footer settings-control-footer-compact"
                                 data-if="game_clock_status != ''">
                                 <span>{{ game_clock_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">HUD / Scoreboard</div>
+                                    <div class="settings-control-description">
+                                        Column checkboxes from the native scoreboard GUI. Show at death stays on Game. These columns are always shown here; they are not gated on hudscore.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Flags</div>
+                                    <div class="settings-control-description">
+                                        Shows captured flags on the CTF scoreboard.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_flags"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_flags(ev.checked)" />
+                                    <span data-if="scoreboard_flags">On</span>
+                                    <span data-if="!scoreboard_flags">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Frags</div>
+                                    <div class="settings-control-description">
+                                        Shows the frags column. Native hidefrags is inverted: checked writes 0, unchecked writes 1.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_frags"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_frags(ev.checked)" />
+                                    <span data-if="scoreboard_frags">On</span>
+                                    <span data-if="!scoreboard_frags">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Deaths</div>
+                                    <div class="settings-control-description">
+                                        Shows each player's death count.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_deaths"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_deaths(ev.checked)" />
+                                    <span data-if="scoreboard_deaths">On</span>
+                                    <span data-if="!scoreboard_deaths">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Suicides</div>
+                                    <div class="settings-control-description">
+                                        Shows each player's suicide count.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_suicides"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_suicides(ev.checked)" />
+                                    <span data-if="scoreboard_suicides">On</span>
+                                    <span data-if="!scoreboard_suicides">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">KPD</div>
+                                    <div class="settings-control-description">
+                                        Shows kills per death.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_kpd"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_kpd(ev.checked)" />
+                                    <span data-if="scoreboard_kpd">On</span>
+                                    <span data-if="!scoreboard_kpd">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Accuracy</div>
+                                    <div class="settings-control-description">
+                                        Shows each player's shot accuracy.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_accuracy"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_accuracy(ev.checked)" />
+                                    <span data-if="scoreboard_accuracy">On</span>
+                                    <span data-if="!scoreboard_accuracy">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Damage</div>
+                                    <div class="settings-control-description">
+                                        Shows damage dealt or net. Enabling from off writes dealt (1). Opening Settings does not rewrite an unmatched non-zero value.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_damage"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_damage(ev.checked)" />
+                                    <span data-if="scoreboard_damage">On</span>
+                                    <span data-if="!scoreboard_damage">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-if="scoreboard_damage">
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="scoreboard_damage_dealt"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-click="select_scoreboard_damage_mode(1)">Dealt</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="scoreboard_damage_net"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-click="select_scoreboard_damage_mode(2)">Net</button>
+                                </div>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Damage Received</div>
+                                    <div class="settings-control-description">
+                                        Shows damage taken by each player.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_damage_received"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_damage_received(ev.checked)" />
+                                    <span data-if="scoreboard_damage_received">On</span>
+                                    <span data-if="!scoreboard_damage_received">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Ping</div>
+                                    <div class="settings-control-description">
+                                        Shows ping. Ident max is 2; a value of 2 stays checked and is not rewritten to 1 on open.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_ping"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_ping(ev.checked)" />
+                                    <span data-if="scoreboard_ping">On</span>
+                                    <span data-if="!scoreboard_ping">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">PJ</div>
+                                    <div class="settings-control-description">
+                                        Shows packet jump on the multiplayer scoreboard.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_pj"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_pj(ev.checked)" />
+                                    <span data-if="scoreboard_pj">On</span>
+                                    <span data-if="!scoreboard_pj">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">CN</div>
+                                    <div class="settings-control-description">
+                                        Shows each player's client number. Masters still see client numbers when this is off.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_clientnum"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_clientnum(ev.checked)" />
+                                    <span data-if="scoreboard_clientnum">On</span>
+                                    <span data-if="!scoreboard_clientnum">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="scoreboard_status != ''">
+                                <span>{{ scoreboard_status }}</span>
                             </div>
                         </div>
 

@@ -504,6 +504,33 @@ namespace cowui
             constructor.BindEventCallback("select_ammobar_flip", &RmlSettings::selectammobarflip, this) &&
             constructor.BindEventCallback("select_ammobar_hide_empty", &RmlSettings::selectammobarhideempty, this) &&
             constructor.BindEventCallback("select_ammobar_align", &RmlSettings::selectammobaralign, this) &&
+            constructor.Bind("scoreboard_available", &scoreboard_available) &&
+            constructor.Bind("scoreboard_flags", &scoreboard_flags) &&
+            constructor.Bind("scoreboard_frags", &scoreboard_frags) &&
+            constructor.Bind("scoreboard_deaths", &scoreboard_deaths) &&
+            constructor.Bind("scoreboard_suicides", &scoreboard_suicides) &&
+            constructor.Bind("scoreboard_kpd", &scoreboard_kpd) &&
+            constructor.Bind("scoreboard_accuracy", &scoreboard_accuracy) &&
+            constructor.Bind("scoreboard_damage", &scoreboard_damage) &&
+            constructor.Bind("scoreboard_damage_dealt", &scoreboard_damage_dealt) &&
+            constructor.Bind("scoreboard_damage_net", &scoreboard_damage_net) &&
+            constructor.Bind("scoreboard_damage_received", &scoreboard_damage_received) &&
+            constructor.Bind("scoreboard_ping", &scoreboard_ping) &&
+            constructor.Bind("scoreboard_pj", &scoreboard_pj) &&
+            constructor.Bind("scoreboard_clientnum", &scoreboard_clientnum) &&
+            constructor.Bind("scoreboard_status", &scoreboard_status) &&
+            constructor.BindEventCallback("select_scoreboard_flags", &RmlSettings::selectscoreboardflags, this) &&
+            constructor.BindEventCallback("select_scoreboard_frags", &RmlSettings::selectscoreboardfrags, this) &&
+            constructor.BindEventCallback("select_scoreboard_deaths", &RmlSettings::selectscoreboarddeaths, this) &&
+            constructor.BindEventCallback("select_scoreboard_suicides", &RmlSettings::selectscoreboardsuicides, this) &&
+            constructor.BindEventCallback("select_scoreboard_kpd", &RmlSettings::selectscoreboardkpd, this) &&
+            constructor.BindEventCallback("select_scoreboard_accuracy", &RmlSettings::selectscoreboardaccuracy, this) &&
+            constructor.BindEventCallback("select_scoreboard_damage", &RmlSettings::selectscoreboarddamage, this) &&
+            constructor.BindEventCallback("select_scoreboard_damage_mode", &RmlSettings::selectscoreboarddamagemode, this) &&
+            constructor.BindEventCallback("select_scoreboard_damage_received", &RmlSettings::selectscoreboarddamagereceived, this) &&
+            constructor.BindEventCallback("select_scoreboard_ping", &RmlSettings::selectscoreboardping, this) &&
+            constructor.BindEventCallback("select_scoreboard_pj", &RmlSettings::selectscoreboardpj, this) &&
+            constructor.BindEventCallback("select_scoreboard_clientnum", &RmlSettings::selectscoreboardclientnum, this) &&
             constructor.Bind("resolution_label", &resolution_label) &&
             constructor.Bind(
                 "render_resolution_label",
@@ -1654,6 +1681,21 @@ namespace cowui
         ammobar_y_editing = false;
         ammobar_hide_empty = true;
         ammobar_status.clear();
+        scoreboard_available = false;
+        scoreboard_flags = false;
+        scoreboard_frags = false;
+        scoreboard_deaths = false;
+        scoreboard_suicides = false;
+        scoreboard_kpd = false;
+        scoreboard_accuracy = false;
+        scoreboard_damage = false;
+        scoreboard_damage_dealt = false;
+        scoreboard_damage_net = false;
+        scoreboard_damage_received = false;
+        scoreboard_ping = true;
+        scoreboard_pj = false;
+        scoreboard_clientnum = false;
+        scoreboard_status.clear();
         resolution_label.clear();
         render_resolution_label.clear();
         video_status.clear();
@@ -2077,6 +2119,8 @@ namespace cowui
         if(!refreshgamemodels())
             return false;
         if(!refreshammobar())
+            return false;
+        if(!refreshscoreboardcolumns())
             return false;
         if(!refreshvideo())
             return false;
@@ -4071,6 +4115,7 @@ namespace cowui
             refreshammobar();
             refreshgameclock();
             refreshhudscore();
+            refreshscoreboardcolumns();
         }
         else if(game)
         {
@@ -5137,6 +5182,310 @@ namespace cowui
         settings::Ammobar state = {};
         const bool accepted = settings::writeammobaralign(requested, state);
         finishammobarwrite(accepted, state);
+    }
+
+    bool RmlSettings::refreshscoreboardcolumns()
+    {
+        settings::ScoreboardColumns state = {};
+        const bool available = settings::readscoreboardcolumns(state);
+        presentscoreboardcolumns(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentscoreboardcolumns(
+        const settings::ScoreboardColumns &state,
+        bool available)
+    {
+        if(scoreboard_available != available)
+        {
+            scoreboard_available = available;
+            model.DirtyVariable("scoreboard_available");
+        }
+
+        if(scoreboard_flags != state.show_flags)
+        {
+            scoreboard_flags = state.show_flags;
+            model.DirtyVariable("scoreboard_flags");
+        }
+        if(scoreboard_frags != state.show_frags)
+        {
+            scoreboard_frags = state.show_frags;
+            model.DirtyVariable("scoreboard_frags");
+        }
+        if(scoreboard_deaths != state.show_deaths)
+        {
+            scoreboard_deaths = state.show_deaths;
+            model.DirtyVariable("scoreboard_deaths");
+        }
+        if(scoreboard_suicides != state.show_suicides)
+        {
+            scoreboard_suicides = state.show_suicides;
+            model.DirtyVariable("scoreboard_suicides");
+        }
+        if(scoreboard_kpd != state.show_kpd)
+        {
+            scoreboard_kpd = state.show_kpd;
+            model.DirtyVariable("scoreboard_kpd");
+        }
+        if(scoreboard_accuracy != state.show_accuracy)
+        {
+            scoreboard_accuracy = state.show_accuracy;
+            model.DirtyVariable("scoreboard_accuracy");
+        }
+        if(scoreboard_damage != state.show_damage)
+        {
+            scoreboard_damage = state.show_damage;
+            model.DirtyVariable("scoreboard_damage");
+        }
+        if(scoreboard_damage_dealt != state.show_damage_dealt)
+        {
+            scoreboard_damage_dealt = state.show_damage_dealt;
+            model.DirtyVariable("scoreboard_damage_dealt");
+        }
+        if(scoreboard_damage_net != state.show_damage_net)
+        {
+            scoreboard_damage_net = state.show_damage_net;
+            model.DirtyVariable("scoreboard_damage_net");
+        }
+        if(scoreboard_damage_received != state.show_damage_received)
+        {
+            scoreboard_damage_received = state.show_damage_received;
+            model.DirtyVariable("scoreboard_damage_received");
+        }
+        if(scoreboard_ping != state.show_ping)
+        {
+            scoreboard_ping = state.show_ping;
+            model.DirtyVariable("scoreboard_ping");
+        }
+        if(scoreboard_pj != state.show_pj)
+        {
+            scoreboard_pj = state.show_pj;
+            model.DirtyVariable("scoreboard_pj");
+        }
+        if(scoreboard_clientnum != state.show_clientnum)
+        {
+            scoreboard_clientnum = state.show_clientnum;
+            model.DirtyVariable("scoreboard_clientnum");
+        }
+
+        Rml::String status;
+        if(!available)
+            status = "Scoreboard column settings are unavailable";
+        else
+        {
+            if(state.showping == 2)
+            {
+                status =
+                    "Ping is 2; shown on without rewriting. A toggle off writes 0, on from 0 writes 1.";
+            }
+            if(state.show_damage &&
+               !state.show_damage_dealt &&
+               !state.show_damage_net)
+            {
+                char text[192];
+                std::snprintf(
+                    text,
+                    sizeof(text),
+                    "Damage is %d; no radio is selected. Opening Settings does not rewrite.",
+                    state.showdamage
+                );
+                if(!status.empty())
+                    status += " ";
+                status += text;
+            }
+        }
+        if(scoreboard_status != status)
+        {
+            scoreboard_status = status;
+            model.DirtyVariable("scoreboard_status");
+        }
+    }
+
+    void RmlSettings::finishscoreboardwrite(
+        bool accepted,
+        settings::ScoreboardColumns &state)
+    {
+        const bool available = accepted ||
+            settings::readscoreboardcolumns(state);
+        presentscoreboardcolumns(state, available);
+        if(!accepted && available)
+        {
+            scoreboard_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("scoreboard_status");
+        }
+    }
+
+    void RmlSettings::selectscoreboardflags(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowflags(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardfrags(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writehidefrags(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboarddeaths(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowdeaths(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardsuicides(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowsuicides(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardkpd(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowkpd(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardaccuracy(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowaccuracy(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboarddamage(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowdamage(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboarddamagemode(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const int value = arguments[0].Get<int>();
+        if(value != 1 && value != 2)
+            return;
+
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowdamagemode(value, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboarddamagereceived(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowdamagereceived(
+            enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardping(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowping(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardpj(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowpj(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardclientnum(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowclientnum(enabled, state);
+        finishscoreboardwrite(accepted, state);
     }
 
     void RmlSettings::gamecategoryaction(Rml::Event &event)
