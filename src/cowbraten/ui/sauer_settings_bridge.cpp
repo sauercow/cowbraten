@@ -37,6 +37,38 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *bloodident()
+        {
+            ident *id = getident("blood");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hitsoundident()
+        {
+            ident *id = getident("hitsound");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *outlinemetersident()
+        {
+            ident *id = getident("outlinemeters");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *deathscoreident()
+        {
+            ident *id = getident("deathscore");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         static ident *fullscreenident()
         {
             ident *id = getident("fullscreen");
@@ -344,6 +376,81 @@ namespace cowui
 
             setvarchecked(id, value);
             return true;
+        }
+
+        bool readgamefeedback(GameFeedback &result)
+        {
+            result.blood = false;
+            result.hit_sound = false;
+            result.outline_capture_meters = false;
+            result.show_scoreboard_at_death = false;
+
+            ident *blood_id = bloodident();
+            ident *hitsound_id = hitsoundident();
+            ident *meters_id = outlinemetersident();
+            ident *death_id = deathscoreident();
+            if(!blood_id || !blood_id->storage.i ||
+               !hitsound_id || !hitsound_id->storage.i ||
+               !meters_id || !meters_id->storage.i ||
+               !death_id || !death_id->storage.i)
+            {
+                return false;
+            }
+
+            result.blood = *blood_id->storage.i != 0;
+            result.hit_sound = *hitsound_id->storage.i != 0;
+            result.outline_capture_meters = *meters_id->storage.i != 0;
+            result.show_scoreboard_at_death = *death_id->storage.i != 0;
+            return true;
+        }
+
+        static bool writegamefeedbackboolean(
+            ident *id,
+            bool enabled,
+            GameFeedback &result)
+        {
+            if(!readgamefeedback(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readgamefeedback(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        bool writeblood(bool enabled, GameFeedback &result)
+        {
+            return writegamefeedbackboolean(bloodident(), enabled, result);
+        }
+
+        bool writehitsound(bool enabled, GameFeedback &result)
+        {
+            return writegamefeedbackboolean(hitsoundident(), enabled, result);
+        }
+
+        bool writeoutlinemeters(bool enabled, GameFeedback &result)
+        {
+            return writegamefeedbackboolean(
+                outlinemetersident(),
+                enabled,
+                result);
+        }
+
+        bool writedeathscore(bool enabled, GameFeedback &result)
+        {
+            return writegamefeedbackboolean(
+                deathscoreident(),
+                enabled,
+                result);
         }
 
         bool readvideo(Video &result)

@@ -78,7 +78,7 @@
                     <div class="settings-scope-note" data-if="category_game">
                         <div class="settings-scope-kicker">Live Setting</div>
                         <div class="settings-scope-copy">
-                            Field of view is connected directly to the existing Sauer configuration system.
+                            Field of view and combat feedback use the existing Sauer configuration system. Opening this page does not rewrite those values.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_graphics">
@@ -176,6 +176,89 @@
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Application</div>
                                 <div class="settings-info-value">Immediate</div>
+                            </div>
+                        </div>
+
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Combat Feedback</div>
+                            <div class="settings-stage-title">Feedback</div>
+                            <div class="settings-stage-copy">
+                                These toggles use Sauer's existing persistent combat-feedback settings. Changes apply immediately and do not restart the renderer.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Hit Sound</div>
+                                    <div class="settings-control-description">
+                                        Play the existing hit confirmation sound when you damage another player. While spectating, it follows the player you are watching.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hit_sound"
+                                        data-attrif-disabled="!game_feedback_available"
+                                        data-event-change="select_hit_sound(ev.checked)" />
+                                    <span data-if="hit_sound">On</span>
+                                    <span data-if="!hit_sound">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Blood</div>
+                                    <div class="settings-control-description">
+                                        Spawn blood splash particles and gibs when players take damage. World blood decals remain a separate Graphics setting.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="blood"
+                                        data-attrif-disabled="!game_feedback_available"
+                                        data-event-change="select_blood(ev.checked)" />
+                                    <span data-if="blood">On</span>
+                                    <span data-if="!blood">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Outline Capture Meters</div>
+                                    <div class="settings-control-description">
+                                        Draw a green outline around in-world meter particles, including capture-progress meters and player status bars.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="outline_capture_meters"
+                                        data-attrif-disabled="!game_feedback_available"
+                                        data-event-change="select_outline_capture_meters(ev.checked)" />
+                                    <span data-if="outline_capture_meters">On</span>
+                                    <span data-if="!outline_capture_meters">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Show Scoreboard at Death</div>
+                                    <div class="settings-control-description">
+                                        Open the scoreboard when you die or are force-killed. Turning this off does not close a scoreboard that is already open.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="show_scoreboard_at_death"
+                                        data-attrif-disabled="!game_feedback_available"
+                                        data-event-change="select_show_scoreboard_at_death(ev.checked)" />
+                                    <span data-if="show_scoreboard_at_death">On</span>
+                                    <span data-if="!show_scoreboard_at_death">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="game_feedback_status != ''">
+                                <span>{{ game_feedback_status }}</span>
                             </div>
                         </div>
                     </div>

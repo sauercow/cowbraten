@@ -83,6 +83,58 @@ namespace cowui
             return sauersettings::writefov(value);
         }
 
+        static void copygamefeedback(
+            const sauersettings::GameFeedback &source,
+            GameFeedback &result)
+        {
+            result.blood = source.blood;
+            result.hit_sound = source.hit_sound;
+            result.outline_capture_meters = source.outline_capture_meters;
+            result.show_scoreboard_at_death = source.show_scoreboard_at_death;
+        }
+
+        bool readgamefeedback(GameFeedback &result)
+        {
+            sauersettings::GameFeedback legacy = {};
+            const bool read = sauersettings::readgamefeedback(legacy);
+            copygamefeedback(legacy, result);
+            return read;
+        }
+
+        bool writeblood(bool enabled, GameFeedback &result)
+        {
+            sauersettings::GameFeedback legacy = {};
+            const bool accepted = sauersettings::writeblood(enabled, legacy);
+            copygamefeedback(legacy, result);
+            return accepted;
+        }
+
+        bool writehitsound(bool enabled, GameFeedback &result)
+        {
+            sauersettings::GameFeedback legacy = {};
+            const bool accepted = sauersettings::writehitsound(enabled, legacy);
+            copygamefeedback(legacy, result);
+            return accepted;
+        }
+
+        bool writeoutlinemeters(bool enabled, GameFeedback &result)
+        {
+            sauersettings::GameFeedback legacy = {};
+            const bool accepted = sauersettings::writeoutlinemeters(
+                enabled, legacy);
+            copygamefeedback(legacy, result);
+            return accepted;
+        }
+
+        bool writedeathscore(bool enabled, GameFeedback &result)
+        {
+            sauersettings::GameFeedback legacy = {};
+            const bool accepted = sauersettings::writedeathscore(
+                enabled, legacy);
+            copygamefeedback(legacy, result);
+            return accepted;
+        }
+
         bool readvideo(Video &result)
         {
             sauersettings::Video legacy;

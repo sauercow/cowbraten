@@ -31,6 +31,7 @@ namespace cowui
         struct WaterEnvironmentReflectionsState;
         struct WaterRenderResolutionState;
         struct WaterfallEffectsState;
+        struct GameFeedback;
         struct GlassReflectionsState;
         struct ModelReflectionsState;
         struct BumpModelsState;
@@ -142,6 +143,17 @@ namespace cowui
         };
 
         bool refresh();
+        bool refreshgamefeedback();
+        void presentgamefeedback(const settings::GameFeedback &state,
+            bool available);
+        void selectblood(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selecthitsound(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectoutlinecapturemeters(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectshowscoreboardatdeath(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
         bool refreshvideo();
         void refreshshaderdetail();
         void presentshaderdetail(const settings::ShaderDetailState &state);
@@ -442,6 +454,12 @@ namespace cowui
         int fov = 100;
         int fov_minimum = 10;
         int fov_maximum = 150;
+        bool game_feedback_available = false;
+        bool blood = true;
+        bool hit_sound = false;
+        bool outline_capture_meters = false;
+        bool show_scoreboard_at_death = true;
+        Rml::String game_feedback_status;
 
         Rml::String resolution_label;
         Rml::String render_resolution_label;

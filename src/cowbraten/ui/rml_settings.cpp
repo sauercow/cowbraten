@@ -289,6 +289,16 @@ namespace cowui
             constructor.Bind("fov", &fov) &&
             constructor.Bind("fov_minimum", &fov_minimum) &&
             constructor.Bind("fov_maximum", &fov_maximum) &&
+            constructor.Bind("game_feedback_available", &game_feedback_available) &&
+            constructor.Bind("blood", &blood) &&
+            constructor.Bind("hit_sound", &hit_sound) &&
+            constructor.Bind("outline_capture_meters", &outline_capture_meters) &&
+            constructor.Bind("show_scoreboard_at_death", &show_scoreboard_at_death) &&
+            constructor.Bind("game_feedback_status", &game_feedback_status) &&
+            constructor.BindEventCallback("select_blood", &RmlSettings::selectblood, this) &&
+            constructor.BindEventCallback("select_hit_sound", &RmlSettings::selecthitsound, this) &&
+            constructor.BindEventCallback("select_outline_capture_meters", &RmlSettings::selectoutlinecapturemeters, this) &&
+            constructor.BindEventCallback("select_show_scoreboard_at_death", &RmlSettings::selectshowscoreboardatdeath, this) &&
             constructor.Bind("resolution_label", &resolution_label) &&
             constructor.Bind(
                 "render_resolution_label",
@@ -934,6 +944,12 @@ namespace cowui
         fov = 100;
         fov_minimum = 10;
         fov_maximum = 150;
+        game_feedback_available = false;
+        blood = true;
+        hit_sound = false;
+        outline_capture_meters = false;
+        show_scoreboard_at_death = true;
+        game_feedback_status.clear();
         resolution_label.clear();
         render_resolution_label.clear();
         video_status.clear();
@@ -1213,6 +1229,8 @@ namespace cowui
             model.DirtyVariable("fov_maximum");
         }
 
+        if(!refreshgamefeedback())
+            return false;
         if(!refreshvideo())
             return false;
         refreshshaderdetail();
@@ -2465,6 +2483,8 @@ namespace cowui
             refreshaudio();
         else if(hud)
             refreshhud(!streak_milestone_scale_editing);
+        else if(game)
+            refreshgamefeedback();
         else if(crosshair)
             refreshcrosshair(!crosshair_size_editing);
         else if(chat)
@@ -2673,6 +2693,142 @@ namespace cowui
 
         instance->refresh();
         event.StopPropagation();
+    }
+
+    bool RmlSettings::refreshgamefeedback()
+    {
+        settings::GameFeedback state = {};
+        const bool available = settings::readgamefeedback(state);
+        presentgamefeedback(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentgamefeedback(
+        const settings::GameFeedback &state,
+        bool available)
+    {
+        if(game_feedback_available != available)
+        {
+            game_feedback_available = available;
+            model.DirtyVariable("game_feedback_available");
+        }
+        if(blood != state.blood)
+        {
+            blood = state.blood;
+            model.DirtyVariable("blood");
+        }
+        if(hit_sound != state.hit_sound)
+        {
+            hit_sound = state.hit_sound;
+            model.DirtyVariable("hit_sound");
+        }
+        if(outline_capture_meters != state.outline_capture_meters)
+        {
+            outline_capture_meters = state.outline_capture_meters;
+            model.DirtyVariable("outline_capture_meters");
+        }
+        if(show_scoreboard_at_death != state.show_scoreboard_at_death)
+        {
+            show_scoreboard_at_death = state.show_scoreboard_at_death;
+            model.DirtyVariable("show_scoreboard_at_death");
+        }
+
+        const char *status = available
+            ? ""
+            : "Combat feedback settings are unavailable";
+        if(game_feedback_status != status)
+        {
+            game_feedback_status = status;
+            model.DirtyVariable("game_feedback_status");
+        }
+    }
+
+    void RmlSettings::selectblood(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_feedback_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameFeedback state = {};
+        const bool accepted = settings::writeblood(enabled, state);
+        const bool available = accepted ||
+            settings::readgamefeedback(state);
+        presentgamefeedback(state, available);
+        if(!accepted && available)
+        {
+            game_feedback_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_feedback_status");
+        }
+    }
+
+    void RmlSettings::selecthitsound(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_feedback_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameFeedback state = {};
+        const bool accepted = settings::writehitsound(enabled, state);
+        const bool available = accepted ||
+            settings::readgamefeedback(state);
+        presentgamefeedback(state, available);
+        if(!accepted && available)
+        {
+            game_feedback_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_feedback_status");
+        }
+    }
+
+    void RmlSettings::selectoutlinecapturemeters(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_feedback_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameFeedback state = {};
+        const bool accepted = settings::writeoutlinemeters(enabled, state);
+        const bool available = accepted ||
+            settings::readgamefeedback(state);
+        presentgamefeedback(state, available);
+        if(!accepted && available)
+        {
+            game_feedback_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_feedback_status");
+        }
+    }
+
+    void RmlSettings::selectshowscoreboardatdeath(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_feedback_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameFeedback state = {};
+        const bool accepted = settings::writedeathscore(enabled, state);
+        const bool available = accepted ||
+            settings::readgamefeedback(state);
+        presentgamefeedback(state, available);
+        if(!accepted && available)
+        {
+            game_feedback_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_feedback_status");
+        }
     }
 
     void RmlSettings::gamecategoryaction(Rml::Event &event)

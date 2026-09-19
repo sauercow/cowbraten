@@ -19,6 +19,14 @@ namespace cowui
             int maximum;
         };
 
+        struct GameFeedback
+        {
+            bool blood;
+            bool hit_sound;
+            bool outline_capture_meters;
+            bool show_scoreboard_at_death;
+        };
+
         struct Video
         {
             int width;
@@ -430,6 +438,12 @@ namespace cowui
 
         bool readfov(Fov &result);
         bool writefov(int value);
+
+        bool readgamefeedback(GameFeedback &result);
+        bool writeblood(bool enabled, GameFeedback &result);
+        bool writehitsound(bool enabled, GameFeedback &result);
+        bool writeoutlinemeters(bool enabled, GameFeedback &result);
+        bool writedeathscore(bool enabled, GameFeedback &result);
 
         bool readvideo(Video &result);
         bool writepresentation(PresentationMode mode);
