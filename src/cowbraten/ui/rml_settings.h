@@ -19,6 +19,7 @@ namespace cowui
     namespace settings
     {
         enum class PresentationMode;
+        struct Gamma;
         struct CrosshairChoice;
         struct SoundpackChoice;
         struct AnisotropyState;
@@ -322,6 +323,8 @@ namespace cowui
         void presentanisotropy(const settings::AnisotropyState &state);
         void selectanisotropy(Rml::DataModelHandle, Rml::Event &event,
                               const Rml::VariantList &arguments);
+        void refreshgamma();
+        void presentgamma(const settings::Gamma &state, bool available);
         bool refreshaudio();
         bool refreshmouseinput(bool update_edit_buffer = false);
         bool refreshcrosshair(bool update_edit_buffer = false);
@@ -393,6 +396,7 @@ namespace cowui
         static void exclusivefullscreenaction(Rml::Event &event);
         static void desktopfullscreenaction(Rml::Event &event);
         static void vsyncaction(Rml::Event &event);
+        static void changegammaaction(Rml::Event &event);
         static void grassaction(Rml::Event &event);
         static void motionbluraction(Rml::Event &event);
         static void changeglareintensityaction(Rml::Event &event);
@@ -479,6 +483,11 @@ namespace cowui
         Rml::String video_status;
         Rml::String presentation_label;
         Rml::String vsync_status;
+        int gamma = 100;
+        int gamma_minimum = 30;
+        int gamma_maximum = 300;
+        Rml::String gamma_label;
+        Rml::String gamma_status;
         bool shadow_state_available = false;
         bool shadow_maps = false;
         bool shadow_maps_available = false;

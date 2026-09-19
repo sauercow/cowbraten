@@ -49,6 +49,16 @@ namespace cowui
             int maximum;
         };
 
+        // requested is the persistent ident; effective is the last brightness
+        // SDL reports for the game window, which can lag or fail independently.
+        struct Gamma
+        {
+            int requested;
+            int effective;
+            int minimum;
+            int maximum;
+        };
+
         struct Antialiasing
         {
             int requested_samples;
@@ -469,6 +479,9 @@ namespace cowui
 
         bool readfpslimit(FpsLimit &result);
         bool writefpslimit(int value);
+
+        bool readgamma(Gamma &result);
+        bool writegamma(int value, Gamma &result);
 
         bool readantialiasing(Antialiasing &result);
         bool writeantialiasing(int samples);

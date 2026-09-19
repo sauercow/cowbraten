@@ -3,6 +3,7 @@
 
 #include "sauer_settings_bridge.h"
 
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 
@@ -96,6 +97,14 @@ namespace cowui
         static ident *maxfpsident()
         {
             ident *id = getident("maxfps");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gammaident()
+        {
+            ident *id = getident("gamma");
             return id && id->type == ID_VAR
                 ? id
                 : nullptr;
@@ -713,6 +722,55 @@ namespace cowui
 
             setvarchecked(id, value);
             return *id->storage.i == value;
+        }
+
+        static int windowgamma()
+        {
+            if(!screen)
+                return 100;
+            return int(std::lround(
+                double(SDL_GetWindowBrightness(screen)) * 100.0));
+        }
+
+        bool readgamma(Gamma &result)
+        {
+            result.requested = 100;
+            result.effective = 100;
+            result.minimum = 30;
+            result.maximum = 300;
+
+            ident *id = gammaident();
+            if(!id || !id->storage.i || !screen)
+                return false;
+
+            result.requested = *id->storage.i;
+            result.minimum = id->minval;
+            result.maximum = id->maxval;
+            result.effective = windowgamma();
+            return true;
+        }
+
+        bool writegamma(int value, Gamma &result)
+        {
+            if(!readgamma(result))
+                return false;
+
+            ident *id = gammaident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            // Same requested value: keep the ident untouched so opening
+            // Settings cannot rewrite SDL brightness.
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readgamma(result))
+                return false;
+            return result.requested == value;
         }
 
         bool readantialiasing(Antialiasing &result)

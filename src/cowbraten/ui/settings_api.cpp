@@ -226,6 +226,30 @@ namespace cowui
             return sauersettings::writefpslimit(value);
         }
 
+        static void copygamma(const sauersettings::Gamma &source, Gamma &result)
+        {
+            result.requested = source.requested;
+            result.effective = source.effective;
+            result.minimum = source.minimum;
+            result.maximum = source.maximum;
+        }
+
+        bool readgamma(Gamma &result)
+        {
+            sauersettings::Gamma legacy = {};
+            const bool read = sauersettings::readgamma(legacy);
+            copygamma(legacy, result);
+            return read;
+        }
+
+        bool writegamma(int value, Gamma &result)
+        {
+            sauersettings::Gamma legacy = {};
+            const bool accepted = sauersettings::writegamma(value, legacy);
+            copygamma(legacy, result);
+            return accepted;
+        }
+
         bool readantialiasing(Antialiasing &result)
         {
             sauersettings::Antialiasing legacy;

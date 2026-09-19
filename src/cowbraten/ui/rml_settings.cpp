@@ -5,6 +5,7 @@
 #include "settings_api.h"
 
 #include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Input.h>
@@ -406,6 +407,11 @@ namespace cowui
             constructor.Bind("vsync", &vsync) &&
             constructor.Bind("vsync_adaptive", &vsync_adaptive) &&
             constructor.Bind("vsync_status", &vsync_status) &&
+            constructor.Bind("gamma", &gamma) &&
+            constructor.Bind("gamma_minimum", &gamma_minimum) &&
+            constructor.Bind("gamma_maximum", &gamma_maximum) &&
+            constructor.Bind("gamma_label", &gamma_label) &&
+            constructor.Bind("gamma_status", &gamma_status) &&
             constructor.Bind("shadow_state_available", &shadow_state_available) &&
             constructor.Bind("shadow_maps", &shadow_maps) &&
             constructor.Bind("shadow_maps_available", &shadow_maps_available) &&
@@ -863,6 +869,10 @@ namespace cowui
                 vsyncaction
             ) &&
             router.registeraction(
+                "settings.gamma",
+                changegammaaction
+            ) &&
+            router.registeraction(
                 "settings.grass",
                 grassaction
             ) &&
@@ -1093,6 +1103,11 @@ namespace cowui
         video_status.clear();
         presentation_label.clear();
         vsync_status.clear();
+        gamma = 100;
+        gamma_minimum = 30;
+        gamma_maximum = 300;
+        gamma_label.clear();
+        gamma_status.clear();
         shadow_state_available = false;
         shadow_maps = false;
         shadow_maps_available = false;
@@ -1494,6 +1509,7 @@ namespace cowui
         refreshanisotropy();
         refreshbilinearfiltering();
         refreshmipmapblending();
+        refreshgamma();
         settings::Video current;
         if(!settings::readvideo(current))
             return false;
@@ -5496,6 +5512,117 @@ namespace cowui
             instance->vsync_status =
                 "Driver rejected the VSync change";
             instance->model.DirtyVariable("vsync_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::refreshgamma()
+    {
+        settings::Gamma state = {};
+        const bool available = settings::readgamma(state);
+        presentgamma(state, available);
+    }
+
+    void RmlSettings::presentgamma(const settings::Gamma &state, bool available)
+    {
+        const int requested = available ? state.requested : 100;
+        const int minimum = available ? state.minimum : 30;
+        const int maximum = available ? state.maximum : 300;
+
+        if(gamma != requested)
+        {
+            gamma = requested;
+            model.DirtyVariable("gamma");
+        }
+        if(gamma_minimum != minimum)
+        {
+            gamma_minimum = minimum;
+            model.DirtyVariable("gamma_minimum");
+        }
+        if(gamma_maximum != maximum)
+        {
+            gamma_maximum = maximum;
+            model.DirtyVariable("gamma_maximum");
+        }
+
+        char value_label[32];
+        if(available)
+        {
+            std::snprintf(
+                value_label,
+                sizeof(value_label),
+                "%d",
+                state.requested
+            );
+        }
+        else std::snprintf(value_label, sizeof(value_label), "Unavailable");
+
+        if(gamma_label != value_label)
+        {
+            gamma_label = value_label;
+            model.DirtyVariable("gamma_label");
+        }
+
+        Rml::String status;
+        if(!available)
+            status = "Gamma state is unavailable";
+        else if(state.requested != state.effective)
+        {
+            char text[96];
+            std::snprintf(
+                text,
+                sizeof(text),
+                "Requested %d; display reports %d",
+                state.requested,
+                state.effective
+            );
+            status = text;
+        }
+        else status = "Immediate window brightness";
+
+        if(gamma_status != status)
+        {
+            gamma_status = status;
+            model.DirtyVariable("gamma_status");
+        }
+    }
+
+    void RmlSettings::changegammaaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->gamma
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for the RML default
+        // (100) and min/max clamps during InstanceElement, before the range
+        // is parented.
+        if(requested == instance->gamma)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Gamma state = {};
+        const bool accepted = settings::writegamma(requested, state);
+        const bool available = accepted || settings::readgamma(state);
+        instance->presentgamma(state, available);
+        if(!accepted && available)
+        {
+            instance->gamma_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("gamma_status");
         }
         event.StopPropagation();
     }

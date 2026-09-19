@@ -599,6 +599,40 @@
                             </div>
                         </div>
 
+                        <div class="settings-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Gamma</div>
+                                    <div class="settings-control-description">
+                                        Adjust display gamma. 100 is the default. The requested value is stored in the player config; SDL reports the last window brightness it accepted.
+                                    </div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ gamma_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ gamma_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="30"
+                                    max="300"
+                                    step="1"
+                                    value="100"
+                                    data-attr-min="gamma_minimum"
+                                    data-attr-max="gamma_maximum"
+                                    data-attr-value="gamma"
+                                    onchange="settings.gamma" />
+                                <span class="settings-range-bound settings-range-maximum">{{ gamma_maximum }}</span>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ gamma_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section settings-antialiasing-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">
