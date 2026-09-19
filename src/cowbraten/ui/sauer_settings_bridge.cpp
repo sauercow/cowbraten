@@ -70,6 +70,44 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *hexvarident(const char *name)
+        {
+            ident *id = getident(name);
+            return id && id->type == ID_VAR && (id->flags & IDF_HEX)
+                ? id
+                : nullptr;
+        }
+
+        static ident *trailcolorshotgunident()
+        {
+            return hexvarident("trailcolorshotgun");
+        }
+
+        static ident *trailcolorchaingunident()
+        {
+            return hexvarident("trailcolorchaingun");
+        }
+
+        static ident *trailcolorrocketlauncherident()
+        {
+            return hexvarident("trailcolorrocketlauncher");
+        }
+
+        static ident *trailcolorrifleident()
+        {
+            return hexvarident("trailcolorrifle");
+        }
+
+        static ident *trailcolorgrenadelauncherident()
+        {
+            return hexvarident("trailcolorgrenadelauncher");
+        }
+
+        static ident *trailcolorpistolident()
+        {
+            return hexvarident("trailcolorpistol");
+        }
+
         static ident *basenumbersident()
         {
             ident *id = getident("basenumbers");
@@ -983,6 +1021,120 @@ namespace cowui
             return writegamefeedbackboolean(
                 deathscoreident(),
                 enabled,
+                result);
+        }
+
+        static void defaulttrailcolors(TrailColors &result)
+        {
+            result.shotgun = 0xFFC864;
+            result.chaingun = 0xFFC864;
+            result.rocketlauncher = 0x404040;
+            result.rifle = 0x404040;
+            result.grenadelauncher = 0x404040;
+            result.pistol = 0xFFC864;
+            result.channel_minimum = 0;
+            result.channel_maximum = 255;
+        }
+
+        bool readtrailcolors(TrailColors &result)
+        {
+            defaulttrailcolors(result);
+
+            ident *shotgun_id = trailcolorshotgunident();
+            ident *chaingun_id = trailcolorchaingunident();
+            ident *rocket_id = trailcolorrocketlauncherident();
+            ident *rifle_id = trailcolorrifleident();
+            ident *grenade_id = trailcolorgrenadelauncherident();
+            ident *pistol_id = trailcolorpistolident();
+            if(!shotgun_id || !shotgun_id->storage.i ||
+               !chaingun_id || !chaingun_id->storage.i ||
+               !rocket_id || !rocket_id->storage.i ||
+               !rifle_id || !rifle_id->storage.i ||
+               !grenade_id || !grenade_id->storage.i ||
+               !pistol_id || !pistol_id->storage.i)
+            {
+                return false;
+            }
+
+            result.shotgun = *shotgun_id->storage.i;
+            result.chaingun = *chaingun_id->storage.i;
+            result.rocketlauncher = *rocket_id->storage.i;
+            result.rifle = *rifle_id->storage.i;
+            result.grenadelauncher = *grenade_id->storage.i;
+            result.pistol = *pistol_id->storage.i;
+            result.channel_minimum = 0;
+            result.channel_maximum = 255;
+            return true;
+        }
+
+        static bool writetrailcolorpacked(
+            ident *id,
+            int packed,
+            TrailColors &result)
+        {
+            if(!readtrailcolors(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               packed < id->minval || packed > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == packed)
+                return true;
+
+            setvarchecked(id, packed);
+            if(!readtrailcolors(result))
+                return false;
+            return *id->storage.i == packed;
+        }
+
+        bool writetrailcolorshotgun(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorshotgunident(),
+                packed,
+                result);
+        }
+
+        bool writetrailcolorchaingun(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorchaingunident(),
+                packed,
+                result);
+        }
+
+        bool writetrailcolorrocketlauncher(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorrocketlauncherident(),
+                packed,
+                result);
+        }
+
+        bool writetrailcolorrifle(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorrifleident(),
+                packed,
+                result);
+        }
+
+        bool writetrailcolorgrenadelauncher(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorgrenadelauncherident(),
+                packed,
+                result);
+        }
+
+        bool writetrailcolorpistol(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorpistolident(),
+                packed,
                 result);
         }
 

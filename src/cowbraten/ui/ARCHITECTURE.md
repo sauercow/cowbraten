@@ -225,6 +225,22 @@ that is not yet parented, matching the gamma rewrite guard. A checkbox or
 intensity write goes through the typed API, then reads the accepted snapshot
 back. The document never supplies ident names.
 
+The Game tab also inlines the native Game-tab "adjust weapon trail colors"
+document. The typed snapshot owns the six packed persistent HVARPs
+`trailcolorshotgun`, `trailcolorchaingun`, `trailcolorrocketlauncher`,
+`trailcolorrifle`, `trailcolorgrenadelauncher`, and `trailcolorpistol`, plus
+the native per-channel slider range 0..255. None have a change callback, so
+they apply immediately on the existing weapon trail particle paths. There is
+no `resetgl()`. Opening Settings, returning from the legacy console, and
+activating the Game category only read these values. RGB sliders pack as
+`(red << 16) | (green << 8) | blue`, matching Sauer's IDF_HEX three-argument
+assignment, then write the packed integer through `setvarchecked()`. Range
+change handlers ignore a requested value that already matches the model or a
+range element that is not yet parented, matching the gamma rewrite guard.
+There is no hardcoded RML value default. The document never supplies ident
+names or the `settrailcolor` command. No `showgui trailcolors` alias is
+added; the standalone legacy document remains reachable by that exact name.
+
 The same activation and console-resume refresh updates presentation, current
 resolution, the supported-mode snapshot, VSync, FPS limit, and effective MSAA.
 Category selection remains owned by the cached model and only the active page

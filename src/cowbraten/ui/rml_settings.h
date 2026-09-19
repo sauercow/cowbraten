@@ -33,6 +33,7 @@ namespace cowui
         struct WaterRenderResolutionState;
         struct WaterfallEffectsState;
         struct GameFeedback;
+        struct TrailColors;
         struct GameRadar;
         struct GameModels;
         struct Ammobar;
@@ -163,6 +164,11 @@ namespace cowui
         void selectoutlinecapturemeters(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void selectshowscoreboardatdeath(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        bool refreshtrailcolors();
+        void presenttrailcolors(const settings::TrailColors &state,
+            bool available);
+        void selecttrailcolorchannel(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         bool refreshgameradar();
         void presentgameradar(const settings::GameRadar &state,
@@ -700,6 +706,28 @@ namespace cowui
         bool outline_capture_meters = false;
         bool show_scoreboard_at_death = true;
         Rml::String game_feedback_status;
+        bool trail_colors_available = false;
+        int trail_color_channel_minimum = 0;
+        int trail_color_channel_maximum = 255;
+        int trail_color_shotgun_red = 255;
+        int trail_color_shotgun_green = 200;
+        int trail_color_shotgun_blue = 100;
+        int trail_color_chaingun_red = 255;
+        int trail_color_chaingun_green = 200;
+        int trail_color_chaingun_blue = 100;
+        int trail_color_rocket_launcher_red = 64;
+        int trail_color_rocket_launcher_green = 64;
+        int trail_color_rocket_launcher_blue = 64;
+        int trail_color_rifle_red = 64;
+        int trail_color_rifle_green = 64;
+        int trail_color_rifle_blue = 64;
+        int trail_color_grenade_launcher_red = 64;
+        int trail_color_grenade_launcher_green = 64;
+        int trail_color_grenade_launcher_blue = 64;
+        int trail_color_pistol_red = 255;
+        int trail_color_pistol_green = 200;
+        int trail_color_pistol_blue = 100;
+        Rml::String trail_colors_status;
         bool game_radar_available = false;
         bool numbered_capture_bases = false;
         bool show_teammates_on_radar = true;

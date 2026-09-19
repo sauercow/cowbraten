@@ -352,6 +352,17 @@ body
     text-transform: uppercase;
 }
 
+.settings-color-swatch
+{
+    box-sizing: border-box;
+    flex: none;
+    width: 56px;
+    height: 32px;
+    margin-left: var(--space-3);
+    border-width: 1px;
+    border-color: var(--color-border);
+}
+
 .settings-range-row
 {
     display: flex;

@@ -46,6 +46,26 @@ namespace cowui
         }
     }
 
+    static int packtrailcolor(int red, int green, int blue)
+    {
+        return (red << 16) | (green << 8) | blue;
+    }
+
+    static int unpacktrailred(int packed)
+    {
+        return (packed >> 16) & 0xFF;
+    }
+
+    static int unpacktrailgreen(int packed)
+    {
+        return (packed >> 8) & 0xFF;
+    }
+
+    static int unpacktrailblue(int packed)
+    {
+        return packed & 0xFF;
+    }
+
     static bool resolutionorder(
         const settings::Resolution &left,
         const settings::Resolution &right)
@@ -423,6 +443,39 @@ namespace cowui
             constructor.BindEventCallback("select_hit_sound", &RmlSettings::selecthitsound, this) &&
             constructor.BindEventCallback("select_outline_capture_meters", &RmlSettings::selectoutlinecapturemeters, this) &&
             constructor.BindEventCallback("select_show_scoreboard_at_death", &RmlSettings::selectshowscoreboardatdeath, this) &&
+            constructor.Bind("trail_colors_available", &trail_colors_available) &&
+            constructor.Bind(
+                "trail_color_channel_minimum",
+                &trail_color_channel_minimum
+            ) &&
+            constructor.Bind(
+                "trail_color_channel_maximum",
+                &trail_color_channel_maximum
+            ) &&
+            constructor.Bind("trail_color_shotgun_red", &trail_color_shotgun_red) &&
+            constructor.Bind("trail_color_shotgun_green", &trail_color_shotgun_green) &&
+            constructor.Bind("trail_color_shotgun_blue", &trail_color_shotgun_blue) &&
+            constructor.Bind("trail_color_chaingun_red", &trail_color_chaingun_red) &&
+            constructor.Bind("trail_color_chaingun_green", &trail_color_chaingun_green) &&
+            constructor.Bind("trail_color_chaingun_blue", &trail_color_chaingun_blue) &&
+            constructor.Bind("trail_color_rocket_launcher_red", &trail_color_rocket_launcher_red) &&
+            constructor.Bind("trail_color_rocket_launcher_green", &trail_color_rocket_launcher_green) &&
+            constructor.Bind("trail_color_rocket_launcher_blue", &trail_color_rocket_launcher_blue) &&
+            constructor.Bind("trail_color_rifle_red", &trail_color_rifle_red) &&
+            constructor.Bind("trail_color_rifle_green", &trail_color_rifle_green) &&
+            constructor.Bind("trail_color_rifle_blue", &trail_color_rifle_blue) &&
+            constructor.Bind("trail_color_grenade_launcher_red", &trail_color_grenade_launcher_red) &&
+            constructor.Bind("trail_color_grenade_launcher_green", &trail_color_grenade_launcher_green) &&
+            constructor.Bind("trail_color_grenade_launcher_blue", &trail_color_grenade_launcher_blue) &&
+            constructor.Bind("trail_color_pistol_red", &trail_color_pistol_red) &&
+            constructor.Bind("trail_color_pistol_green", &trail_color_pistol_green) &&
+            constructor.Bind("trail_color_pistol_blue", &trail_color_pistol_blue) &&
+            constructor.Bind("trail_colors_status", &trail_colors_status) &&
+            constructor.BindEventCallback(
+                "select_trail_color_channel",
+                &RmlSettings::selecttrailcolorchannel,
+                this
+            ) &&
             constructor.Bind("game_radar_available", &game_radar_available) &&
             constructor.Bind("numbered_capture_bases", &numbered_capture_bases) &&
             constructor.Bind("show_teammates_on_radar", &show_teammates_on_radar) &&
@@ -2029,6 +2082,28 @@ namespace cowui
         outline_capture_meters = false;
         show_scoreboard_at_death = true;
         game_feedback_status.clear();
+        trail_colors_available = false;
+        trail_color_channel_minimum = 0;
+        trail_color_channel_maximum = 255;
+        trail_color_shotgun_red = 255;
+        trail_color_shotgun_green = 200;
+        trail_color_shotgun_blue = 100;
+        trail_color_chaingun_red = 255;
+        trail_color_chaingun_green = 200;
+        trail_color_chaingun_blue = 100;
+        trail_color_rocket_launcher_red = 64;
+        trail_color_rocket_launcher_green = 64;
+        trail_color_rocket_launcher_blue = 64;
+        trail_color_rifle_red = 64;
+        trail_color_rifle_green = 64;
+        trail_color_rifle_blue = 64;
+        trail_color_grenade_launcher_red = 64;
+        trail_color_grenade_launcher_green = 64;
+        trail_color_grenade_launcher_blue = 64;
+        trail_color_pistol_red = 255;
+        trail_color_pistol_green = 200;
+        trail_color_pistol_blue = 100;
+        trail_colors_status.clear();
         game_radar_available = false;
         numbered_capture_bases = false;
         show_teammates_on_radar = true;
@@ -2580,6 +2655,8 @@ namespace cowui
         }
 
         if(!refreshgamefeedback())
+            return false;
+        if(!refreshtrailcolors())
             return false;
         if(!refreshgameradar())
             return false;
@@ -5042,6 +5119,7 @@ namespace cowui
         else if(game)
         {
             refreshgamefeedback();
+            refreshtrailcolors();
             refreshgameradar();
             refreshgamemodels();
         }
@@ -5459,6 +5537,319 @@ namespace cowui
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("game_feedback_status");
         }
+    }
+
+    bool RmlSettings::refreshtrailcolors()
+    {
+        settings::TrailColors state = {};
+        const bool available = settings::readtrailcolors(state);
+        presenttrailcolors(state, available);
+        return available;
+    }
+
+    void RmlSettings::presenttrailcolors(
+        const settings::TrailColors &state,
+        bool available)
+    {
+        if(trail_colors_available != available)
+        {
+            trail_colors_available = available;
+            model.DirtyVariable("trail_colors_available");
+        }
+        if(trail_color_channel_minimum != state.channel_minimum)
+        {
+            trail_color_channel_minimum = state.channel_minimum;
+            model.DirtyVariable("trail_color_channel_minimum");
+        }
+        if(trail_color_channel_maximum != state.channel_maximum)
+        {
+            trail_color_channel_maximum = state.channel_maximum;
+            model.DirtyVariable("trail_color_channel_maximum");
+        }
+
+        const int shotgun_red = unpacktrailred(state.shotgun);
+        const int shotgun_green = unpacktrailgreen(state.shotgun);
+        const int shotgun_blue = unpacktrailblue(state.shotgun);
+        if(trail_color_shotgun_red != shotgun_red)
+        {
+            trail_color_shotgun_red = shotgun_red;
+            model.DirtyVariable("trail_color_shotgun_red");
+        }
+        if(trail_color_shotgun_green != shotgun_green)
+        {
+            trail_color_shotgun_green = shotgun_green;
+            model.DirtyVariable("trail_color_shotgun_green");
+        }
+        if(trail_color_shotgun_blue != shotgun_blue)
+        {
+            trail_color_shotgun_blue = shotgun_blue;
+            model.DirtyVariable("trail_color_shotgun_blue");
+        }
+
+        const int chaingun_red = unpacktrailred(state.chaingun);
+        const int chaingun_green = unpacktrailgreen(state.chaingun);
+        const int chaingun_blue = unpacktrailblue(state.chaingun);
+        if(trail_color_chaingun_red != chaingun_red)
+        {
+            trail_color_chaingun_red = chaingun_red;
+            model.DirtyVariable("trail_color_chaingun_red");
+        }
+        if(trail_color_chaingun_green != chaingun_green)
+        {
+            trail_color_chaingun_green = chaingun_green;
+            model.DirtyVariable("trail_color_chaingun_green");
+        }
+        if(trail_color_chaingun_blue != chaingun_blue)
+        {
+            trail_color_chaingun_blue = chaingun_blue;
+            model.DirtyVariable("trail_color_chaingun_blue");
+        }
+
+        const int rocket_red = unpacktrailred(state.rocketlauncher);
+        const int rocket_green = unpacktrailgreen(state.rocketlauncher);
+        const int rocket_blue = unpacktrailblue(state.rocketlauncher);
+        if(trail_color_rocket_launcher_red != rocket_red)
+        {
+            trail_color_rocket_launcher_red = rocket_red;
+            model.DirtyVariable("trail_color_rocket_launcher_red");
+        }
+        if(trail_color_rocket_launcher_green != rocket_green)
+        {
+            trail_color_rocket_launcher_green = rocket_green;
+            model.DirtyVariable("trail_color_rocket_launcher_green");
+        }
+        if(trail_color_rocket_launcher_blue != rocket_blue)
+        {
+            trail_color_rocket_launcher_blue = rocket_blue;
+            model.DirtyVariable("trail_color_rocket_launcher_blue");
+        }
+
+        const int rifle_red = unpacktrailred(state.rifle);
+        const int rifle_green = unpacktrailgreen(state.rifle);
+        const int rifle_blue = unpacktrailblue(state.rifle);
+        if(trail_color_rifle_red != rifle_red)
+        {
+            trail_color_rifle_red = rifle_red;
+            model.DirtyVariable("trail_color_rifle_red");
+        }
+        if(trail_color_rifle_green != rifle_green)
+        {
+            trail_color_rifle_green = rifle_green;
+            model.DirtyVariable("trail_color_rifle_green");
+        }
+        if(trail_color_rifle_blue != rifle_blue)
+        {
+            trail_color_rifle_blue = rifle_blue;
+            model.DirtyVariable("trail_color_rifle_blue");
+        }
+
+        const int grenade_red = unpacktrailred(state.grenadelauncher);
+        const int grenade_green = unpacktrailgreen(state.grenadelauncher);
+        const int grenade_blue = unpacktrailblue(state.grenadelauncher);
+        if(trail_color_grenade_launcher_red != grenade_red)
+        {
+            trail_color_grenade_launcher_red = grenade_red;
+            model.DirtyVariable("trail_color_grenade_launcher_red");
+        }
+        if(trail_color_grenade_launcher_green != grenade_green)
+        {
+            trail_color_grenade_launcher_green = grenade_green;
+            model.DirtyVariable("trail_color_grenade_launcher_green");
+        }
+        if(trail_color_grenade_launcher_blue != grenade_blue)
+        {
+            trail_color_grenade_launcher_blue = grenade_blue;
+            model.DirtyVariable("trail_color_grenade_launcher_blue");
+        }
+
+        const int pistol_red = unpacktrailred(state.pistol);
+        const int pistol_green = unpacktrailgreen(state.pistol);
+        const int pistol_blue = unpacktrailblue(state.pistol);
+        if(trail_color_pistol_red != pistol_red)
+        {
+            trail_color_pistol_red = pistol_red;
+            model.DirtyVariable("trail_color_pistol_red");
+        }
+        if(trail_color_pistol_green != pistol_green)
+        {
+            trail_color_pistol_green = pistol_green;
+            model.DirtyVariable("trail_color_pistol_green");
+        }
+        if(trail_color_pistol_blue != pistol_blue)
+        {
+            trail_color_pistol_blue = pistol_blue;
+            model.DirtyVariable("trail_color_pistol_blue");
+        }
+
+        const char *status = available
+            ? ""
+            : "Trail color settings are unavailable";
+        if(trail_colors_status != status)
+        {
+            trail_colors_status = status;
+            model.DirtyVariable("trail_colors_status");
+        }
+    }
+
+    void RmlSettings::selecttrailcolorchannel(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 2 && arguments.size() != 3)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const int weapon = arguments[0].Get<int>(-1);
+        const int channel = arguments[1].Get<int>(-1);
+
+        // Native trailcolors tabs: shotgun, chaingun, rocketlauncher,
+        // rifle, grenadelauncher, pistol. Channels are red, green, blue.
+
+        int red = 0;
+        int green = 0;
+        int blue = 0;
+        switch(weapon)
+        {
+            case 0:
+                red = trail_color_shotgun_red;
+                green = trail_color_shotgun_green;
+                blue = trail_color_shotgun_blue;
+                break;
+            case 1:
+                red = trail_color_chaingun_red;
+                green = trail_color_chaingun_green;
+                blue = trail_color_chaingun_blue;
+                break;
+            case 2:
+                red = trail_color_rocket_launcher_red;
+                green = trail_color_rocket_launcher_green;
+                blue = trail_color_rocket_launcher_blue;
+                break;
+            case 3:
+                red = trail_color_rifle_red;
+                green = trail_color_rifle_green;
+                blue = trail_color_rifle_blue;
+                break;
+            case 4:
+                red = trail_color_grenade_launcher_red;
+                green = trail_color_grenade_launcher_green;
+                blue = trail_color_grenade_launcher_blue;
+                break;
+            case 5:
+                red = trail_color_pistol_red;
+                green = trail_color_pistol_green;
+                blue = trail_color_pistol_blue;
+                break;
+            default:
+                event.StopPropagation();
+                return;
+        }
+
+        int current = 0;
+        switch(channel)
+        {
+            case 0:
+                current = red;
+                break;
+            case 1:
+                current = green;
+                break;
+            case 2:
+                current = blue;
+                break;
+            default:
+                event.StopPropagation();
+                return;
+        }
+
+        int requested = current;
+        if(arguments.size() == 3)
+            requested = arguments[2].Get<int>(current);
+        else
+            requested = event.GetParameter<int>("value", current);
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == current)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(!trail_colors_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(requested < trail_color_channel_minimum ||
+           requested > trail_color_channel_maximum)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        switch(channel)
+        {
+            case 0:
+                red = requested;
+                break;
+            case 1:
+                green = requested;
+                break;
+            case 2:
+                blue = requested;
+                break;
+        }
+
+        const int packed = packtrailcolor(red, green, blue);
+        settings::TrailColors state = {};
+        bool accepted = false;
+        switch(weapon)
+        {
+            case 0:
+                accepted = settings::writetrailcolorshotgun(packed, state);
+                break;
+            case 1:
+                accepted = settings::writetrailcolorchaingun(packed, state);
+                break;
+            case 2:
+                accepted = settings::writetrailcolorrocketlauncher(
+                    packed, state);
+                break;
+            case 3:
+                accepted = settings::writetrailcolorrifle(packed, state);
+                break;
+            case 4:
+                accepted = settings::writetrailcolorgrenadelauncher(
+                    packed, state);
+                break;
+            case 5:
+                accepted = settings::writetrailcolorpistol(packed, state);
+                break;
+        }
+
+        const bool available = accepted ||
+            settings::readtrailcolors(state);
+        presenttrailcolors(state, available);
+        if(!accepted && available)
+        {
+            trail_colors_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("trail_colors_status");
+        }
+        event.StopPropagation();
     }
 
     bool RmlSettings::refreshgameradar()

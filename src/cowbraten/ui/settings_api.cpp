@@ -135,6 +135,84 @@ namespace cowui
             return accepted;
         }
 
+        static void copytrailcolors(
+            const sauersettings::TrailColors &source,
+            TrailColors &result)
+        {
+            result.shotgun = source.shotgun;
+            result.chaingun = source.chaingun;
+            result.rocketlauncher = source.rocketlauncher;
+            result.rifle = source.rifle;
+            result.grenadelauncher = source.grenadelauncher;
+            result.pistol = source.pistol;
+            result.channel_minimum = source.channel_minimum;
+            result.channel_maximum = source.channel_maximum;
+        }
+
+        bool readtrailcolors(TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool read = sauersettings::readtrailcolors(legacy);
+            copytrailcolors(legacy, result);
+            return read;
+        }
+
+        bool writetrailcolorshotgun(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted = sauersettings::writetrailcolorshotgun(
+                packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        bool writetrailcolorchaingun(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted = sauersettings::writetrailcolorchaingun(
+                packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        bool writetrailcolorrocketlauncher(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted =
+                sauersettings::writetrailcolorrocketlauncher(
+                    packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        bool writetrailcolorrifle(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted = sauersettings::writetrailcolorrifle(
+                packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        bool writetrailcolorgrenadelauncher(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted =
+                sauersettings::writetrailcolorgrenadelauncher(
+                    packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        bool writetrailcolorpistol(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted = sauersettings::writetrailcolorpistol(
+                packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
         static void copygameradar(
             const sauersettings::GameRadar &source,
             GameRadar &result)

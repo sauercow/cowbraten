@@ -27,6 +27,20 @@ namespace cowui
             bool show_scoreboard_at_death;
         };
 
+        // Native Settings Game-tab trailcolors document. Packed HVARP
+        // storage; RGB sliders use the native 0..255 channel range.
+        struct TrailColors
+        {
+            int shotgun;
+            int chaingun;
+            int rocketlauncher;
+            int rifle;
+            int grenadelauncher;
+            int pistol;
+            int channel_minimum;
+            int channel_maximum;
+        };
+
         struct GameRadar
         {
             bool numbered_capture_bases;
@@ -634,6 +648,14 @@ namespace cowui
         bool writehitsound(bool enabled, GameFeedback &result);
         bool writeoutlinemeters(bool enabled, GameFeedback &result);
         bool writedeathscore(bool enabled, GameFeedback &result);
+
+        bool readtrailcolors(TrailColors &result);
+        bool writetrailcolorshotgun(int packed, TrailColors &result);
+        bool writetrailcolorchaingun(int packed, TrailColors &result);
+        bool writetrailcolorrocketlauncher(int packed, TrailColors &result);
+        bool writetrailcolorrifle(int packed, TrailColors &result);
+        bool writetrailcolorgrenadelauncher(int packed, TrailColors &result);
+        bool writetrailcolorpistol(int packed, TrailColors &result);
 
         bool readgameradar(GameRadar &result);
         bool writebasenumbers(bool enabled, GameRadar &result);
