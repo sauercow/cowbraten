@@ -27,6 +27,12 @@ namespace cowui
             bool show_scoreboard_at_death;
         };
 
+        struct GameRadar
+        {
+            bool numbered_capture_bases;
+            bool show_teammates_on_radar;
+        };
+
         struct Video
         {
             int width;
@@ -468,6 +474,10 @@ namespace cowui
         bool writehitsound(bool enabled, GameFeedback &result);
         bool writeoutlinemeters(bool enabled, GameFeedback &result);
         bool writedeathscore(bool enabled, GameFeedback &result);
+
+        bool readgameradar(GameRadar &result);
+        bool writebasenumbers(bool enabled, GameRadar &result);
+        bool writeradarteammates(bool enabled, GameRadar &result);
 
         bool readvideo(Video &result);
         bool writepresentation(PresentationMode mode);

@@ -33,6 +33,7 @@ namespace cowui
         struct WaterRenderResolutionState;
         struct WaterfallEffectsState;
         struct GameFeedback;
+        struct GameRadar;
         struct GlassReflectionsState;
         struct ModelReflectionsState;
         struct BumpModelsState;
@@ -154,6 +155,13 @@ namespace cowui
         void selectoutlinecapturemeters(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void selectshowscoreboardatdeath(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        bool refreshgameradar();
+        void presentgameradar(const settings::GameRadar &state,
+            bool available);
+        void selectnumberedcapturebases(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectshowteammatesonradar(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         bool refreshvideo();
         void refreshshaderdetail();
@@ -477,6 +485,10 @@ namespace cowui
         bool outline_capture_meters = false;
         bool show_scoreboard_at_death = true;
         Rml::String game_feedback_status;
+        bool game_radar_available = false;
+        bool numbered_capture_bases = false;
+        bool show_teammates_on_radar = true;
+        Rml::String game_radar_status;
 
         Rml::String resolution_label;
         Rml::String render_resolution_label;

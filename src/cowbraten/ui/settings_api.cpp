@@ -135,6 +135,40 @@ namespace cowui
             return accepted;
         }
 
+        static void copygameradar(
+            const sauersettings::GameRadar &source,
+            GameRadar &result)
+        {
+            result.numbered_capture_bases = source.numbered_capture_bases;
+            result.show_teammates_on_radar = source.show_teammates_on_radar;
+        }
+
+        bool readgameradar(GameRadar &result)
+        {
+            sauersettings::GameRadar legacy = {};
+            const bool read = sauersettings::readgameradar(legacy);
+            copygameradar(legacy, result);
+            return read;
+        }
+
+        bool writebasenumbers(bool enabled, GameRadar &result)
+        {
+            sauersettings::GameRadar legacy = {};
+            const bool accepted = sauersettings::writebasenumbers(
+                enabled, legacy);
+            copygameradar(legacy, result);
+            return accepted;
+        }
+
+        bool writeradarteammates(bool enabled, GameRadar &result)
+        {
+            sauersettings::GameRadar legacy = {};
+            const bool accepted = sauersettings::writeradarteammates(
+                enabled, legacy);
+            copygameradar(legacy, result);
+            return accepted;
+        }
+
         bool readvideo(Video &result)
         {
             sauersettings::Video legacy;

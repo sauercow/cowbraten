@@ -377,6 +377,12 @@ namespace cowui
             constructor.BindEventCallback("select_hit_sound", &RmlSettings::selecthitsound, this) &&
             constructor.BindEventCallback("select_outline_capture_meters", &RmlSettings::selectoutlinecapturemeters, this) &&
             constructor.BindEventCallback("select_show_scoreboard_at_death", &RmlSettings::selectshowscoreboardatdeath, this) &&
+            constructor.Bind("game_radar_available", &game_radar_available) &&
+            constructor.Bind("numbered_capture_bases", &numbered_capture_bases) &&
+            constructor.Bind("show_teammates_on_radar", &show_teammates_on_radar) &&
+            constructor.Bind("game_radar_status", &game_radar_status) &&
+            constructor.BindEventCallback("select_numbered_capture_bases", &RmlSettings::selectnumberedcapturebases, this) &&
+            constructor.BindEventCallback("select_show_teammates_on_radar", &RmlSettings::selectshowteammatesonradar, this) &&
             constructor.Bind("resolution_label", &resolution_label) &&
             constructor.Bind(
                 "render_resolution_label",
@@ -1098,6 +1104,10 @@ namespace cowui
         outline_capture_meters = false;
         show_scoreboard_at_death = true;
         game_feedback_status.clear();
+        game_radar_available = false;
+        numbered_capture_bases = false;
+        show_teammates_on_radar = true;
+        game_radar_status.clear();
         resolution_label.clear();
         render_resolution_label.clear();
         video_status.clear();
@@ -1462,6 +1472,8 @@ namespace cowui
         }
 
         if(!refreshgamefeedback())
+            return false;
+        if(!refreshgameradar())
             return false;
         if(!refreshvideo())
             return false;
@@ -2819,7 +2831,10 @@ namespace cowui
         else if(hud)
             refreshhud(!streak_milestone_scale_editing);
         else if(game)
+        {
             refreshgamefeedback();
+            refreshgameradar();
+        }
         else if(crosshair)
             refreshcrosshair(!crosshair_size_editing);
         else if(chat)
@@ -3231,6 +3246,88 @@ namespace cowui
             game_feedback_status =
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("game_feedback_status");
+        }
+    }
+
+    bool RmlSettings::refreshgameradar()
+    {
+        settings::GameRadar state = {};
+        const bool available = settings::readgameradar(state);
+        presentgameradar(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentgameradar(
+        const settings::GameRadar &state,
+        bool available)
+    {
+        if(game_radar_available != available)
+        {
+            game_radar_available = available;
+            model.DirtyVariable("game_radar_available");
+        }
+        if(numbered_capture_bases != state.numbered_capture_bases)
+        {
+            numbered_capture_bases = state.numbered_capture_bases;
+            model.DirtyVariable("numbered_capture_bases");
+        }
+        if(show_teammates_on_radar != state.show_teammates_on_radar)
+        {
+            show_teammates_on_radar = state.show_teammates_on_radar;
+            model.DirtyVariable("show_teammates_on_radar");
+        }
+
+        const char *status = available
+            ? ""
+            : "Radar settings are unavailable";
+        if(game_radar_status != status)
+        {
+            game_radar_status = status;
+            model.DirtyVariable("game_radar_status");
+        }
+    }
+
+    void RmlSettings::selectnumberedcapturebases(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_radar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameRadar state = {};
+        const bool accepted = settings::writebasenumbers(enabled, state);
+        const bool available = accepted ||
+            settings::readgameradar(state);
+        presentgameradar(state, available);
+        if(!accepted && available)
+        {
+            game_radar_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_radar_status");
+        }
+    }
+
+    void RmlSettings::selectshowteammatesonradar(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_radar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameRadar state = {};
+        const bool accepted = settings::writeradarteammates(enabled, state);
+        const bool available = accepted ||
+            settings::readgameradar(state);
+        presentgameradar(state, available);
+        if(!accepted && available)
+        {
+            game_radar_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_radar_status");
         }
     }
 

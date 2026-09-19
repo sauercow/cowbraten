@@ -198,6 +198,16 @@ handler writes through the typed API, immediately reads the accepted value
 back, and dirties only model variables that changed. When the legacy console
 temporarily suspends RmlUi, the model refreshes before Settings is shown again,
 so a normal `/fov` change is reflected without per-frame ident polling.
+
+The Game tab also exposes Capture radar numbering and teammate radar blips
+through Sauer's persistent `basenumbers` and `radarteammates` booleans. Both
+are 0/1 integer idents with no change callback, so they apply immediately on
+the existing capture HUD, capture messages, and Capture/CTF/Collect teammate
+radar paths. There is no `resetgl()`. Opening Settings, returning from the
+legacy console, and activating the Game category only read these values. A
+checkbox write goes through the typed API, then reads the accepted snapshot
+back. The document never supplies ident names.
+
 The same activation and console-resume refresh updates presentation, current
 resolution, the supported-mode snapshot, VSync, FPS limit, and effective MSAA.
 Category selection remains owned by the cached model and only the active page

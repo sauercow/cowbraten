@@ -78,7 +78,7 @@
                     <div class="settings-scope-note" data-if="category_game">
                         <div class="settings-scope-kicker">Live Setting</div>
                         <div class="settings-scope-copy">
-                            Field of view and combat feedback use the existing Sauer configuration system. Opening this page does not rewrite those values.
+                            Field of view, combat feedback, and radar options use the existing Sauer configuration system. Opening this page does not rewrite those values.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_graphics">
@@ -259,6 +259,55 @@
                             <div class="settings-control-footer settings-control-footer-compact"
                                 data-if="game_feedback_status != ''">
                                 <span>{{ game_feedback_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Radar</div>
+                            <div class="settings-stage-title">Radar</div>
+                            <div class="settings-stage-copy">
+                                These toggles use Sauer's existing persistent capture and teammate radar settings. Changes apply immediately and do not restart the renderer.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Numbered Capture Bases</div>
+                                    <div class="settings-control-description">
+                                        Include each capture base's tag number on in-world labels, capture and lost messages, and radar blips. Unnamed bases already show their numbers.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="numbered_capture_bases"
+                                        data-attrif-disabled="!game_radar_available"
+                                        data-event-change="select_numbered_capture_bases(ev.checked)" />
+                                    <span data-if="numbered_capture_bases">On</span>
+                                    <span data-if="!numbered_capture_bases">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Show Teammates on Radar</div>
+                                    <div class="settings-control-description">
+                                        Draw alive and dead teammate blips on the HUD radar in Capture, CTF, and Collect. Enemy and base blips stay visible when this is off.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="show_teammates_on_radar"
+                                        data-attrif-disabled="!game_radar_available"
+                                        data-event-change="select_show_teammates_on_radar(ev.checked)" />
+                                    <span data-if="show_teammates_on_radar">On</span>
+                                    <span data-if="!show_teammates_on_radar">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="game_radar_status != ''">
+                                <span>{{ game_radar_status }}</span>
                             </div>
                         </div>
                     </div>

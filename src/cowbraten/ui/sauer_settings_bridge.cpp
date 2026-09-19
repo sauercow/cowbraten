@@ -70,6 +70,22 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *basenumbersident()
+        {
+            ident *id = getident("basenumbers");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *radarteammatesident()
+        {
+            ident *id = getident("radarteammates");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         static ident *fullscreenident()
         {
             ident *id = getident("fullscreen");
@@ -544,6 +560,63 @@ namespace cowui
         {
             return writegamefeedbackboolean(
                 deathscoreident(),
+                enabled,
+                result);
+        }
+
+        bool readgameradar(GameRadar &result)
+        {
+            result.numbered_capture_bases = false;
+            result.show_teammates_on_radar = false;
+
+            ident *bases_id = basenumbersident();
+            ident *teammates_id = radarteammatesident();
+            if(!bases_id || !bases_id->storage.i ||
+               !teammates_id || !teammates_id->storage.i)
+            {
+                return false;
+            }
+
+            result.numbered_capture_bases = *bases_id->storage.i != 0;
+            result.show_teammates_on_radar = *teammates_id->storage.i != 0;
+            return true;
+        }
+
+        static bool writegameradarboolean(
+            ident *id,
+            bool enabled,
+            GameRadar &result)
+        {
+            if(!readgameradar(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readgameradar(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        bool writebasenumbers(bool enabled, GameRadar &result)
+        {
+            return writegameradarboolean(
+                basenumbersident(),
+                enabled,
+                result);
+        }
+
+        bool writeradarteammates(bool enabled, GameRadar &result)
+        {
+            return writegameradarboolean(
+                radarteammatesident(),
                 enabled,
                 result);
         }
