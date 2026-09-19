@@ -32,6 +32,20 @@ namespace cowui
         resolutions.push_back(resolution);
     }
 
+    static int fullbrightintensityselected(int value)
+    {
+        switch(value)
+        {
+            case 60:
+            case 100:
+            case 150:
+            case 200:
+                return value;
+            default:
+                return -1;
+        }
+    }
+
     static bool resolutionorder(
         const settings::Resolution &left,
         const settings::Resolution &right)
@@ -383,6 +397,25 @@ namespace cowui
             constructor.Bind("game_radar_status", &game_radar_status) &&
             constructor.BindEventCallback("select_numbered_capture_bases", &RmlSettings::selectnumberedcapturebases, this) &&
             constructor.BindEventCallback("select_show_teammates_on_radar", &RmlSettings::selectshowteammatesonradar, this) &&
+            constructor.Bind("game_models_available", &game_models_available) &&
+            constructor.Bind("ragdoll_deaths", &ragdoll_deaths) &&
+            constructor.Bind("keep_ragdoll_after_respawn", &keep_ragdoll_after_respawn) &&
+            constructor.Bind("deadpush", &deadpush) &&
+            constructor.Bind("deadpush_minimum", &deadpush_minimum) &&
+            constructor.Bind("deadpush_maximum", &deadpush_maximum) &&
+            constructor.Bind("hide_dead_players", &hide_dead_players) &&
+            constructor.Bind("fullbright_player_models", &fullbright_player_models) &&
+            constructor.Bind("fullbright_intensity_selected", &fullbright_intensity_selected) &&
+            constructor.Bind("force_matching_player_models", &force_matching_player_models) &&
+            constructor.Bind("always_use_team_skins", &always_use_team_skins) &&
+            constructor.Bind("game_models_status", &game_models_status) &&
+            constructor.BindEventCallback("select_ragdoll_deaths", &RmlSettings::selectragdolldeaths, this) &&
+            constructor.BindEventCallback("select_keep_ragdoll_after_respawn", &RmlSettings::selectkeepragdollafterrespawn, this) &&
+            constructor.BindEventCallback("select_hide_dead_players", &RmlSettings::selecthidedeadplayers, this) &&
+            constructor.BindEventCallback("select_fullbright_player_models", &RmlSettings::selectfullbrightplayermodels, this) &&
+            constructor.BindEventCallback("select_fullbright_intensity", &RmlSettings::selectfullbrightintensity, this) &&
+            constructor.BindEventCallback("select_force_player_models", &RmlSettings::selectforceplayermodels, this) &&
+            constructor.BindEventCallback("select_always_use_team_skins", &RmlSettings::selectalwaysuseteamskins, this) &&
             constructor.Bind("resolution_label", &resolution_label) &&
             constructor.Bind(
                 "render_resolution_label",
@@ -831,6 +864,10 @@ namespace cowui
                 changefovaction
             ) &&
             router.registeraction(
+                "settings.deadpush",
+                changedeadpushaction
+            ) &&
+            router.registeraction(
                 "settings.category.game",
                 gamecategoryaction
             ) &&
@@ -1108,6 +1145,18 @@ namespace cowui
         numbered_capture_bases = false;
         show_teammates_on_radar = true;
         game_radar_status.clear();
+        game_models_available = false;
+        ragdoll_deaths = true;
+        keep_ragdoll_after_respawn = true;
+        deadpush = 2;
+        deadpush_minimum = 1;
+        deadpush_maximum = 20;
+        hide_dead_players = false;
+        fullbright_player_models = true;
+        fullbright_intensity_selected = 60;
+        force_matching_player_models = false;
+        always_use_team_skins = false;
+        game_models_status.clear();
         resolution_label.clear();
         render_resolution_label.clear();
         video_status.clear();
@@ -1474,6 +1523,8 @@ namespace cowui
         if(!refreshgamefeedback())
             return false;
         if(!refreshgameradar())
+            return false;
+        if(!refreshgamemodels())
             return false;
         if(!refreshvideo())
             return false;
@@ -2834,6 +2885,7 @@ namespace cowui
         {
             refreshgamefeedback();
             refreshgameradar();
+            refreshgamemodels();
         }
         else if(crosshair)
             refreshcrosshair(!crosshair_size_editing);
@@ -3328,6 +3380,290 @@ namespace cowui
             game_radar_status =
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("game_radar_status");
+        }
+    }
+
+    bool RmlSettings::refreshgamemodels()
+    {
+        settings::GameModels state = {};
+        const bool available = settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentgamemodels(
+        const settings::GameModels &state,
+        bool available)
+    {
+        if(game_models_available != available)
+        {
+            game_models_available = available;
+            model.DirtyVariable("game_models_available");
+        }
+        if(ragdoll_deaths != state.ragdoll_deaths)
+        {
+            ragdoll_deaths = state.ragdoll_deaths;
+            model.DirtyVariable("ragdoll_deaths");
+        }
+        if(keep_ragdoll_after_respawn != state.keep_ragdoll_after_respawn)
+        {
+            keep_ragdoll_after_respawn = state.keep_ragdoll_after_respawn;
+            model.DirtyVariable("keep_ragdoll_after_respawn");
+        }
+        if(deadpush != state.deadpush)
+        {
+            deadpush = state.deadpush;
+            model.DirtyVariable("deadpush");
+        }
+        if(deadpush_minimum != state.deadpush_minimum)
+        {
+            deadpush_minimum = state.deadpush_minimum;
+            model.DirtyVariable("deadpush_minimum");
+        }
+        if(deadpush_maximum != state.deadpush_maximum)
+        {
+            deadpush_maximum = state.deadpush_maximum;
+            model.DirtyVariable("deadpush_maximum");
+        }
+        if(hide_dead_players != state.hide_dead_players)
+        {
+            hide_dead_players = state.hide_dead_players;
+            model.DirtyVariable("hide_dead_players");
+        }
+        if(fullbright_player_models != state.fullbright_player_models)
+        {
+            fullbright_player_models = state.fullbright_player_models;
+            model.DirtyVariable("fullbright_player_models");
+        }
+        const int intensity = fullbrightintensityselected(
+            state.fullbrightmodels);
+        if(fullbright_intensity_selected != intensity)
+        {
+            fullbright_intensity_selected = intensity;
+            model.DirtyVariable("fullbright_intensity_selected");
+        }
+        if(force_matching_player_models !=
+           state.force_matching_player_models)
+        {
+            force_matching_player_models =
+                state.force_matching_player_models;
+            model.DirtyVariable("force_matching_player_models");
+        }
+        if(always_use_team_skins != state.always_use_team_skins)
+        {
+            always_use_team_skins = state.always_use_team_skins;
+            model.DirtyVariable("always_use_team_skins");
+        }
+
+        Rml::String status;
+        if(!available)
+            status = "Player model settings are unavailable";
+        else
+        {
+            if(state.hidedead > 1)
+            {
+                char text[160];
+                std::snprintf(
+                    text,
+                    sizeof(text),
+                    "Hide-dead is %d; shown on without rewriting. A toggle writes 0 or 1.",
+                    state.hidedead
+                );
+                status = text;
+            }
+            if(state.ragdoll_millis != 0 &&
+               state.ragdoll_millis != 10000)
+            {
+                char text[192];
+                std::snprintf(
+                    text,
+                    sizeof(text),
+                    "Ragdolls stay for %d ms; shown on without rewriting. A toggle writes 10000 or 0.",
+                    state.ragdoll_millis
+                );
+                if(!status.empty())
+                    status += " ";
+                status += text;
+            }
+            if(state.fullbrightmodels != 0 &&
+               fullbrightintensityselected(state.fullbrightmodels) < 0)
+            {
+                char text[192];
+                std::snprintf(
+                    text,
+                    sizeof(text),
+                    "Fullbright intensity is %d; no radio is selected. Opening Settings does not rewrite.",
+                    state.fullbrightmodels
+                );
+                if(!status.empty())
+                    status += " ";
+                status += text;
+            }
+        }
+        if(game_models_status != status)
+        {
+            game_models_status = status;
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectragdolldeaths(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writeragdoll(enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectkeepragdollafterrespawn(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writeragdollmillis(enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selecthidedeadplayers(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writehidedead(enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectfullbrightplayermodels(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writefullbrightmodels(
+            enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectfullbrightintensity(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const int value = arguments[0].Get<int>();
+        if(fullbrightintensityselected(value) < 0)
+            return;
+
+        settings::GameModels state = {};
+        const bool accepted = settings::writefullbrightintensity(
+            value, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectforceplayermodels(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writeforceplayermodels(
+            enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectalwaysuseteamskins(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writeteamskins(enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
         }
     }
 
@@ -5720,6 +6056,53 @@ namespace cowui
             instance->gamma_status =
                 "Change not accepted; current engine state is shown";
             instance->model.DirtyVariable("gamma_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changedeadpushaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->deadpush
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->deadpush)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(!instance->game_models_available || !instance->ragdoll_deaths)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::GameModels state = {};
+        const bool accepted = settings::writedeadpush(requested, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        instance->presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            instance->game_models_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("game_models_status");
         }
         event.StopPropagation();
     }

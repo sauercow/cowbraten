@@ -208,6 +208,23 @@ legacy console, and activating the Game category only read these values. A
 checkbox write goes through the typed API, then reads the accepted snapshot
 back. The document never supplies ident names.
 
+The Game tab also exposes player-model presentation through Sauer's persistent
+`ragdoll`, `ragdollmillis`, `deadpush`, `hidedead`, `fullbrightmodels`,
+`forceplayermodels`, and `teamskins` integer idents. None of these have a
+change callback, so they apply immediately on the existing death, hit-push,
+and player-model render paths. There is no `resetgl()`. Opening Settings,
+returning from the legacy console, and activating the Game category only read
+these values. Canonical native Settings writes are ragdoll 0/1, ragdollmillis
+0/10000, hidedead 0/1, and fullbrightmodels 0/60 plus radios 60/100/150/200.
+If the engine holds hidedead 2, a non-zero unmatched ragdollmillis, or a
+fullbright intensity other than those radios, the UI presents the checkbox on
+(and no radio selected) without rewriting until the user toggles or selects.
+The deadpush range has no hardcoded RML value default; its change handler
+ignores a requested value that already matches the model or a range element
+that is not yet parented, matching the gamma rewrite guard. A checkbox or
+intensity write goes through the typed API, then reads the accepted snapshot
+back. The document never supplies ident names.
+
 The same activation and console-resume refresh updates presentation, current
 resolution, the supported-mode snapshot, VSync, FPS limit, and effective MSAA.
 Category selection remains owned by the cached model and only the active page

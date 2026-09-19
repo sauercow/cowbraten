@@ -169,6 +169,107 @@ namespace cowui
             return accepted;
         }
 
+        static void copygamemodels(
+            const sauersettings::GameModels &source,
+            GameModels &result)
+        {
+            result.ragdoll_deaths = source.ragdoll_deaths;
+            result.keep_ragdoll_after_respawn =
+                source.keep_ragdoll_after_respawn;
+            result.ragdoll_millis = source.ragdoll_millis;
+            result.deadpush = source.deadpush;
+            result.deadpush_minimum = source.deadpush_minimum;
+            result.deadpush_maximum = source.deadpush_maximum;
+            result.hide_dead_players = source.hide_dead_players;
+            result.hidedead = source.hidedead;
+            result.fullbright_player_models =
+                source.fullbright_player_models;
+            result.fullbrightmodels = source.fullbrightmodels;
+            result.force_matching_player_models =
+                source.force_matching_player_models;
+            result.always_use_team_skins = source.always_use_team_skins;
+        }
+
+        bool readgamemodels(GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool read = sauersettings::readgamemodels(legacy);
+            copygamemodels(legacy, result);
+            return read;
+        }
+
+        bool writeragdoll(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writeragdoll(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writeragdollmillis(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writeragdollmillis(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writedeadpush(int value, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writedeadpush(
+                value, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writehidedead(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writehidedead(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writefullbrightmodels(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writefullbrightmodels(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writefullbrightintensity(int value, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writefullbrightintensity(
+                value, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writeforceplayermodels(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writeforceplayermodels(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writeteamskins(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writeteamskins(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
         bool readvideo(Video &result)
         {
             sauersettings::Video legacy;

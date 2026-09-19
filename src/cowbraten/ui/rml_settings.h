@@ -34,6 +34,7 @@ namespace cowui
         struct WaterfallEffectsState;
         struct GameFeedback;
         struct GameRadar;
+        struct GameModels;
         struct GlassReflectionsState;
         struct ModelReflectionsState;
         struct BumpModelsState;
@@ -162,6 +163,23 @@ namespace cowui
         void selectnumberedcapturebases(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void selectshowteammatesonradar(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        bool refreshgamemodels();
+        void presentgamemodels(const settings::GameModels &state,
+            bool available);
+        void selectragdolldeaths(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectkeepragdollafterrespawn(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selecthidedeadplayers(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectfullbrightplayermodels(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectfullbrightintensity(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectforceplayermodels(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void selectalwaysuseteamskins(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         bool refreshvideo();
         void refreshshaderdetail();
@@ -393,6 +411,7 @@ namespace cowui
             void *data
         );
         static void changefovaction(Rml::Event &event);
+        static void changedeadpushaction(Rml::Event &event);
         static void gamecategoryaction(Rml::Event &event);
         static void hudcategoryaction(Rml::Event &event);
         static void graphicscategoryaction(Rml::Event &event);
@@ -489,6 +508,18 @@ namespace cowui
         bool numbered_capture_bases = false;
         bool show_teammates_on_radar = true;
         Rml::String game_radar_status;
+        bool game_models_available = false;
+        bool ragdoll_deaths = true;
+        bool keep_ragdoll_after_respawn = true;
+        int deadpush = 2;
+        int deadpush_minimum = 1;
+        int deadpush_maximum = 20;
+        bool hide_dead_players = false;
+        bool fullbright_player_models = true;
+        int fullbright_intensity_selected = 60;
+        bool force_matching_player_models = false;
+        bool always_use_team_skins = false;
+        Rml::String game_models_status;
 
         Rml::String resolution_label;
         Rml::String render_resolution_label;

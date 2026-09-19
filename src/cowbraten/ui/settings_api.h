@@ -33,6 +33,25 @@ namespace cowui
             bool show_teammates_on_radar;
         };
 
+        // Effective idents can diverge from the native Settings writes:
+        // ragdollmillis 0/10000, hidedead 0/1, fullbrightmodels
+        // 0/60/100/150/200. Opening Settings must not coerce them.
+        struct GameModels
+        {
+            bool ragdoll_deaths;
+            bool keep_ragdoll_after_respawn;
+            int ragdoll_millis;
+            int deadpush;
+            int deadpush_minimum;
+            int deadpush_maximum;
+            bool hide_dead_players;
+            int hidedead;
+            bool fullbright_player_models;
+            int fullbrightmodels;
+            bool force_matching_player_models;
+            bool always_use_team_skins;
+        };
+
         struct Video
         {
             int width;
@@ -478,6 +497,16 @@ namespace cowui
         bool readgameradar(GameRadar &result);
         bool writebasenumbers(bool enabled, GameRadar &result);
         bool writeradarteammates(bool enabled, GameRadar &result);
+
+        bool readgamemodels(GameModels &result);
+        bool writeragdoll(bool enabled, GameModels &result);
+        bool writeragdollmillis(bool enabled, GameModels &result);
+        bool writedeadpush(int value, GameModels &result);
+        bool writehidedead(bool enabled, GameModels &result);
+        bool writefullbrightmodels(bool enabled, GameModels &result);
+        bool writefullbrightintensity(int value, GameModels &result);
+        bool writeforceplayermodels(bool enabled, GameModels &result);
+        bool writeteamskins(bool enabled, GameModels &result);
 
         bool readvideo(Video &result);
         bool writepresentation(PresentationMode mode);

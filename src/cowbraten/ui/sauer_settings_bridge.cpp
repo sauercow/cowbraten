@@ -86,6 +86,62 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *ragdollident()
+        {
+            ident *id = getident("ragdoll");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ragdollmillisident()
+        {
+            ident *id = getident("ragdollmillis");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *deadpushident()
+        {
+            ident *id = getident("deadpush");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hidedeadident()
+        {
+            ident *id = getident("hidedead");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *fullbrightmodelsident()
+        {
+            ident *id = getident("fullbrightmodels");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *forceplayermodelsident()
+        {
+            ident *id = getident("forceplayermodels");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *teamskinsident()
+        {
+            ident *id = getident("teamskins");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         static ident *fullscreenident()
         {
             ident *id = getident("fullscreen");
@@ -617,6 +673,230 @@ namespace cowui
         {
             return writegameradarboolean(
                 radarteammatesident(),
+                enabled,
+                result);
+        }
+
+        enum
+        {
+            kRagdollKeepAfterRespawnMillis = 10000,
+            kFullbrightSubtle = 60,
+            kFullbrightBright = 100,
+            kFullbrightOverbright = 150,
+            kFullbrightMax = 200
+        };
+
+        static bool isfullbrightintensity(int value)
+        {
+            return value == kFullbrightSubtle ||
+                value == kFullbrightBright ||
+                value == kFullbrightOverbright ||
+                value == kFullbrightMax;
+        }
+
+        bool readgamemodels(GameModels &result)
+        {
+            result.ragdoll_deaths = false;
+            result.keep_ragdoll_after_respawn = false;
+            result.ragdoll_millis = 0;
+            result.deadpush = 2;
+            result.deadpush_minimum = 1;
+            result.deadpush_maximum = 20;
+            result.hide_dead_players = false;
+            result.hidedead = 0;
+            result.fullbright_player_models = false;
+            result.fullbrightmodels = 0;
+            result.force_matching_player_models = false;
+            result.always_use_team_skins = false;
+
+            ident *ragdoll_id = ragdollident();
+            ident *ragdollmillis_id = ragdollmillisident();
+            ident *deadpush_id = deadpushident();
+            ident *hidedead_id = hidedeadident();
+            ident *fullbright_id = fullbrightmodelsident();
+            ident *force_id = forceplayermodelsident();
+            ident *teamskins_id = teamskinsident();
+            if(!ragdoll_id || !ragdoll_id->storage.i ||
+               !ragdollmillis_id || !ragdollmillis_id->storage.i ||
+               !deadpush_id || !deadpush_id->storage.i ||
+               !hidedead_id || !hidedead_id->storage.i ||
+               !fullbright_id || !fullbright_id->storage.i ||
+               !force_id || !force_id->storage.i ||
+               !teamskins_id || !teamskins_id->storage.i)
+            {
+                return false;
+            }
+
+            result.ragdoll_deaths = *ragdoll_id->storage.i != 0;
+            result.ragdoll_millis = *ragdollmillis_id->storage.i;
+            result.keep_ragdoll_after_respawn = result.ragdoll_millis != 0;
+            result.deadpush = *deadpush_id->storage.i;
+            result.deadpush_minimum = deadpush_id->minval;
+            result.deadpush_maximum = deadpush_id->maxval;
+            result.hidedead = *hidedead_id->storage.i;
+            result.hide_dead_players = result.hidedead != 0;
+            result.fullbrightmodels = *fullbright_id->storage.i;
+            result.fullbright_player_models = result.fullbrightmodels != 0;
+            result.force_matching_player_models = *force_id->storage.i != 0;
+            result.always_use_team_skins = *teamskins_id->storage.i != 0;
+            return true;
+        }
+
+        static bool writegamemodelsboolean(
+            ident *id,
+            bool enabled,
+            GameModels &result)
+        {
+            if(!readgamemodels(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readgamemodels(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        // Native Settings checkboxes with a dedicated on-value only write
+        // when the user toggles. A non-off engine value stays put on open
+        // and on a no-op "checked" event.
+        static bool writegamemodelsonoff(
+            ident *id,
+            bool enabled,
+            int on_value,
+            int off_value,
+            GameModels &result)
+        {
+            if(!readgamemodels(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            if(enabled)
+            {
+                if(*id->storage.i == off_value)
+                {
+                    if(on_value < id->minval || on_value > id->maxval)
+                        return false;
+                    setvarchecked(id, on_value);
+                }
+            }
+            else if(*id->storage.i != off_value)
+            {
+                if(off_value < id->minval || off_value > id->maxval)
+                    return false;
+                setvarchecked(id, off_value);
+            }
+
+            if(!readgamemodels(result))
+                return false;
+            return enabled
+                ? *id->storage.i != off_value
+                : *id->storage.i == off_value;
+        }
+
+        bool writeragdoll(bool enabled, GameModels &result)
+        {
+            return writegamemodelsboolean(
+                ragdollident(),
+                enabled,
+                result);
+        }
+
+        bool writeragdollmillis(bool enabled, GameModels &result)
+        {
+            return writegamemodelsonoff(
+                ragdollmillisident(),
+                enabled,
+                kRagdollKeepAfterRespawnMillis,
+                0,
+                result);
+        }
+
+        bool writedeadpush(int value, GameModels &result)
+        {
+            if(!readgamemodels(result))
+                return false;
+
+            ident *id = deadpushident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readgamemodels(result))
+                return false;
+            return result.deadpush == value;
+        }
+
+        bool writehidedead(bool enabled, GameModels &result)
+        {
+            return writegamemodelsonoff(
+                hidedeadident(),
+                enabled,
+                1,
+                0,
+                result);
+        }
+
+        bool writefullbrightmodels(bool enabled, GameModels &result)
+        {
+            return writegamemodelsonoff(
+                fullbrightmodelsident(),
+                enabled,
+                kFullbrightSubtle,
+                0,
+                result);
+        }
+
+        bool writefullbrightintensity(int value, GameModels &result)
+        {
+            if(!readgamemodels(result))
+                return false;
+
+            ident *id = fullbrightmodelsident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               !isfullbrightintensity(value) ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readgamemodels(result))
+                return false;
+            return result.fullbrightmodels == value;
+        }
+
+        bool writeforceplayermodels(bool enabled, GameModels &result)
+        {
+            return writegamemodelsboolean(
+                forceplayermodelsident(),
+                enabled,
+                result);
+        }
+
+        bool writeteamskins(bool enabled, GameModels &result)
+        {
+            return writegamemodelsboolean(
+                teamskinsident(),
                 enabled,
                 result);
         }

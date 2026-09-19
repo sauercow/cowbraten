@@ -78,7 +78,7 @@
                     <div class="settings-scope-note" data-if="category_game">
                         <div class="settings-scope-kicker">Live Setting</div>
                         <div class="settings-scope-copy">
-                            Field of view, combat feedback, and radar options use the existing Sauer configuration system. Opening this page does not rewrite those values.
+                            Field of view, combat feedback, radar, and player-model options use the existing Sauer configuration system. Opening this page does not rewrite those values.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_graphics">
@@ -308,6 +308,174 @@
                             <div class="settings-control-footer settings-control-footer-compact"
                                 data-if="game_radar_status != ''">
                                 <span>{{ game_radar_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Models</div>
+                            <div class="settings-stage-title">Models</div>
+                            <div class="settings-stage-copy">
+                                These controls use Sauer's existing persistent player-model presentation settings. Changes apply immediately and do not restart the renderer.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Ragdoll Deaths</div>
+                                    <div class="settings-control-description">
+                                        Use physics ragdolls for player death animations when the model includes ragdoll data.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="ragdoll_deaths"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_ragdoll_deaths(ev.checked)" />
+                                    <span data-if="ragdoll_deaths">On</span>
+                                    <span data-if="!ragdoll_deaths">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider"
+                                data-if="ragdoll_deaths">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Keep After Respawn</div>
+                                    <div class="settings-control-description">
+                                        Keep saved ragdoll corpses after respawn. Native Settings writes 10000 ms on and 0 ms off. A different non-zero engine value stays put until you toggle.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="keep_ragdoll_after_respawn"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_keep_ragdoll_after_respawn(ev.checked)" />
+                                    <span data-if="keep_ragdoll_after_respawn">On</span>
+                                    <span data-if="!keep_ragdoll_after_respawn">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-attrif-hidden="!ragdoll_deaths">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Ragdoll Velocity Multiplier</div>
+                                        <div class="settings-control-description">
+                                            Scales hit-push applied to dead players. The range comes from Sauer's existing deadpush ident.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ deadpush }}</span>
+                                        <span class="settings-value-unit">x</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ deadpush_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="1"
+                                        max="20"
+                                        step="1"
+                                        data-attr-min="deadpush_minimum"
+                                        data-attr-max="deadpush_maximum"
+                                        data-attr-value="deadpush"
+                                        data-attrif-disabled="!game_models_available || !ragdoll_deaths"
+                                        onchange="settings.deadpush" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ deadpush_maximum }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Hide Dead Players</div>
+                                    <div class="settings-control-description">
+                                        Skip drawing other dead players. Native Settings writes 0 or 1. A value of 1 also hides your own third-person corpse; 2 hides others and keeps yours. Opening Settings does not rewrite 2.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hide_dead_players"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_hide_dead_players(ev.checked)" />
+                                    <span data-if="hide_dead_players">On</span>
+                                    <span data-if="!hide_dead_players">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Fullbright Player Models</div>
+                                    <div class="settings-control-description">
+                                        Raise the minimum brightness of player models. Enabling from off writes 60 (subtle). Intensity radios write only when you select them.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="fullbright_player_models"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_fullbright_player_models(ev.checked)" />
+                                    <span data-if="fullbright_player_models">On</span>
+                                    <span data-if="!fullbright_player_models">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-if="fullbright_player_models">
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="fullbright_intensity_selected == 60"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-click="select_fullbright_intensity(60)">Subtle</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="fullbright_intensity_selected == 100"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-click="select_fullbright_intensity(100)">Bright</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="fullbright_intensity_selected == 150"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-click="select_fullbright_intensity(150)">Overbright</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="fullbright_intensity_selected == 200"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-click="select_fullbright_intensity(200)">Max</button>
+                                </div>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Force Matching Player Models</div>
+                                    <div class="settings-control-description">
+                                        Render other players with your selected player model instead of each player's own model.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="force_matching_player_models"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_force_player_models(ev.checked)" />
+                                    <span data-if="force_matching_player_models">On</span>
+                                    <span data-if="!force_matching_player_models">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Always Use Team Skins</div>
+                                    <div class="settings-control-description">
+                                        Use blue and red team skins even outside team modes.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="always_use_team_skins"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_always_use_team_skins(ev.checked)" />
+                                    <span data-if="always_use_team_skins">On</span>
+                                    <span data-if="!always_use_team_skins">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="game_models_status != ''">
+                                <span>{{ game_models_status }}</span>
                             </div>
                         </div>
                     </div>
