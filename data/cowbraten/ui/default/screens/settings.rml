@@ -90,7 +90,7 @@
                     <div class="settings-scope-note" data-if="category_hud">
                         <div class="settings-scope-kicker">Combat Information</div>
                         <div class="settings-scope-copy">
-                            FPS and wall-clock overlays, damage feedback, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
+                            FPS and wall-clock overlays, damage feedback, HUD guns, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_audio">
@@ -370,6 +370,69 @@
                                         onclick="settings.hud.damage-compass" />
                                     <span data-if="damage_compass">Enabled</span>
                                     <span data-if="!damage_compass">Disabled</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">HUD Guns</div>
+                                    <div class="settings-control-description">
+                                        Draws the first-person weapon models through Sauer's existing HUD gun renderer.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hud_guns"
+                                        onclick="settings.hud.guns" />
+                                    <span data-if="hud_guns">Enabled</span>
+                                    <span data-if="!hud_guns">Disabled</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Sway</div>
+                                    <div class="settings-control-description">
+                                        Offsets the first-person weapon with Sauer's existing walk sway while HUD guns are drawn.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hud_gun_sway"
+                                        onclick="settings.hud.guns.sway" />
+                                    <span data-if="hud_gun_sway">Enabled</span>
+                                    <span data-if="!hud_gun_sway">Disabled</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Muzzle Flash</div>
+                                    <div class="settings-control-description">
+                                        Shows the existing muzzle flare when a weapon muzzle tag is available.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="muzzle_flash"
+                                        onclick="settings.hud.guns.muzzle-flash" />
+                                    <span data-if="muzzle_flash">Enabled</span>
+                                    <span data-if="!muzzle_flash">Disabled</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Muzzle Light</div>
+                                    <div class="settings-control-description">
+                                        Adds Sauer's existing brief muzzle dynlight, including when HUD guns are off.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="muzzle_light"
+                                        onclick="settings.hud.guns.muzzle-light" />
+                                    <span data-if="muzzle_light">Enabled</span>
+                                    <span data-if="!muzzle_light">Disabled</span>
                                 </label>
                             </div>
                         </div>

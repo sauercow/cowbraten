@@ -423,6 +423,10 @@ namespace cowui
         static void wallclocksecondsaction(Rml::Event &event);
         static void damagescreenaction(Rml::Event &event);
         static void damagecompassaction(Rml::Event &event);
+        static void hudgunsaction(Rml::Event &event);
+        static void hudgunswayaction(Rml::Event &event);
+        static void muzzleflashaction(Rml::Event &event);
+        static void muzzlelightaction(Rml::Event &event);
         static void fragmessagesenabledaction(Rml::Event &event);
         static void fragmessagesinstaaction(Rml::Event &event);
         static void decreasestreakscaleaction(Rml::Event &event);
@@ -671,6 +675,10 @@ namespace cowui
         bool wall_clock_seconds = false;
         bool damage_screen = true;
         bool damage_compass = true;
+        bool hud_guns = true;
+        bool hud_gun_sway = true;
+        bool muzzle_flash = true;
+        bool muzzle_light = true;
         bool frag_messages_enabled = true;
         bool frag_messages_in_insta = true;
         float streak_milestone_scale = 1.25f;

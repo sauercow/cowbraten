@@ -712,6 +712,10 @@ namespace cowui
             ) &&
             constructor.Bind("damage_screen", &damage_screen) &&
             constructor.Bind("damage_compass", &damage_compass) &&
+            constructor.Bind("hud_guns", &hud_guns) &&
+            constructor.Bind("hud_gun_sway", &hud_gun_sway) &&
+            constructor.Bind("muzzle_flash", &muzzle_flash) &&
+            constructor.Bind("muzzle_light", &muzzle_light) &&
             constructor.Bind(
                 "frag_messages_enabled",
                 &frag_messages_enabled
@@ -977,6 +981,22 @@ namespace cowui
             router.registeraction(
                 "settings.hud.damage-compass",
                 damagecompassaction
+            ) &&
+            router.registeraction(
+                "settings.hud.guns",
+                hudgunsaction
+            ) &&
+            router.registeraction(
+                "settings.hud.guns.sway",
+                hudgunswayaction
+            ) &&
+            router.registeraction(
+                "settings.hud.guns.muzzle-flash",
+                muzzleflashaction
+            ) &&
+            router.registeraction(
+                "settings.hud.guns.muzzle-light",
+                muzzlelightaction
             ) &&
             router.registeraction(
                 "settings.hud.frag-messages.enabled",
@@ -1255,6 +1275,10 @@ namespace cowui
         wall_clock_seconds = false;
         damage_screen = true;
         damage_compass = true;
+        hud_guns = true;
+        hud_gun_sway = true;
+        muzzle_flash = true;
+        muzzle_light = true;
         frag_messages_enabled = true;
         frag_messages_in_insta = true;
         streak_milestone_scale = 1.25f;
@@ -2153,6 +2177,26 @@ namespace cowui
         {
             damage_compass = current.damage_compass;
             model.DirtyVariable("damage_compass");
+        }
+        if(hud_guns != current.hud_guns)
+        {
+            hud_guns = current.hud_guns;
+            model.DirtyVariable("hud_guns");
+        }
+        if(hud_gun_sway != current.hud_gun_sway)
+        {
+            hud_gun_sway = current.hud_gun_sway;
+            model.DirtyVariable("hud_gun_sway");
+        }
+        if(muzzle_flash != current.muzzle_flash)
+        {
+            muzzle_flash = current.muzzle_flash;
+            model.DirtyVariable("muzzle_flash");
+        }
+        if(muzzle_light != current.muzzle_light)
+        {
+            muzzle_light = current.muzzle_light;
+            model.DirtyVariable("muzzle_light");
         }
 
         const bool messages_enabled = current.frag_messages !=
@@ -5829,6 +5873,46 @@ namespace cowui
         if(instance)
         {
             settings::writedamagecompass(!instance->damage_compass);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::hudgunsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writehudguns(!instance->hud_guns);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::hudgunswayaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writehudgunsway(!instance->hud_gun_sway);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::muzzleflashaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writemuzzleflash(!instance->muzzle_flash);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::muzzlelightaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writemuzzlelight(!instance->muzzle_light);
             instance->refreshhud();
         }
         event.StopPropagation();

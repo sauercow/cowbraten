@@ -261,6 +261,38 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *hudgunident()
+        {
+            ident *id = getident("hudgun");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudgunswayident()
+        {
+            ident *id = getident("hudgunsway");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *muzzleflashident()
+        {
+            ident *id = getident("muzzleflash");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *muzzlelightident()
+        {
+            ident *id = getident("muzzlelight");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         static ident *fragmessagesident()
         {
             ident *id = getident("hudfragmessages");
@@ -2935,6 +2967,10 @@ namespace cowui
             ident *clocksecs_id = wallclocksecsident();
             ident *screen_id = damagescreenident();
             ident *compass_id = damagecompassident();
+            ident *guns_id = hudgunident();
+            ident *sway_id = hudgunswayident();
+            ident *flash_id = muzzleflashident();
+            ident *light_id = muzzlelightident();
             ident *messages_id = fragmessagesident();
             ident *streak_id = streakmilestonescaleident();
             if(!fps_id || !fps_id->storage.i ||
@@ -2943,6 +2979,10 @@ namespace cowui
                !clocksecs_id || !clocksecs_id->storage.i ||
                !screen_id || !screen_id->storage.i ||
                !compass_id || !compass_id->storage.i ||
+               !guns_id || !guns_id->storage.i ||
+               !sway_id || !sway_id->storage.i ||
+               !flash_id || !flash_id->storage.i ||
+               !light_id || !light_id->storage.i ||
                !messages_id || !messages_id->storage.i ||
                !streak_id || !streak_id->storage.f)
             {
@@ -2955,6 +2995,10 @@ namespace cowui
             result.wall_clock_seconds = *clocksecs_id->storage.i != 0;
             result.damage_screen = *screen_id->storage.i != 0;
             result.damage_compass = *compass_id->storage.i != 0;
+            result.hud_guns = *guns_id->storage.i != 0;
+            result.hud_gun_sway = *sway_id->storage.i != 0;
+            result.muzzle_flash = *flash_id->storage.i != 0;
+            result.muzzle_light = *light_id->storage.i != 0;
             switch(*messages_id->storage.i)
             {
                 case 0:
@@ -3001,6 +3045,26 @@ namespace cowui
         bool writedamagecompass(bool enabled)
         {
             return writeboolean(damagecompassident(), enabled);
+        }
+
+        bool writehudguns(bool enabled)
+        {
+            return writeboolean(hudgunident(), enabled);
+        }
+
+        bool writehudgunsway(bool enabled)
+        {
+            return writeboolean(hudgunswayident(), enabled);
+        }
+
+        bool writemuzzleflash(bool enabled)
+        {
+            return writeboolean(muzzleflashident(), enabled);
+        }
+
+        bool writemuzzlelight(bool enabled)
+        {
+            return writeboolean(muzzlelightident(), enabled);
         }
 
         bool writefragmessages(FragMessagesMode mode)

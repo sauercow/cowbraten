@@ -295,6 +295,18 @@ HUD-tab control and is not exposed. The streak scale uses its declared
 sensitivity. Settings activation, category activation, local writes, and
 console return refresh these snapshots; there is no frame-loop polling.
 
+HUD guns add four independent persistent Sauer booleans on the same HUD page:
+`hudgun`, `hudgunsway`, `muzzleflash`, and `muzzlelight`. Each has its own
+typed writer. Toggling `hudgun` does not write the other three idents. Sway
+only offsets the first-person weapon while `drawhudgun()` draws it. Muzzle
+flash requires a valid muzzle tag; local first-person flashes therefore
+disappear when HUD guns are off because that path invalidates the tag, while
+other players and third-person view can still supply a world-model tag.
+Muzzle light does not require that tag and still uses `hudgunorigin()` when
+HUD guns are off. The default theme groups sway, flash, and light as
+subordinates of HUD Guns without disabling or rewriting those independent
+values. `hudgunsdir` remains unexposed.
+
 `hudfragmessages` is one p1x enum, not a generic per-game-mode policy: `0`
 disables frag and Cowbraten streak messages, `1` shows them in all modes, and
 `2` shows them outside instagib only. No equivalent exceptions exist for other

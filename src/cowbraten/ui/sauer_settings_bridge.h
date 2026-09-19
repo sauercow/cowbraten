@@ -410,6 +410,10 @@ namespace cowui
             bool wall_clock_seconds;
             bool damage_screen;
             bool damage_compass;
+            bool hud_guns;
+            bool hud_gun_sway;
+            bool muzzle_flash;
+            bool muzzle_light;
             FragMessagesMode frag_messages;
             float streak_milestone_scale;
             float streak_milestone_scale_minimum;
@@ -617,6 +621,10 @@ namespace cowui
         bool writewallclockseconds(bool enabled);
         bool writedamagescreen(bool enabled);
         bool writedamagecompass(bool enabled);
+        bool writehudguns(bool enabled);
+        bool writehudgunsway(bool enabled);
+        bool writemuzzleflash(bool enabled);
+        bool writemuzzlelight(bool enabled);
         bool writefragmessages(FragMessagesMode mode);
         bool writestreakmilestonescale(float value);
 

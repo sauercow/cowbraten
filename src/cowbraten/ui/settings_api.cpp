@@ -1777,6 +1777,10 @@ namespace cowui
             result.wall_clock_seconds = legacy.wall_clock_seconds;
             result.damage_screen = legacy.damage_screen;
             result.damage_compass = legacy.damage_compass;
+            result.hud_guns = legacy.hud_guns;
+            result.hud_gun_sway = legacy.hud_gun_sway;
+            result.muzzle_flash = legacy.muzzle_flash;
+            result.muzzle_light = legacy.muzzle_light;
             result.frag_messages = fragmessagesmode(legacy.frag_messages);
             result.streak_milestone_scale = legacy.streak_milestone_scale;
             result.streak_milestone_scale_minimum =
@@ -1814,6 +1818,26 @@ namespace cowui
         bool writedamagecompass(bool enabled)
         {
             return sauersettings::writedamagecompass(enabled);
+        }
+
+        bool writehudguns(bool enabled)
+        {
+            return sauersettings::writehudguns(enabled);
+        }
+
+        bool writehudgunsway(bool enabled)
+        {
+            return sauersettings::writehudgunsway(enabled);
+        }
+
+        bool writemuzzleflash(bool enabled)
+        {
+            return sauersettings::writemuzzleflash(enabled);
+        }
+
+        bool writemuzzlelight(bool enabled)
+        {
+            return sauersettings::writemuzzlelight(enabled);
         }
 
         bool writefragmessages(FragMessagesMode mode)
