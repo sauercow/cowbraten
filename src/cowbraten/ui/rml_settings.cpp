@@ -368,6 +368,10 @@ namespace cowui
             constructor.Bind("model_reflections", &model_reflections) &&
             constructor.Bind("model_reflections_status", &model_reflections_status) &&
             constructor.BindEventCallback("select_model_reflections", &RmlSettings::selectmodelreflections, this) &&
+            constructor.Bind("bump_models_available", &bump_models_available) &&
+            constructor.Bind("bump_models", &bump_models) &&
+            constructor.Bind("bump_models_status", &bump_models_status) &&
+            constructor.BindEventCallback("select_bump_models", &RmlSettings::selectbumpmodels, this) &&
             constructor.Bind("environment_map_resolution_available", &environment_map_resolution_available) &&
             constructor.Bind("environment_map_resolution_selected", &environment_map_resolution_selected) &&
             constructor.Bind("environment_map_resolution_label", &environment_map_resolution_label) &&
@@ -971,6 +975,9 @@ namespace cowui
         model_reflections_available = false;
         model_reflections = false;
         model_reflections_status.clear();
+        bump_models_available = false;
+        bump_models = false;
+        bump_models_status.clear();
         environment_map_resolution_available = false;
         environment_map_resolution_selected = -1;
         environment_map_resolution_label.clear();
@@ -1233,6 +1240,7 @@ namespace cowui
         refreshwaterfalleffects();
         refreshglassreflections();
         refreshmodelreflections();
+        refreshbumpmodels();
         refreshenvironmentmapresolution();
         refreshdynamiclights();
         refreshsoftparticles();
@@ -3602,6 +3610,50 @@ namespace cowui
             model_reflections_status =
                 "Change not accepted; current engine state is shown";
             model.DirtyVariable("model_reflections_status");
+        }
+    }
+
+    void RmlSettings::refreshbumpmodels()
+    {
+        settings::BumpModelsState state = {};
+        const bool available = settings::readbumpmodels(state);
+        presentbumpmodels(state, available);
+    }
+
+    void RmlSettings::presentbumpmodels(
+        const settings::BumpModelsState &state,
+        bool available)
+    {
+        bump_models_available = available;
+        bump_models = state.enabled;
+        bump_models_status = available
+            ? ""
+            : "Model bump maps state is unavailable";
+
+        model.DirtyVariable("bump_models_available");
+        model.DirtyVariable("bump_models");
+        model.DirtyVariable("bump_models_status");
+    }
+
+    void RmlSettings::selectbumpmodels(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !bump_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::BumpModelsState state = {};
+        const bool accepted = settings::writebumpmodels(enabled, state);
+        const bool available = accepted ||
+            settings::readbumpmodels(state);
+        presentbumpmodels(state, available);
+        if(!accepted && available)
+        {
+            bump_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("bump_models_status");
         }
     }
 

@@ -586,6 +586,30 @@ namespace cowui
             return accepted;
         }
 
+        static void copybumpmodels(
+            const sauersettings::BumpModelsState &source,
+            BumpModelsState &result)
+        {
+            result.enabled = source.enabled;
+        }
+
+        bool readbumpmodels(BumpModelsState &result)
+        {
+            sauersettings::BumpModelsState legacy = {};
+            const bool read = sauersettings::readbumpmodels(legacy);
+            copybumpmodels(legacy, result);
+            return read;
+        }
+
+        bool writebumpmodels(bool enabled, BumpModelsState &result)
+        {
+            sauersettings::BumpModelsState legacy = {};
+            const bool accepted = sauersettings::writebumpmodels(
+                enabled, legacy);
+            copybumpmodels(legacy, result);
+            return accepted;
+        }
+
         static EnvironmentMapResolution environmentmapresolution(
             sauersettings::EnvironmentMapResolution level)
         {

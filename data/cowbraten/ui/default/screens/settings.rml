@@ -757,6 +757,29 @@
                             </div>
                         </div>
 
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Model Bump Maps</div>
+                                    <div class="settings-control-description">
+                                        Use normal maps on models that provide them. Changing this rebuilds model shaders and may hitch briefly.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="bump_models"
+                                        data-attrif-disabled="!bump_models_available"
+                                        data-event-change="select_bump_models(ev.checked)" />
+                                    <span data-if="bump_models">On</span>
+                                    <span data-if="!bump_models">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="bump_models_status != ''">
+                                <span>{{ bump_models_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section settings-antialiasing-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">

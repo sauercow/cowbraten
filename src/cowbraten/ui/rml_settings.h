@@ -33,6 +33,7 @@ namespace cowui
         struct WaterfallEffectsState;
         struct GlassReflectionsState;
         struct ModelReflectionsState;
+        struct BumpModelsState;
         struct EnvironmentMapResolutionState;
         struct DynamicLightsState;
         struct SoftParticlesState;
@@ -204,6 +205,12 @@ namespace cowui
             const settings::ModelReflectionsState &state,
             bool available);
         void selectmodelreflections(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void refreshbumpmodels();
+        void presentbumpmodels(
+            const settings::BumpModelsState &state,
+            bool available);
+        void selectbumpmodels(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void refreshenvironmentmapresolution();
         void presentenvironmentmapresolution(
@@ -477,6 +484,9 @@ namespace cowui
         bool model_reflections_available = false;
         bool model_reflections = false;
         Rml::String model_reflections_status;
+        bool bump_models_available = false;
+        bool bump_models = false;
+        Rml::String bump_models_status;
         bool environment_map_resolution_available = false;
         int environment_map_resolution_selected = -1;
         Rml::String environment_map_resolution_label;

@@ -124,6 +124,11 @@ namespace cowui
             bool enabled;
         };
 
+        struct BumpModelsState
+        {
+            bool enabled;
+        };
+
         enum class EnvironmentMapResolution
         {
             Minimum,
@@ -487,6 +492,9 @@ namespace cowui
         bool readmodelreflections(ModelReflectionsState &result);
         bool writemodelreflections(bool enabled,
             ModelReflectionsState &result);
+
+        bool readbumpmodels(BumpModelsState &result);
+        bool writebumpmodels(bool enabled, BumpModelsState &result);
 
         bool readenvironmentmapresolution(
             EnvironmentMapResolutionState &result);

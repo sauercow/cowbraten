@@ -1214,6 +1214,50 @@ namespace cowui
             return result.enabled == enabled;
         }
 
+        bool readbumpmodels(BumpModelsState &result)
+        {
+            result.enabled = false;
+
+            ident *id = getident("bumpmodels");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writebumpmodels(bool enabled, BumpModelsState &result)
+        {
+            if(!readbumpmodels(result))
+                return false;
+
+            ident *id = getident("bumpmodels");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            const bool changed = *id->storage.i != value;
+            if(!changed)
+            {
+                if(!readbumpmodels(result))
+                    return false;
+                return result.enabled == enabled;
+            }
+
+            if(!SDL_GL_GetCurrentContext())
+                return false;
+
+            setvarchecked(id, value);
+
+            if(!readbumpmodels(result))
+                return false;
+            return result.enabled == enabled;
+        }
+
         static bool environmentmapresolution(
             int exponent,
             EnvironmentMapResolution &level)
