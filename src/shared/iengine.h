@@ -304,6 +304,8 @@ extern physent *camera1;
 extern vec worldpos, camdir, camright, camup;
 
 extern void disablezoom();
+extern float getzoomprogress();
+extern void forcezoom(float progress);
 
 extern vec calcavatarpos(const vec &pos, float dist);
 extern vec calcmodelpreviewpos(const vec &radius, float &yaw);

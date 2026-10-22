@@ -178,13 +178,17 @@ namespace game
     void setupcamera()
     {
         fpsent *target = followingplayer();
-        if(target)
+        bool hd = target && hdplaybackcamera(target);
+        if(target && !hd)
         {
             player1->yaw = target->yaw;
             player1->pitch = target->state==CS_DEAD ? 0 : target->pitch;
             player1->o = target->o;
             player1->resetinterp();
         }
+        // Only apply HD where an exact player-owned track exists. The
+        // existing Cowbraten HiFi aim decoder remains authoritative otherwise.
+        hdplaybackothers(target);
     }
 
     bool allowthirdperson(bool msg)
@@ -285,6 +289,7 @@ namespace game
         if(!maptime) { maptime = lastmillis; maprealtime = totalmillis; return; }
         if(!curtime || ispaused()) {
             gets2c();
+            hdupdatespecqueue();
             if(curtime && player1->state==CS_SPECTATOR) { fakephysicsframe(); moveplayer(player1, 10, true); }
             if(player1->clientnum>=0) c2sinfo();
             return;
@@ -301,6 +306,7 @@ namespace game
         ai::update();
         moveragdolls();
         gets2c();
+        hdupdatespecqueue();
         updatemovables(curtime);
         updatemonsters(curtime);
         if(connected)
