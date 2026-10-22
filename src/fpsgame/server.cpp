@@ -870,7 +870,9 @@ namespace server
     void enddemoplayback()
     {
         if(!demoplayback) return;
-
+#ifndef STANDALONE
+        game::clearhdplayback();
+#endif
         DELETEP(demoplayback);
         demoplaybackduration = 0;
         demoplaybackfile[0] = '\0';
@@ -1057,6 +1059,11 @@ namespace server
 
         copystring(demoplaybackfile, file);
         if(scan) demoplaybackduration = scandemoduration(file);
+#ifndef STANDALONE
+        // The optional HD sidecar is indexed by the same timeline as .dmo.
+        // Rewinds reopen the demo but reuse the already decoded HD samples.
+        game::loadhdplayback(file);
+#endif
         if(announce) sendservmsgf("playing demo \"%s\"", file);
 
         sendf(-1, 1, "ri3", N_DEMOPLAYBACK, 1, -1);

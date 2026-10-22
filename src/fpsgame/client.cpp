@@ -124,6 +124,9 @@ namespace game
     int sessionid = 0, mastermode = MM_OPEN, gamespeed = 100;
     static int demorestartfollowing = -1, demorestartfollowdir = 0;
     string servdesc = "", servauth = "", connectpass = "";
+    static bool hdservercapable = false;
+    bool hdserverready() { return connected && remote && hdservercapable; }
+    ICOMMAND(hdserver, "", (), intret(hdserverready() ? 1 : 0));
 
     VARP(deadpush, 1, 2, 20);
 
@@ -960,6 +963,9 @@ namespace game
 
     void gamedisconnect(bool cleanup)
     {
+        hdservercapable = false;
+        hdclearspecqueue();
+        hdclearstreams();
         closekillstreaklife();
         if(remote) stopfollowing();
         ignores.setsize(0);
@@ -1150,6 +1156,7 @@ namespace game
         lastdemopos = totalmillis;
         sendpositions();
         sendmessages();
+        hdflushlive();
         flushclient();
     }
 
@@ -2163,7 +2170,21 @@ namespace game
 
             case N_SERVCMD:
                 getstring(text, p);
-                handlecapprobe(text);
+                // Do not send HD network messages before the exact L4ZY hello.
+                if(!strcmp(text, CLANMOD_HELLO) && !demoplayback && remote)
+                {
+                    if(!hdservercapable)
+                    {
+                        hdservercapable = true;
+                        addmsg(N_SERVCMD, "rs", CLANMOD_ACK);
+                        conoutf("L4ZY HD: compatible server detected");
+                    }
+                }
+                else handlecapprobe(text);
+                break;
+
+            case N_HDPOS:
+                hdreceivelive(p);
                 break;
 
             case N_P1X_RECORDDEMO:
@@ -2247,9 +2268,96 @@ namespace game
         }
     }
 
+    void parsepacketclient(int chan, packetbuf &p);
+
+    // HD live spectator: ordinary game packets are held for the same delay
+    // as the camera. HD position packets arrive immediately and are sampled
+    // in the past. Vanilla servers and active players have zero delay.
+    struct hdspecpacket
+    {
+        int stamp, chan;
+        vector<uchar> bytes;
+    };
+    static vector<hdspecpacket *> hdspecqueue;
+    static int hdspecbytes = 0;
+    static float hdspecdelayms = 0;
+    static int hdspeclastupdate = 0;
+    static bool hdreplaying = false, hdwaswatching = false;
+    static const int HD_MAX_SPEC_PACKETS = 8192, HD_MAX_SPEC_BYTES = 8 << 20;
+    VARP(hdlivedelay, 0, 200, 1000);
+
+    static bool hdwatching()
+    {
+        return hdserverready() && !demoplayback && player1 && player1->state == CS_SPECTATOR;
+    }
+
+    void hdclearspecqueue()
+    {
+        hdspecqueue.deletecontents();
+        hdspecbytes = 0;
+        hdspecdelayms = 0;
+        hdspeclastupdate = 0;
+        hdwaswatching = false;
+    }
+
+    int hdspecdelay() { return int(hdspecdelayms); }
+
+    // Same approach as L4ZY; rate-limit changes to avoid abrupt time jumps.
+    void hdupdatespecqueue()
+    {
+        const int dt = hdspeclastupdate ? max(totalmillis - hdspeclastupdate, 0) : 0;
+        hdspeclastupdate = totalmillis;
+        const bool active = hdwatching();
+        const int goal = active ? hdlivedelay : 0;
+        if(active && !hdwaswatching && hdspecqueue.empty()) hdspecdelayms = goal;
+        hdwaswatching = active;
+        const float step = dt * 0.2f;
+        hdspecdelayms = goal > hdspecdelayms ? min(hdspecdelayms+step, float(goal)) : max(hdspecdelayms-step, float(goal));
+        while(!hdspecqueue.empty())
+        {
+            const bool flush = !active || hdspecqueue.length() > HD_MAX_SPEC_PACKETS || hdspecbytes > HD_MAX_SPEC_BYTES;
+            hdspecpacket *sp = hdspecqueue[0];
+            if(!flush && sp->stamp > totalmillis - int(hdspecdelayms)) break;
+            hdspecqueue.remove(0);
+            hdspecbytes -= sp->bytes.length();
+            ENetPacket *raw = enet_packet_create(sp->bytes.getbuf(), sp->bytes.length(), 0);
+            if(raw)
+            {
+                hdreplaying = true;
+                packetbuf pk(raw);
+                parsepacketclient(sp->chan, pk);
+                hdreplaying = false;
+                enet_packet_destroy(raw);
+            }
+            delete sp;
+        }
+        if(!active) hdspecdelayms = 0;
+    }
+
     void parsepacketclient(int chan, packetbuf &p)   // processes any updates from the server
     {
         if(p.packet->flags&ENET_PACKET_FLAG_UNSEQUENCED) return;
+        if((chan == 0 || chan == 1) && !hdreplaying &&
+           (!hdspecqueue.empty() || (hdspecdelayms > 0 && hdwatching())))
+        {
+            ucharbuf peek(p.buf, p.maxlen);
+            int type = getint(peek);
+            if(type != N_HDPOS && type != N_PONG && type != N_SERVMSG && type != N_SERVCMD)
+            {
+                // Bound allocation before accepting a packet into the queue.
+                if(p.maxlen > 0 && p.maxlen <= HD_MAX_SPEC_BYTES)
+                {
+                    hdspecpacket *sp = new hdspecpacket;
+                    sp->stamp = totalmillis;
+                    sp->chan = chan;
+                    sp->bytes.put(p.buf, p.maxlen);
+                    hdspecbytes += p.maxlen;
+                    hdspecqueue.add(sp);
+                    p.len = p.maxlen;
+                    return;
+                }
+            }
+        }
         if(demorecord && chan<2) recordpacket(chan, p.packet->data, p.packet->dataLength);
         switch(chan)
         {

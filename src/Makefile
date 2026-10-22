@@ -126,6 +126,7 @@ CLIENT_OBJS= \
 	cowbraten/bans.o \
 	cowbraten/capability_probing.o \
 	cowbraten/clientdemo.o \
+	cowbraten/demohd.o \
 	cowbraten/demo_info_message.o \
 	cowbraten/detection.o \
 	cowbraten/embedded_cfgs.o \
