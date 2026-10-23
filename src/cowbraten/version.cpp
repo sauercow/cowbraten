@@ -13,7 +13,7 @@ static void lockversion(const char *name)
 void migratecowbraten()
 {
     const char *version = "9.0.0"; // upstream p1xbraten compatibility version
-    const char *cowversion = "1.0.1-rc.2";
+    const char *cowversion = "1.0.1-rc.3";
     if(naturalsort(p1xbratenversion, version) == -1)
     {
         // we're newer, run migrations

@@ -2,7 +2,7 @@
 
 This repository contains **cowbraten**, a standalone-branded fork of [p1xbraten](https://github.com/sauerbraten/p1xbraten) with additional demo playback, HUD, crosshair, and sound features. It retains p1xbraten network detection compatibility while versioning and packaging cowbraten separately.
 
-Current fork version: **1.0.1-rc.2**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights.
+Current fork version: **1.0.1-rc.3**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights.
 
 - [Installation](#installation)
   - [Windows](#windows)

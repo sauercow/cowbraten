@@ -1,5 +1,19 @@
 # Changelog
 
+## cowbraten 1.0.1-rc.3 — 2026-10-23
+
+### HD Demos
+- Add optional HD recording alongside existing HiFi client demos.
+- Store high-precision camera samples in companion `.dmohd` files.
+- Add HD playback with configurable interpolation.
+- Preserve existing `.dmo` playback and advanced demo controls.
+- Add experimental live HD spectating support for compatible L4ZY servers.
+- Preserve compatibility with vanilla servers.
+
+### Notes
+- Live HD spectating requires further interoperability testing.
+- HD server-side recording and relay support is deferred to a future release.
+
 ## cowbraten 1.0.1-rc.2 — 2026-09-11
 
 Second release candidate with a client-side kill-streak lifecycle correction.
