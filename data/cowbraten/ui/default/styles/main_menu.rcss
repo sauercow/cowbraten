@@ -20,9 +20,9 @@ body
 {
     display: flex;
     flex-direction: column;
-    width: 1440px;
+    width: 1440dp;
     max-width: 100%;
-    height: 800px;
+    height: 800dp;
     max-height: 100%;
     overflow: hidden;
 }
@@ -32,18 +32,20 @@ body
     box-sizing: border-box;
     display: flex;
     flex: none;
-    height: 72px;
+    height: 72dp;
     padding: 0 var(--space-3);
     align-items: center;
     justify-content: space-between;
     background-color: var(--color-surface);
-    border-bottom-width: 1px;
+    border-bottom-width: 1dp;
     border-bottom-color: var(--color-border);
 }
 
 .main-lockup
 {
     display: flex;
+    flex: none;
+    min-width: 0;
     align-items: center;
     gap: var(--space-2);
 }
@@ -51,18 +53,19 @@ body
 .main-mark
 {
     box-sizing: border-box;
-    width: 40px;
-    height: 40px;
+    width: 40dp;
+    height: 40dp;
     background-color: var(--color-secondary);
-    border-width: 1px;
+    border-width: 1dp;
     border-color: var(--color-secondary-hover);
     border-radius: var(--radius-control);
     color: var(--color-background);
-    font-size: 24px;
-    line-height: 38px;
-    letter-spacing: 1px;
+    font-size: 24dp;
+    line-height: 38dp;
+    letter-spacing: 1dp;
     text-align: center;
     text-transform: uppercase;
+    flex: none;
 }
 
 .main-lockup-copy
@@ -74,9 +77,9 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 18px;
-    line-height: 20px;
-    letter-spacing: 2px;
+    font-size: 18dp;
+    line-height: 20dp;
+    letter-spacing: 2dp;
     text-transform: uppercase;
 }
 
@@ -84,15 +87,15 @@ body
 {
     display: block;
     color: var(--color-text-muted);
-    font-size: 11px;
-    line-height: 16px;
-    letter-spacing: 1px;
+    font-size: 11dp;
+    line-height: 16dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
 .main-close
 {
-    min-width: 152px;
+    min-width: 152dp;
 }
 
 .main-content
@@ -107,12 +110,12 @@ body
 {
     box-sizing: border-box;
     display: flex;
-    flex: 0 0 400px;
+    flex: 0 0 400dp;
     min-width: 0;
     padding: var(--space-3);
     flex-direction: column;
     background-color: var(--color-background);
-    border-right-width: 1px;
+    border-right-width: 1dp;
     border-right-color: var(--color-border);
 }
 
@@ -121,8 +124,8 @@ body
     flex: none;
     margin-bottom: var(--space-2);
     color: var(--color-primary);
-    font-size: 12px;
-    letter-spacing: 2px;
+    font-size: 12dp;
+    letter-spacing: 2dp;
     text-transform: uppercase;
 }
 
@@ -136,20 +139,20 @@ body
 .main-nav-item
 {
     display: flex;
-    height: 48px;
+    height: 48dp;
     padding: 0 var(--space-2);
     align-items: center;
-    line-height: 46px;
+    line-height: 46dp;
 }
 
 .main-nav-index
 {
     display: block;
     flex: none;
-    width: 32px;
+    width: 32dp;
     color: var(--color-disabled);
-    font-size: 10px;
-    letter-spacing: 1px;
+    font-size: 10dp;
+    letter-spacing: 1dp;
 }
 
 .main-nav-label
@@ -162,10 +165,10 @@ body
 {
     display: block;
     flex: none;
-    width: 72px;
+    width: 72dp;
     color: var(--color-disabled);
-    font-size: 9px;
-    letter-spacing: 1px;
+    font-size: 10dp;
+    letter-spacing: 1dp;
     text-align: right;
 }
 
@@ -178,7 +181,7 @@ body
 .main-nav-exit
 {
     margin-top: var(--space-1);
-    border-top-width: 1px;
+    border-top-width: 1dp;
     border-top-color: var(--color-border);
 }
 
@@ -209,9 +212,9 @@ body
 .main-brand-title
 {
     color: var(--color-text);
-    font-size: 72px;
-    line-height: 76px;
-    letter-spacing: 6px;
+    font-size: 72dp;
+    line-height: 76dp;
+    letter-spacing: 6dp;
     text-transform: uppercase;
 }
 
@@ -219,7 +222,7 @@ body
 {
     display: block;
     width: 100%;
-    height: 2px;
+    height: 2dp;
     margin-top: var(--space-2);
     margin-bottom: var(--space-3);
     background-color: var(--color-border);
@@ -228,29 +231,29 @@ body
 .main-brand-accent
 {
     display: block;
-    width: 96px;
-    height: 2px;
+    width: 96dp;
+    height: 2dp;
     background-color: var(--color-secondary);
 }
 
 .main-brand-subtitle
 {
     display: block;
-    max-width: 640px;
+    max-width: 640dp;
     color: var(--color-text);
-    font-size: 20px;
-    line-height: 28px;
-    letter-spacing: 1px;
+    font-size: 20dp;
+    line-height: 28dp;
+    letter-spacing: 1dp;
 }
 
 .main-brand-description
 {
     display: block;
-    max-width: 560px;
+    max-width: 560dp;
     margin-top: var(--space-2);
     color: var(--color-text-muted);
-    font-size: 14px;
-    line-height: 22px;
+    font-size: 14dp;
+    line-height: 22dp;
 }
 
 .main-details
@@ -258,7 +261,7 @@ body
     display: flex;
     flex: none;
     flex-direction: row;
-    border-top-width: 1px;
+    border-top-width: 1dp;
     border-top-color: var(--color-border);
 }
 
@@ -276,8 +279,8 @@ body
     display: block;
     margin-bottom: var(--space-1);
     color: var(--color-disabled);
-    font-size: 10px;
-    letter-spacing: 1px;
+    font-size: 10dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
@@ -285,8 +288,8 @@ body
 {
     display: block;
     color: var(--color-text-muted);
-    font-size: 12px;
-    letter-spacing: 1px;
+    font-size: 12dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
@@ -295,16 +298,16 @@ body
     box-sizing: border-box;
     display: flex;
     flex: none;
-    height: 48px;
+    height: 48dp;
     padding: 0 var(--space-3);
     align-items: center;
     justify-content: space-between;
     background-color: var(--color-surface-2);
-    border-top-width: 1px;
+    border-top-width: 1dp;
     border-top-color: var(--color-border);
     color: var(--color-text-muted);
-    font-size: 10px;
-    letter-spacing: 1px;
+    font-size: 10dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
@@ -329,13 +332,102 @@ body
 .main-status-dot
 {
     display: block;
-    width: 6px;
-    height: 6px;
+    width: 6dp;
+    height: 6dp;
     background-color: var(--color-success);
-    border-radius: 3px;
+    border-radius: 3dp;
 }
 
 .main-status-text
 {
     display: block;
+}
+
+@media (max-width: 1000dp)
+{
+    .main-screen
+    {
+        padding: var(--space-2);
+    }
+
+    .main-navigation
+    {
+        flex-basis: 280dp;
+        padding: var(--space-2);
+    }
+
+    .main-stage
+    {
+        padding: var(--space-3);
+    }
+
+    .main-brand-title
+    {
+        font-size: 52dp;
+        line-height: 58dp;
+        letter-spacing: 4dp;
+    }
+}
+
+@media (max-height: 700dp)
+{
+    .main-screen
+    {
+        padding: var(--space-2);
+    }
+
+    .main-header
+    {
+        height: 64dp;
+        padding: 0 var(--space-2);
+    }
+
+    .main-navigation
+    {
+        padding: var(--space-2);
+    }
+
+    .main-section-label
+    {
+        margin-bottom: var(--space-1);
+    }
+
+    .main-nav-list
+    {
+        gap: 2dp;
+    }
+
+    .main-nav-item
+    {
+        height: 40dp;
+        line-height: 38dp;
+    }
+
+    .main-stage
+    {
+        padding: var(--space-3);
+    }
+
+    .main-stage-copy
+    {
+        margin-top: var(--space-2);
+    }
+
+    .main-brand-title
+    {
+        font-size: 48dp;
+        line-height: 54dp;
+    }
+
+    .main-brand-subtitle
+    {
+        font-size: 18dp;
+        line-height: 24dp;
+    }
+
+    .main-footer
+    {
+        height: 40dp;
+        padding: 0 var(--space-2);
+    }
 }

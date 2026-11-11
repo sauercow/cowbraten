@@ -2,19 +2,19 @@
 {
     box-sizing: border-box;
     display: inline-block;
-    height: 40px;
+    height: 40dp;
     padding: 0 var(--space-2);
 
     background-color: var(--color-surface-2);
-    border-width: 1px;
+    border-width: 1dp;
     border-color: var(--color-border);
     border-radius: var(--radius-control);
 
     color: var(--color-text);
     font-family: Lato;
-    font-size: 13px;
-    line-height: 38px;
-    letter-spacing: 1px;
+    font-size: 13dp;
+    line-height: 38dp;
+    letter-spacing: 1dp;
     text-align: center;
     text-transform: uppercase;
     tab-index: auto;
@@ -23,7 +23,7 @@
 .button:hover,
 .button:focus-visible
 {
-    border-width: 2px;
+    border-width: 2dp;
     border-color: var(--color-primary);
 }
 
@@ -90,7 +90,7 @@
     background-color: var(--color-surface-2);
     border-color: var(--color-disabled);
     color: var(--color-disabled);
-    opacity: 0.65;
+    opacity: 0.78;
     cursor: unavailable;
 }
 
@@ -106,19 +106,19 @@
     box-sizing: border-box;
     display: block;
     width: 100%;
-    height: 40px;
+    height: 40dp;
     padding: 0 var(--space-2);
 
     background-color: var(--color-background);
-    border-width: 1px;
+    border-width: 1dp;
     border-color: var(--color-border);
     border-radius: var(--radius-control);
     caret-color: var(--color-primary);
 
     color: var(--color-text);
     font-family: Lato;
-    font-size: 14px;
-    line-height: 38px;
+    font-size: 14dp;
+    line-height: 38dp;
     tab-index: auto;
 }
 
@@ -130,7 +130,7 @@
 .text-input:focus,
 .text-input:focus-visible
 {
-    border-width: 2px;
+    border-width: 2dp;
     border-color: var(--color-primary);
 }
 
@@ -145,19 +145,19 @@
     flex-direction: row;
     align-items: center;
     gap: var(--space-1);
-    height: 32px;
+    height: 32dp;
     color: var(--color-text-muted);
-    font-size: 14px;
+    font-size: 14dp;
 }
 
 input.checkbox
 {
     box-sizing: border-box;
-    width: 18px;
-    height: 18px;
+    width: 18dp;
+    height: 18dp;
     margin: 0;
     background-color: var(--color-background);
-    border-width: 1px;
+    border-width: 1dp;
     border-color: var(--color-border);
     border-radius: var(--radius-control);
     tab-index: auto;
@@ -166,7 +166,7 @@ input.checkbox
 input.checkbox:hover,
 input.checkbox:focus-visible
 {
-    border-width: 2px;
+    border-width: 2dp;
     border-color: var(--color-primary);
 }
 
@@ -185,7 +185,7 @@ input.checkbox:disabled
 {
     background-color: var(--color-surface-2);
     border-color: var(--color-disabled);
-    opacity: 0.65;
+    opacity: 0.78;
 }
 
 .tab-bar
@@ -194,23 +194,23 @@ input.checkbox:disabled
     flex-direction: row;
     padding: 0 var(--space-3);
     background-color: var(--color-background);
-    border-bottom-width: 1px;
+    border-bottom-width: 1dp;
     border-bottom-color: var(--color-border);
 }
 
 .tab
 {
     box-sizing: border-box;
-    height: 40px;
+    height: 40dp;
     padding: 0 var(--space-2);
     background-color: transparent;
-    border-width: 0 0 2px 0;
+    border-width: 0 0 2dp 0;
     border-color: transparent;
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 12px;
-    line-height: 38px;
-    letter-spacing: 1px;
+    font-size: 12dp;
+    line-height: 38dp;
+    letter-spacing: 1dp;
     text-align: center;
     text-transform: uppercase;
     tab-index: auto;
@@ -237,7 +237,7 @@ input.checkbox:disabled
 .tab:disabled
 {
     color: var(--color-disabled);
-    opacity: 0.65;
+    opacity: 0.78;
 }
 
 .nav-list
@@ -252,16 +252,16 @@ input.checkbox:disabled
     box-sizing: border-box;
     display: block;
     width: 100%;
-    height: 40px;
+    height: 40dp;
     padding: 0 var(--space-2);
     background-color: transparent;
-    border-width: 0 0 0 3px;
+    border-width: 0 0 0 3dp;
     border-color: transparent;
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 13px;
-    line-height: 40px;
-    letter-spacing: 1px;
+    font-size: 13dp;
+    line-height: 40dp;
+    letter-spacing: 1dp;
     text-align: left;
     text-transform: uppercase;
     tab-index: auto;
@@ -290,5 +290,5 @@ input.checkbox:disabled
 {
     background-color: transparent;
     color: var(--color-disabled);
-    opacity: 0.65;
+    opacity: 0.78;
 }

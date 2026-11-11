@@ -20,9 +20,9 @@ body
 {
     display: flex;
     flex-direction: column;
-    width: 1600px;
+    width: 1600dp;
     max-width: 100%;
-    height: 880px;
+    height: 880dp;
     max-height: 100%;
     overflow: hidden;
 }
@@ -32,18 +32,20 @@ body
     box-sizing: border-box;
     display: flex;
     flex: none;
-    height: 72px;
+    height: 72dp;
     padding: 0 var(--space-3);
     align-items: center;
     justify-content: space-between;
     background-color: var(--color-surface);
-    border-bottom-width: 1px;
+    border-bottom-width: 1dp;
     border-bottom-color: var(--color-border);
 }
 
 .servers-lockup
 {
     display: flex;
+    flex: none;
+    min-width: 0;
     align-items: center;
     gap: var(--space-2);
 }
@@ -51,18 +53,19 @@ body
 .servers-mark
 {
     box-sizing: border-box;
-    width: 40px;
-    height: 40px;
+    width: 40dp;
+    height: 40dp;
     background-color: var(--color-secondary);
-    border-width: 1px;
+    border-width: 1dp;
     border-color: var(--color-secondary-hover);
     border-radius: var(--radius-control);
     color: var(--color-background);
-    font-size: 24px;
-    line-height: 38px;
-    letter-spacing: 1px;
+    font-size: 24dp;
+    line-height: 38dp;
+    letter-spacing: 1dp;
     text-align: center;
     text-transform: uppercase;
+    flex: none;
 }
 
 .servers-heading
@@ -74,9 +77,9 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 18px;
-    line-height: 20px;
-    letter-spacing: 2px;
+    font-size: 18dp;
+    line-height: 20dp;
+    letter-spacing: 2dp;
     text-transform: uppercase;
 }
 
@@ -84,15 +87,15 @@ body
 {
     display: block;
     color: var(--color-primary);
-    font-size: 11px;
-    line-height: 16px;
-    letter-spacing: 2px;
+    font-size: 11dp;
+    line-height: 16dp;
+    letter-spacing: 2dp;
     text-transform: uppercase;
 }
 
 .servers-back
 {
-    min-width: 184px;
+    min-width: 184dp;
 }
 
 .servers-toolbar
@@ -100,12 +103,12 @@ body
     box-sizing: border-box;
     display: flex;
     flex: none;
-    height: 72px;
+    height: 72dp;
     padding: var(--space-2) var(--space-3);
     align-items: center;
     gap: var(--space-2);
     background-color: var(--color-background);
-    border-bottom-width: 1px;
+    border-bottom-width: 1dp;
     border-bottom-color: var(--color-border);
 }
 
@@ -113,7 +116,7 @@ body
 {
     display: block;
     flex: none;
-    width: 208px;
+    width: 208dp;
 }
 
 .servers-source-kicker,
@@ -122,9 +125,9 @@ body
 {
     display: block;
     color: var(--color-disabled);
-    font-size: 9px;
-    line-height: 12px;
-    letter-spacing: 1px;
+    font-size: 10dp;
+    line-height: 12dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
@@ -132,9 +135,9 @@ body
 {
     display: block;
     color: var(--color-primary);
-    font-size: 13px;
-    line-height: 20px;
-    letter-spacing: 1px;
+    font-size: 13dp;
+    line-height: 20dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
@@ -142,19 +145,19 @@ body
 {
     display: block;
     flex: 1;
-    min-width: 240px;
+    min-width: 240dp;
 }
 
 .servers-search-input
 {
-    height: 36px;
-    line-height: 34px;
+    height: 36dp;
+    line-height: 34dp;
 }
 
 .servers-refresh
 {
     flex: none;
-    width: 152px;
+    width: 152dp;
 }
 
 .servers-filter-options
@@ -162,32 +165,32 @@ body
     box-sizing: border-box;
     display: flex;
     flex: none;
-    height: 48px;
+    height: 48dp;
     padding: var(--space-1) var(--space-3);
     align-items: center;
     gap: var(--space-3);
     background-color: var(--color-surface);
-    border-bottom-width: 1px;
+    border-bottom-width: 1dp;
     border-bottom-color: var(--color-border);
 }
 
 .servers-filter-kicker
 {
     flex: none;
-    width: 56px;
+    width: 56dp;
     color: var(--color-disabled);
-    font-size: 9px;
-    letter-spacing: 1px;
+    font-size: 10dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
 .servers-filter-toggle
 {
     flex: none;
-    height: 32px;
+    height: 32dp;
     color: var(--color-text-muted);
-    font-size: 11px;
-    letter-spacing: 1px;
+    font-size: 11dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
@@ -217,10 +220,10 @@ body
 .servers-columns
 {
     flex: none;
-    height: 40px;
+    height: 40dp;
     padding: 0 var(--space-2);
     background-color: var(--color-surface-2);
-    border-bottom-width: 1px;
+    border-bottom-width: 1dp;
     border-bottom-color: var(--color-border);
 }
 
@@ -229,16 +232,16 @@ body
 {
     box-sizing: border-box;
     display: block;
-    height: 39px;
+    height: 39dp;
     padding: 0 var(--space-1);
     background-color: transparent;
-    border-width: 0 0 2px 0;
+    border-width: 0 0 2dp 0;
     border-color: transparent;
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 10px;
-    line-height: 37px;
-    letter-spacing: 1px;
+    font-size: 10dp;
+    line-height: 37dp;
+    letter-spacing: 1dp;
     text-align: left;
     text-transform: uppercase;
 }
@@ -266,23 +269,23 @@ body
 
 .server-rows scrollbarvertical
 {
-    width: 12px;
+    width: 12dp;
     background-color: var(--color-background);
-    border-left-width: 1px;
+    border-left-width: 1dp;
     border-left-color: var(--color-border);
 }
 
 .server-rows scrollbarvertical slidertrack
 {
-    width: 11px;
+    width: 11dp;
     background-color: var(--color-background);
 }
 
 .server-rows scrollbarvertical sliderbar
 {
-    width: 7px;
-    min-height: 40px;
-    margin-left: 2px;
+    width: 7dp;
+    min-height: 40dp;
+    margin-left: 2dp;
     background-color: var(--color-disabled);
     border-radius: var(--radius-control);
 }
@@ -313,19 +316,19 @@ body
 .server-row
 {
     display: flex;
-    width: 1598px;
-    min-width: 1598px;
+    width: 1598dp;
+    min-width: 1598dp;
     max-width: 100%;
-    height: 48px;
+    height: 48dp;
     padding: 0 var(--space-2);
     align-items: center;
     background-color: var(--color-surface);
-    border-width: 0 0 1px 3px;
+    border-width: 0 0 1dp 3dp;
     border-color: var(--color-border) var(--color-border) var(--color-border) transparent;
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 12px;
-    line-height: 16px;
+    font-size: 12dp;
+    line-height: 16dp;
     text-align: left;
     tab-index: auto;
 }
@@ -414,8 +417,8 @@ body
     display: block;
     overflow: hidden;
     color: var(--color-text);
-    font-size: 13px;
-    line-height: 17px;
+    font-size: 13dp;
+    line-height: 17dp;
     white-space: nowrap;
 }
 
@@ -429,9 +432,9 @@ body
     display: block;
     overflow: hidden;
     color: var(--color-disabled);
-    font-size: 9px;
-    line-height: 13px;
-    letter-spacing: 1px;
+    font-size: 10dp;
+    line-height: 13dp;
+    letter-spacing: 1dp;
     white-space: nowrap;
 }
 
@@ -467,18 +470,18 @@ body
     display: block;
     margin: var(--space-5) auto 0 auto;
     padding: var(--space-3);
-    width: 440px;
+    width: 440dp;
     max-width: 90%;
     background-color: var(--color-background);
-    border-left-width: 3px;
+    border-left-width: 3dp;
     border-left-color: var(--color-primary);
 }
 
 .servers-empty-title
 {
     color: var(--color-text);
-    font-size: 16px;
-    letter-spacing: 1px;
+    font-size: 16dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
@@ -486,7 +489,7 @@ body
 {
     margin-top: var(--space-1);
     color: var(--color-text-muted);
-    font-size: 12px;
+    font-size: 12dp;
 }
 
 .servers-selection
@@ -494,12 +497,12 @@ body
     box-sizing: border-box;
     display: flex;
     flex: none;
-    min-height: 88px;
+    min-height: 88dp;
     padding: var(--space-2) var(--space-3);
     align-items: center;
     gap: var(--space-3);
     background-color: var(--color-background);
-    border-top-width: 1px;
+    border-top-width: 1dp;
     border-top-color: var(--color-border);
 }
 
@@ -515,8 +518,8 @@ body
     display: block;
     overflow: hidden;
     color: var(--color-text);
-    font-size: 15px;
-    line-height: 22px;
+    font-size: 15dp;
+    line-height: 22dp;
     white-space: nowrap;
 }
 
@@ -525,9 +528,9 @@ body
     display: block;
     overflow: hidden;
     color: var(--color-text-muted);
-    font-size: 10px;
-    line-height: 16px;
-    letter-spacing: 1px;
+    font-size: 10dp;
+    line-height: 16dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
     white-space: nowrap;
 }
@@ -535,7 +538,7 @@ body
 .servers-connect
 {
     flex: none;
-    width: 168px;
+    width: 168dp;
 }
 
 .servers-connect.is-disabled
@@ -543,7 +546,7 @@ body
     background-color: var(--color-surface-2);
     border-color: var(--color-disabled);
     color: var(--color-disabled);
-    opacity: 0.65;
+    opacity: 0.78;
 }
 
 .servers-footer
@@ -551,20 +554,90 @@ body
     box-sizing: border-box;
     display: flex;
     flex: none;
-    height: 40px;
+    height: 40dp;
     padding: 0 var(--space-3);
     align-items: center;
     justify-content: space-between;
     background-color: var(--color-surface-2);
-    border-top-width: 1px;
+    border-top-width: 1dp;
     border-top-color: var(--color-border);
     color: var(--color-text-muted);
-    font-size: 9px;
-    letter-spacing: 1px;
+    font-size: 10dp;
+    letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
 .servers-footer-help
 {
     color: var(--color-disabled);
+}
+
+@media (max-width: 900dp)
+{
+    .servers-screen
+    {
+        padding: var(--space-2);
+    }
+
+    .servers-header
+    {
+        padding: 0 var(--space-2);
+    }
+
+    .servers-source
+    {
+        width: 184dp;
+    }
+
+    .servers-toolbar
+    {
+        padding-left: var(--space-2);
+        padding-right: var(--space-2);
+        gap: var(--space-1);
+    }
+
+    .servers-search
+    {
+        min-width: 0;
+    }
+
+    .servers-refresh
+    {
+        width: 136dp;
+    }
+
+    .servers-filter-options
+    {
+        padding-left: var(--space-2);
+        padding-right: var(--space-2);
+        gap: var(--space-2);
+    }
+}
+
+@media (max-height: 700dp)
+{
+    .servers-screen
+    {
+        padding: var(--space-2);
+    }
+
+    .servers-header
+    {
+        height: 64dp;
+    }
+
+    .servers-toolbar
+    {
+        height: 64dp;
+    }
+
+    .servers-selection
+    {
+        min-height: 72dp;
+    }
+
+    .servers-footer
+    {
+        height: 36dp;
+    }
 }

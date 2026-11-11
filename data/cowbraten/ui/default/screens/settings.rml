@@ -77,50 +77,50 @@
                         </button>
                         <button class="nav-item settings-nav-item" disabled="true">
                             <span class="settings-nav-index">09</span>
-                            <span>Advanced / Network</span>
+                            <span>Advanced</span>
                         </button>
                     </div>
 
                     <div class="settings-scope-note" data-if="category_game">
                         <div class="settings-scope-kicker">Live Setting</div>
                         <div class="settings-scope-copy">
-                            Field of view, combat feedback, radar, and player-model options use the existing Sauer configuration system. Opening this page does not rewrite those values.
+                            Gameplay changes are saved automatically. Opening this page never rewrites custom values.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_graphics">
-                        <div class="settings-scope-kicker">Typed Runtime State</div>
+                        <div class="settings-scope-kicker">Display State</div>
                         <div class="settings-scope-copy">
-                            Display mode and VSync report accepted SDL state. Frame limiting uses Cowbraten's existing render scheduler.
+                            Display options report the active result after each change. Frame limiting applies immediately.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_hud">
                         <div class="settings-scope-kicker">Combat Information</div>
                         <div class="settings-scope-copy">
-                            FPS and wall-clock overlays, damage feedback, HUD guns, the match gameclock, the score overlay, scoreboard columns, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
+                            HUD options update immediately and keep their current layout when Settings is reopened.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_audio">
                         <div class="settings-scope-kicker">Existing Sound Mix</div>
                         <div class="settings-scope-copy">
-                            Sauer provides separate sound and music levels. Sound Volume at zero also mutes music through the existing engine gate.
+                            Sound and music have separate levels. Setting Sound Volume to zero also mutes music.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_mouse_keyboard">
                         <div class="settings-scope-kicker">Gameplay Mouse</div>
                         <div class="settings-scope-copy">
-                            These controls affect relative gameplay look. RmlUi continues to use the operating system's absolute pointer while menus are open.
+                            Mouse settings affect gameplay look. Menu pointer speed continues to follow the operating system.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_crosshair">
                         <div class="settings-scope-kicker">Gameplay Reticle</div>
                         <div class="settings-scope-copy">
-                            Selection loads Sauer's existing normal and hit textures. Dynamic effects remain controlled by the gameplay renderer.
+                            Each style includes its normal and hit appearance. Dynamic effects apply during gameplay.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_chat">
                         <div class="settings-scope-kicker">Message Routing</div>
                         <div class="settings-scope-copy">
-                            Public and team chat remain in Sauer's console buffer. These controls choose which live feeds present each message type.
+                            Choose where public and team messages appear without changing message delivery.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_console">
@@ -172,7 +172,7 @@
 
                             <div class="settings-control-footer">
                                 <span class="settings-live-indicator"></span>
-                                <span>Live value&nbsp;&nbsp;//&nbsp;&nbsp;Saved by the existing Sauer configuration system</span>
+                                <span>Live value&nbsp;&nbsp;//&nbsp;&nbsp;Saved automatically</span>
                             </div>
                         </div>
 
@@ -195,7 +195,7 @@
                             <div class="eyebrow settings-eyebrow">Game / Combat Feedback</div>
                             <div class="settings-stage-title">Feedback</div>
                             <div class="settings-stage-copy">
-                                These toggles use Sauer's existing persistent combat-feedback settings. Changes apply immediately and do not restart the renderer.
+                                Configure combat feedback. Changes apply immediately.
                             </div>
                         </div>
 
@@ -278,7 +278,7 @@
                             <div class="eyebrow settings-eyebrow">Game / Trail Colors</div>
                             <div class="settings-stage-title">Trail Colors</div>
                             <div class="settings-stage-copy">
-                                Per-weapon RGB sliders pack into Sauer's existing persistent trail colors. Changes apply immediately on the next projectile or particle trail. Opening Settings does not rewrite these values.
+                                Set the RGB trail color for each weapon. Changes appear on the next projectile or particle trail.
                             </div>
                         </div>
 
@@ -755,7 +755,7 @@
                             <div class="eyebrow settings-eyebrow">Game / Radar</div>
                             <div class="settings-stage-title">Radar</div>
                             <div class="settings-stage-copy">
-                                These toggles use Sauer's existing persistent capture and teammate radar settings. Changes apply immediately and do not restart the renderer.
+                                Configure capture-base labels and teammate radar markers. Changes apply immediately.
                             </div>
                         </div>
 
@@ -804,7 +804,7 @@
                             <div class="eyebrow settings-eyebrow">Game / Models</div>
                             <div class="settings-stage-title">Models</div>
                             <div class="settings-stage-copy">
-                                These controls use Sauer's existing persistent player-model presentation settings. Changes apply immediately and do not restart the renderer.
+                                Configure player-model visibility and death effects. Changes apply immediately.
                             </div>
                         </div>
 
@@ -831,7 +831,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Keep After Respawn</div>
                                     <div class="settings-control-description">
-                                        Keep saved ragdoll corpses after respawn. Native Settings writes 10000 ms on and 0 ms off. A different non-zero engine value stays put until you toggle.
+                                        Keep ragdoll corpses after respawn. Custom non-zero durations remain unchanged until this option is toggled.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -849,7 +849,7 @@
                                     <div class="settings-control-copy">
                                         <div class="settings-control-title">Ragdoll Velocity Multiplier</div>
                                         <div class="settings-control-description">
-                                            Scales hit-push applied to dead players. The range comes from Sauer's existing deadpush ident.
+                                            Scale the force applied to dead players when they are hit.
                                         </div>
                                     </div>
                                     <div class="settings-value">
@@ -877,7 +877,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Hide Dead Players</div>
                                     <div class="settings-control-description">
-                                        Skip drawing other dead players. Native Settings writes 0 or 1. A value of 1 also hides your own third-person corpse; 2 hides others and keeps yours. Opening Settings does not rewrite 2.
+                                        Hide dead players. Existing custom behavior remains unchanged until this option is toggled.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -983,7 +983,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Show FPS</div>
                                     <div class="settings-control-description">
-                                        Shows Sauer's existing frames-per-second overlay in the HUD stats corner.
+                                        Show the frames-per-second counter in the HUD stats corner.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -999,7 +999,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Wall Clock</div>
                                     <div class="settings-control-description">
-                                        Shows Sauer's existing local time overlay in the HUD stats corner.
+                                        Show local time in the HUD stats corner.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1085,7 +1085,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">HUD Guns</div>
                                     <div class="settings-control-description">
-                                        Draws the first-person weapon models through Sauer's existing HUD gun renderer.
+                                        Show the first-person weapon model.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1100,7 +1100,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Sway</div>
                                     <div class="settings-control-description">
-                                        Offsets the first-person weapon with Sauer's existing walk sway while HUD guns are drawn.
+                                        Move the first-person weapon while walking.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1130,7 +1130,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Muzzle Light</div>
                                     <div class="settings-control-description">
-                                        Adds Sauer's existing brief muzzle dynlight, including when HUD guns are off.
+                                        Add a brief light at the muzzle when firing.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1148,7 +1148,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Score Overlay</div>
                                     <div class="settings-control-description">
-                                        Draws Sauer's compact HUD scores when at least two teams or players are present. Off by default.
+                                        Show compact scores when at least two teams or players are present.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1166,7 +1166,7 @@
                                     <div class="settings-control-copy">
                                         <div class="settings-control-title">Size</div>
                                         <div class="settings-control-description">
-                                            Scale of the overlay text. Native Settings steps this by 0.01.
+                                            Scale the overlay text in 0.01 steps.
                                         </div>
                                     </div>
                                     <div class="settings-stepper">
@@ -1191,7 +1191,7 @@
                                     <div class="settings-control-copy">
                                         <div class="settings-control-title">Opacity</div>
                                         <div class="settings-control-description">
-                                            Overlay text opacity. The range comes from Sauer's existing overlay setting.
+                                            Set the overlay text opacity.
                                         </div>
                                     </div>
                                     <div class="settings-value">
@@ -1266,7 +1266,7 @@
                                     <div class="settings-control-copy">
                                         <div class="settings-control-title">X</div>
                                         <div class="settings-control-description">
-                                            Normalized horizontal position. Native Settings steps this by 0.01.
+                                            Set the horizontal position in 0.01 steps.
                                         </div>
                                     </div>
                                     <div class="settings-stepper">
@@ -1291,7 +1291,7 @@
                                     <div class="settings-control-copy">
                                         <div class="settings-control-title">Y</div>
                                         <div class="settings-control-description">
-                                            Normalized vertical position. Native Settings steps this by 0.01.
+                                            Set the vertical position in 0.01 steps.
                                         </div>
                                     </div>
                                     <div class="settings-stepper">
@@ -1322,9 +1322,9 @@
                         <div class="settings-section settings-compact-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
-                                    <div class="settings-control-title">Gameclock</div>
+                                    <div class="settings-control-title">Game Clock</div>
                                     <div class="settings-control-description">
-                                        Shows Sauer's existing match-time overlay. Layout controls match the native gameclock adjust panel; colour idents stay unexposed.
+                                        Show the remaining match time and configure its position and appearance.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1342,7 +1342,7 @@
                                     <div class="settings-control-copy">
                                         <div class="settings-control-title">Size</div>
                                         <div class="settings-control-description">
-                                            Scales the match overlay. Native Settings steps by 0.01.
+                                            Scale the match-time overlay in 0.01 steps.
                                         </div>
                                     </div>
                                     <div class="settings-stepper">
@@ -1367,7 +1367,7 @@
                                     <div class="settings-control-copy">
                                         <div class="settings-control-title">Opacity</div>
                                         <div class="settings-control-description">
-                                            Sets overlay alpha through Sauer's existing gameclockalpha ident.
+                                            Set the match-time overlay opacity.
                                         </div>
                                     </div>
                                     <div class="settings-value">
@@ -1416,7 +1416,7 @@
                                     <div class="settings-control-copy">
                                         <div class="settings-control-title">X</div>
                                         <div class="settings-control-description">
-                                            Horizontal position. Native Settings steps by 0.01.
+                                            Set the horizontal position in 0.01 steps.
                                         </div>
                                     </div>
                                     <div class="settings-stepper">
@@ -1441,7 +1441,7 @@
                                     <div class="settings-control-copy">
                                         <div class="settings-control-title">Y</div>
                                         <div class="settings-control-description">
-                                            Vertical position. Native Settings steps by 0.01.
+                                            Set the vertical position in 0.01 steps.
                                         </div>
                                     </div>
                                     <div class="settings-stepper">
@@ -1632,7 +1632,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Ping</div>
                                     <div class="settings-control-description">
-                                        Shows ping. Ident max is 2; a value of 2 stays checked and is not rewritten to 1 on open.
+                                        Show ping. Existing custom non-zero values remain unchanged until toggled.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1690,7 +1690,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Ammobar</div>
                                     <div class="settings-control-description">
-                                        Draws Sauer's existing HUD ammo icon strip. Off by default. The renderer still hides it in instagib.
+                                        Show the HUD ammo icon strip. It remains hidden in instagib.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -2275,7 +2275,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Vertical Synchronization</div>
                                     <div class="settings-control-description">
-                                        Synchronize presentation with the display. Driver acceptance is read back from SDL.
+                                        Synchronize frame presentation with the display. The active result is shown after the change.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -2327,7 +2327,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Gamma</div>
                                     <div class="settings-control-description">
-                                        Adjust display gamma. 100 is the default. The requested value is stored in the player config; SDL reports the last window brightness it accepted.
+                                        Adjust display brightness. 100 is the default; the active value is shown after the change.
                                     </div>
                                 </div>
                                 <div class="settings-value">
@@ -2361,11 +2361,11 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Multisample Anti-Aliasing (MSAA)</div>
                                     <div class="settings-control-description">
-                                        Multisample the scene edges. Changing this option rebuilds the existing OpenGL context.
+                                        Smooth scene edges. Changing this option restarts the graphics renderer.
                                     </div>
                                 </div>
                                 <div class="settings-resolution-current settings-antialiasing-current">
-                                    <span class="settings-info-label">Actual runtime</span>
+                                    <span class="settings-info-label">Active value</span>
                                     <span class="settings-resolution-current-value">{{ antialiasing_label }}</span>
                                 </div>
                             </div>
@@ -2399,11 +2399,11 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Depth Buffer</div>
                                     <div class="settings-control-description">
-                                        Requested OpenGL z-buffer precision. Zero keeps the engine default of 24 bits rather than a 0-bit buffer. Changing this option rebuilds the existing OpenGL context.
+                                        Set depth precision. Default uses 24 bits. Changing this option restarts the graphics renderer.
                                     </div>
                                 </div>
                                 <div class="settings-resolution-current settings-antialiasing-current">
-                                    <span class="settings-info-label">Actual runtime</span>
+                                    <span class="settings-info-label">Active value</span>
                                     <span class="settings-resolution-current-value">{{ depth_buffer_label }}</span>
                                 </div>
                             </div>
@@ -3546,7 +3546,7 @@
                             <div class="eyebrow settings-eyebrow">Audio / Mix</div>
                             <div class="settings-stage-title">Audio</div>
                             <div class="settings-stage-copy">
-                                Balance gameplay sounds and music, then configure mixer device settings through Cowbraten's existing SDL_mixer audio path.
+                                Balance gameplay sounds and music, then configure output quality and device behavior.
                             </div>
                         </div>
 
@@ -3555,7 +3555,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Sound Volume</div>
                                     <div class="settings-control-description">
-                                        Controls gameplay sound effects. Setting this to zero also mutes music through Sauer's existing global audio gate.
+                                        Control gameplay sound effects. Setting this to zero also mutes music.
                                     </div>
                                 </div>
                                 <div class="settings-value settings-audio-value">
@@ -3580,7 +3580,7 @@
 
                             <div class="settings-control-footer">
                                 <span class="settings-live-indicator"></span>
-                                <span>Engine value&nbsp;&nbsp;{{ sound_volume }} / {{ sound_volume_maximum }}</span>
+                                <span>Current level&nbsp;&nbsp;{{ sound_volume }} / {{ sound_volume_maximum }}</span>
                             </div>
                         </div>
 
@@ -3614,16 +3614,16 @@
 
                             <div class="settings-control-footer">
                                 <span class="settings-live-indicator"></span>
-                                <span>Engine value&nbsp;&nbsp;{{ music_volume }} / {{ music_volume_maximum }}</span>
+                                <span>Current level&nbsp;&nbsp;{{ music_volume }} / {{ music_volume_maximum }}</span>
                             </div>
                         </div>
 
                         <div class="settings-section settings-audio-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">
-                                    <div class="settings-control-title">Soundpack</div>
+                                    <div class="settings-control-title">Sound Pack</div>
                                     <div class="settings-control-description">
-                                        Selects an installed gameplay sound pack discovered through the active Sauer package roots.
+                                        Select an installed gameplay sound pack.
                                     </div>
                                 </div>
                                 <div class="settings-value settings-soundpack-current">
@@ -3655,7 +3655,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Sound Channels</div>
                                     <div class="settings-control-description">
-                                        Mixer channel count. The ident is stored immediately. The mixer applies it on sound reset when Settings input finishes with CHANGE_SOUND pending.
+                                        Set how many sounds can play at once. The audio system restarts when the change is applied.
                                     </div>
                                 </div>
                                 <div class="settings-value settings-audio-value">
@@ -3688,7 +3688,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Sound Frequency</div>
                                     <div class="settings-control-description">
-                                        Native Settings offers 11025, 22050, and 44100 Hz. Opening this page does not coerce another stored ident value.
+                                        Choose the output sample rate. Custom stored values remain unchanged until a listed rate is selected.
                                     </div>
                                 </div>
                                 <div class="settings-value settings-audio-value">
@@ -3719,7 +3719,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Sound Buffer Length</div>
                                     <div class="settings-control-description">
-                                        SDL_mixer chunk size. The ident is stored immediately. The mixer applies it on sound reset. SDL_mixer does not report the opened chunk size.
+                                        Set the audio buffer size. Larger buffers can improve stability but add latency.
                                     </div>
                                 </div>
                                 <div class="settings-value settings-audio-value">
@@ -3750,9 +3750,9 @@
                         <div class="settings-section settings-audio-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
-                                    <div class="settings-control-title">Mumble positional audio</div>
+                                    <div class="settings-control-title">Mumble Positional Audio</div>
                                     <div class="settings-control-description">
-                                        Toggles Sauer's Mumble link immediately through the existing ident callback. This does not reset the mixer.
+                                        Share positional information with Mumble when supported.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -3776,11 +3776,11 @@
                             </div>
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Application</div>
-                                <div class="settings-info-value">Volumes, soundpack, and Mumble immediate; device idents reset the mixer from applypending</div>
+                                <div class="settings-info-value">Levels and Mumble apply immediately; device changes restart audio</div>
                             </div>
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Persistence</div>
-                                <div class="settings-info-value">Existing Sauer config</div>
+                                <div class="settings-info-value">Saved automatically</div>
                             </div>
                         </div>
                     </div>
@@ -4004,7 +4004,7 @@
                             <div class="eyebrow settings-eyebrow">HUD / Reticle</div>
                             <div class="settings-stage-title">Crosshair</div>
                             <div class="settings-stage-copy">
-                                Select the existing Sauer crosshair pair and configure the gameplay-owned dynamic states.
+                                Select a crosshair style and configure its dynamic gameplay effects.
                             </div>
                         </div>
 
@@ -4013,7 +4013,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Crosshair Style</div>
                                     <div class="settings-control-description">
-                                        Choosing a style loads its normal and hit textures through Sauer's texture manager.
+                                        Choose the normal and hit appearance used during gameplay.
                                     </div>
                                 </div>
                                 <div class="settings-value settings-crosshair-current">
@@ -4041,7 +4041,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Crosshair Size</div>
                                     <div class="settings-control-description">
-                                        Uses Sauer's exact integer size. Buttons move by one; type a value to commit on Enter or focus loss.
+                                        Buttons adjust by one. Type an exact value and press Enter, or click elsewhere to apply it.
                                     </div>
                                 </div>
                                 <div class="settings-stepper">
@@ -4116,7 +4116,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Hit Marker</div>
                                     <div class="settings-control-description">
-                                        Shows the selected hit texture for Sauer's standard 425 ms interval.
+                                        Briefly show the selected hit appearance after dealing damage.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -4278,7 +4278,7 @@
                             </div>
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Persistence</div>
-                                <div class="settings-info-value">Existing Sauer config</div>
+                                <div class="settings-info-value">Saved automatically</div>
                             </div>
                         </div>
                     </div>
@@ -4547,7 +4547,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Top-left Size</div>
                                     <div class="settings-control-description">
-                                        Height of the top-left console in lines. Native Settings steps this by 1.
+                                        Set the top-left console height in lines.
                                     </div>
                                 </div>
                                 <div class="settings-stepper">
@@ -4583,7 +4583,7 @@
                             </div>
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Persistence</div>
-                                <div class="settings-info-value">Existing Sauer config</div>
+                                <div class="settings-info-value">Saved automatically</div>
                             </div>
                         </div>
                         <div class="settings-control-footer settings-control-footer-compact"

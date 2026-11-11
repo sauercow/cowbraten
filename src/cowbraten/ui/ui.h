@@ -13,8 +13,8 @@ namespace cowui
         Settings
     };
 
-    // Window dimensions use SDL input coordinates; drawable dimensions use
-    // framebuffer pixels and define the RmlUi context/rendering space.
+    // Window dimensions define logical UI density and SDL input coordinates;
+    // drawable dimensions define the RmlUi framebuffer and rendering space.
     bool init(
         int window_width,
         int window_height,

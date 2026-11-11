@@ -73,6 +73,7 @@ namespace cowui
         int drawable_height = 1;
         int context_width = 1;
         int context_height = 1;
+        float density_ratio = 1.0f;
         bool input_mapping_valid = false;
     };
 
@@ -248,9 +249,18 @@ namespace cowui
             ? drawable_height
             : window_height;
 
+        const float horizontal_density =
+            float(drawable_width) / float(window_width);
+        const float vertical_density =
+            float(drawable_height) / float(window_height);
+        const float density_ratio = horizontal_density < vertical_density
+            ? horizontal_density
+            : vertical_density;
+
         context_changed =
             ui_dimensions.context_width != drawable_width ||
-            ui_dimensions.context_height != drawable_height;
+            ui_dimensions.context_height != drawable_height ||
+            ui_dimensions.density_ratio != density_ratio;
 
         const bool dimensions_changed =
             ui_dimensions.window_width != window_width ||
@@ -265,10 +275,11 @@ namespace cowui
         ui_dimensions.window_height = window_height;
         ui_dimensions.drawable_width = drawable_width;
         ui_dimensions.drawable_height = drawable_height;
-        // Context space deliberately tracks drawable pixels; keeping both
-        // explicit preserves the input/render coordinate boundary.
+        // Context space tracks drawable pixels. Density-independent RCSS
+        // lengths preserve logical UI size while retaining sharp HiDPI text.
         ui_dimensions.context_width = drawable_width;
         ui_dimensions.context_height = drawable_height;
+        ui_dimensions.density_ratio = density_ratio;
         ui_dimensions.input_mapping_valid =
             valid_window && valid_drawable;
 
@@ -521,6 +532,10 @@ namespace cowui
             return false;
         }
 
+        context->SetDensityIndependentPixelRatio(
+            ui_dimensions.density_ratio
+        );
+
         action_router.clear();
 
         if(!action_router.registeraction(
@@ -622,6 +637,9 @@ namespace cowui
                     ui_dimensions.context_height
                 )
             );
+            context->SetDensityIndependentPixelRatio(
+                ui_dimensions.density_ratio
+            );
         }
 
         if(dimensions_changed &&
@@ -667,6 +685,9 @@ namespace cowui
                     ui_dimensions.context_width,
                     ui_dimensions.context_height
                 )
+            );
+            context->SetDensityIndependentPixelRatio(
+                ui_dimensions.density_ratio
             );
 
             if(active_screen && active_screen->id == ScreenId::Settings)

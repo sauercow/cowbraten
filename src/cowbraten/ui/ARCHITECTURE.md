@@ -68,6 +68,13 @@ and returns cursor/grab ownership through the existing input bridge. Cached
 documents remain loaded until shutdown. Reopening is an explicit request for a
 screen rather than an implicit DOM operation.
 
+The RmlUi context uses drawable pixels so geometry, text, clipping, and
+textures remain sharp on HiDPI displays. RCSS dimensions use density-independent
+pixels, with the ratio derived from SDL's drawable-to-window scale. SDL pointer
+coordinates are mapped into drawable context space before dispatch. This keeps
+the interface at the same logical size across scale factors without reducing
+framebuffer precision.
+
 The legacy Sauer command line temporarily takes presentation and text-input
 ownership without closing the active RmlUi screen. Its normal `saycommand`,
 `sayteamcommand`, and `inputcommand` key bindings are recognized by the legacy

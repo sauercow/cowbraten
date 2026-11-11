@@ -13,6 +13,8 @@ This release candidate combines the 1.0.1 maintenance line with the first produc
 - Add key binding capture with multiple bindings, exact removal, readable key names, conflict detection, and explicit replacement.
 - Add RmlUi controls for Cowbraten and p1x features including weapon trails, feedback, radar, player models, clocks, score overlay, ammobar, frag messages, scoreboard columns, console filters, soundpacks, and audio devices.
 - Preserve configuration persistence, legacy console handoff, GL reset recovery, drawable-size updates, and exact-name `showgui` compatibility for migrated screens.
+- Preserve logical interface size on HiDPI displays with density-independent styling and drawable-resolution rendering.
+- Improve responsive layouts at 800x600 and other compact viewports, raise microtext legibility, and simplify user-facing Settings descriptions.
 
 ### Integrated maintenance work
 
