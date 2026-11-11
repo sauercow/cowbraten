@@ -83,6 +83,271 @@ namespace cowui
             return sauersettings::writefov(value);
         }
 
+        static void copygamefeedback(
+            const sauersettings::GameFeedback &source,
+            GameFeedback &result)
+        {
+            result.blood = source.blood;
+            result.hit_sound = source.hit_sound;
+            result.outline_capture_meters = source.outline_capture_meters;
+            result.show_scoreboard_at_death = source.show_scoreboard_at_death;
+        }
+
+        bool readgamefeedback(GameFeedback &result)
+        {
+            sauersettings::GameFeedback legacy = {};
+            const bool read = sauersettings::readgamefeedback(legacy);
+            copygamefeedback(legacy, result);
+            return read;
+        }
+
+        bool writeblood(bool enabled, GameFeedback &result)
+        {
+            sauersettings::GameFeedback legacy = {};
+            const bool accepted = sauersettings::writeblood(enabled, legacy);
+            copygamefeedback(legacy, result);
+            return accepted;
+        }
+
+        bool writehitsound(bool enabled, GameFeedback &result)
+        {
+            sauersettings::GameFeedback legacy = {};
+            const bool accepted = sauersettings::writehitsound(enabled, legacy);
+            copygamefeedback(legacy, result);
+            return accepted;
+        }
+
+        bool writeoutlinemeters(bool enabled, GameFeedback &result)
+        {
+            sauersettings::GameFeedback legacy = {};
+            const bool accepted = sauersettings::writeoutlinemeters(
+                enabled, legacy);
+            copygamefeedback(legacy, result);
+            return accepted;
+        }
+
+        bool writedeathscore(bool enabled, GameFeedback &result)
+        {
+            sauersettings::GameFeedback legacy = {};
+            const bool accepted = sauersettings::writedeathscore(
+                enabled, legacy);
+            copygamefeedback(legacy, result);
+            return accepted;
+        }
+
+        static void copytrailcolors(
+            const sauersettings::TrailColors &source,
+            TrailColors &result)
+        {
+            result.shotgun = source.shotgun;
+            result.chaingun = source.chaingun;
+            result.rocketlauncher = source.rocketlauncher;
+            result.rifle = source.rifle;
+            result.grenadelauncher = source.grenadelauncher;
+            result.pistol = source.pistol;
+            result.channel_minimum = source.channel_minimum;
+            result.channel_maximum = source.channel_maximum;
+        }
+
+        bool readtrailcolors(TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool read = sauersettings::readtrailcolors(legacy);
+            copytrailcolors(legacy, result);
+            return read;
+        }
+
+        bool writetrailcolorshotgun(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted = sauersettings::writetrailcolorshotgun(
+                packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        bool writetrailcolorchaingun(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted = sauersettings::writetrailcolorchaingun(
+                packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        bool writetrailcolorrocketlauncher(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted =
+                sauersettings::writetrailcolorrocketlauncher(
+                    packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        bool writetrailcolorrifle(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted = sauersettings::writetrailcolorrifle(
+                packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        bool writetrailcolorgrenadelauncher(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted =
+                sauersettings::writetrailcolorgrenadelauncher(
+                    packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        bool writetrailcolorpistol(int packed, TrailColors &result)
+        {
+            sauersettings::TrailColors legacy = {};
+            const bool accepted = sauersettings::writetrailcolorpistol(
+                packed, legacy);
+            copytrailcolors(legacy, result);
+            return accepted;
+        }
+
+        static void copygameradar(
+            const sauersettings::GameRadar &source,
+            GameRadar &result)
+        {
+            result.numbered_capture_bases = source.numbered_capture_bases;
+            result.show_teammates_on_radar = source.show_teammates_on_radar;
+        }
+
+        bool readgameradar(GameRadar &result)
+        {
+            sauersettings::GameRadar legacy = {};
+            const bool read = sauersettings::readgameradar(legacy);
+            copygameradar(legacy, result);
+            return read;
+        }
+
+        bool writebasenumbers(bool enabled, GameRadar &result)
+        {
+            sauersettings::GameRadar legacy = {};
+            const bool accepted = sauersettings::writebasenumbers(
+                enabled, legacy);
+            copygameradar(legacy, result);
+            return accepted;
+        }
+
+        bool writeradarteammates(bool enabled, GameRadar &result)
+        {
+            sauersettings::GameRadar legacy = {};
+            const bool accepted = sauersettings::writeradarteammates(
+                enabled, legacy);
+            copygameradar(legacy, result);
+            return accepted;
+        }
+
+        static void copygamemodels(
+            const sauersettings::GameModels &source,
+            GameModels &result)
+        {
+            result.ragdoll_deaths = source.ragdoll_deaths;
+            result.keep_ragdoll_after_respawn =
+                source.keep_ragdoll_after_respawn;
+            result.ragdoll_millis = source.ragdoll_millis;
+            result.deadpush = source.deadpush;
+            result.deadpush_minimum = source.deadpush_minimum;
+            result.deadpush_maximum = source.deadpush_maximum;
+            result.hide_dead_players = source.hide_dead_players;
+            result.hidedead = source.hidedead;
+            result.fullbright_player_models =
+                source.fullbright_player_models;
+            result.fullbrightmodels = source.fullbrightmodels;
+            result.force_matching_player_models =
+                source.force_matching_player_models;
+            result.always_use_team_skins = source.always_use_team_skins;
+        }
+
+        bool readgamemodels(GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool read = sauersettings::readgamemodels(legacy);
+            copygamemodels(legacy, result);
+            return read;
+        }
+
+        bool writeragdoll(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writeragdoll(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writeragdollmillis(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writeragdollmillis(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writedeadpush(int value, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writedeadpush(
+                value, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writehidedead(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writehidedead(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writefullbrightmodels(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writefullbrightmodels(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writefullbrightintensity(int value, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writefullbrightintensity(
+                value, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writeforceplayermodels(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writeforceplayermodels(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
+        bool writeteamskins(bool enabled, GameModels &result)
+        {
+            sauersettings::GameModels legacy = {};
+            const bool accepted = sauersettings::writeteamskins(
+                enabled, legacy);
+            copygamemodels(legacy, result);
+            return accepted;
+        }
+
         bool readvideo(Video &result)
         {
             sauersettings::Video legacy;
@@ -174,6 +439,30 @@ namespace cowui
             return sauersettings::writefpslimit(value);
         }
 
+        static void copygamma(const sauersettings::Gamma &source, Gamma &result)
+        {
+            result.requested = source.requested;
+            result.effective = source.effective;
+            result.minimum = source.minimum;
+            result.maximum = source.maximum;
+        }
+
+        bool readgamma(Gamma &result)
+        {
+            sauersettings::Gamma legacy = {};
+            const bool read = sauersettings::readgamma(legacy);
+            copygamma(legacy, result);
+            return read;
+        }
+
+        bool writegamma(int value, Gamma &result)
+        {
+            sauersettings::Gamma legacy = {};
+            const bool accepted = sauersettings::writegamma(value, legacy);
+            copygamma(legacy, result);
+            return accepted;
+        }
+
         bool readantialiasing(Antialiasing &result)
         {
             sauersettings::Antialiasing legacy;
@@ -188,6 +477,22 @@ namespace cowui
         bool writeantialiasing(int samples)
         {
             return sauersettings::writeantialiasing(samples);
+        }
+
+        bool readdepthbits(DepthBuffer &result)
+        {
+            sauersettings::DepthBuffer legacy;
+            if(!sauersettings::readdepthbits(legacy))
+                return false;
+
+            result.requested_bits = legacy.requested_bits;
+            result.actual_bits = legacy.actual_bits;
+            return true;
+        }
+
+        bool writedepthbits(int bits)
+        {
+            return sauersettings::writedepthbits(bits);
         }
 
         void resetgraphics()
@@ -586,6 +891,30 @@ namespace cowui
             return accepted;
         }
 
+        static void copybumpmodels(
+            const sauersettings::BumpModelsState &source,
+            BumpModelsState &result)
+        {
+            result.enabled = source.enabled;
+        }
+
+        bool readbumpmodels(BumpModelsState &result)
+        {
+            sauersettings::BumpModelsState legacy = {};
+            const bool read = sauersettings::readbumpmodels(legacy);
+            copybumpmodels(legacy, result);
+            return read;
+        }
+
+        bool writebumpmodels(bool enabled, BumpModelsState &result)
+        {
+            sauersettings::BumpModelsState legacy = {};
+            const bool accepted = sauersettings::writebumpmodels(
+                enabled, legacy);
+            copybumpmodels(legacy, result);
+            return accepted;
+        }
+
         static EnvironmentMapResolution environmentmapresolution(
             sauersettings::EnvironmentMapResolution level)
         {
@@ -848,6 +1177,30 @@ namespace cowui
             const bool accepted = sauersettings::writedecals(
                 enabled, legacy);
             copydecals(legacy, result);
+            return accepted;
+        }
+
+        static void copyfixtjoints(
+            const sauersettings::FixTJointsState &source,
+            FixTJointsState &result)
+        {
+            result.enabled = source.enabled;
+        }
+
+        bool readfixtjoints(FixTJointsState &result)
+        {
+            sauersettings::FixTJointsState legacy = {};
+            const bool read = sauersettings::readfixtjoints(legacy);
+            copyfixtjoints(legacy, result);
+            return read;
+        }
+
+        bool writefixtjoints(bool enabled, FixTJointsState &result)
+        {
+            sauersettings::FixTJointsState legacy = {};
+            const bool accepted = sauersettings::writefixtjoints(
+                enabled, legacy);
+            copyfixtjoints(legacy, result);
             return accepted;
         }
 
@@ -1463,24 +1816,41 @@ namespace cowui
             return accepted;
         }
 
+        static void copyaudio(
+            const sauersettings::Audio &source,
+            Audio &result)
+        {
+            result.sound_volume = source.sound_volume;
+            result.sound_volume_minimum = source.sound_volume_minimum;
+            result.sound_volume_maximum = source.sound_volume_maximum;
+            result.music_volume = source.music_volume;
+            result.music_volume_minimum = source.music_volume_minimum;
+            result.music_volume_maximum = source.music_volume_maximum;
+            result.active_soundpack = source.active_soundpack;
+            result.backend_active = source.backend_active;
+            result.sound_channels = source.sound_channels;
+            result.sound_channels_minimum = source.sound_channels_minimum;
+            result.sound_channels_maximum = source.sound_channels_maximum;
+            result.effective_sound_channels =
+                source.effective_sound_channels;
+            result.sound_frequency = source.sound_frequency;
+            result.effective_sound_frequency =
+                source.effective_sound_frequency;
+            result.sound_buffer_length = source.sound_buffer_length;
+            result.sound_buffer_length_minimum =
+                source.sound_buffer_length_minimum;
+            result.sound_buffer_length_maximum =
+                source.sound_buffer_length_maximum;
+            result.mumble = source.mumble;
+        }
+
         bool readaudio(Audio &result)
         {
-            sauersettings::Audio legacy;
+            sauersettings::Audio legacy = {};
             if(!sauersettings::readaudio(legacy))
                 return false;
 
-            result.sound_volume = legacy.sound_volume;
-            result.sound_volume_minimum =
-                legacy.sound_volume_minimum;
-            result.sound_volume_maximum =
-                legacy.sound_volume_maximum;
-            result.music_volume = legacy.music_volume;
-            result.music_volume_minimum =
-                legacy.music_volume_minimum;
-            result.music_volume_maximum =
-                legacy.music_volume_maximum;
-            result.active_soundpack = legacy.active_soundpack;
-            result.backend_active = legacy.backend_active;
+            copyaudio(legacy, result);
             return true;
         }
 
@@ -1529,6 +1899,52 @@ namespace cowui
         bool writesoundpack(const char *id)
         {
             return sauersettings::writesoundpack(id);
+        }
+
+        bool writesoundchannels(int value, Audio &result)
+        {
+            sauersettings::Audio legacy = {};
+            const bool accepted =
+                sauersettings::writesoundchannels(value, legacy);
+            copyaudio(legacy, result);
+            return accepted;
+        }
+
+        bool writesoundfrequency(int value, Audio &result)
+        {
+            sauersettings::Audio legacy = {};
+            const bool accepted =
+                sauersettings::writesoundfrequency(value, legacy);
+            copyaudio(legacy, result);
+            return accepted;
+        }
+
+        bool writesoundbufferlength(int value, Audio &result)
+        {
+            sauersettings::Audio legacy = {};
+            const bool accepted =
+                sauersettings::writesoundbufferlength(value, legacy);
+            copyaudio(legacy, result);
+            return accepted;
+        }
+
+        bool writemumble(bool enabled, Audio &result)
+        {
+            sauersettings::Audio legacy = {};
+            const bool accepted =
+                sauersettings::writemumble(enabled, legacy);
+            copyaudio(legacy, result);
+            return accepted;
+        }
+
+        bool hassoundchanges()
+        {
+            return sauersettings::hassoundchanges();
+        }
+
+        void resetsound()
+        {
+            sauersettings::resetsound();
         }
 
         bool readmouseinput(MouseInput &result)
@@ -1649,21 +2065,82 @@ namespace cowui
             return sauersettings::writecrosshairreloadrotation(enabled);
         }
 
+        static void copyhud(
+            const sauersettings::Hud &source,
+            Hud &result)
+        {
+            result.show_fps = source.show_fps;
+            result.wall_clock = source.wall_clock;
+            result.wall_clock_24_hour = source.wall_clock_24_hour;
+            result.wall_clock_seconds = source.wall_clock_seconds;
+            result.damage_screen = source.damage_screen;
+            result.damage_compass = source.damage_compass;
+            result.hud_guns = source.hud_guns;
+            result.hud_gun_sway = source.hud_gun_sway;
+            result.muzzle_flash = source.muzzle_flash;
+            result.muzzle_light = source.muzzle_light;
+            result.frag_messages = fragmessagesmode(source.frag_messages);
+            result.max_frag_messages = source.max_frag_messages;
+            result.max_frag_messages_minimum =
+                source.max_frag_messages_minimum;
+            result.max_frag_messages_maximum =
+                source.max_frag_messages_maximum;
+            result.frag_message_duration = source.frag_message_duration;
+            result.frag_message_duration_minimum =
+                source.frag_message_duration_minimum;
+            result.frag_message_duration_maximum =
+                source.frag_message_duration_maximum;
+            result.frag_message_self_frags = source.frag_message_self_frags;
+            result.frag_message_other_frags = source.frag_message_other_frags;
+            result.frag_message_team_kills = source.frag_message_team_kills;
+            result.frag_message_scale = source.frag_message_scale;
+            result.frag_message_scale_minimum =
+                source.frag_message_scale_minimum;
+            result.frag_message_scale_maximum =
+                source.frag_message_scale_maximum;
+            result.frag_message_fade = source.frag_message_fade;
+            result.frag_message_x = source.frag_message_x;
+            result.frag_message_x_minimum = source.frag_message_x_minimum;
+            result.frag_message_x_maximum = source.frag_message_x_maximum;
+            result.frag_message_y = source.frag_message_y;
+            result.frag_message_y_minimum = source.frag_message_y_minimum;
+            result.frag_message_y_maximum = source.frag_message_y_maximum;
+            result.frag_message_stack_dir = source.frag_message_stack_dir;
+            result.streak_milestone_scale = source.streak_milestone_scale;
+            result.streak_milestone_scale_minimum =
+                source.streak_milestone_scale_minimum;
+            result.streak_milestone_scale_maximum =
+                source.streak_milestone_scale_maximum;
+        }
+
         bool readhud(Hud &result)
         {
             sauersettings::Hud legacy;
             if(!sauersettings::readhud(legacy))
                 return false;
 
-            result.damage_screen = legacy.damage_screen;
-            result.damage_compass = legacy.damage_compass;
-            result.frag_messages = fragmessagesmode(legacy.frag_messages);
-            result.streak_milestone_scale = legacy.streak_milestone_scale;
-            result.streak_milestone_scale_minimum =
-                legacy.streak_milestone_scale_minimum;
-            result.streak_milestone_scale_maximum =
-                legacy.streak_milestone_scale_maximum;
+            copyhud(legacy, result);
             return true;
+        }
+
+        bool writeshowfps(bool enabled)
+        {
+            return sauersettings::writeshowfps(enabled);
+        }
+
+        bool writewallclock(bool enabled)
+        {
+            return sauersettings::writewallclock(enabled);
+        }
+
+        bool writewallclock24hour(bool enabled)
+        {
+            return sauersettings::writewallclock24hour(enabled);
+        }
+
+        bool writewallclockseconds(bool enabled)
+        {
+            return sauersettings::writewallclockseconds(enabled);
         }
 
         bool writedamagescreen(bool enabled)
@@ -1676,6 +2153,26 @@ namespace cowui
             return sauersettings::writedamagecompass(enabled);
         }
 
+        bool writehudguns(bool enabled)
+        {
+            return sauersettings::writehudguns(enabled);
+        }
+
+        bool writehudgunsway(bool enabled)
+        {
+            return sauersettings::writehudgunsway(enabled);
+        }
+
+        bool writemuzzleflash(bool enabled)
+        {
+            return sauersettings::writemuzzleflash(enabled);
+        }
+
+        bool writemuzzlelight(bool enabled)
+        {
+            return sauersettings::writemuzzlelight(enabled);
+        }
+
         bool writefragmessages(FragMessagesMode mode)
         {
             return sauersettings::writefragmessages(
@@ -1686,6 +2183,545 @@ namespace cowui
         bool writestreakmilestonescale(float value)
         {
             return sauersettings::writestreakmilestonescale(value);
+        }
+
+        bool writemaxfragmessages(int value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writemaxfragmessages(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessageduration(float value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessageduration(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessageselffrags(bool enabled, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessageselffrags(
+                enabled, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessageotherfrags(bool enabled, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessageotherfrags(
+                enabled, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessageteamkills(bool enabled, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessageteamkills(
+                enabled, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessagescale(float value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessagescale(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessagefade(bool enabled, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessagefade(
+                enabled, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessagex(float value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessagex(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessagey(float value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessagey(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        bool writefragmessagestackdir(int value, Hud &result)
+        {
+            sauersettings::Hud legacy = {};
+            const bool accepted = sauersettings::writefragmessagestackdir(
+                value, legacy);
+            copyhud(legacy, result);
+            return accepted;
+        }
+
+        static void copyammobar(
+            const sauersettings::Ammobar &source,
+            Ammobar &result)
+        {
+            result.visible = source.visible;
+            result.horizontal = source.horizontal;
+            result.flip = source.flip;
+            result.scale = source.scale;
+            result.scale_minimum = source.scale_minimum;
+            result.scale_maximum = source.scale_maximum;
+            result.icon_spacing = source.icon_spacing;
+            result.icon_spacing_minimum = source.icon_spacing_minimum;
+            result.icon_spacing_maximum = source.icon_spacing_maximum;
+            result.label_size = source.label_size;
+            result.label_size_minimum = source.label_size_minimum;
+            result.label_size_maximum = source.label_size_maximum;
+            result.label_offset = source.label_offset;
+            result.label_offset_minimum = source.label_offset_minimum;
+            result.label_offset_maximum = source.label_offset_maximum;
+            result.align = source.align;
+            result.x = source.x;
+            result.x_minimum = source.x_minimum;
+            result.x_maximum = source.x_maximum;
+            result.y = source.y;
+            result.y_minimum = source.y_minimum;
+            result.y_maximum = source.y_maximum;
+            result.hide_empty = source.hide_empty;
+        }
+
+        bool readammobar(Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool read = sauersettings::readammobar(legacy);
+            copyammobar(legacy, result);
+            return read;
+        }
+
+        bool writeammobar(bool enabled, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobar(
+                enabled, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarhorizontal(bool enabled, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarhorizontal(
+                enabled, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarflip(bool enabled, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarflip(
+                enabled, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarscale(float value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarscale(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarsep(int value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarsep(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarcountscale(float value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarcountscale(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarcountsep(int value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarcountsep(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobaralign(int value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobaralign(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarx(float value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarx(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobary(float value, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobary(
+                value, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        bool writeammobarhideempty(bool enabled, Ammobar &result)
+        {
+            sauersettings::Ammobar legacy = {};
+            const bool accepted = sauersettings::writeammobarhideempty(
+                enabled, legacy);
+            copyammobar(legacy, result);
+            return accepted;
+        }
+
+        static void copygameclock(
+            const sauersettings::GameClock &source,
+            GameClock &result)
+        {
+            result.enabled = source.enabled;
+            result.scale = source.scale;
+            result.scale_minimum = source.scale_minimum;
+            result.scale_maximum = source.scale_maximum;
+            result.alpha = source.alpha;
+            result.alpha_minimum = source.alpha_minimum;
+            result.alpha_maximum = source.alpha_maximum;
+            result.align = source.align;
+            result.x = source.x;
+            result.x_minimum = source.x_minimum;
+            result.x_maximum = source.x_maximum;
+            result.y = source.y;
+            result.y_minimum = source.y_minimum;
+            result.y_maximum = source.y_maximum;
+        }
+
+        bool readgameclock(GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool read = sauersettings::readgameclock(legacy);
+            copygameclock(legacy, result);
+            return read;
+        }
+
+        bool writegameclock(bool enabled, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclock(
+                enabled, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        bool writegameclockscale(float value, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclockscale(
+                value, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        bool writegameclockalpha(int value, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclockalpha(
+                value, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        bool writegameclockalign(int value, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclockalign(
+                value, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        bool writegameclockx(float value, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclockx(
+                value, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        bool writegameclocky(float value, GameClock &result)
+        {
+            sauersettings::GameClock legacy = {};
+            const bool accepted = sauersettings::writegameclocky(
+                value, legacy);
+            copygameclock(legacy, result);
+            return accepted;
+        }
+
+        static void copyhudscore(
+            const sauersettings::HudScore &source,
+            HudScore &result)
+        {
+            result.enabled = source.enabled;
+            result.scale = source.scale;
+            result.scale_minimum = source.scale_minimum;
+            result.scale_maximum = source.scale_maximum;
+            result.alpha = source.alpha;
+            result.alpha_minimum = source.alpha_minimum;
+            result.alpha_maximum = source.alpha_maximum;
+            result.spacing = source.spacing;
+            result.spacing_minimum = source.spacing_minimum;
+            result.spacing_maximum = source.spacing_maximum;
+            result.align = source.align;
+            result.x = source.x;
+            result.x_minimum = source.x_minimum;
+            result.x_maximum = source.x_maximum;
+            result.y = source.y;
+            result.y_minimum = source.y_minimum;
+            result.y_maximum = source.y_maximum;
+        }
+
+        bool readhudscore(HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool read = sauersettings::readhudscore(legacy);
+            copyhudscore(legacy, result);
+            return read;
+        }
+
+        bool writehudscore(bool enabled, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscore(
+                enabled, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscorescale(float value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscorescale(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscorealpha(int value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscorealpha(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscoresep(int value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscoresep(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscorealign(int value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscorealign(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscorex(float value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscorex(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        bool writehudscorey(float value, HudScore &result)
+        {
+            sauersettings::HudScore legacy = {};
+            const bool accepted = sauersettings::writehudscorey(
+                value, legacy);
+            copyhudscore(legacy, result);
+            return accepted;
+        }
+
+        static void copyscoreboardcolumns(
+            const sauersettings::ScoreboardColumns &source,
+            ScoreboardColumns &result)
+        {
+            result.show_flags = source.show_flags;
+            result.show_frags = source.show_frags;
+            result.show_deaths = source.show_deaths;
+            result.show_suicides = source.show_suicides;
+            result.show_kpd = source.show_kpd;
+            result.show_accuracy = source.show_accuracy;
+            result.show_damage = source.show_damage;
+            result.showdamage = source.showdamage;
+            result.show_damage_dealt = source.show_damage_dealt;
+            result.show_damage_net = source.show_damage_net;
+            result.show_damage_received = source.show_damage_received;
+            result.show_ping = source.show_ping;
+            result.showping = source.showping;
+            result.show_pj = source.show_pj;
+            result.show_clientnum = source.show_clientnum;
+        }
+
+        bool readscoreboardcolumns(ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool read = sauersettings::readscoreboardcolumns(legacy);
+            copyscoreboardcolumns(legacy, result);
+            return read;
+        }
+
+        bool writeshowflags(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowflags(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writehidefrags(bool show_column, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writehidefrags(
+                show_column, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowdeaths(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowdeaths(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowsuicides(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowsuicides(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowkpd(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowkpd(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowaccuracy(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowaccuracy(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowdamage(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowdamage(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowdamagemode(int value, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowdamagemode(
+                value, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowdamagereceived(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowdamagereceived(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowping(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowping(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowpj(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowpj(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
+        }
+
+        bool writeshowclientnum(bool enabled, ScoreboardColumns &result)
+        {
+            sauersettings::ScoreboardColumns legacy = {};
+            const bool accepted = sauersettings::writeshowclientnum(
+                enabled, legacy);
+            copyscoreboardcolumns(legacy, result);
+            return accepted;
         }
 
         bool readchat(Chat &result)
@@ -1729,6 +2765,239 @@ namespace cowui
         bool writeteamcoloredchatnames(bool enabled)
         {
             return sauersettings::writeteamcoloredchatnames(enabled);
+        }
+
+        static void copyconsole(
+            const sauersettings::Console &source,
+            Console &result)
+        {
+            result.important_information_in_top_feed =
+                source.important_information_in_top_feed;
+            result.warnings_in_top_feed = source.warnings_in_top_feed;
+            result.errors_in_top_feed = source.errors_in_top_feed;
+            result.script_messages_in_top_feed =
+                source.script_messages_in_top_feed;
+            result.game_events_in_top_feed =
+                source.game_events_in_top_feed;
+            result.self_frags_in_top_feed =
+                source.self_frags_in_top_feed;
+            result.other_player_frags_in_top_feed =
+                source.other_player_frags_in_top_feed;
+            result.team_kills_in_top_feed =
+                source.team_kills_in_top_feed;
+            result.important_information_in_full_console =
+                source.important_information_in_full_console;
+            result.warnings_in_full_console =
+                source.warnings_in_full_console;
+            result.errors_in_full_console =
+                source.errors_in_full_console;
+            result.script_messages_in_full_console =
+                source.script_messages_in_full_console;
+            result.public_messages_in_full_console =
+                source.public_messages_in_full_console;
+            result.team_messages_in_full_console =
+                source.team_messages_in_full_console;
+            result.game_events_in_full_console =
+                source.game_events_in_full_console;
+            result.self_frags_in_full_console =
+                source.self_frags_in_full_console;
+            result.other_player_frags_in_full_console =
+                source.other_player_frags_in_full_console;
+            result.team_kills_in_full_console =
+                source.team_kills_in_full_console;
+            result.size = source.size;
+            result.size_minimum = source.size_minimum;
+            result.size_maximum = source.size_maximum;
+        }
+
+        bool readconsole(Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool read = sauersettings::readconsole(legacy);
+            copyconsole(legacy, result);
+            return read;
+        }
+
+        bool writeimportantintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeimportantintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writewarningsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writewarningsintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeerrorsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeerrorsintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writescriptmessagesintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writescriptmessagesintopfeed(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writegameeventsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writegameeventsintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeselffragsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeselffragsintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeotherplayerfragsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeotherplayerfragsintopfeed(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeteamkillsintopfeed(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeteamkillsintopfeed(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeimportantinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeimportantinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writewarningsinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writewarningsinfullconsole(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeerrorsinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeerrorsinfullconsole(
+                enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writescriptmessagesinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writescriptmessagesinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writepublicchatinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writepublicchatinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeteamchatinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeteamchatinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writegameeventsinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writegameeventsinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeselffragsinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeselffragsinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeotherplayerfragsinfullconsole(bool enabled,
+            Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeotherplayerfragsinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeteamkillsinfullconsole(bool enabled, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted =
+                sauersettings::writeteamkillsinfullconsole(
+                    enabled, legacy);
+            copyconsole(legacy, result);
+            return accepted;
+        }
+
+        bool writeconsolesize(int value, Console &result)
+        {
+            sauersettings::Console legacy = {};
+            const bool accepted = sauersettings::writeconsolesize(
+                value, legacy);
+            copyconsole(legacy, result);
+            return accepted;
         }
     }
 }

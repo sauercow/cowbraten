@@ -198,6 +198,49 @@ handler writes through the typed API, immediately reads the accepted value
 back, and dirties only model variables that changed. When the legacy console
 temporarily suspends RmlUi, the model refreshes before Settings is shown again,
 so a normal `/fov` change is reflected without per-frame ident polling.
+
+The Game tab also exposes Capture radar numbering and teammate radar blips
+through Sauer's persistent `basenumbers` and `radarteammates` booleans. Both
+are 0/1 integer idents with no change callback, so they apply immediately on
+the existing capture HUD, capture messages, and Capture/CTF/Collect teammate
+radar paths. There is no `resetgl()`. Opening Settings, returning from the
+legacy console, and activating the Game category only read these values. A
+checkbox write goes through the typed API, then reads the accepted snapshot
+back. The document never supplies ident names.
+
+The Game tab also exposes player-model presentation through Sauer's persistent
+`ragdoll`, `ragdollmillis`, `deadpush`, `hidedead`, `fullbrightmodels`,
+`forceplayermodels`, and `teamskins` integer idents. None of these have a
+change callback, so they apply immediately on the existing death, hit-push,
+and player-model render paths. There is no `resetgl()`. Opening Settings,
+returning from the legacy console, and activating the Game category only read
+these values. Canonical native Settings writes are ragdoll 0/1, ragdollmillis
+0/10000, hidedead 0/1, and fullbrightmodels 0/60 plus radios 60/100/150/200.
+If the engine holds hidedead 2, a non-zero unmatched ragdollmillis, or a
+fullbright intensity other than those radios, the UI presents the checkbox on
+(and no radio selected) without rewriting until the user toggles or selects.
+The deadpush range has no hardcoded RML value default; its change handler
+ignores a requested value that already matches the model or a range element
+that is not yet parented, matching the gamma rewrite guard. A checkbox or
+intensity write goes through the typed API, then reads the accepted snapshot
+back. The document never supplies ident names.
+
+The Game tab also inlines the native Game-tab "adjust weapon trail colors"
+document. The typed snapshot owns the six packed persistent HVARPs
+`trailcolorshotgun`, `trailcolorchaingun`, `trailcolorrocketlauncher`,
+`trailcolorrifle`, `trailcolorgrenadelauncher`, and `trailcolorpistol`, plus
+the native per-channel slider range 0..255. None have a change callback, so
+they apply immediately on the existing weapon trail particle paths. There is
+no `resetgl()`. Opening Settings, returning from the legacy console, and
+activating the Game category only read these values. RGB sliders pack as
+`(red << 16) | (green << 8) | blue`, matching Sauer's IDF_HEX three-argument
+assignment, then write the packed integer through `setvarchecked()`. Range
+change handlers ignore a requested value that already matches the model or a
+range element that is not yet parented, matching the gamma rewrite guard.
+There is no hardcoded RML value default. The document never supplies ident
+names or the `settrailcolor` command. No `showgui trailcolors` alias is
+added; the standalone legacy document remains reachable by that exact name.
+
 The same activation and console-resume refresh updates presentation, current
 resolution, the supported-mode snapshot, VSync, FPS limit, and effective MSAA.
 Category selection remains owned by the cached model and only the active page
@@ -216,9 +259,7 @@ plain boolean snapshot from the legacy bridge. There is no separate legacy
 master-volume ident, so the UI does not fabricate one.
 
 Settings activation, local volume writes, and return from the legacy console
-refresh the Audio model. Sound enablement, channel count, sample frequency,
-buffer length, and driver choice remain outside this first Audio slice because
-they require `resetsound()` and additional runtime fallback/readback policy.
+refresh the Audio model.
 
 Soundpack choices come from the engine's existing `visitsoundpacks()` discovery
 path, which also backs the legacy `listsoundpacks` command. Directory names are
@@ -232,6 +273,38 @@ restarted. The Rml model immediately reads back the effective ID and rebuilds
 only its small choice snapshot on Settings/Audio activation, local selection,
 or console return. No filesystem paths, CubeScript, DOM structure, or theme
 presentation cross this typed boundary.
+
+The remaining native Settings SOUND tab device controls share that typed
+boundary. `soundchans` (1..128), `soundfreq` (declared 0..48000), and
+`soundbufferlen` (128..4096) write through `setvarchecked` immediately. Their
+VARF callbacks queue `initwarning("sound configuration", INIT_RESET,
+CHANGE_SOUND)`. Opening Settings never rewrites those idents. Integer sliders
+have no hardcoded RML value default and ignore a requested value that already
+matches the model or a range that is not yet parented, matching the gamma
+rewrite guard.
+
+Native Settings presents frequency as a list slider of 11025, 22050, and
+44100 Hz only. CowUI writes those three values and does not coerce another
+effective ident (including 0 or 48000) when the page opens; radios select
+only on exact match. After a write, `readaudio` reports the ident as
+requested and the open mixer as effective: channel count from `maxchannels`,
+frequency from `Mix_QuerySpec`. `Mix_QuerySpec` does not report chunk size,
+so buffer length has no mixer readback. `usesound`, `audiodriver`, and
+`fixwav` stay unexposed; they are not on the native Settings sound tab.
+
+When Settings is the active screen, `ui.cpp` `finishinput` already calls
+`RmlSettings::applypending()`. If `haschanges(CHANGE_SOUND)` is true,
+applypending invokes the existing engine `resetsound()` path, which starts by
+`clearchanges(CHANGE_SOUND)` and then reopens the mixer. That matches leaving
+the native GUI and confirming the apply dialog. If `applydialog` is 0, native
+`addchange` does not queue CHANGE_SOUND, so applypending will not reset the
+mixer; the ident still updates immediately and is written to `init.cfg` on
+exit.
+
+`mumble` is a VARFP checkbox ("Mumble positional audio"). Its callback calls
+`initmumble` or `closemumble` immediately. The default is 1 when the platform
+builds the Mumble link (Windows, or POSIX shared memory) and 0 otherwise.
+Mumble does not queue CHANGE_SOUND and does not call `resetsound`.
 
 The first Mouse / Keyboard slice exposes only gameplay sensitivity and
 vertical-look inversion. The bridge targets the fixed persistent
@@ -280,14 +353,63 @@ additive crosshair blend; the loader converts that mask to premultiplied alpha
 for RmlUi. This keeps previews valid across `resetgl()` without exposing engine
 texture or OpenGL handles or encoding any Settings DOM structure in C++.
 
-The first HUD slice is deliberately limited to combat feedback. It exposes
-vanilla Sauer's persistent `damagescreen` and `damagecompass` toggles, p1x's
-three-state `hudfragmessages` mode, and Cowbraten's persistent
-`streakmilestonescale` float. All apply immediately through their existing
-render paths without resource or GL reset. The streak scale uses its declared
+The HUD category exposes overlay stats and combat feedback. Overlay stats are
+vanilla Sauer's persistent `showfps` and `wallclock` toggles, plus the
+`wallclock24` and `wallclocksecs` format flags that the renderer consults only
+while the clock is on. Combat feedback remains vanilla Sauer's persistent
+`damagescreen` and `damagecompass` toggles, p1x's three-state
+`hudfragmessages` mode, and Cowbraten's persistent `streakmilestonescale`
+float. All apply immediately through their existing render paths without
+resource or GL reset. Turning the wall clock off does not rewrite its 24-hour
+or seconds flags; the default theme hides those subordinates until the clock
+is on again, matching the legacy HUD tab. `showfpsrange` is not a production
+HUD-tab control and is not exposed. The streak scale uses its declared
 `1.0..2.0` range and the same local edit/commit/readback policy as exact mouse
 sensitivity. Settings activation, category activation, local writes, and
 console return refresh these snapshots; there is no frame-loop polling.
+
+HUD guns add four independent persistent Sauer booleans on the same HUD page:
+`hudgun`, `hudgunsway`, `muzzleflash`, and `muzzlelight`. Each has its own
+typed writer. Toggling `hudgun` does not write the other three idents. Sway
+only offsets the first-person weapon while `drawhudgun()` draws it. Muzzle
+flash requires a valid muzzle tag; local first-person flashes therefore
+disappear when HUD guns are off because that path invalidates the tag, while
+other players and third-person view can still supply a world-model tag.
+Muzzle light does not require that tag and still uses `hudgunorigin()` when
+HUD guns are off. The default theme groups sway, flash, and light as
+subordinates of HUD Guns without disabling or rewriting those independent
+values. `hudgunsdir` remains unexposed.
+
+Gameclock is a separate typed snapshot of Sauer's match overlay, not the
+HUD wall clock. The master `gameclock` boolean is always shown. Size,
+opacity, alignment, and x/y layout controls are visible only while the
+clock is on, matching the native HUD tab's "adjust gameclock" panel.
+`gameclockscale`, `gameclockx`, and `gameclocky` use the native `+fround`
+0.01 stepper plus exact field commit; `gameclockalpha` is an integer
+slider bound to the ident range with no hardcoded RML value default;
+`gameclockalign` radios write only on user select and light only on the
+exact ident values `-1`, `0`, and `1`. All six writes go through
+`setvarchecked` / `setfvarchecked` and read back into the snapshot.
+Opening Settings does not rewrite these idents. `gameclockcolour` and
+`gameclocklowcolour` are not on the native Settings GUI and stay
+unexposed. No `showgui gameclock` alias is added; the standalone legacy
+document remains reachable by that exact name.
+
+HUD score overlay inlines the native HUD-tab `hudscore` master toggle and the
+`hudscore` adjust document. The migrated persistent idents are `hudscore`,
+`hudscorescale`, `hudscorealpha`, `hudscoresep`, `hudscorealign`, `hudscorex`,
+and `hudscorey`. None have a change callback, so they apply immediately on
+`drawhudscore()` when the overlay is on. `hudscoreplayercolour` and
+`hudscoreenemycolour` are not native Settings GUI controls and stay unexposed.
+Opening Settings, returning from the legacy console, and activating the HUD
+category only read these values. Integer opacity and spacing sliders bind
+min/max from the ident and have no hardcoded RML value default; their change
+handlers ignore a requested value that already matches the model or a range
+element that is not yet parented, matching the gamma/deadpush rewrite guard.
+Size, x, and y use local edit buffers and `+fround`-style 0.01 steppers, then
+clamp through `setfvarchecked`. Anchor radios write only on user select and
+light only on an exact `-1`/`0`/`1` match. A typed write then reads the
+accepted snapshot back. The document never supplies ident names.
 
 `hudfragmessages` is one p1x enum, not a generic per-game-mode policy: `0`
 disables frag and Cowbraten streak messages, `1` shows them in all modes, and
@@ -296,12 +418,76 @@ modes. The default theme therefore presents an Enabled toggle plus a subordinate
 Show in Instagib toggle, while the typed settings API retains the exact engine
 enum as its source of truth.
 
-The legacy `ammobar`, `gameclock`, `hudscore`, `scoreboard`, and
-`hudfragmessages` adjustment documents contain substantially more controls
-than this initial production slice. Their exact `showgui` names therefore
-continue through the legacy fallback. No HUD or Crosshair compatibility alias
-is added until the corresponding RmlUi surface is a sufficiently complete
-semantic replacement.
+HUD frag-message layout inlines the native `hudfragmessages` adjust document
+onto the Settings HUD page. The typed snapshot owns the layout idents that
+native GUI already exposes: max (`maxhudfragmessages`, VARFP `1..10`;
+`setvarchecked()` runs the buffer grow/shrink callback), duration
+(`hudfragmessageduration`, `0..10` seconds, native `0.1` steps), the three
+native `hudfragmessagefilter` bits only (`CON_FRAG_SELF` `0x800`,
+`CON_FRAG_OTHER` `0x1000`, `CON_TEAMKILL` `0x2000`; every other bit is
+preserved), size (`hudfragmessagescale`, `0.1..1.0`, native `0.1` steps),
+fade (`hudfragmessagefade`), normalized position (`hudfragmessagex`,
+`hudfragmessagey`, native `0.01` steps), and stack direction
+(`hudfragmessagestackdir` as exact `-1` / `0` / `1`). Each control has a
+typed writer through `setvarchecked()` / `setfvarchecked()`. All apply
+immediately through `drawfragmessages()` with no GL reset. Filter writers skip
+when the requested bit already matches, so opening Settings cannot rewrite the
+default `0x2800`. `hudfragmessagefilter` is an `HVARP` registered as `ID_VAR`
+with `IDF_HEX`; there is no separate hex ident type. Turning frag messages off
+does not rewrite layout idents; the default theme hides those subordinates
+until messages are on, matching `if $hudfragmessages`. The integer max slider
+binds min/max from the ident, omits a hardcoded RML `value`, and ignores
+programmatic range change during document construct or when the enabled
+`data-if` reveals the extras. Float fields use the same local
+edit/commit/readback policy as streak scale. Stack radios write only on user
+select and select only on an exact `-1/0/1` match.
+`hudfragmessageforcecolors` is not in the native Settings GUI and is not
+exposed. `showgui "hudfragmessages"` remains the legacy standalone document;
+Settings no longer needs that nested GUI.
+
+HUD ammo bar inlines the legacy `ammobar` adjust document onto the Settings HUD
+page. The typed snapshot owns Sauer's persistent `ammobar` master switch plus
+the layout idents that native GUI already exposes: orientation
+(`ammobarhorizontal`, `ammobarflip`), size (`ammobarscale`), icon spacing
+(`ammobarsep`), label size (`ammobarcountscale`), label offset
+(`ammobarcountsep`), anchor (`ammobaralign` as exact `-1` / `0` / `1`),
+normalized position (`ammobarx`, `ammobary`), and hide-empty
+(`ammobarhideempty`, default on). Each control has a typed writer through
+`setvarchecked()` / `setfvarchecked()`. All apply immediately through
+`gamehud()` / `drawammobar()` with no ident callback and no GL reset. Turning
+the master off does not rewrite layout idents; the default theme hides those
+subordinates until the bar is on, matching `if $ammobar`. Integer sliders bind
+min/max from the idents, omit a hardcoded RML `value`, and ignore programmatic
+range change during document construct. Float fields use the same local
+edit/commit/readback policy as streak scale, with native `0.01` steps.
+Anchor radios write only on user select and select only on an exact `-1/0/1`
+match. `showgui "ammobar"` remains the legacy standalone document; Settings no
+longer needs that nested GUI.
+
+HUD scoreboard columns inline the native `newgui scoreboard` column checkboxes
+onto Settings HUD. They are always presented; native `guibutton "adjust
+scoreboard"` is not gated on `hudscore`, and this slice does not add that gate.
+Show at death remains the Game-tab `deathscore` control and is not duplicated.
+The typed snapshot owns Sauer's persistent column idents: `showflags`, inverted
+`hidefrags` (UI "frags" on writes 0, off writes 1), `showdeaths`,
+`showsuicides`, `showkpd`, `showaccuracy`, `showdamage` 0/1/2, `showdamagereceived`,
+`showping` 0/1/2, `showpj`, and `showclientnum`. Each control has a typed writer
+through `setvarchecked()`. Opening Settings, returning from the legacy console,
+and activating HUD only read these values. Checkbox writes go through the typed
+API, then read the accepted snapshot back. Native `showping` and `showdamage`
+checkboxes write 0/1, but their ident maxima are 2. A non-zero unmatched value
+presents the checkbox on without rewriting until the user toggles; enabling from
+0 writes 1, disabling writes 0. Damage radios are exact-match 1 (dealt) and 2
+(net) only, skip-if-equal, and leave an unmatched non-zero value with no radio
+selected. `scoreboard2d`, `showservinfo`, `showspectators`, `highlightscore`,
+`tiesort`, and related non-column scoreboard options stay unexposed.
+`showgui "scoreboard"` remains the legacy document.
+
+Native `showgui gameclock`, `showgui hudscore`, and `showgui scoreboard` remain
+on the legacy path because those slices inline Settings HUD rather than mapping
+the adjust document names. No HUD or Crosshair compatibility alias is added
+until the corresponding RmlUi surface is a sufficiently complete semantic
+replacement.
 
 The first Chat slice preserves Sauer's actual console-backed message model.
 Public and team chat enter the shared console buffer as the distinct
@@ -312,15 +498,34 @@ custom filter bit. `teamcolorchat` remains a separate persistent boolean that
 controls player-name coloring when chat lines are formatted. All five values
 apply immediately and are read back from their fixed legacy idents after each
 write, on Chat activation, on Settings activation, and after legacy-console
-handoff. The full-console `fullconfilter`, message delivery, `saycommand`,
-`sayteamcommand`, input ownership, and scrollback are unchanged.
+handoff. Message delivery, `saycommand`, `sayteamcommand`, input ownership,
+and scrollback are unchanged.
 
-`confade` and `consize` affect the complete top-left console feed, while
-`miniconfade`, `miniconsize`, and `miniconwidth` affect every message type a
-user may route into the mini-console. They are intentionally not represented
-as chat-only duration or size settings. Chat highlight sounds are absent from
-the current Cowbraten source, player ignore state is transient per-connection
-behavior, and the server's `specchat` policy is not a client preference, so
-none are exposed by this slice. There is no dedicated legacy Chat settings
-document to replace; the console tab remains available through the existing
-legacy `options` content, and no new `showgui` mapping is added.
+`confade` affects the complete top-left console feed, while `miniconfade`,
+`miniconsize`, and `miniconwidth` affect every message type a user may route
+into the mini-console. They are intentionally not represented as chat-only
+duration or size settings. Chat highlight sounds are absent from the current
+Cowbraten source, player ignore state is transient per-connection behavior,
+and the server's `specchat` policy is not a client preference, so none are
+exposed by this slice. There is no dedicated legacy Chat settings document to
+replace; the console tab remains available through the existing legacy
+`options` content, and no new `showgui` mapping is added.
+
+The Console category owns the rest of the native Settings `console` tab. The
+typed snapshot reads `confilter`, `fullconfilter`, and `consize`. Top-left
+writers toggle only the remaining native `confilter` masks: important
+information `CON_INFO|CON_INIT` (`0x11`), warnings `CON_WARN`, errors
+`CON_ERROR`, script messages `CON_ECHO`, game events `CON_GAMEINFO`, self
+frags `CON_FRAG_SELF`, other player frags `CON_FRAG_OTHER`, and team kills
+`CON_TEAMKILL`. Each write uses the same `writefilterbit` path as Chat and
+preserves every unrelated bit, including `CON_CHAT` and `CON_TEAMCHAT`.
+`fullconfilter` includes those chat bits because Chat does not own the
+full-console mask. The native combined `miniconfilter 0x300` "chat box
+(bottom left)" checkbox stays on the Chat page as independent public and team
+toggles; Console does not add a second copy. `consize` is a local integer
+edit buffer with native `+/- 1` steps through `setvarchecked()`. Opening
+Settings, returning from the legacy console, and activating the Console
+category only read these values. A typed write then reads the accepted
+snapshot back. `confade`, `miniconfade`, `miniconsize`, `miniconwidth`,
+`CON_DEBUG`, and ignore lists are not native console-tab controls and stay
+unexposed. No new `showgui` mapping is added.

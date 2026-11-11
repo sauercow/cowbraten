@@ -69,8 +69,14 @@
                             <span class="settings-nav-index">07</span>
                             <span>Chat</span>
                         </button>
-                        <button class="nav-item settings-nav-item" disabled="true">
+                        <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_console"
+                            onclick="settings.category.console">
                             <span class="settings-nav-index">08</span>
+                            <span>Console</span>
+                        </button>
+                        <button class="nav-item settings-nav-item" disabled="true">
+                            <span class="settings-nav-index">09</span>
                             <span>Advanced / Network</span>
                         </button>
                     </div>
@@ -78,7 +84,7 @@
                     <div class="settings-scope-note" data-if="category_game">
                         <div class="settings-scope-kicker">Live Setting</div>
                         <div class="settings-scope-copy">
-                            Field of view is connected directly to the existing Sauer configuration system.
+                            Field of view, combat feedback, radar, and player-model options use the existing Sauer configuration system. Opening this page does not rewrite those values.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_graphics">
@@ -90,7 +96,7 @@
                     <div class="settings-scope-note" data-if="category_hud">
                         <div class="settings-scope-kicker">Combat Information</div>
                         <div class="settings-scope-copy">
-                            Damage feedback and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
+                            FPS and wall-clock overlays, damage feedback, HUD guns, the match gameclock, the score overlay, scoreboard columns, and frag messages use the existing HUD paths. Cowbraten streak milestones share the frag-message presentation.
                         </div>
                     </div>
                     <div class="settings-scope-note" data-if="category_audio">
@@ -115,6 +121,12 @@
                         <div class="settings-scope-kicker">Message Routing</div>
                         <div class="settings-scope-copy">
                             Public and team chat remain in Sauer's console buffer. These controls choose which live feeds present each message type.
+                        </div>
+                    </div>
+                    <div class="settings-scope-note" data-if="category_console">
+                        <div class="settings-scope-kicker">Console Feeds</div>
+                        <div class="settings-scope-copy">
+                            Remaining top-left message types, the full-console history filter, and top-left size. Chat message routing stays on the Chat page.
                         </div>
                     </div>
                 </div>
@@ -178,14 +190,859 @@
                                 <div class="settings-info-value">Immediate</div>
                             </div>
                         </div>
+
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Combat Feedback</div>
+                            <div class="settings-stage-title">Feedback</div>
+                            <div class="settings-stage-copy">
+                                These toggles use Sauer's existing persistent combat-feedback settings. Changes apply immediately and do not restart the renderer.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Hit Sound</div>
+                                    <div class="settings-control-description">
+                                        Play the existing hit confirmation sound when you damage another player. While spectating, it follows the player you are watching.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hit_sound"
+                                        data-attrif-disabled="!game_feedback_available"
+                                        data-event-change="select_hit_sound(ev.checked)" />
+                                    <span data-if="hit_sound">On</span>
+                                    <span data-if="!hit_sound">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Blood</div>
+                                    <div class="settings-control-description">
+                                        Spawn blood splash particles and gibs when players take damage. World blood decals remain a separate Graphics setting.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="blood"
+                                        data-attrif-disabled="!game_feedback_available"
+                                        data-event-change="select_blood(ev.checked)" />
+                                    <span data-if="blood">On</span>
+                                    <span data-if="!blood">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Outline Capture Meters</div>
+                                    <div class="settings-control-description">
+                                        Draw a green outline around in-world meter particles, including capture-progress meters and player status bars.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="outline_capture_meters"
+                                        data-attrif-disabled="!game_feedback_available"
+                                        data-event-change="select_outline_capture_meters(ev.checked)" />
+                                    <span data-if="outline_capture_meters">On</span>
+                                    <span data-if="!outline_capture_meters">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Show Scoreboard at Death</div>
+                                    <div class="settings-control-description">
+                                        Open the scoreboard when you die or are force-killed. Turning this off does not close a scoreboard that is already open.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="show_scoreboard_at_death"
+                                        data-attrif-disabled="!game_feedback_available"
+                                        data-event-change="select_show_scoreboard_at_death(ev.checked)" />
+                                    <span data-if="show_scoreboard_at_death">On</span>
+                                    <span data-if="!show_scoreboard_at_death">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="game_feedback_status != ''">
+                                <span>{{ game_feedback_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Trail Colors</div>
+                            <div class="settings-stage-title">Trail Colors</div>
+                            <div class="settings-stage-copy">
+                                Per-weapon RGB sliders pack into Sauer's existing persistent trail colors. Changes apply immediately on the next projectile or particle trail. Opening Settings does not rewrite these values.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Shotgun</div>
+                                    <div class="settings-control-description">
+                                        Streak color for shotgun pellets.
+                                    </div>
+                                </div>
+                                <div class="settings-color-swatch"
+                                    data-style-background-color="'rgb(' + trail_color_shotgun_red + ',' + trail_color_shotgun_green + ',' + trail_color_shotgun_blue + ')'"></div>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Red</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_shotgun_red }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_shotgun_red"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(0, 0, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Green</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_shotgun_green }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_shotgun_green"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(0, 1, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Blue</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_shotgun_blue }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_shotgun_blue"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(0, 2, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Chaingun</div>
+                                    <div class="settings-control-description">
+                                        Streak color for chaingun rounds.
+                                    </div>
+                                </div>
+                                <div class="settings-color-swatch"
+                                    data-style-background-color="'rgb(' + trail_color_chaingun_red + ',' + trail_color_chaingun_green + ',' + trail_color_chaingun_blue + ')'"></div>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Red</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_chaingun_red }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_chaingun_red"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(1, 0, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Green</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_chaingun_green }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_chaingun_green"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(1, 1, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Blue</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_chaingun_blue }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_chaingun_blue"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(1, 2, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Rocket Launcher</div>
+                                    <div class="settings-control-description">
+                                        Smoke trail color for rockets.
+                                    </div>
+                                </div>
+                                <div class="settings-color-swatch"
+                                    data-style-background-color="'rgb(' + trail_color_rocket_launcher_red + ',' + trail_color_rocket_launcher_green + ',' + trail_color_rocket_launcher_blue + ')'"></div>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Red</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_rocket_launcher_red }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_rocket_launcher_red"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(2, 0, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Green</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_rocket_launcher_green }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_rocket_launcher_green"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(2, 1, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Blue</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_rocket_launcher_blue }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_rocket_launcher_blue"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(2, 2, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Rifle</div>
+                                    <div class="settings-control-description">
+                                        Smoke trail color for rifle shots.
+                                    </div>
+                                </div>
+                                <div class="settings-color-swatch"
+                                    data-style-background-color="'rgb(' + trail_color_rifle_red + ',' + trail_color_rifle_green + ',' + trail_color_rifle_blue + ')'"></div>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Red</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_rifle_red }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_rifle_red"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(3, 0, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Green</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_rifle_green }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_rifle_green"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(3, 1, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Blue</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_rifle_blue }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_rifle_blue"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(3, 2, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Grenade Launcher</div>
+                                    <div class="settings-control-description">
+                                        Smoke trail color for grenades.
+                                    </div>
+                                </div>
+                                <div class="settings-color-swatch"
+                                    data-style-background-color="'rgb(' + trail_color_grenade_launcher_red + ',' + trail_color_grenade_launcher_green + ',' + trail_color_grenade_launcher_blue + ')'"></div>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Red</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_grenade_launcher_red }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_grenade_launcher_red"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(4, 0, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Green</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_grenade_launcher_green }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_grenade_launcher_green"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(4, 1, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Blue</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_grenade_launcher_blue }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_grenade_launcher_blue"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(4, 2, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Pistol</div>
+                                    <div class="settings-control-description">
+                                        Streak color for pistol shots.
+                                    </div>
+                                </div>
+                                <div class="settings-color-swatch"
+                                    data-style-background-color="'rgb(' + trail_color_pistol_red + ',' + trail_color_pistol_green + ',' + trail_color_pistol_blue + ')'"></div>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Red</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_pistol_red }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_pistol_red"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(5, 0, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Green</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_pistol_green }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_pistol_green"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(5, 1, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Blue</div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ trail_color_pistol_blue }}</span>
+                                </div>
+                            </div>
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ trail_color_channel_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="0"
+                                    max="255"
+                                    step="1"
+                                    data-attr-min="trail_color_channel_minimum"
+                                    data-attr-max="trail_color_channel_maximum"
+                                    data-attr-value="trail_color_pistol_blue"
+                                    data-attrif-disabled="!trail_colors_available"
+                                    data-event-change="select_trail_color_channel(5, 2, ev.value)" />
+                                <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="trail_colors_status != ''">
+                                <span>{{ trail_colors_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Radar</div>
+                            <div class="settings-stage-title">Radar</div>
+                            <div class="settings-stage-copy">
+                                These toggles use Sauer's existing persistent capture and teammate radar settings. Changes apply immediately and do not restart the renderer.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Numbered Capture Bases</div>
+                                    <div class="settings-control-description">
+                                        Include each capture base's tag number on in-world labels, capture and lost messages, and radar blips. Unnamed bases already show their numbers.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="numbered_capture_bases"
+                                        data-attrif-disabled="!game_radar_available"
+                                        data-event-change="select_numbered_capture_bases(ev.checked)" />
+                                    <span data-if="numbered_capture_bases">On</span>
+                                    <span data-if="!numbered_capture_bases">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Show Teammates on Radar</div>
+                                    <div class="settings-control-description">
+                                        Draw alive and dead teammate blips on the HUD radar in Capture, CTF, and Collect. Enemy and base blips stay visible when this is off.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="show_teammates_on_radar"
+                                        data-attrif-disabled="!game_radar_available"
+                                        data-event-change="select_show_teammates_on_radar(ev.checked)" />
+                                    <span data-if="show_teammates_on_radar">On</span>
+                                    <span data-if="!show_teammates_on_radar">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="game_radar_status != ''">
+                                <span>{{ game_radar_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Models</div>
+                            <div class="settings-stage-title">Models</div>
+                            <div class="settings-stage-copy">
+                                These controls use Sauer's existing persistent player-model presentation settings. Changes apply immediately and do not restart the renderer.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Ragdoll Deaths</div>
+                                    <div class="settings-control-description">
+                                        Use physics ragdolls for player death animations when the model includes ragdoll data.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="ragdoll_deaths"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_ragdoll_deaths(ev.checked)" />
+                                    <span data-if="ragdoll_deaths">On</span>
+                                    <span data-if="!ragdoll_deaths">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider"
+                                data-if="ragdoll_deaths">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Keep After Respawn</div>
+                                    <div class="settings-control-description">
+                                        Keep saved ragdoll corpses after respawn. Native Settings writes 10000 ms on and 0 ms off. A different non-zero engine value stays put until you toggle.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="keep_ragdoll_after_respawn"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_keep_ragdoll_after_respawn(ev.checked)" />
+                                    <span data-if="keep_ragdoll_after_respawn">On</span>
+                                    <span data-if="!keep_ragdoll_after_respawn">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-attrif-hidden="!ragdoll_deaths">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Ragdoll Velocity Multiplier</div>
+                                        <div class="settings-control-description">
+                                            Scales hit-push applied to dead players. The range comes from Sauer's existing deadpush ident.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ deadpush }}</span>
+                                        <span class="settings-value-unit">x</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ deadpush_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="1"
+                                        max="20"
+                                        step="1"
+                                        data-attr-min="deadpush_minimum"
+                                        data-attr-max="deadpush_maximum"
+                                        data-attr-value="deadpush"
+                                        data-attrif-disabled="!game_models_available || !ragdoll_deaths"
+                                        onchange="settings.deadpush" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ deadpush_maximum }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Hide Dead Players</div>
+                                    <div class="settings-control-description">
+                                        Skip drawing other dead players. Native Settings writes 0 or 1. A value of 1 also hides your own third-person corpse; 2 hides others and keeps yours. Opening Settings does not rewrite 2.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hide_dead_players"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_hide_dead_players(ev.checked)" />
+                                    <span data-if="hide_dead_players">On</span>
+                                    <span data-if="!hide_dead_players">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Fullbright Player Models</div>
+                                    <div class="settings-control-description">
+                                        Raise the minimum brightness of player models. Enabling from off writes 60 (subtle). Intensity radios write only when you select them.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="fullbright_player_models"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_fullbright_player_models(ev.checked)" />
+                                    <span data-if="fullbright_player_models">On</span>
+                                    <span data-if="!fullbright_player_models">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-if="fullbright_player_models">
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="fullbright_intensity_selected == 60"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-click="select_fullbright_intensity(60)">Subtle</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="fullbright_intensity_selected == 100"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-click="select_fullbright_intensity(100)">Bright</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="fullbright_intensity_selected == 150"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-click="select_fullbright_intensity(150)">Overbright</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="fullbright_intensity_selected == 200"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-click="select_fullbright_intensity(200)">Max</button>
+                                </div>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Force Matching Player Models</div>
+                                    <div class="settings-control-description">
+                                        Render other players with your selected player model instead of each player's own model.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="force_matching_player_models"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_force_player_models(ev.checked)" />
+                                    <span data-if="force_matching_player_models">On</span>
+                                    <span data-if="!force_matching_player_models">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Always Use Team Skins</div>
+                                    <div class="settings-control-description">
+                                        Use blue and red team skins even outside team modes.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="always_use_team_skins"
+                                        data-attrif-disabled="!game_models_available"
+                                        data-event-change="select_always_use_team_skins(ev.checked)" />
+                                    <span data-if="always_use_team_skins">On</span>
+                                    <span data-if="!always_use_team_skins">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="game_models_status != ''">
+                                <span>{{ game_models_status }}</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="settings-page" data-if="category_hud">
                         <div class="settings-stage-header">
-                            <div class="eyebrow settings-eyebrow">HUD / Combat Feedback</div>
+                            <div class="eyebrow settings-eyebrow">HUD / Overlay &amp; Combat</div>
                             <div class="settings-stage-title">HUD</div>
                             <div class="settings-stage-copy">
-                                Keep critical combat information readable without changing Cowbraten's existing HUD rendering behavior.
+                                Keep overlay stats and combat information readable without changing Cowbraten's existing HUD rendering behavior.
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Show FPS</div>
+                                    <div class="settings-control-description">
+                                        Shows Sauer's existing frames-per-second overlay in the HUD stats corner.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="show_fps"
+                                        onclick="settings.hud.show-fps" />
+                                    <span data-if="show_fps">Enabled</span>
+                                    <span data-if="!show_fps">Disabled</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Wall Clock</div>
+                                    <div class="settings-control-description">
+                                        Shows Sauer's existing local time overlay in the HUD stats corner.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="wall_clock"
+                                        onclick="settings.hud.wall-clock" />
+                                    <span data-if="wall_clock">Enabled</span>
+                                    <span data-if="!wall_clock">Disabled</span>
+                                </label>
+                            </div>
+
+                            <div data-if="wall_clock">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">24-hour</div>
+                                        <div class="settings-control-description">
+                                            Formats the wall clock as 24-hour time instead of 12-hour with AM/PM.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="wall_clock_24_hour"
+                                            onclick="settings.hud.wall-clock.24-hour" />
+                                        <span data-if="wall_clock_24_hour">Enabled</span>
+                                        <span data-if="!wall_clock_24_hour">Disabled</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Seconds</div>
+                                        <div class="settings-control-description">
+                                            Includes seconds in the wall-clock overlay.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="wall_clock_seconds"
+                                            onclick="settings.hud.wall-clock.seconds" />
+                                        <span data-if="wall_clock_seconds">Enabled</span>
+                                        <span data-if="!wall_clock_seconds">Disabled</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -226,6 +1083,875 @@
                         <div class="settings-section settings-compact-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
+                                    <div class="settings-control-title">HUD Guns</div>
+                                    <div class="settings-control-description">
+                                        Draws the first-person weapon models through Sauer's existing HUD gun renderer.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hud_guns"
+                                        onclick="settings.hud.guns" />
+                                    <span data-if="hud_guns">Enabled</span>
+                                    <span data-if="!hud_guns">Disabled</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Sway</div>
+                                    <div class="settings-control-description">
+                                        Offsets the first-person weapon with Sauer's existing walk sway while HUD guns are drawn.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hud_gun_sway"
+                                        onclick="settings.hud.guns.sway" />
+                                    <span data-if="hud_gun_sway">Enabled</span>
+                                    <span data-if="!hud_gun_sway">Disabled</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Muzzle Flash</div>
+                                    <div class="settings-control-description">
+                                        Shows the existing muzzle flare when a weapon muzzle tag is available.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="muzzle_flash"
+                                        onclick="settings.hud.guns.muzzle-flash" />
+                                    <span data-if="muzzle_flash">Enabled</span>
+                                    <span data-if="!muzzle_flash">Disabled</span>
+                                </label>
+                            </div>
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Muzzle Light</div>
+                                    <div class="settings-control-description">
+                                        Adds Sauer's existing brief muzzle dynlight, including when HUD guns are off.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="muzzle_light"
+                                        onclick="settings.hud.guns.muzzle-light" />
+                                    <span data-if="muzzle_light">Enabled</span>
+                                    <span data-if="!muzzle_light">Disabled</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Score Overlay</div>
+                                    <div class="settings-control-description">
+                                        Draws Sauer's compact HUD scores when at least two teams or players are present. Off by default.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="hudscore"
+                                        data-attrif-disabled="!hudscore_available"
+                                        data-event-change="select_hudscore(ev.checked)" />
+                                    <span data-if="hudscore">On</span>
+                                    <span data-if="!hudscore">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-if="hudscore">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Size</div>
+                                        <div class="settings-control-description">
+                                            Scale of the overlay text. Native Settings steps this by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.scale.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="hudscore_scale_input"
+                                            data-class-is-invalid="hudscore_scale_invalid"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onfocus="settings.hud.score.scale.focus"
+                                            onblur="settings.hud.score.scale.blur"
+                                            onkeyup="settings.hud.score.scale.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.scale.increase">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Opacity</div>
+                                        <div class="settings-control-description">
+                                            Overlay text opacity. The range comes from Sauer's existing overlay setting.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ hudscore_alpha }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ hudscore_alpha_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="0"
+                                        max="255"
+                                        step="1"
+                                        data-attr-min="hudscore_alpha_minimum"
+                                        data-attr-max="hudscore_alpha_maximum"
+                                        data-attr-value="hudscore_alpha"
+                                        data-attrif-disabled="!hudscore_available || !hudscore"
+                                        onchange="settings.hud.score.alpha" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ hudscore_alpha_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Spacing</div>
+                                        <div class="settings-control-description">
+                                            Gap between the two scores.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ hudscore_sep }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ hudscore_sep_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="0"
+                                        max="1000"
+                                        step="1"
+                                        data-attr-min="hudscore_sep_minimum"
+                                        data-attr-max="hudscore_sep_maximum"
+                                        data-attr-value="hudscore_sep"
+                                        data-attrif-disabled="!hudscore_available || !hudscore"
+                                        onchange="settings.hud.score.spacing" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ hudscore_sep_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Anchor</div>
+                                        <div class="settings-control-description">
+                                            Horizontal alignment of the overlay. Radios write only when you select them.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="hudscore_align == -1"
+                                        data-attrif-disabled="!hudscore_available"
+                                        data-event-click="select_hudscore_align(-1)">Start</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="hudscore_align == 0"
+                                        data-attrif-disabled="!hudscore_available"
+                                        data-event-click="select_hudscore_align(0)">Center</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="hudscore_align == 1"
+                                        data-attrif-disabled="!hudscore_available"
+                                        data-event-click="select_hudscore_align(1)">End</button>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">X</div>
+                                        <div class="settings-control-description">
+                                            Normalized horizontal position. Native Settings steps this by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.x.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="hudscore_x_input"
+                                            data-class-is-invalid="hudscore_x_invalid"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onfocus="settings.hud.score.x.focus"
+                                            onblur="settings.hud.score.x.blur"
+                                            onkeyup="settings.hud.score.x.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.x.increase">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Y</div>
+                                        <div class="settings-control-description">
+                                            Normalized vertical position. Native Settings steps this by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.y.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="hudscore_y_input"
+                                            data-class-is-invalid="hudscore_y_invalid"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onfocus="settings.hud.score.y.focus"
+                                            onblur="settings.hud.score.y.blur"
+                                            onkeyup="settings.hud.score.y.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!hudscore_available"
+                                            onclick="settings.hud.score.y.increase">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="hudscore_status != ''">
+                                <span>{{ hudscore_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Gameclock</div>
+                                    <div class="settings-control-description">
+                                        Shows Sauer's existing match-time overlay. Layout controls match the native gameclock adjust panel; colour idents stay unexposed.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="game_clock"
+                                        data-attrif-disabled="!game_clock_available"
+                                        data-event-change="select_game_clock(ev.checked)" />
+                                    <span data-if="game_clock">On</span>
+                                    <span data-if="!game_clock">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-if="game_clock">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Size</div>
+                                        <div class="settings-control-description">
+                                            Scales the match overlay. Native Settings steps by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.scale.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="game_clock_scale_input"
+                                            data-class-is-invalid="game_clock_scale_invalid"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onfocus="settings.hud.gameclock.scale.focus"
+                                            onblur="settings.hud.gameclock.scale.blur"
+                                            onkeyup="settings.hud.gameclock.scale.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.scale.increase">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Opacity</div>
+                                        <div class="settings-control-description">
+                                            Sets overlay alpha through Sauer's existing gameclockalpha ident.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ game_clock_alpha }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ game_clock_alpha_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="0"
+                                        max="255"
+                                        step="1"
+                                        data-attr-min="game_clock_alpha_minimum"
+                                        data-attr-max="game_clock_alpha_maximum"
+                                        data-attr-value="game_clock_alpha"
+                                        data-attrif-disabled="!game_clock_available || !game_clock"
+                                        onchange="settings.hud.gameclock.alpha" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ game_clock_alpha_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Anchor</div>
+                                        <div class="settings-control-description">
+                                            Horizontal alignment. Radios write only when you select start, center, or end.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="game_clock_align == -1"
+                                        data-attrif-disabled="!game_clock_available"
+                                        data-event-click="select_game_clock_align(-1)">Start</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="game_clock_align == 0"
+                                        data-attrif-disabled="!game_clock_available"
+                                        data-event-click="select_game_clock_align(0)">Center</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="game_clock_align == 1"
+                                        data-attrif-disabled="!game_clock_available"
+                                        data-event-click="select_game_clock_align(1)">End</button>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">X</div>
+                                        <div class="settings-control-description">
+                                            Horizontal position. Native Settings steps by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.x.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="game_clock_x_input"
+                                            data-class-is-invalid="game_clock_x_invalid"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onfocus="settings.hud.gameclock.x.focus"
+                                            onblur="settings.hud.gameclock.x.blur"
+                                            onkeyup="settings.hud.gameclock.x.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.x.increase">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Y</div>
+                                        <div class="settings-control-description">
+                                            Vertical position. Native Settings steps by 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.y.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="game_clock_y_input"
+                                            data-class-is-invalid="game_clock_y_invalid"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onfocus="settings.hud.gameclock.y.focus"
+                                            onblur="settings.hud.gameclock.y.blur"
+                                            onkeyup="settings.hud.gameclock.y.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!game_clock_available"
+                                            onclick="settings.hud.gameclock.y.increase">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="game_clock_status != ''">
+                                <span>{{ game_clock_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">HUD / Scoreboard</div>
+                                    <div class="settings-control-description">
+                                        Column checkboxes from the native scoreboard GUI. Show at death stays on Game. These columns are always shown here; they are not gated on hudscore.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Flags</div>
+                                    <div class="settings-control-description">
+                                        Shows captured flags on the CTF scoreboard.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_flags"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_flags(ev.checked)" />
+                                    <span data-if="scoreboard_flags">On</span>
+                                    <span data-if="!scoreboard_flags">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Frags</div>
+                                    <div class="settings-control-description">
+                                        Shows the frags column. Native hidefrags is inverted: checked writes 0, unchecked writes 1.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_frags"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_frags(ev.checked)" />
+                                    <span data-if="scoreboard_frags">On</span>
+                                    <span data-if="!scoreboard_frags">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Deaths</div>
+                                    <div class="settings-control-description">
+                                        Shows each player's death count.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_deaths"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_deaths(ev.checked)" />
+                                    <span data-if="scoreboard_deaths">On</span>
+                                    <span data-if="!scoreboard_deaths">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Suicides</div>
+                                    <div class="settings-control-description">
+                                        Shows each player's suicide count.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_suicides"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_suicides(ev.checked)" />
+                                    <span data-if="scoreboard_suicides">On</span>
+                                    <span data-if="!scoreboard_suicides">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">KPD</div>
+                                    <div class="settings-control-description">
+                                        Shows kills per death.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_kpd"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_kpd(ev.checked)" />
+                                    <span data-if="scoreboard_kpd">On</span>
+                                    <span data-if="!scoreboard_kpd">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Accuracy</div>
+                                    <div class="settings-control-description">
+                                        Shows each player's shot accuracy.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_accuracy"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_accuracy(ev.checked)" />
+                                    <span data-if="scoreboard_accuracy">On</span>
+                                    <span data-if="!scoreboard_accuracy">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Damage</div>
+                                    <div class="settings-control-description">
+                                        Shows damage dealt or net. Enabling from off writes dealt (1). Opening Settings does not rewrite an unmatched non-zero value.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_damage"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_damage(ev.checked)" />
+                                    <span data-if="scoreboard_damage">On</span>
+                                    <span data-if="!scoreboard_damage">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-if="scoreboard_damage">
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="scoreboard_damage_dealt"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-click="select_scoreboard_damage_mode(1)">Dealt</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="scoreboard_damage_net"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-click="select_scoreboard_damage_mode(2)">Net</button>
+                                </div>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Damage Received</div>
+                                    <div class="settings-control-description">
+                                        Shows damage taken by each player.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_damage_received"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_damage_received(ev.checked)" />
+                                    <span data-if="scoreboard_damage_received">On</span>
+                                    <span data-if="!scoreboard_damage_received">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Ping</div>
+                                    <div class="settings-control-description">
+                                        Shows ping. Ident max is 2; a value of 2 stays checked and is not rewritten to 1 on open.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_ping"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_ping(ev.checked)" />
+                                    <span data-if="scoreboard_ping">On</span>
+                                    <span data-if="!scoreboard_ping">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">PJ</div>
+                                    <div class="settings-control-description">
+                                        Shows packet jump on the multiplayer scoreboard.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_pj"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_pj(ev.checked)" />
+                                    <span data-if="scoreboard_pj">On</span>
+                                    <span data-if="!scoreboard_pj">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">CN</div>
+                                    <div class="settings-control-description">
+                                        Shows each player's client number. Masters still see client numbers when this is off.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="scoreboard_clientnum"
+                                        data-attrif-disabled="!scoreboard_available"
+                                        data-event-change="select_scoreboard_clientnum(ev.checked)" />
+                                    <span data-if="scoreboard_clientnum">On</span>
+                                    <span data-if="!scoreboard_clientnum">Off</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="scoreboard_status != ''">
+                                <span>{{ scoreboard_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Ammobar</div>
+                                    <div class="settings-control-description">
+                                        Draws Sauer's existing HUD ammo icon strip. Off by default. The renderer still hides it in instagib.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="ammobar_visible"
+                                        data-attrif-disabled="!ammobar_available"
+                                        data-event-change="select_ammobar(ev.checked)" />
+                                    <span data-if="ammobar_visible">On</span>
+                                    <span data-if="!ammobar_visible">Off</span>
+                                </label>
+                            </div>
+
+                            <div data-if="ammobar_visible">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Horizontal</div>
+                                        <div class="settings-control-description">
+                                            Lays icons out left to right instead of top to bottom.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="ammobar_horizontal"
+                                            data-attrif-disabled="!ammobar_available"
+                                            data-event-change="select_ammobar_horizontal(ev.checked)" />
+                                        <span data-if="ammobar_horizontal">On</span>
+                                        <span data-if="!ammobar_horizontal">Off</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Flip</div>
+                                        <div class="settings-control-description">
+                                            Reverses the ammo-count offset relative to each icon.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="ammobar_flip"
+                                            data-attrif-disabled="!ammobar_available"
+                                            data-event-change="select_ammobar_flip(ev.checked)" />
+                                        <span data-if="ammobar_flip">On</span>
+                                        <span data-if="!ammobar_flip">Off</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Size</div>
+                                        <div class="settings-control-description">
+                                            Overall scale of the ammo bar. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.scale.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="ammobar_scale_input"
+                                            data-class-is-invalid="ammobar_scale_invalid"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onfocus="settings.hud.ammobar.scale.focus"
+                                            onblur="settings.hud.ammobar.scale.blur"
+                                            onkeyup="settings.hud.ammobar.scale.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.scale.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ ammobar_scale_minimum }} - {{ ammobar_scale_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Icon Spacing</div>
+                                        <div class="settings-control-description">
+                                            Extra pixels between ammo icons.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ ammobar_icon_spacing }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ ammobar_icon_spacing_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="0"
+                                        max="500"
+                                        step="1"
+                                        data-attr-min="ammobar_icon_spacing_minimum"
+                                        data-attr-max="ammobar_icon_spacing_maximum"
+                                        data-attr-value="ammobar_icon_spacing"
+                                        data-attrif-disabled="!ammobar_available"
+                                        onchange="settings.hud.ammobar.icon-spacing" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ ammobar_icon_spacing_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Label Size</div>
+                                        <div class="settings-control-description">
+                                            Scale of the ammo-count text. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.label-size.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="ammobar_label_size_input"
+                                            data-class-is-invalid="ammobar_label_size_invalid"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onfocus="settings.hud.ammobar.label-size.focus"
+                                            onblur="settings.hud.ammobar.label-size.blur"
+                                            onkeyup="settings.hud.ammobar.label-size.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.label-size.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ ammobar_label_size_minimum }} - {{ ammobar_label_size_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Label Offset</div>
+                                        <div class="settings-control-description">
+                                            Extra pixels between each icon and its ammo count.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ ammobar_label_offset }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ ammobar_label_offset_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="0"
+                                        max="500"
+                                        step="1"
+                                        data-attr-min="ammobar_label_offset_minimum"
+                                        data-attr-max="ammobar_label_offset_maximum"
+                                        data-attr-value="ammobar_label_offset"
+                                        data-attrif-disabled="!ammobar_available"
+                                        onchange="settings.hud.ammobar.label-offset" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ ammobar_label_offset_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Anchor</div>
+                                        <div class="settings-control-description">
+                                            Which icon sits on the configured x/y point: first icon, center, or last icon.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="ammobar_align_first"
+                                        data-attrif-disabled="!ammobar_available"
+                                        data-event-click="select_ammobar_align(-1)">First icon</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="ammobar_align_center"
+                                        data-attrif-disabled="!ammobar_available"
+                                        data-event-click="select_ammobar_align(0)">Center</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="ammobar_align_last"
+                                        data-attrif-disabled="!ammobar_available"
+                                        data-event-click="select_ammobar_align(1)">Last icon</button>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">X</div>
+                                        <div class="settings-control-description">
+                                            Horizontal HUD position. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.x.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="ammobar_x_input"
+                                            data-class-is-invalid="ammobar_x_invalid"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onfocus="settings.hud.ammobar.x.focus"
+                                            onblur="settings.hud.ammobar.x.blur"
+                                            onkeyup="settings.hud.ammobar.x.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.x.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ ammobar_x_minimum }} - {{ ammobar_x_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Y</div>
+                                        <div class="settings-control-description">
+                                            Vertical HUD position. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.y.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="ammobar_y_input"
+                                            data-class-is-invalid="ammobar_y_invalid"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onfocus="settings.hud.ammobar.y.focus"
+                                            onblur="settings.hud.ammobar.y.blur"
+                                            onkeyup="settings.hud.ammobar.y.commit" />
+                                        <button class="button settings-stepper-button"
+                                            data-attrif-disabled="!ammobar_available"
+                                            onclick="settings.hud.ammobar.y.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ ammobar_y_minimum }} - {{ ammobar_y_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Hide Empty Stacks</div>
+                                        <div class="settings-control-description">
+                                            Hides guns with no ammo unless that gun is selected. On by default.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="ammobar_hide_empty"
+                                            data-attrif-disabled="!ammobar_available"
+                                            data-event-change="select_ammobar_hide_empty(ev.checked)" />
+                                        <span data-if="ammobar_hide_empty">On</span>
+                                        <span data-if="!ammobar_hide_empty">Off</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="ammobar_status != ''">
+                                <span>{{ ammobar_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
                                     <div class="settings-control-title">Frag &amp; Streak Messages</div>
                                     <div class="settings-control-description">
                                         Shows p1x frag messages and Cowbraten streak milestones using their existing shared HUD path.
@@ -254,6 +1980,217 @@
                                     <span data-if="frag_messages_in_insta">Shown</span>
                                     <span data-if="!frag_messages_in_insta">Hidden</span>
                                 </label>
+                            </div>
+
+                            <div data-if="frag_messages_enabled">
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Max</div>
+                                        <div class="settings-control-description">
+                                            How many p1x frag messages stay on the HUD. Changing this grows or shrinks the existing message buffer immediately.
+                                        </div>
+                                    </div>
+                                    <div class="settings-value">
+                                        <span class="settings-value-number">{{ max_frag_messages }}</span>
+                                    </div>
+                                </div>
+                                <div class="settings-range-row">
+                                    <span class="settings-range-bound">{{ max_frag_messages_minimum }}</span>
+                                    <input class="settings-range"
+                                        type="range"
+                                        min="1"
+                                        max="10"
+                                        step="1"
+                                        data-attr-min="max_frag_messages_minimum"
+                                        data-attr-max="max_frag_messages_maximum"
+                                        data-attr-value="max_frag_messages"
+                                        onchange="settings.hud.frag-messages.max" />
+                                    <span class="settings-range-bound settings-range-maximum">{{ max_frag_messages_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Duration</div>
+                                        <div class="settings-control-description">
+                                            Seconds each frag message stays visible. Native +/- steps of 0.1.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.duration.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="frag_message_duration_input"
+                                            data-class-is-invalid="frag_message_duration_invalid"
+                                            onfocus="settings.hud.frag-messages.duration.focus"
+                                            onblur="settings.hud.frag-messages.duration.blur"
+                                            onkeyup="settings.hud.frag-messages.duration.commit" />
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.duration.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ frag_message_duration_minimum }} - {{ frag_message_duration_maximum }} seconds</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Self Frags</div>
+                                        <div class="settings-control-description">
+                                            Show your own kills in the frag message list.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="frag_message_self_frags"
+                                            onclick="settings.hud.frag-messages.self" />
+                                        <span data-if="frag_message_self_frags">Shown</span>
+                                        <span data-if="!frag_message_self_frags">Hidden</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Other Player Frags</div>
+                                        <div class="settings-control-description">
+                                            Show kills by other players in the frag message list.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="frag_message_other_frags"
+                                            onclick="settings.hud.frag-messages.other" />
+                                        <span data-if="frag_message_other_frags">Shown</span>
+                                        <span data-if="!frag_message_other_frags">Hidden</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Team Kills</div>
+                                        <div class="settings-control-description">
+                                            Show team kills in the frag message list.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="frag_message_team_kills"
+                                            onclick="settings.hud.frag-messages.team-kills" />
+                                        <span data-if="frag_message_team_kills">Shown</span>
+                                        <span data-if="!frag_message_team_kills">Hidden</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Size</div>
+                                        <div class="settings-control-description">
+                                            Scale of p1x frag messages. Native +/- steps of 0.1.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.scale.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="frag_message_scale_input"
+                                            data-class-is-invalid="frag_message_scale_invalid"
+                                            onfocus="settings.hud.frag-messages.scale.focus"
+                                            onblur="settings.hud.frag-messages.scale.blur"
+                                            onkeyup="settings.hud.frag-messages.scale.commit" />
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.scale.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ frag_message_scale_minimum }} - {{ frag_message_scale_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Fade Out</div>
+                                        <div class="settings-control-description">
+                                            Fades each message after its duration instead of removing it immediately.
+                                        </div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="frag_message_fade"
+                                            onclick="settings.hud.frag-messages.fade" />
+                                        <span data-if="frag_message_fade">On</span>
+                                        <span data-if="!frag_message_fade">Off</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">X</div>
+                                        <div class="settings-control-description">
+                                            Horizontal HUD position. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.x.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="frag_message_x_input"
+                                            data-class-is-invalid="frag_message_x_invalid"
+                                            onfocus="settings.hud.frag-messages.x.focus"
+                                            onblur="settings.hud.frag-messages.x.blur"
+                                            onkeyup="settings.hud.frag-messages.x.commit" />
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.x.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ frag_message_x_minimum }} - {{ frag_message_x_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Y</div>
+                                        <div class="settings-control-description">
+                                            Vertical HUD position. Native +/- steps of 0.01.
+                                        </div>
+                                    </div>
+                                    <div class="settings-stepper">
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.y.decrease">-</button>
+                                        <input class="text-input settings-stepper-value"
+                                            type="text" maxlength="8"
+                                            data-value="frag_message_y_input"
+                                            data-class-is-invalid="frag_message_y_invalid"
+                                            onfocus="settings.hud.frag-messages.y.focus"
+                                            onblur="settings.hud.frag-messages.y.blur"
+                                            onkeyup="settings.hud.frag-messages.y.commit" />
+                                        <button class="button settings-stepper-button"
+                                            onclick="settings.hud.frag-messages.y.increase">+</button>
+                                    </div>
+                                </div>
+                                <div class="settings-control-footer settings-control-footer-compact">
+                                    <span>Range&nbsp;&nbsp;{{ frag_message_y_minimum }} - {{ frag_message_y_maximum }}</span>
+                                </div>
+
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Stack Direction</div>
+                                        <div class="settings-control-description">
+                                            Newer messages stack up, toward the nearest vertical edge, or down from the configured position.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-antialiasing-selector">
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="frag_message_stack_up"
+                                        data-event-click="select_frag_message_stack_dir(-1)">Up</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="frag_message_stack_auto"
+                                        data-event-click="select_frag_message_stack_dir(0)">Auto</button>
+                                    <button class="button settings-antialiasing-button"
+                                        data-class-is-selected="frag_message_stack_down"
+                                        data-event-click="select_frag_message_stack_dir(1)">Down</button>
+                                </div>
                             </div>
                         </div>
 
@@ -385,6 +2322,40 @@
                             </div>
                         </div>
 
+                        <div class="settings-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Gamma</div>
+                                    <div class="settings-control-description">
+                                        Adjust display gamma. 100 is the default. The requested value is stored in the player config; SDL reports the last window brightness it accepted.
+                                    </div>
+                                </div>
+                                <div class="settings-value">
+                                    <span class="settings-value-number">{{ gamma_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-range-row">
+                                <span class="settings-range-bound">{{ gamma_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="30"
+                                    max="300"
+                                    step="1"
+                                    value="100"
+                                    data-attr-min="gamma_minimum"
+                                    data-attr-max="gamma_maximum"
+                                    data-attr-value="gamma"
+                                    onchange="settings.gamma" />
+                                <span class="settings-range-bound settings-range-maximum">{{ gamma_maximum }}</span>
+                            </div>
+
+                            <div class="settings-control-footer settings-control-footer-compact">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ gamma_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section settings-antialiasing-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">
@@ -420,6 +2391,41 @@
                             <div class="settings-control-footer">
                                 <span class="settings-live-indicator"></span>
                                 <span>{{ antialiasing_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-antialiasing-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Depth Buffer</div>
+                                    <div class="settings-control-description">
+                                        Requested OpenGL z-buffer precision. Zero keeps the engine default of 24 bits rather than a 0-bit buffer. Changing this option rebuilds the existing OpenGL context.
+                                    </div>
+                                </div>
+                                <div class="settings-resolution-current settings-antialiasing-current">
+                                    <span class="settings-info-label">Actual runtime</span>
+                                    <span class="settings-resolution-current-value">{{ depth_buffer_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="depth_buffer_default"
+                                    data-event-click="select_depth_buffer(0)">Default</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="depth_buffer_16"
+                                    data-event-click="select_depth_buffer(16)">16-bit</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="depth_buffer_24"
+                                    data-event-click="select_depth_buffer(24)">24-bit</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="depth_buffer_32"
+                                    data-event-click="select_depth_buffer(32)">32-bit</button>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ depth_buffer_status }}</span>
                             </div>
                         </div>
 
@@ -757,6 +2763,29 @@
                             </div>
                         </div>
 
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Model Bump Maps</div>
+                                    <div class="settings-control-description">
+                                        Use normal maps on models that provide them. Changing this rebuilds model shaders and may hitch briefly.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="bump_models"
+                                        data-attrif-disabled="!bump_models_available"
+                                        data-event-change="select_bump_models(ev.checked)" />
+                                    <span data-if="bump_models">On</span>
+                                    <span data-if="!bump_models">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="bump_models_status != ''">
+                                <span>{{ bump_models_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section settings-antialiasing-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">
@@ -949,6 +2978,29 @@
                             <div class="settings-control-footer settings-control-footer-compact"
                                 data-if="decal_persistence_status != ''">
                                 <span>{{ decal_persistence_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Fix T-Joints</div>
+                                    <div class="settings-control-description">
+                                        Fill T-junctions in world geometry so adjacent cubes meet cleanly. This reduces sparkles and seams. Changing it rebuilds the map's vertex arrays and may hitch.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="fix_t_joints"
+                                        data-attrif-disabled="!fix_t_joints_available"
+                                        data-event-change="select_fix_t_joints(ev.checked)" />
+                                    <span data-if="fix_t_joints">On</span>
+                                    <span data-if="!fix_t_joints">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact"
+                                data-if="fix_t_joints_status != ''">
+                                <span>{{ fix_t_joints_status }}</span>
                             </div>
                         </div>
 
@@ -1494,7 +3546,7 @@
                             <div class="eyebrow settings-eyebrow">Audio / Mix</div>
                             <div class="settings-stage-title">Audio</div>
                             <div class="settings-stage-copy">
-                                Balance gameplay sounds and music through Cowbraten's existing SDL_mixer audio path.
+                                Balance gameplay sounds and music, then configure mixer device settings through Cowbraten's existing SDL_mixer audio path.
                             </div>
                         </div>
 
@@ -1598,6 +3650,125 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Sound Channels</div>
+                                    <div class="settings-control-description">
+                                        Mixer channel count. The ident is stored immediately. The mixer applies it on sound reset when Settings input finishes with CHANGE_SOUND pending.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-audio-value">
+                                    <span class="settings-fps-value-label">{{ sound_channels }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-range-row settings-audio-range-row">
+                                <span class="settings-range-bound">{{ sound_channels_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="1"
+                                    max="128"
+                                    step="1"
+                                    data-attr-min="sound_channels_minimum"
+                                    data-attr-max="sound_channels_maximum"
+                                    data-attr-value="sound_channels"
+                                    onchange="settings.audio.sound-channels" />
+                                <span class="settings-range-bound settings-range-maximum">{{ sound_channels_maximum }}</span>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ sound_channels_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Sound Frequency</div>
+                                    <div class="settings-control-description">
+                                        Native Settings offers 11025, 22050, and 44100 Hz. Opening this page does not coerce another stored ident value.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-audio-value">
+                                    <span class="settings-fps-value-label">{{ sound_frequency_label }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-antialiasing-selector">
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="sound_frequency == 11025"
+                                    data-event-click="select_sound_frequency(11025)">11025 Hz</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="sound_frequency == 22050"
+                                    data-event-click="select_sound_frequency(22050)">22050 Hz</button>
+                                <button class="button settings-antialiasing-button"
+                                    data-class-is-selected="sound_frequency == 44100"
+                                    data-event-click="select_sound_frequency(44100)">44100 Hz</button>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ sound_frequency_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Sound Buffer Length</div>
+                                    <div class="settings-control-description">
+                                        SDL_mixer chunk size. The ident is stored immediately. The mixer applies it on sound reset. SDL_mixer does not report the opened chunk size.
+                                    </div>
+                                </div>
+                                <div class="settings-value settings-audio-value">
+                                    <span class="settings-fps-value-label">{{ sound_buffer_length }}</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-range-row settings-audio-range-row">
+                                <span class="settings-range-bound">{{ sound_buffer_length_minimum }}</span>
+                                <input class="settings-range"
+                                    type="range"
+                                    min="128"
+                                    max="4096"
+                                    step="1"
+                                    data-attr-min="sound_buffer_length_minimum"
+                                    data-attr-max="sound_buffer_length_maximum"
+                                    data-attr-value="sound_buffer_length"
+                                    onchange="settings.audio.sound-buffer-length" />
+                                <span class="settings-range-bound settings-range-maximum">{{ sound_buffer_length_maximum }}</span>
+                            </div>
+
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ sound_buffer_length_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-audio-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Mumble positional audio</div>
+                                    <div class="settings-control-description">
+                                        Toggles Sauer's Mumble link immediately through the existing ident callback. This does not reset the mixer.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="mumble"
+                                        data-event-change="select_mumble(ev.checked)" />
+                                    <span data-if="mumble">On</span>
+                                    <span data-if="!mumble">Off</span>
+                                </label>
+                            </div>
+                            <div class="settings-control-footer">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ mumble_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-info-row settings-audio-info-row">
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Runtime</div>
@@ -1605,7 +3776,7 @@
                             </div>
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Application</div>
-                                <div class="settings-info-value">Immediate</div>
+                                <div class="settings-info-value">Volumes, soundpack, and Mumble immediate; device idents reset the mixer from applypending</div>
                             </div>
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Persistence</div>
@@ -2112,6 +4283,315 @@
                         </div>
                     </div>
 
+                    <div class="settings-page" data-if="category_console">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Game / Console</div>
+                            <div class="settings-stage-title">Console</div>
+                            <div class="settings-stage-copy">
+                                Choose which message types appear in the top-left feed and the full-console history. Public and team chat for the live feeds stay on the Chat page.
+                            </div>
+                        </div>
+
+                        <div class="settings-console-columns">
+                            <div class="settings-section settings-compact-section panel settings-console-column">
+                                <div class="settings-control-title">Top-left Filter</div>
+                                <div class="settings-control-description">
+                                    Remaining message types for the normal in-game console. Chat and team chat are configured on the Chat page.
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Important Information</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_important"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.important" />
+                                        <span data-if="console_top_important">Shown</span>
+                                        <span data-if="!console_top_important">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Warnings</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_warnings"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.warnings" />
+                                        <span data-if="console_top_warnings">Shown</span>
+                                        <span data-if="!console_top_warnings">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Errors</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_errors"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.errors" />
+                                        <span data-if="console_top_errors">Shown</span>
+                                        <span data-if="!console_top_errors">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Script Messages</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_script"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.script" />
+                                        <span data-if="console_top_script">Shown</span>
+                                        <span data-if="!console_top_script">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Game Events</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_game_events"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.game-events" />
+                                        <span data-if="console_top_game_events">Shown</span>
+                                        <span data-if="!console_top_game_events">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Self Frags</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_self_frags"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.self-frags" />
+                                        <span data-if="console_top_self_frags">Shown</span>
+                                        <span data-if="!console_top_self_frags">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Other Player Frags</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_other_frags"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.other-frags" />
+                                        <span data-if="console_top_other_frags">Shown</span>
+                                        <span data-if="!console_top_other_frags">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Team Kills</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_top_team_kills"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.top.team-kills" />
+                                        <span data-if="console_top_team_kills">Shown</span>
+                                        <span data-if="!console_top_team_kills">Hidden</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-section settings-compact-section panel settings-console-column">
+                                <div class="settings-control-title">Full Console Filter</div>
+                                <div class="settings-control-description">
+                                    Message types kept in the full-console history, including public and team chat.
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Important Information</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_important"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.important" />
+                                        <span data-if="console_full_important">Shown</span>
+                                        <span data-if="!console_full_important">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Warnings</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_warnings"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.warnings" />
+                                        <span data-if="console_full_warnings">Shown</span>
+                                        <span data-if="!console_full_warnings">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Errors</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_errors"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.errors" />
+                                        <span data-if="console_full_errors">Shown</span>
+                                        <span data-if="!console_full_errors">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Script Messages</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_script"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.script" />
+                                        <span data-if="console_full_script">Shown</span>
+                                        <span data-if="!console_full_script">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Chat</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_chat"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.chat" />
+                                        <span data-if="console_full_chat">Shown</span>
+                                        <span data-if="!console_full_chat">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Team Chat</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_team_chat"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.team-chat" />
+                                        <span data-if="console_full_team_chat">Shown</span>
+                                        <span data-if="!console_full_team_chat">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Game Events</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_game_events"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.game-events" />
+                                        <span data-if="console_full_game_events">Shown</span>
+                                        <span data-if="!console_full_game_events">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Self Frags</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_self_frags"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.self-frags" />
+                                        <span data-if="console_full_self_frags">Shown</span>
+                                        <span data-if="!console_full_self_frags">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Other Player Frags</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_other_frags"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.other-frags" />
+                                        <span data-if="console_full_other_frags">Shown</span>
+                                        <span data-if="!console_full_other_frags">Hidden</span>
+                                    </label>
+                                </div>
+                                <div class="settings-display-row settings-control-divider">
+                                    <div class="settings-control-copy">
+                                        <div class="settings-control-title">Team Kills</div>
+                                    </div>
+                                    <label class="checkbox-row settings-display-toggle">
+                                        <input class="checkbox" type="checkbox"
+                                            data-attrif-checked="console_full_team_kills"
+                                            data-attrif-disabled="!console_available"
+                                            onclick="settings.console.full.team-kills" />
+                                        <span data-if="console_full_team_kills">Shown</span>
+                                        <span data-if="!console_full_team_kills">Hidden</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Top-left Size</div>
+                                    <div class="settings-control-description">
+                                        Height of the top-left console in lines. Native Settings steps this by 1.
+                                    </div>
+                                </div>
+                                <div class="settings-stepper">
+                                    <button class="button settings-stepper-button"
+                                        data-attrif-disabled="!console_available"
+                                        onclick="settings.console.size.decrease">-</button>
+                                    <input class="text-input settings-stepper-value"
+                                        type="text" maxlength="3"
+                                        data-value="console_size_input"
+                                        data-class-is-invalid="console_size_invalid"
+                                        data-attrif-disabled="!console_available"
+                                        onfocus="settings.console.size.focus"
+                                        onblur="settings.console.size.blur"
+                                        onkeyup="settings.console.size.commit" />
+                                    <button class="button settings-stepper-button"
+                                        data-attrif-disabled="!console_available"
+                                        onclick="settings.console.size.increase">+</button>
+                                </div>
+                            </div>
+                            <div class="settings-control-footer settings-control-footer-compact">
+                                <span>Range&nbsp;&nbsp;{{ console_size_minimum }} - {{ console_size_maximum }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-info-row">
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Application</div>
+                                <div class="settings-info-value">Immediate</div>
+                            </div>
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Chat Routing</div>
+                                <div class="settings-info-value">Owned by Chat</div>
+                            </div>
+                            <div class="settings-info-block">
+                                <div class="settings-info-label">Persistence</div>
+                                <div class="settings-info-value">Existing Sauer config</div>
+                            </div>
+                        </div>
+                        <div class="settings-control-footer settings-control-footer-compact"
+                            data-if="console_status != ''">
+                            <span>{{ console_status }}</span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -2124,6 +4604,7 @@
                     <span data-if="category_mouse_keyboard">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Mouse / Keyboard</span>
                     <span data-if="category_crosshair">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Crosshair</span>
                     <span data-if="category_chat">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Chat</span>
+                    <span data-if="category_console">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Console</span>
                 </div>
                 <div class="settings-footer-help">Escape returns to gameplay</div>
                 <div class="settings-footer-status">

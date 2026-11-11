@@ -5,6 +5,7 @@
 #include "settings_api.h"
 
 #include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Input.h>
@@ -13,6 +14,7 @@
 #include <cerrno>
 #include <climits>
 #include <cmath>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -30,6 +32,40 @@ namespace cowui
         resolutions.push_back(resolution);
     }
 
+    static int fullbrightintensityselected(int value)
+    {
+        switch(value)
+        {
+            case 60:
+            case 100:
+            case 150:
+            case 200:
+                return value;
+            default:
+                return -1;
+        }
+    }
+
+    static int packtrailcolor(int red, int green, int blue)
+    {
+        return (red << 16) | (green << 8) | blue;
+    }
+
+    static int unpacktrailred(int packed)
+    {
+        return (packed >> 16) & 0xFF;
+    }
+
+    static int unpacktrailgreen(int packed)
+    {
+        return (packed >> 8) & 0xFF;
+    }
+
+    static int unpacktrailblue(int packed)
+    {
+        return packed & 0xFF;
+    }
+
     static bool resolutionorder(
         const settings::Resolution &left,
         const settings::Resolution &right)
@@ -45,6 +81,82 @@ namespace cowui
     {
         return left.width == right.width &&
             left.height == right.height;
+    }
+
+    static bool validdepthbufferchoice(int bits)
+    {
+        return bits == 0 || bits == 16 || bits == 24 || bits == 32;
+    }
+
+    static void formatdepthbufferlabel(
+        int actual_bits,
+        char *out,
+        std::size_t out_size)
+    {
+        if(actual_bits > 0)
+        {
+            std::snprintf(out, out_size, "%d-bit", actual_bits);
+            return;
+        }
+
+        std::snprintf(out, out_size, "Unavailable");
+    }
+
+    static void formatdepthbufferstatus(
+        int requested_bits,
+        int actual_bits,
+        const char *actual_label,
+        char *out,
+        std::size_t out_size)
+    {
+        if(requested_bits == 0)
+        {
+            if(actual_bits == 24)
+            {
+                std::snprintf(
+                    out,
+                    out_size,
+                    "Engine default 24-bit depth active"
+                );
+            }
+            else if(actual_bits > 0)
+            {
+                std::snprintf(
+                    out,
+                    out_size,
+                    "Engine default requested; runtime is %d-bit",
+                    actual_bits
+                );
+            }
+            else
+            {
+                std::snprintf(
+                    out,
+                    out_size,
+                    "Engine default requested; runtime depth is unavailable"
+                );
+            }
+            return;
+        }
+
+        if(requested_bits != actual_bits)
+        {
+            std::snprintf(
+                out,
+                out_size,
+                "%d-bit requested; runtime is %s",
+                requested_bits,
+                actual_label
+            );
+            return;
+        }
+
+        std::snprintf(
+            out,
+            out_size,
+            "%d-bit depth buffer active",
+            actual_bits
+        );
     }
 
     static void appendkeyname(const char *key_name, void *data)
@@ -127,6 +239,38 @@ namespace cowui
     {
         const double stepped = std::round(
             (double(value) + double(direction) * 0.05) * 100.0
+        ) / 100.0;
+        return float(stepped);
+    }
+
+    static float stepfragmessagefloat(float value, int direction, double step)
+    {
+        const double stepped = std::round(
+            (double(value) + double(direction) * step) / step
+        ) * step;
+        return float(stepped);
+    }
+
+    static float stepammobarfloat(float value, int direction)
+    {
+        const double stepped = std::round(
+            (double(value) + double(direction) * 0.01) * 100.0
+        ) / 100.0;
+        return float(stepped);
+    }
+
+    static float stepgameclockfloat(float value, int direction)
+    {
+        const double stepped = std::round(
+            (double(value) + double(direction) * 0.01) * 100.0
+        ) / 100.0;
+        return float(stepped);
+    }
+
+    static float stephudscore(float value, int direction)
+    {
+        const double stepped = std::round(
+            (double(value) + double(direction) * 0.01) * 100.0
         ) / 100.0;
         return float(stepped);
     }
@@ -289,6 +433,166 @@ namespace cowui
             constructor.Bind("fov", &fov) &&
             constructor.Bind("fov_minimum", &fov_minimum) &&
             constructor.Bind("fov_maximum", &fov_maximum) &&
+            constructor.Bind("game_feedback_available", &game_feedback_available) &&
+            constructor.Bind("blood", &blood) &&
+            constructor.Bind("hit_sound", &hit_sound) &&
+            constructor.Bind("outline_capture_meters", &outline_capture_meters) &&
+            constructor.Bind("show_scoreboard_at_death", &show_scoreboard_at_death) &&
+            constructor.Bind("game_feedback_status", &game_feedback_status) &&
+            constructor.BindEventCallback("select_blood", &RmlSettings::selectblood, this) &&
+            constructor.BindEventCallback("select_hit_sound", &RmlSettings::selecthitsound, this) &&
+            constructor.BindEventCallback("select_outline_capture_meters", &RmlSettings::selectoutlinecapturemeters, this) &&
+            constructor.BindEventCallback("select_show_scoreboard_at_death", &RmlSettings::selectshowscoreboardatdeath, this) &&
+            constructor.Bind("trail_colors_available", &trail_colors_available) &&
+            constructor.Bind(
+                "trail_color_channel_minimum",
+                &trail_color_channel_minimum
+            ) &&
+            constructor.Bind(
+                "trail_color_channel_maximum",
+                &trail_color_channel_maximum
+            ) &&
+            constructor.Bind("trail_color_shotgun_red", &trail_color_shotgun_red) &&
+            constructor.Bind("trail_color_shotgun_green", &trail_color_shotgun_green) &&
+            constructor.Bind("trail_color_shotgun_blue", &trail_color_shotgun_blue) &&
+            constructor.Bind("trail_color_chaingun_red", &trail_color_chaingun_red) &&
+            constructor.Bind("trail_color_chaingun_green", &trail_color_chaingun_green) &&
+            constructor.Bind("trail_color_chaingun_blue", &trail_color_chaingun_blue) &&
+            constructor.Bind("trail_color_rocket_launcher_red", &trail_color_rocket_launcher_red) &&
+            constructor.Bind("trail_color_rocket_launcher_green", &trail_color_rocket_launcher_green) &&
+            constructor.Bind("trail_color_rocket_launcher_blue", &trail_color_rocket_launcher_blue) &&
+            constructor.Bind("trail_color_rifle_red", &trail_color_rifle_red) &&
+            constructor.Bind("trail_color_rifle_green", &trail_color_rifle_green) &&
+            constructor.Bind("trail_color_rifle_blue", &trail_color_rifle_blue) &&
+            constructor.Bind("trail_color_grenade_launcher_red", &trail_color_grenade_launcher_red) &&
+            constructor.Bind("trail_color_grenade_launcher_green", &trail_color_grenade_launcher_green) &&
+            constructor.Bind("trail_color_grenade_launcher_blue", &trail_color_grenade_launcher_blue) &&
+            constructor.Bind("trail_color_pistol_red", &trail_color_pistol_red) &&
+            constructor.Bind("trail_color_pistol_green", &trail_color_pistol_green) &&
+            constructor.Bind("trail_color_pistol_blue", &trail_color_pistol_blue) &&
+            constructor.Bind("trail_colors_status", &trail_colors_status) &&
+            constructor.BindEventCallback(
+                "select_trail_color_channel",
+                &RmlSettings::selecttrailcolorchannel,
+                this
+            ) &&
+            constructor.Bind("game_radar_available", &game_radar_available) &&
+            constructor.Bind("numbered_capture_bases", &numbered_capture_bases) &&
+            constructor.Bind("show_teammates_on_radar", &show_teammates_on_radar) &&
+            constructor.Bind("game_radar_status", &game_radar_status) &&
+            constructor.BindEventCallback("select_numbered_capture_bases", &RmlSettings::selectnumberedcapturebases, this) &&
+            constructor.BindEventCallback("select_show_teammates_on_radar", &RmlSettings::selectshowteammatesonradar, this) &&
+            constructor.Bind("game_models_available", &game_models_available) &&
+            constructor.Bind("ragdoll_deaths", &ragdoll_deaths) &&
+            constructor.Bind("keep_ragdoll_after_respawn", &keep_ragdoll_after_respawn) &&
+            constructor.Bind("deadpush", &deadpush) &&
+            constructor.Bind("deadpush_minimum", &deadpush_minimum) &&
+            constructor.Bind("deadpush_maximum", &deadpush_maximum) &&
+            constructor.Bind("hide_dead_players", &hide_dead_players) &&
+            constructor.Bind("fullbright_player_models", &fullbright_player_models) &&
+            constructor.Bind("fullbright_intensity_selected", &fullbright_intensity_selected) &&
+            constructor.Bind("force_matching_player_models", &force_matching_player_models) &&
+            constructor.Bind("always_use_team_skins", &always_use_team_skins) &&
+            constructor.Bind("game_models_status", &game_models_status) &&
+            constructor.BindEventCallback("select_ragdoll_deaths", &RmlSettings::selectragdolldeaths, this) &&
+            constructor.BindEventCallback("select_keep_ragdoll_after_respawn", &RmlSettings::selectkeepragdollafterrespawn, this) &&
+            constructor.BindEventCallback("select_hide_dead_players", &RmlSettings::selecthidedeadplayers, this) &&
+            constructor.BindEventCallback("select_fullbright_player_models", &RmlSettings::selectfullbrightplayermodels, this) &&
+            constructor.BindEventCallback("select_fullbright_intensity", &RmlSettings::selectfullbrightintensity, this) &&
+            constructor.BindEventCallback("select_force_player_models", &RmlSettings::selectforceplayermodels, this) &&
+            constructor.BindEventCallback("select_always_use_team_skins", &RmlSettings::selectalwaysuseteamskins, this) &&
+            constructor.Bind("ammobar_available", &ammobar_available) &&
+            constructor.Bind("ammobar_visible", &ammobar_visible) &&
+            constructor.Bind("ammobar_horizontal", &ammobar_horizontal) &&
+            constructor.Bind("ammobar_flip", &ammobar_flip) &&
+            constructor.Bind("ammobar_scale", &ammobar_scale) &&
+            constructor.Bind("ammobar_scale_minimum", &ammobar_scale_minimum) &&
+            constructor.Bind("ammobar_scale_maximum", &ammobar_scale_maximum) &&
+            constructor.Bind("ammobar_scale_input", &ammobar_scale_input) &&
+            constructor.Bind("ammobar_scale_invalid", &ammobar_scale_invalid) &&
+            constructor.Bind("ammobar_icon_spacing", &ammobar_icon_spacing) &&
+            constructor.Bind(
+                "ammobar_icon_spacing_minimum",
+                &ammobar_icon_spacing_minimum
+            ) &&
+            constructor.Bind(
+                "ammobar_icon_spacing_maximum",
+                &ammobar_icon_spacing_maximum
+            ) &&
+            constructor.Bind("ammobar_label_size", &ammobar_label_size) &&
+            constructor.Bind(
+                "ammobar_label_size_minimum",
+                &ammobar_label_size_minimum
+            ) &&
+            constructor.Bind(
+                "ammobar_label_size_maximum",
+                &ammobar_label_size_maximum
+            ) &&
+            constructor.Bind(
+                "ammobar_label_size_input",
+                &ammobar_label_size_input
+            ) &&
+            constructor.Bind(
+                "ammobar_label_size_invalid",
+                &ammobar_label_size_invalid
+            ) &&
+            constructor.Bind("ammobar_label_offset", &ammobar_label_offset) &&
+            constructor.Bind(
+                "ammobar_label_offset_minimum",
+                &ammobar_label_offset_minimum
+            ) &&
+            constructor.Bind(
+                "ammobar_label_offset_maximum",
+                &ammobar_label_offset_maximum
+            ) &&
+            constructor.Bind("ammobar_align_first", &ammobar_align_first) &&
+            constructor.Bind("ammobar_align_center", &ammobar_align_center) &&
+            constructor.Bind("ammobar_align_last", &ammobar_align_last) &&
+            constructor.Bind("ammobar_x", &ammobar_x) &&
+            constructor.Bind("ammobar_x_minimum", &ammobar_x_minimum) &&
+            constructor.Bind("ammobar_x_maximum", &ammobar_x_maximum) &&
+            constructor.Bind("ammobar_x_input", &ammobar_x_input) &&
+            constructor.Bind("ammobar_x_invalid", &ammobar_x_invalid) &&
+            constructor.Bind("ammobar_y", &ammobar_y) &&
+            constructor.Bind("ammobar_y_minimum", &ammobar_y_minimum) &&
+            constructor.Bind("ammobar_y_maximum", &ammobar_y_maximum) &&
+            constructor.Bind("ammobar_y_input", &ammobar_y_input) &&
+            constructor.Bind("ammobar_y_invalid", &ammobar_y_invalid) &&
+            constructor.Bind("ammobar_hide_empty", &ammobar_hide_empty) &&
+            constructor.Bind("ammobar_status", &ammobar_status) &&
+            constructor.BindEventCallback("select_ammobar", &RmlSettings::selectammobar, this) &&
+            constructor.BindEventCallback("select_ammobar_horizontal", &RmlSettings::selectammobarhorizontal, this) &&
+            constructor.BindEventCallback("select_ammobar_flip", &RmlSettings::selectammobarflip, this) &&
+            constructor.BindEventCallback("select_ammobar_hide_empty", &RmlSettings::selectammobarhideempty, this) &&
+            constructor.BindEventCallback("select_ammobar_align", &RmlSettings::selectammobaralign, this) &&
+            constructor.Bind("scoreboard_available", &scoreboard_available) &&
+            constructor.Bind("scoreboard_flags", &scoreboard_flags) &&
+            constructor.Bind("scoreboard_frags", &scoreboard_frags) &&
+            constructor.Bind("scoreboard_deaths", &scoreboard_deaths) &&
+            constructor.Bind("scoreboard_suicides", &scoreboard_suicides) &&
+            constructor.Bind("scoreboard_kpd", &scoreboard_kpd) &&
+            constructor.Bind("scoreboard_accuracy", &scoreboard_accuracy) &&
+            constructor.Bind("scoreboard_damage", &scoreboard_damage) &&
+            constructor.Bind("scoreboard_damage_dealt", &scoreboard_damage_dealt) &&
+            constructor.Bind("scoreboard_damage_net", &scoreboard_damage_net) &&
+            constructor.Bind("scoreboard_damage_received", &scoreboard_damage_received) &&
+            constructor.Bind("scoreboard_ping", &scoreboard_ping) &&
+            constructor.Bind("scoreboard_pj", &scoreboard_pj) &&
+            constructor.Bind("scoreboard_clientnum", &scoreboard_clientnum) &&
+            constructor.Bind("scoreboard_status", &scoreboard_status) &&
+            constructor.BindEventCallback("select_scoreboard_flags", &RmlSettings::selectscoreboardflags, this) &&
+            constructor.BindEventCallback("select_scoreboard_frags", &RmlSettings::selectscoreboardfrags, this) &&
+            constructor.BindEventCallback("select_scoreboard_deaths", &RmlSettings::selectscoreboarddeaths, this) &&
+            constructor.BindEventCallback("select_scoreboard_suicides", &RmlSettings::selectscoreboardsuicides, this) &&
+            constructor.BindEventCallback("select_scoreboard_kpd", &RmlSettings::selectscoreboardkpd, this) &&
+            constructor.BindEventCallback("select_scoreboard_accuracy", &RmlSettings::selectscoreboardaccuracy, this) &&
+            constructor.BindEventCallback("select_scoreboard_damage", &RmlSettings::selectscoreboarddamage, this) &&
+            constructor.BindEventCallback("select_scoreboard_damage_mode", &RmlSettings::selectscoreboarddamagemode, this) &&
+            constructor.BindEventCallback("select_scoreboard_damage_received", &RmlSettings::selectscoreboarddamagereceived, this) &&
+            constructor.BindEventCallback("select_scoreboard_ping", &RmlSettings::selectscoreboardping, this) &&
+            constructor.BindEventCallback("select_scoreboard_pj", &RmlSettings::selectscoreboardpj, this) &&
+            constructor.BindEventCallback("select_scoreboard_clientnum", &RmlSettings::selectscoreboardclientnum, this) &&
+            constructor.BindEventCallback("select_frag_message_stack_dir", &RmlSettings::selectfragmessagestackdir, this) &&
             constructor.Bind("resolution_label", &resolution_label) &&
             constructor.Bind(
                 "render_resolution_label",
@@ -319,6 +623,11 @@ namespace cowui
             constructor.Bind("vsync", &vsync) &&
             constructor.Bind("vsync_adaptive", &vsync_adaptive) &&
             constructor.Bind("vsync_status", &vsync_status) &&
+            constructor.Bind("gamma", &gamma) &&
+            constructor.Bind("gamma_minimum", &gamma_minimum) &&
+            constructor.Bind("gamma_maximum", &gamma_maximum) &&
+            constructor.Bind("gamma_label", &gamma_label) &&
+            constructor.Bind("gamma_status", &gamma_status) &&
             constructor.Bind("shadow_state_available", &shadow_state_available) &&
             constructor.Bind("shadow_maps", &shadow_maps) &&
             constructor.Bind("shadow_maps_available", &shadow_maps_available) &&
@@ -368,6 +677,10 @@ namespace cowui
             constructor.Bind("model_reflections", &model_reflections) &&
             constructor.Bind("model_reflections_status", &model_reflections_status) &&
             constructor.BindEventCallback("select_model_reflections", &RmlSettings::selectmodelreflections, this) &&
+            constructor.Bind("bump_models_available", &bump_models_available) &&
+            constructor.Bind("bump_models", &bump_models) &&
+            constructor.Bind("bump_models_status", &bump_models_status) &&
+            constructor.BindEventCallback("select_bump_models", &RmlSettings::selectbumpmodels, this) &&
             constructor.Bind("environment_map_resolution_available", &environment_map_resolution_available) &&
             constructor.Bind("environment_map_resolution_selected", &environment_map_resolution_selected) &&
             constructor.Bind("environment_map_resolution_label", &environment_map_resolution_label) &&
@@ -397,6 +710,10 @@ namespace cowui
             constructor.Bind("decal_persistence_label", &decal_persistence_label) &&
             constructor.Bind("decal_persistence_status", &decal_persistence_status) &&
             constructor.BindEventCallback("select_decal_persistence", &RmlSettings::selectdecalpersistence, this) &&
+            constructor.Bind("fix_t_joints_available", &fix_t_joints_available) &&
+            constructor.Bind("fix_t_joints", &fix_t_joints) &&
+            constructor.Bind("fix_t_joints_status", &fix_t_joints_status) &&
+            constructor.BindEventCallback("select_fix_t_joints", &RmlSettings::selectfixtjoints, this) &&
             constructor.Bind("grass", &grass) &&
             constructor.Bind("grass_distance_available", &grass_distance_available) &&
             constructor.Bind("grass_distance_selected", &grass_distance_selected) &&
@@ -488,6 +805,19 @@ namespace cowui
             constructor.Bind("antialiasing_4x", &antialiasing_4x) &&
             constructor.Bind("antialiasing_8x", &antialiasing_8x) &&
             constructor.Bind("antialiasing_16x", &antialiasing_16x) &&
+            constructor.Bind("depth_buffer", &depth_buffer) &&
+            constructor.Bind(
+                "depth_buffer_label",
+                &depth_buffer_label
+            ) &&
+            constructor.Bind(
+                "depth_buffer_status",
+                &depth_buffer_status
+            ) &&
+            constructor.Bind("depth_buffer_default", &depth_buffer_default) &&
+            constructor.Bind("depth_buffer_16", &depth_buffer_16) &&
+            constructor.Bind("depth_buffer_24", &depth_buffer_24) &&
+            constructor.Bind("depth_buffer_32", &depth_buffer_32) &&
             constructor.Bind("sound_volume", &sound_volume) &&
             constructor.Bind(
                 "sound_volume_minimum",
@@ -521,6 +851,54 @@ namespace cowui
                 &active_soundpack_label
             ) &&
             constructor.Bind("soundpack_status", &soundpack_status) &&
+            constructor.Bind("sound_channels", &sound_channels) &&
+            constructor.Bind(
+                "sound_channels_minimum",
+                &sound_channels_minimum
+            ) &&
+            constructor.Bind(
+                "sound_channels_maximum",
+                &sound_channels_maximum
+            ) &&
+            constructor.Bind(
+                "effective_sound_channels",
+                &effective_sound_channels
+            ) &&
+            constructor.Bind(
+                "sound_channels_status",
+                &sound_channels_status
+            ) &&
+            constructor.Bind("sound_frequency", &sound_frequency) &&
+            constructor.Bind(
+                "effective_sound_frequency",
+                &effective_sound_frequency
+            ) &&
+            constructor.Bind(
+                "sound_frequency_label",
+                &sound_frequency_label
+            ) &&
+            constructor.Bind(
+                "sound_frequency_status",
+                &sound_frequency_status
+            ) &&
+            constructor.Bind(
+                "sound_buffer_length",
+                &sound_buffer_length
+            ) &&
+            constructor.Bind(
+                "sound_buffer_length_minimum",
+                &sound_buffer_length_minimum
+            ) &&
+            constructor.Bind(
+                "sound_buffer_length_maximum",
+                &sound_buffer_length_maximum
+            ) &&
+            constructor.Bind(
+                "sound_buffer_length_status",
+                &sound_buffer_length_status
+            ) &&
+            constructor.Bind("mumble", &mumble) &&
+            constructor.Bind("mumble_status", &mumble_status) &&
             constructor.Bind(
                 "mouse_sensitivity",
                 &mouse_sensitivity
@@ -595,8 +973,19 @@ namespace cowui
                 "crosshair_reload_rotation",
                 &crosshair_reload_rotation
             ) &&
+            constructor.Bind("show_fps", &show_fps) &&
+            constructor.Bind("wall_clock", &wall_clock) &&
+            constructor.Bind("wall_clock_24_hour", &wall_clock_24_hour) &&
+            constructor.Bind(
+                "wall_clock_seconds",
+                &wall_clock_seconds
+            ) &&
             constructor.Bind("damage_screen", &damage_screen) &&
             constructor.Bind("damage_compass", &damage_compass) &&
+            constructor.Bind("hud_guns", &hud_guns) &&
+            constructor.Bind("hud_gun_sway", &hud_gun_sway) &&
+            constructor.Bind("muzzle_flash", &muzzle_flash) &&
+            constructor.Bind("muzzle_light", &muzzle_light) &&
             constructor.Bind(
                 "frag_messages_enabled",
                 &frag_messages_enabled
@@ -604,6 +993,117 @@ namespace cowui
             constructor.Bind(
                 "frag_messages_in_insta",
                 &frag_messages_in_insta
+            ) &&
+            constructor.Bind(
+                "max_frag_messages",
+                &max_frag_messages
+            ) &&
+            constructor.Bind(
+                "max_frag_messages_minimum",
+                &max_frag_messages_minimum
+            ) &&
+            constructor.Bind(
+                "max_frag_messages_maximum",
+                &max_frag_messages_maximum
+            ) &&
+            constructor.Bind(
+                "frag_message_duration",
+                &frag_message_duration
+            ) &&
+            constructor.Bind(
+                "frag_message_duration_minimum",
+                &frag_message_duration_minimum
+            ) &&
+            constructor.Bind(
+                "frag_message_duration_maximum",
+                &frag_message_duration_maximum
+            ) &&
+            constructor.Bind(
+                "frag_message_duration_input",
+                &frag_message_duration_input
+            ) &&
+            constructor.Bind(
+                "frag_message_duration_invalid",
+                &frag_message_duration_invalid
+            ) &&
+            constructor.Bind(
+                "frag_message_self_frags",
+                &frag_message_self_frags
+            ) &&
+            constructor.Bind(
+                "frag_message_other_frags",
+                &frag_message_other_frags
+            ) &&
+            constructor.Bind(
+                "frag_message_team_kills",
+                &frag_message_team_kills
+            ) &&
+            constructor.Bind(
+                "frag_message_scale",
+                &frag_message_scale
+            ) &&
+            constructor.Bind(
+                "frag_message_scale_minimum",
+                &frag_message_scale_minimum
+            ) &&
+            constructor.Bind(
+                "frag_message_scale_maximum",
+                &frag_message_scale_maximum
+            ) &&
+            constructor.Bind(
+                "frag_message_scale_input",
+                &frag_message_scale_input
+            ) &&
+            constructor.Bind(
+                "frag_message_scale_invalid",
+                &frag_message_scale_invalid
+            ) &&
+            constructor.Bind("frag_message_fade", &frag_message_fade) &&
+            constructor.Bind("frag_message_x", &frag_message_x) &&
+            constructor.Bind(
+                "frag_message_x_minimum",
+                &frag_message_x_minimum
+            ) &&
+            constructor.Bind(
+                "frag_message_x_maximum",
+                &frag_message_x_maximum
+            ) &&
+            constructor.Bind(
+                "frag_message_x_input",
+                &frag_message_x_input
+            ) &&
+            constructor.Bind(
+                "frag_message_x_invalid",
+                &frag_message_x_invalid
+            ) &&
+            constructor.Bind("frag_message_y", &frag_message_y) &&
+            constructor.Bind(
+                "frag_message_y_minimum",
+                &frag_message_y_minimum
+            ) &&
+            constructor.Bind(
+                "frag_message_y_maximum",
+                &frag_message_y_maximum
+            ) &&
+            constructor.Bind(
+                "frag_message_y_input",
+                &frag_message_y_input
+            ) &&
+            constructor.Bind(
+                "frag_message_y_invalid",
+                &frag_message_y_invalid
+            ) &&
+            constructor.Bind(
+                "frag_message_stack_up",
+                &frag_message_stack_up
+            ) &&
+            constructor.Bind(
+                "frag_message_stack_auto",
+                &frag_message_stack_auto
+            ) &&
+            constructor.Bind(
+                "frag_message_stack_down",
+                &frag_message_stack_down
             ) &&
             constructor.Bind(
                 "streak_milestone_scale",
@@ -627,6 +1127,154 @@ namespace cowui
             ) &&
             constructor.Bind("hud_status", &hud_status) &&
             constructor.Bind(
+                "game_clock_available",
+                &game_clock_available
+            ) &&
+            constructor.Bind("game_clock", &game_clock) &&
+            constructor.Bind(
+                "game_clock_scale",
+                &game_clock_scale
+            ) &&
+            constructor.Bind(
+                "game_clock_scale_minimum",
+                &game_clock_scale_minimum
+            ) &&
+            constructor.Bind(
+                "game_clock_scale_maximum",
+                &game_clock_scale_maximum
+            ) &&
+            constructor.Bind(
+                "game_clock_scale_input",
+                &game_clock_scale_input
+            ) &&
+            constructor.Bind(
+                "game_clock_scale_invalid",
+                &game_clock_scale_invalid
+            ) &&
+            constructor.Bind(
+                "game_clock_alpha",
+                &game_clock_alpha
+            ) &&
+            constructor.Bind(
+                "game_clock_alpha_minimum",
+                &game_clock_alpha_minimum
+            ) &&
+            constructor.Bind(
+                "game_clock_alpha_maximum",
+                &game_clock_alpha_maximum
+            ) &&
+            constructor.Bind(
+                "game_clock_align",
+                &game_clock_align
+            ) &&
+            constructor.Bind("game_clock_x", &game_clock_x) &&
+            constructor.Bind(
+                "game_clock_x_minimum",
+                &game_clock_x_minimum
+            ) &&
+            constructor.Bind(
+                "game_clock_x_maximum",
+                &game_clock_x_maximum
+            ) &&
+            constructor.Bind(
+                "game_clock_x_input",
+                &game_clock_x_input
+            ) &&
+            constructor.Bind(
+                "game_clock_x_invalid",
+                &game_clock_x_invalid
+            ) &&
+            constructor.Bind("game_clock_y", &game_clock_y) &&
+            constructor.Bind(
+                "game_clock_y_minimum",
+                &game_clock_y_minimum
+            ) &&
+            constructor.Bind(
+                "game_clock_y_maximum",
+                &game_clock_y_maximum
+            ) &&
+            constructor.Bind(
+                "game_clock_y_input",
+                &game_clock_y_input
+            ) &&
+            constructor.Bind(
+                "game_clock_y_invalid",
+                &game_clock_y_invalid
+            ) &&
+            constructor.Bind(
+                "game_clock_status",
+                &game_clock_status
+            ) &&
+            constructor.BindEventCallback(
+                "select_game_clock",
+                &RmlSettings::selectgameclock,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_game_clock_align",
+                &RmlSettings::selectgameclockalign,
+                this
+            ) &&
+            constructor.Bind("hudscore_available", &hudscore_available) &&
+            constructor.Bind("hudscore", &hudscore) &&
+            constructor.Bind("hudscore_scale", &hudscore_scale) &&
+            constructor.Bind(
+                "hudscore_scale_minimum",
+                &hudscore_scale_minimum
+            ) &&
+            constructor.Bind(
+                "hudscore_scale_maximum",
+                &hudscore_scale_maximum
+            ) &&
+            constructor.Bind(
+                "hudscore_scale_input",
+                &hudscore_scale_input
+            ) &&
+            constructor.Bind(
+                "hudscore_scale_invalid",
+                &hudscore_scale_invalid
+            ) &&
+            constructor.Bind("hudscore_alpha", &hudscore_alpha) &&
+            constructor.Bind(
+                "hudscore_alpha_minimum",
+                &hudscore_alpha_minimum
+            ) &&
+            constructor.Bind(
+                "hudscore_alpha_maximum",
+                &hudscore_alpha_maximum
+            ) &&
+            constructor.Bind("hudscore_sep", &hudscore_sep) &&
+            constructor.Bind(
+                "hudscore_sep_minimum",
+                &hudscore_sep_minimum
+            ) &&
+            constructor.Bind(
+                "hudscore_sep_maximum",
+                &hudscore_sep_maximum
+            ) &&
+            constructor.Bind("hudscore_align", &hudscore_align) &&
+            constructor.Bind("hudscore_x", &hudscore_x) &&
+            constructor.Bind("hudscore_x_minimum", &hudscore_x_minimum) &&
+            constructor.Bind("hudscore_x_maximum", &hudscore_x_maximum) &&
+            constructor.Bind("hudscore_x_input", &hudscore_x_input) &&
+            constructor.Bind("hudscore_x_invalid", &hudscore_x_invalid) &&
+            constructor.Bind("hudscore_y", &hudscore_y) &&
+            constructor.Bind("hudscore_y_minimum", &hudscore_y_minimum) &&
+            constructor.Bind("hudscore_y_maximum", &hudscore_y_maximum) &&
+            constructor.Bind("hudscore_y_input", &hudscore_y_input) &&
+            constructor.Bind("hudscore_y_invalid", &hudscore_y_invalid) &&
+            constructor.Bind("hudscore_status", &hudscore_status) &&
+            constructor.BindEventCallback(
+                "select_hudscore",
+                &RmlSettings::selecthudscore,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_hudscore_align",
+                &RmlSettings::selecthudscorealign,
+                this
+            ) &&
+            constructor.Bind(
                 "public_chat_in_top_feed",
                 &public_chat_in_top_feed
             ) &&
@@ -646,6 +1294,91 @@ namespace cowui
                 "team_colored_chat_names",
                 &team_colored_chat_names
             ) &&
+            constructor.Bind("console_available", &console_available) &&
+            constructor.Bind(
+                "console_top_important",
+                &console_top_important
+            ) &&
+            constructor.Bind(
+                "console_top_warnings",
+                &console_top_warnings
+            ) &&
+            constructor.Bind(
+                "console_top_errors",
+                &console_top_errors
+            ) &&
+            constructor.Bind(
+                "console_top_script",
+                &console_top_script
+            ) &&
+            constructor.Bind(
+                "console_top_game_events",
+                &console_top_game_events
+            ) &&
+            constructor.Bind(
+                "console_top_self_frags",
+                &console_top_self_frags
+            ) &&
+            constructor.Bind(
+                "console_top_other_frags",
+                &console_top_other_frags
+            ) &&
+            constructor.Bind(
+                "console_top_team_kills",
+                &console_top_team_kills
+            ) &&
+            constructor.Bind(
+                "console_full_important",
+                &console_full_important
+            ) &&
+            constructor.Bind(
+                "console_full_warnings",
+                &console_full_warnings
+            ) &&
+            constructor.Bind(
+                "console_full_errors",
+                &console_full_errors
+            ) &&
+            constructor.Bind(
+                "console_full_script",
+                &console_full_script
+            ) &&
+            constructor.Bind("console_full_chat", &console_full_chat) &&
+            constructor.Bind(
+                "console_full_team_chat",
+                &console_full_team_chat
+            ) &&
+            constructor.Bind(
+                "console_full_game_events",
+                &console_full_game_events
+            ) &&
+            constructor.Bind(
+                "console_full_self_frags",
+                &console_full_self_frags
+            ) &&
+            constructor.Bind(
+                "console_full_other_frags",
+                &console_full_other_frags
+            ) &&
+            constructor.Bind(
+                "console_full_team_kills",
+                &console_full_team_kills
+            ) &&
+            constructor.Bind("console_size", &console_size) &&
+            constructor.Bind(
+                "console_size_minimum",
+                &console_size_minimum
+            ) &&
+            constructor.Bind(
+                "console_size_maximum",
+                &console_size_maximum
+            ) &&
+            constructor.Bind("console_size_input", &console_size_input) &&
+            constructor.Bind(
+                "console_size_invalid",
+                &console_size_invalid
+            ) &&
+            constructor.Bind("console_status", &console_status) &&
             constructor.Bind("category_game", &category_game) &&
             constructor.Bind("category_hud", &category_hud) &&
             constructor.Bind(
@@ -668,6 +1401,10 @@ namespace cowui
                 "category_chat",
                 &category_chat
             ) &&
+            constructor.Bind(
+                "category_console",
+                &category_console
+            ) &&
             constructor.BindEventCallback(
                 "select_resolution",
                 &RmlSettings::selectresolution,
@@ -679,6 +1416,11 @@ namespace cowui
                 this
             ) &&
             constructor.BindEventCallback(
+                "select_depth_buffer",
+                &RmlSettings::selectdepthbuffer,
+                this
+            ) &&
+            constructor.BindEventCallback(
                 "select_crosshair",
                 &RmlSettings::selectcrosshair,
                 this
@@ -687,12 +1429,26 @@ namespace cowui
                 "select_soundpack",
                 &RmlSettings::selectsoundpack,
                 this
+            ) &&
+            constructor.BindEventCallback(
+                "select_sound_frequency",
+                &RmlSettings::selectsoundfrequency,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_mumble",
+                &RmlSettings::selectmumble,
+                this
             );
 
         valid = valid &&
             router.registeraction(
                 "settings.fov",
                 changefovaction
+            ) &&
+            router.registeraction(
+                "settings.deadpush",
+                changedeadpushaction
             ) &&
             router.registeraction(
                 "settings.category.game",
@@ -723,6 +1479,10 @@ namespace cowui
                 chatcategoryaction
             ) &&
             router.registeraction(
+                "settings.category.console",
+                consolecategoryaction
+            ) &&
+            router.registeraction(
                 "settings.presentation.windowed",
                 windowedaction
             ) &&
@@ -737,6 +1497,10 @@ namespace cowui
             router.registeraction(
                 "settings.vsync",
                 vsyncaction
+            ) &&
+            router.registeraction(
+                "settings.gamma",
+                changegammaaction
             ) &&
             router.registeraction(
                 "settings.grass",
@@ -765,6 +1529,14 @@ namespace cowui
             router.registeraction(
                 "settings.audio.music-volume",
                 changemusicvolumeaction
+            ) &&
+            router.registeraction(
+                "settings.audio.sound-channels",
+                changesoundchannelsaction
+            ) &&
+            router.registeraction(
+                "settings.audio.sound-buffer-length",
+                changesoundbufferlengthaction
             ) &&
             router.registeraction(
                 "settings.input.sensitivity.decrease",
@@ -835,6 +1607,22 @@ namespace cowui
                 crosshairreloadrotationaction
             ) &&
             router.registeraction(
+                "settings.hud.show-fps",
+                showfpsaction
+            ) &&
+            router.registeraction(
+                "settings.hud.wall-clock",
+                wallclockaction
+            ) &&
+            router.registeraction(
+                "settings.hud.wall-clock.24-hour",
+                wallclock24action
+            ) &&
+            router.registeraction(
+                "settings.hud.wall-clock.seconds",
+                wallclocksecondsaction
+            ) &&
+            router.registeraction(
                 "settings.hud.damage-screen",
                 damagescreenaction
             ) &&
@@ -843,12 +1631,128 @@ namespace cowui
                 damagecompassaction
             ) &&
             router.registeraction(
+                "settings.hud.guns",
+                hudgunsaction
+            ) &&
+            router.registeraction(
+                "settings.hud.guns.sway",
+                hudgunswayaction
+            ) &&
+            router.registeraction(
+                "settings.hud.guns.muzzle-flash",
+                muzzleflashaction
+            ) &&
+            router.registeraction(
+                "settings.hud.guns.muzzle-light",
+                muzzlelightaction
+            ) &&
+            router.registeraction(
                 "settings.hud.frag-messages.enabled",
                 fragmessagesenabledaction
             ) &&
             router.registeraction(
                 "settings.hud.frag-messages.insta",
                 fragmessagesinstaaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.self",
+                fragmessageselffragsaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.other",
+                fragmessageotherfragsaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.team-kills",
+                fragmessageteamkillsaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.fade",
+                fragmessagefadeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.max",
+                changemaxfragmessagesaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.duration.decrease",
+                decreasefragmessagedurationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.duration.increase",
+                increasefragmessagedurationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.duration.focus",
+                focusfragmessagedurationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.duration.blur",
+                blurfragmessagedurationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.duration.commit",
+                commitfragmessagedurationaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.scale.decrease",
+                decreasefragmessagescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.scale.increase",
+                increasefragmessagescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.scale.focus",
+                focusfragmessagescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.scale.blur",
+                blurfragmessagescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.scale.commit",
+                commitfragmessagescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.x.decrease",
+                decreasefragmessagexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.x.increase",
+                increasefragmessagexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.x.focus",
+                focusfragmessagexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.x.blur",
+                blurfragmessagexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.x.commit",
+                commitfragmessagexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.y.decrease",
+                decreasefragmessageyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.y.increase",
+                increasefragmessageyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.y.focus",
+                focusfragmessageyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.y.blur",
+                blurfragmessageyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.frag-messages.y.commit",
+                commitfragmessageyaction
             ) &&
             router.registeraction(
                 "settings.hud.streak-scale.decrease",
@@ -871,6 +1775,226 @@ namespace cowui
                 commitstreakscaleaction
             ) &&
             router.registeraction(
+                "settings.hud.ammobar.icon-spacing",
+                changeammobariconspacingaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-offset",
+                changeammobarlabeloffsetaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.scale.decrease",
+                decreaseammobarscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.scale.increase",
+                increaseammobarscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.scale.focus",
+                focusammobarscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.scale.blur",
+                blurammobarscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.scale.commit",
+                commitammobarscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-size.decrease",
+                decreaseammobarlabelsizeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-size.increase",
+                increaseammobarlabelsizeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-size.focus",
+                focusammobarlabelsizeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-size.blur",
+                blurammobarlabelsizeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.label-size.commit",
+                commitammobarlabelsizeaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.x.decrease",
+                decreaseammobarxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.x.increase",
+                increaseammobarxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.x.focus",
+                focusammobarxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.x.blur",
+                blurammobarxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.x.commit",
+                commitammobarxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.y.decrease",
+                decreaseammobaryaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.y.increase",
+                increaseammobaryaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.y.focus",
+                focusammobaryaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.y.blur",
+                blurammobaryaction
+            ) &&
+            router.registeraction(
+                "settings.hud.ammobar.y.commit",
+                commitammobaryaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.alpha",
+                changegameclockalphaaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.scale.decrease",
+                decreasegameclockscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.scale.increase",
+                increasegameclockscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.scale.focus",
+                focusgameclockscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.scale.blur",
+                blurgameclockscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.scale.commit",
+                commitgameclockscaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.x.decrease",
+                decreasegameclockxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.x.increase",
+                increasegameclockxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.x.focus",
+                focusgameclockxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.x.blur",
+                blurgameclockxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.x.commit",
+                commitgameclockxaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.y.decrease",
+                decreasegameclockyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.y.increase",
+                increasegameclockyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.y.focus",
+                focusgameclockyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.y.blur",
+                blurgameclockyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.gameclock.y.commit",
+                commitgameclockyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.alpha",
+                changehudscorealphaaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.spacing",
+                changehudscoresepaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.scale.decrease",
+                decreasehudscorescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.scale.increase",
+                increasehudscorescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.scale.focus",
+                focushudscorescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.scale.blur",
+                blurhudscorescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.scale.commit",
+                commithudscorescaleaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.x.decrease",
+                decreasehudscorexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.x.increase",
+                increasehudscorexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.x.focus",
+                focushudscorexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.x.blur",
+                blurhudscorexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.x.commit",
+                commithudscorexaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.y.decrease",
+                decreasehudscoreyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.y.increase",
+                increasehudscoreyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.y.focus",
+                focushudscoreyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.y.blur",
+                blurhudscoreyaction
+            ) &&
+            router.registeraction(
+                "settings.hud.score.y.commit",
+                commithudscoreyaction
+            ) &&
+            router.registeraction(
                 "settings.chat.top.public",
                 publicchatintopfeedaction
             ) &&
@@ -889,6 +2013,98 @@ namespace cowui
             router.registeraction(
                 "settings.chat.team-colors",
                 teamcoloredchatnamesaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.important",
+                consoletopimportantaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.warnings",
+                consoletopwarningsaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.errors",
+                consoletoperrorsaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.script",
+                consoletopscriptaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.game-events",
+                consoletopgameeventsaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.self-frags",
+                consoletopselffragsaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.other-frags",
+                consoletopotherfragsaction
+            ) &&
+            router.registeraction(
+                "settings.console.top.team-kills",
+                consoletopteamkillsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.important",
+                consolefullimportantaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.warnings",
+                consolefullwarningsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.errors",
+                consolefullerrorsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.script",
+                consolefullscriptaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.chat",
+                consolefullchataction
+            ) &&
+            router.registeraction(
+                "settings.console.full.team-chat",
+                consolefullteamchataction
+            ) &&
+            router.registeraction(
+                "settings.console.full.game-events",
+                consolefullgameeventsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.self-frags",
+                consolefullselffragsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.other-frags",
+                consolefullotherfragsaction
+            ) &&
+            router.registeraction(
+                "settings.console.full.team-kills",
+                consolefullteamkillsaction
+            ) &&
+            router.registeraction(
+                "settings.console.size.decrease",
+                decreaseconsolesizeaction
+            ) &&
+            router.registeraction(
+                "settings.console.size.increase",
+                increaseconsolesizeaction
+            ) &&
+            router.registeraction(
+                "settings.console.size.focus",
+                focusconsolesizeaction
+            ) &&
+            router.registeraction(
+                "settings.console.size.blur",
+                blurconsolesizeaction
+            ) &&
+            router.registeraction(
+                "settings.console.size.commit",
+                commitconsolesizeaction
             );
 
         if(!valid)
@@ -926,11 +2142,116 @@ namespace cowui
         fov = 100;
         fov_minimum = 10;
         fov_maximum = 150;
+        game_feedback_available = false;
+        blood = true;
+        hit_sound = false;
+        outline_capture_meters = false;
+        show_scoreboard_at_death = true;
+        game_feedback_status.clear();
+        trail_colors_available = false;
+        trail_color_channel_minimum = 0;
+        trail_color_channel_maximum = 255;
+        trail_color_shotgun_red = 255;
+        trail_color_shotgun_green = 200;
+        trail_color_shotgun_blue = 100;
+        trail_color_chaingun_red = 255;
+        trail_color_chaingun_green = 200;
+        trail_color_chaingun_blue = 100;
+        trail_color_rocket_launcher_red = 64;
+        trail_color_rocket_launcher_green = 64;
+        trail_color_rocket_launcher_blue = 64;
+        trail_color_rifle_red = 64;
+        trail_color_rifle_green = 64;
+        trail_color_rifle_blue = 64;
+        trail_color_grenade_launcher_red = 64;
+        trail_color_grenade_launcher_green = 64;
+        trail_color_grenade_launcher_blue = 64;
+        trail_color_pistol_red = 255;
+        trail_color_pistol_green = 200;
+        trail_color_pistol_blue = 100;
+        trail_colors_status.clear();
+        game_radar_available = false;
+        numbered_capture_bases = false;
+        show_teammates_on_radar = true;
+        game_radar_status.clear();
+        game_models_available = false;
+        ragdoll_deaths = true;
+        keep_ragdoll_after_respawn = true;
+        deadpush = 2;
+        deadpush_minimum = 1;
+        deadpush_maximum = 20;
+        hide_dead_players = false;
+        fullbright_player_models = true;
+        fullbright_intensity_selected = 60;
+        force_matching_player_models = false;
+        always_use_team_skins = false;
+        game_models_status.clear();
+        ammobar_available = false;
+        ammobar_visible = false;
+        ammobar_horizontal = false;
+        ammobar_flip = false;
+        ammobar_scale = 0.5f;
+        ammobar_scale_minimum = 0.1f;
+        ammobar_scale_maximum = 1.0f;
+        ammobar_scale_input.clear();
+        ammobar_scale_invalid = false;
+        ammobar_scale_editing = false;
+        ammobar_icon_spacing = 20;
+        ammobar_icon_spacing_minimum = 0;
+        ammobar_icon_spacing_maximum = 500;
+        ammobar_icon_spacing_armed = false;
+        ammobar_label_size = 1.5f;
+        ammobar_label_size_minimum = 0.5f;
+        ammobar_label_size_maximum = 2.0f;
+        ammobar_label_size_input.clear();
+        ammobar_label_size_invalid = false;
+        ammobar_label_size_editing = false;
+        ammobar_label_offset = 20;
+        ammobar_label_offset_minimum = 0;
+        ammobar_label_offset_maximum = 500;
+        ammobar_label_offset_armed = false;
+        ammobar_align_first = false;
+        ammobar_align_center = true;
+        ammobar_align_last = false;
+        ammobar_x = 0.025f;
+        ammobar_x_minimum = 0.0f;
+        ammobar_x_maximum = 1.0f;
+        ammobar_x_input.clear();
+        ammobar_x_invalid = false;
+        ammobar_x_editing = false;
+        ammobar_y = 0.5f;
+        ammobar_y_minimum = 0.0f;
+        ammobar_y_maximum = 1.0f;
+        ammobar_y_input.clear();
+        ammobar_y_invalid = false;
+        ammobar_y_editing = false;
+        ammobar_hide_empty = true;
+        ammobar_status.clear();
+        scoreboard_available = false;
+        scoreboard_flags = false;
+        scoreboard_frags = false;
+        scoreboard_deaths = false;
+        scoreboard_suicides = false;
+        scoreboard_kpd = false;
+        scoreboard_accuracy = false;
+        scoreboard_damage = false;
+        scoreboard_damage_dealt = false;
+        scoreboard_damage_net = false;
+        scoreboard_damage_received = false;
+        scoreboard_ping = true;
+        scoreboard_pj = false;
+        scoreboard_clientnum = false;
+        scoreboard_status.clear();
         resolution_label.clear();
         render_resolution_label.clear();
         video_status.clear();
         presentation_label.clear();
         vsync_status.clear();
+        gamma = 100;
+        gamma_minimum = 30;
+        gamma_maximum = 300;
+        gamma_label.clear();
+        gamma_status.clear();
         shadow_state_available = false;
         shadow_maps = false;
         shadow_maps_available = false;
@@ -967,6 +2288,9 @@ namespace cowui
         model_reflections_available = false;
         model_reflections = false;
         model_reflections_status.clear();
+        bump_models_available = false;
+        bump_models = false;
+        bump_models_status.clear();
         environment_map_resolution_available = false;
         environment_map_resolution_selected = -1;
         environment_map_resolution_label.clear();
@@ -990,6 +2314,9 @@ namespace cowui
         decal_persistence_selected = -1;
         decal_persistence_label.clear();
         decal_persistence_status.clear();
+        fix_t_joints_available = false;
+        fix_t_joints = false;
+        fix_t_joints_status.clear();
         grass = false;
         grass_distance_available = false;
         grass_distance_selected = -1;
@@ -1043,6 +2370,9 @@ namespace cowui
         antialiasing = 0;
         antialiasing_requested = -1;
         pending_antialiasing = -1;
+        depth_buffer = 0;
+        depth_buffer_requested = -1;
+        pending_depth_buffer = -1;
         pending_shader_detail = shader_detail_selected = -1;
         shader_detail_available = false;
         shader_detail_label.clear();
@@ -1054,6 +2384,12 @@ namespace cowui
         antialiasing_4x = false;
         antialiasing_8x = false;
         antialiasing_16x = false;
+        depth_buffer_label.clear();
+        depth_buffer_status.clear();
+        depth_buffer_default = true;
+        depth_buffer_16 = false;
+        depth_buffer_24 = false;
+        depth_buffer_32 = false;
         sound_volume = 255;
         sound_volume_minimum = 0;
         sound_volume_maximum = 255;
@@ -1066,6 +2402,21 @@ namespace cowui
         active_soundpack.clear();
         active_soundpack_label.clear();
         soundpack_status.clear();
+        sound_channels = 32;
+        sound_channels_minimum = 1;
+        sound_channels_maximum = 128;
+        effective_sound_channels = 0;
+        sound_channels_status.clear();
+        sound_frequency = 22050;
+        effective_sound_frequency = 0;
+        sound_frequency_label.clear();
+        sound_frequency_status.clear();
+        sound_buffer_length = 1024;
+        sound_buffer_length_minimum = 128;
+        sound_buffer_length_maximum = 4096;
+        sound_buffer_length_status.clear();
+        mumble = false;
+        mumble_status.clear();
         mouse_sensitivity = 3.0f;
         mouse_sensitivity_minimum = 0.001f;
         mouse_sensitivity_maximum = 1000.0f;
@@ -1092,10 +2443,53 @@ namespace cowui
         hit_crosshair = true;
         crosshair_reload_fade = true;
         crosshair_reload_rotation = true;
+        show_fps = true;
+        wall_clock = false;
+        wall_clock_24_hour = false;
+        wall_clock_seconds = false;
         damage_screen = true;
         damage_compass = true;
+        hud_guns = true;
+        hud_gun_sway = true;
+        muzzle_flash = true;
+        muzzle_light = true;
         frag_messages_enabled = true;
         frag_messages_in_insta = true;
+        max_frag_messages = 3;
+        max_frag_messages_minimum = 1;
+        max_frag_messages_maximum = 10;
+        max_frag_messages_armed = false;
+        frag_message_duration = 2.0f;
+        frag_message_duration_minimum = 0.0f;
+        frag_message_duration_maximum = 10.0f;
+        frag_message_duration_input.clear();
+        frag_message_duration_invalid = false;
+        frag_message_duration_editing = false;
+        frag_message_self_frags = true;
+        frag_message_other_frags = false;
+        frag_message_team_kills = true;
+        frag_message_scale = 0.5f;
+        frag_message_scale_minimum = 0.1f;
+        frag_message_scale_maximum = 1.0f;
+        frag_message_scale_input.clear();
+        frag_message_scale_invalid = false;
+        frag_message_scale_editing = false;
+        frag_message_fade = true;
+        frag_message_x = 0.5f;
+        frag_message_x_minimum = 0.0f;
+        frag_message_x_maximum = 1.0f;
+        frag_message_x_input.clear();
+        frag_message_x_invalid = false;
+        frag_message_x_editing = false;
+        frag_message_y = 0.25f;
+        frag_message_y_minimum = 0.0f;
+        frag_message_y_maximum = 1.0f;
+        frag_message_y_input.clear();
+        frag_message_y_invalid = false;
+        frag_message_y_editing = false;
+        frag_message_stack_up = false;
+        frag_message_stack_auto = true;
+        frag_message_stack_down = false;
         streak_milestone_scale = 1.25f;
         streak_milestone_scale_minimum = 1.0f;
         streak_milestone_scale_maximum = 2.0f;
@@ -1103,11 +2497,90 @@ namespace cowui
         hud_status.clear();
         streak_milestone_scale_invalid = false;
         streak_milestone_scale_editing = false;
+        game_clock_available = false;
+        game_clock = false;
+        game_clock_scale = 1.0f;
+        game_clock_scale_minimum = 0.5f;
+        game_clock_scale_maximum = 2.0f;
+        game_clock_scale_input.clear();
+        game_clock_scale_invalid = false;
+        game_clock_scale_editing = false;
+        game_clock_alpha = 255;
+        game_clock_alpha_minimum = 0;
+        game_clock_alpha_maximum = 255;
+        game_clock_align = 0;
+        game_clock_x = 0.50f;
+        game_clock_x_minimum = 0.0f;
+        game_clock_x_maximum = 1.0f;
+        game_clock_x_input.clear();
+        game_clock_x_invalid = false;
+        game_clock_x_editing = false;
+        game_clock_y = 0.03f;
+        game_clock_y_minimum = 0.0f;
+        game_clock_y_maximum = 1.0f;
+        game_clock_y_input.clear();
+        game_clock_y_invalid = false;
+        game_clock_y_editing = false;
+        game_clock_status.clear();
+        hudscore_available = false;
+        hudscore = false;
+        hudscore_scale = 1.0f;
+        hudscore_scale_minimum = 0.5f;
+        hudscore_scale_maximum = 2.0f;
+        hudscore_scale_input.clear();
+        hudscore_scale_invalid = false;
+        hudscore_scale_editing = false;
+        hudscore_alpha = 255;
+        hudscore_alpha_minimum = 0;
+        hudscore_alpha_maximum = 255;
+        hudscore_sep = 200;
+        hudscore_sep_minimum = 0;
+        hudscore_sep_maximum = 1000;
+        hudscore_align = 0;
+        hudscore_x = 0.50f;
+        hudscore_x_minimum = 0.0f;
+        hudscore_x_maximum = 1.0f;
+        hudscore_x_input.clear();
+        hudscore_x_invalid = false;
+        hudscore_x_editing = false;
+        hudscore_y = 0.03f;
+        hudscore_y_minimum = 0.0f;
+        hudscore_y_maximum = 1.0f;
+        hudscore_y_input.clear();
+        hudscore_y_invalid = false;
+        hudscore_y_editing = false;
+        hudscore_status.clear();
         public_chat_in_top_feed = true;
         team_chat_in_top_feed = true;
         public_chat_in_bottom_box = false;
         team_chat_in_bottom_box = false;
         team_colored_chat_names = true;
+        console_available = false;
+        console_top_important = true;
+        console_top_warnings = true;
+        console_top_errors = true;
+        console_top_script = true;
+        console_top_game_events = true;
+        console_top_self_frags = true;
+        console_top_other_frags = true;
+        console_top_team_kills = true;
+        console_full_important = true;
+        console_full_warnings = true;
+        console_full_errors = true;
+        console_full_script = true;
+        console_full_chat = true;
+        console_full_team_chat = true;
+        console_full_game_events = true;
+        console_full_self_frags = true;
+        console_full_other_frags = true;
+        console_full_team_kills = true;
+        console_size = 5;
+        console_size_minimum = 0;
+        console_size_maximum = 100;
+        console_size_input.clear();
+        console_size_invalid = false;
+        console_size_editing = false;
+        console_status.clear();
         category_game = true;
         category_hud = false;
         category_graphics = false;
@@ -1115,6 +2588,7 @@ namespace cowui
         category_mouse_keyboard = false;
         category_crosshair = false;
         category_chat = false;
+        category_console = false;
     }
 
     void RmlSettings::activate()
@@ -1133,45 +2607,118 @@ namespace cowui
 
     void RmlSettings::applypending()
     {
-        if(pending_antialiasing < 0)
+        const bool reset_antialiasing = pending_antialiasing >= 0;
+        const bool reset_depth_buffer = pending_depth_buffer >= 0;
+        const bool reset_sound = settings::hassoundchanges();
+        if(!reset_antialiasing && !reset_depth_buffer && !reset_sound)
         {
             applypendingshaderdetail();
             return;
         }
 
-        const int requested = pending_antialiasing;
+        const int requested_antialiasing = pending_antialiasing;
+        const int requested_depth_buffer = pending_depth_buffer;
         pending_antialiasing = -1;
-        settings::resetgraphics();
-        refreshvideo();
-
-        char status[96];
-        if(antialiasing == requested)
+        pending_depth_buffer = -1;
+        if(reset_antialiasing || reset_depth_buffer)
         {
-            if(requested)
+            settings::resetgraphics();
+            refreshvideo();
+        }
+
+        if(reset_antialiasing)
+        {
+            char status[96];
+            if(antialiasing == requested_antialiasing)
+            {
+                if(requested_antialiasing)
+                {
+                    std::snprintf(
+                        status,
+                        sizeof(status),
+                        "%dx multisample antialiasing active",
+                        requested_antialiasing
+                    );
+                }
+                else std::snprintf(
+                    status,
+                    sizeof(status),
+                    "Antialiasing disabled"
+                );
+            }
+            else
             {
                 std::snprintf(
                     status,
                     sizeof(status),
-                    "%dx multisample antialiasing active",
-                    requested
+                    "%dx was unavailable; runtime is %s",
+                    requested_antialiasing,
+                    antialiasing ? antialiasing_label.c_str() : "off"
                 );
             }
-            else std::snprintf(status, sizeof(status), "Antialiasing disabled");
-        }
-        else
-        {
-            std::snprintf(
-                status,
-                sizeof(status),
-                "%dx was unavailable; runtime is %s",
-                requested,
-                antialiasing ? antialiasing_label.c_str() : "off"
-            );
+
+            antialiasing_status = status;
+            model.DirtyVariable("antialiasing_status");
         }
 
-        antialiasing_status = status;
-        model.DirtyVariable("antialiasing_status");
-        refreshshaderdetail(); // resetgraphics has now completed reloadshaders.
+        if(reset_depth_buffer)
+        {
+            const int engine_bits = requested_depth_buffer
+                ? requested_depth_buffer
+                : 24;
+            char status[96];
+            if(depth_buffer == engine_bits)
+            {
+                if(requested_depth_buffer == 0)
+                {
+                    std::snprintf(
+                        status,
+                        sizeof(status),
+                        "Engine default 24-bit depth active"
+                    );
+                }
+                else
+                {
+                    std::snprintf(
+                        status,
+                        sizeof(status),
+                        "%d-bit depth buffer active",
+                        requested_depth_buffer
+                    );
+                }
+            }
+            else if(requested_depth_buffer == 0)
+            {
+                std::snprintf(
+                    status,
+                    sizeof(status),
+                    "Engine default 24-bit was unavailable; runtime is %s",
+                    depth_buffer_label.c_str()
+                );
+            }
+            else
+            {
+                std::snprintf(
+                    status,
+                    sizeof(status),
+                    "%d-bit was unavailable; runtime is %s",
+                    requested_depth_buffer,
+                    depth_buffer_label.c_str()
+                );
+            }
+
+            depth_buffer_status = status;
+            model.DirtyVariable("depth_buffer_status");
+        }
+
+        if(reset_sound)
+        {
+            settings::resetsound();
+            refreshaudio();
+        }
+
+        if(reset_antialiasing || reset_depth_buffer)
+            refreshshaderdetail(); // resetgraphics has now completed reloadshaders.
         applypendingshaderdetail();
     }
 
@@ -1199,6 +2746,18 @@ namespace cowui
             model.DirtyVariable("fov_maximum");
         }
 
+        if(!refreshgamefeedback())
+            return false;
+        if(!refreshtrailcolors())
+            return false;
+        if(!refreshgameradar())
+            return false;
+        if(!refreshgamemodels())
+            return false;
+        if(!refreshammobar())
+            return false;
+        if(!refreshscoreboardcolumns())
+            return false;
         if(!refreshvideo())
             return false;
         refreshshaderdetail();
@@ -1210,7 +2769,13 @@ namespace cowui
             return false;
         if(!refreshhud(!streak_milestone_scale_editing))
             return false;
+        if(!refreshgameclock())
+            return false;
+        if(!refreshhudscore())
+            return false;
         if(!refreshchat())
+            return false;
+        if(!refreshconsole())
             return false;
         return refreshkeybindings();
     }
@@ -1226,12 +2791,14 @@ namespace cowui
         refreshwaterfalleffects();
         refreshglassreflections();
         refreshmodelreflections();
+        refreshbumpmodels();
         refreshenvironmentmapresolution();
         refreshdynamiclights();
         refreshsoftparticles();
         refreshsoftparticlequality();
         refreshdecals();
         refreshdecalpersistence();
+        refreshfixtjoints();
         refreshgrassdistance();
         refreshmotionblurintensity();
         refreshglarepreset();
@@ -1243,6 +2810,7 @@ namespace cowui
         refreshanisotropy();
         refreshbilinearfiltering();
         refreshmipmapblending();
+        refreshgamma();
         settings::Video current;
         if(!settings::readvideo(current))
             return false;
@@ -1538,6 +3106,68 @@ namespace cowui
             antialiasing_status = aa_status;
             model.DirtyVariable("antialiasing_status");
         }
+
+        settings::DepthBuffer current_depth_buffer;
+        if(!settings::readdepthbits(current_depth_buffer))
+            return false;
+
+        depth_buffer_requested = current_depth_buffer.requested_bits;
+
+        if(depth_buffer != current_depth_buffer.actual_bits)
+        {
+            depth_buffer = current_depth_buffer.actual_bits;
+            model.DirtyVariable("depth_buffer");
+        }
+
+        const bool depth_default = current_depth_buffer.requested_bits == 0;
+        const bool depth_16 = current_depth_buffer.requested_bits == 16;
+        const bool depth_24 = current_depth_buffer.requested_bits == 24;
+        const bool depth_32 = current_depth_buffer.requested_bits == 32;
+        if(depth_buffer_default != depth_default)
+        {
+            depth_buffer_default = depth_default;
+            model.DirtyVariable("depth_buffer_default");
+        }
+        if(depth_buffer_16 != depth_16)
+        {
+            depth_buffer_16 = depth_16;
+            model.DirtyVariable("depth_buffer_16");
+        }
+        if(depth_buffer_24 != depth_24)
+        {
+            depth_buffer_24 = depth_24;
+            model.DirtyVariable("depth_buffer_24");
+        }
+        if(depth_buffer_32 != depth_32)
+        {
+            depth_buffer_32 = depth_32;
+            model.DirtyVariable("depth_buffer_32");
+        }
+
+        formatdepthbufferlabel(
+            current_depth_buffer.actual_bits,
+            label,
+            sizeof(label)
+        );
+        if(depth_buffer_label != label)
+        {
+            depth_buffer_label = label;
+            model.DirtyVariable("depth_buffer_label");
+        }
+
+        char depth_status[96];
+        formatdepthbufferstatus(
+            current_depth_buffer.requested_bits,
+            current_depth_buffer.actual_bits,
+            label,
+            depth_status,
+            sizeof(depth_status)
+        );
+        if(depth_buffer_status != depth_status)
+        {
+            depth_buffer_status = depth_status;
+            model.DirtyVariable("depth_buffer_status");
+        }
         return true;
     }
 
@@ -1555,6 +3185,14 @@ namespace cowui
             return false;
         }
 
+        presentaudio(current, available_soundpacks);
+        return true;
+    }
+
+    void RmlSettings::presentaudio(
+        const settings::Audio &current,
+        std::vector<SoundpackChoice> &available_soundpacks)
+    {
         const Rml::String current_soundpack = current.active_soundpack;
         Rml::String current_soundpack_label = current_soundpack;
         bool active_found = false;
@@ -1677,7 +3315,175 @@ namespace cowui
             audio_status = status;
             model.DirtyVariable("audio_status");
         }
-        return true;
+
+        if(sound_channels != current.sound_channels)
+        {
+            sound_channels = current.sound_channels;
+            model.DirtyVariable("sound_channels");
+        }
+        if(sound_channels_minimum != current.sound_channels_minimum)
+        {
+            sound_channels_minimum = current.sound_channels_minimum;
+            model.DirtyVariable("sound_channels_minimum");
+        }
+        if(sound_channels_maximum != current.sound_channels_maximum)
+        {
+            sound_channels_maximum = current.sound_channels_maximum;
+            model.DirtyVariable("sound_channels_maximum");
+        }
+        if(effective_sound_channels != current.effective_sound_channels)
+        {
+            effective_sound_channels = current.effective_sound_channels;
+            model.DirtyVariable("effective_sound_channels");
+        }
+
+        char channels_status[96];
+        if(!current.backend_active)
+        {
+            std::snprintf(
+                channels_status,
+                sizeof(channels_status),
+                "Audio backend unavailable"
+            );
+        }
+        else if(current.sound_channels != current.effective_sound_channels)
+        {
+            std::snprintf(
+                channels_status,
+                sizeof(channels_status),
+                "Requested %d channels; mixer is still using %d",
+                current.sound_channels,
+                current.effective_sound_channels
+            );
+        }
+        else
+        {
+            std::snprintf(
+                channels_status,
+                sizeof(channels_status),
+                "Mixer using %d channels",
+                current.sound_channels
+            );
+        }
+        if(sound_channels_status != channels_status)
+        {
+            sound_channels_status = channels_status;
+            model.DirtyVariable("sound_channels_status");
+        }
+
+        if(sound_frequency != current.sound_frequency)
+        {
+            sound_frequency = current.sound_frequency;
+            model.DirtyVariable("sound_frequency");
+        }
+        if(effective_sound_frequency != current.effective_sound_frequency)
+        {
+            effective_sound_frequency = current.effective_sound_frequency;
+            model.DirtyVariable("effective_sound_frequency");
+        }
+
+        char frequency_label[32];
+        std::snprintf(
+            frequency_label,
+            sizeof(frequency_label),
+            "%d Hz",
+            current.sound_frequency
+        );
+        if(sound_frequency_label != frequency_label)
+        {
+            sound_frequency_label = frequency_label;
+            model.DirtyVariable("sound_frequency_label");
+        }
+
+        char frequency_status[96];
+        if(!current.backend_active)
+        {
+            std::snprintf(
+                frequency_status,
+                sizeof(frequency_status),
+                "Audio backend unavailable"
+            );
+        }
+        else if(current.sound_frequency != current.effective_sound_frequency)
+        {
+            std::snprintf(
+                frequency_status,
+                sizeof(frequency_status),
+                "Requested %d Hz; mixer is still using %d Hz",
+                current.sound_frequency,
+                current.effective_sound_frequency
+            );
+        }
+        else
+        {
+            std::snprintf(
+                frequency_status,
+                sizeof(frequency_status),
+                "Mixer using %d Hz",
+                current.sound_frequency
+            );
+        }
+        if(sound_frequency_status != frequency_status)
+        {
+            sound_frequency_status = frequency_status;
+            model.DirtyVariable("sound_frequency_status");
+        }
+
+        if(sound_buffer_length != current.sound_buffer_length)
+        {
+            sound_buffer_length = current.sound_buffer_length;
+            model.DirtyVariable("sound_buffer_length");
+        }
+        if(sound_buffer_length_minimum != current.sound_buffer_length_minimum)
+        {
+            sound_buffer_length_minimum = current.sound_buffer_length_minimum;
+            model.DirtyVariable("sound_buffer_length_minimum");
+        }
+        if(sound_buffer_length_maximum != current.sound_buffer_length_maximum)
+        {
+            sound_buffer_length_maximum = current.sound_buffer_length_maximum;
+            model.DirtyVariable("sound_buffer_length_maximum");
+        }
+
+        char buffer_status[128];
+        if(settings::hassoundchanges())
+        {
+            std::snprintf(
+                buffer_status,
+                sizeof(buffer_status),
+                "Stored %d samples; mixer applies this buffer length on sound reset",
+                current.sound_buffer_length
+            );
+        }
+        else
+        {
+            std::snprintf(
+                buffer_status,
+                sizeof(buffer_status),
+                "Requested mixer buffer %d samples; SDL_mixer does not report the opened chunk size",
+                current.sound_buffer_length
+            );
+        }
+        if(sound_buffer_length_status != buffer_status)
+        {
+            sound_buffer_length_status = buffer_status;
+            model.DirtyVariable("sound_buffer_length_status");
+        }
+
+        if(mumble != current.mumble)
+        {
+            mumble = current.mumble;
+            model.DirtyVariable("mumble");
+        }
+
+        const char *mumble_state = current.mumble
+            ? "Positional audio ident is on; applies immediately"
+            : "Positional audio ident is off; applies immediately";
+        if(mumble_status != mumble_state)
+        {
+            mumble_status = mumble_state;
+            model.DirtyVariable("mumble_status");
+        }
     }
 
     bool RmlSettings::refreshmouseinput(bool update_edit_buffer)
@@ -1835,6 +3641,34 @@ namespace cowui
         if(!settings::readhud(current))
             return false;
 
+        presenthud(current, update_edit_buffer);
+        return true;
+    }
+
+    void RmlSettings::presenthud(
+        const settings::Hud &current,
+        bool update_edit_buffer)
+    {
+        if(show_fps != current.show_fps)
+        {
+            show_fps = current.show_fps;
+            model.DirtyVariable("show_fps");
+        }
+        if(wall_clock != current.wall_clock)
+        {
+            wall_clock = current.wall_clock;
+            model.DirtyVariable("wall_clock");
+        }
+        if(wall_clock_24_hour != current.wall_clock_24_hour)
+        {
+            wall_clock_24_hour = current.wall_clock_24_hour;
+            model.DirtyVariable("wall_clock_24_hour");
+        }
+        if(wall_clock_seconds != current.wall_clock_seconds)
+        {
+            wall_clock_seconds = current.wall_clock_seconds;
+            model.DirtyVariable("wall_clock_seconds");
+        }
         if(damage_screen != current.damage_screen)
         {
             damage_screen = current.damage_screen;
@@ -1845,6 +3679,26 @@ namespace cowui
             damage_compass = current.damage_compass;
             model.DirtyVariable("damage_compass");
         }
+        if(hud_guns != current.hud_guns)
+        {
+            hud_guns = current.hud_guns;
+            model.DirtyVariable("hud_guns");
+        }
+        if(hud_gun_sway != current.hud_gun_sway)
+        {
+            hud_gun_sway = current.hud_gun_sway;
+            model.DirtyVariable("hud_gun_sway");
+        }
+        if(muzzle_flash != current.muzzle_flash)
+        {
+            muzzle_flash = current.muzzle_flash;
+            model.DirtyVariable("muzzle_flash");
+        }
+        if(muzzle_light != current.muzzle_light)
+        {
+            muzzle_light = current.muzzle_light;
+            model.DirtyVariable("muzzle_light");
+        }
 
         const bool messages_enabled = current.frag_messages !=
             settings::FragMessagesMode::Off;
@@ -1854,11 +3708,172 @@ namespace cowui
         {
             frag_messages_enabled = messages_enabled;
             model.DirtyVariable("frag_messages_enabled");
+            if(messages_enabled)
+                max_frag_messages_armed = false;
         }
         if(frag_messages_in_insta != messages_in_insta)
         {
             frag_messages_in_insta = messages_in_insta;
             model.DirtyVariable("frag_messages_in_insta");
+        }
+
+        if(max_frag_messages != current.max_frag_messages)
+        {
+            max_frag_messages = current.max_frag_messages;
+            model.DirtyVariable("max_frag_messages");
+        }
+        if(max_frag_messages_minimum != current.max_frag_messages_minimum)
+        {
+            max_frag_messages_minimum = current.max_frag_messages_minimum;
+            model.DirtyVariable("max_frag_messages_minimum");
+        }
+        if(max_frag_messages_maximum != current.max_frag_messages_maximum)
+        {
+            max_frag_messages_maximum = current.max_frag_messages_maximum;
+            model.DirtyVariable("max_frag_messages_maximum");
+        }
+
+        if(frag_message_duration != current.frag_message_duration)
+        {
+            frag_message_duration = current.frag_message_duration;
+            model.DirtyVariable("frag_message_duration");
+        }
+        if(frag_message_duration_minimum !=
+           current.frag_message_duration_minimum)
+        {
+            frag_message_duration_minimum =
+                current.frag_message_duration_minimum;
+            model.DirtyVariable("frag_message_duration_minimum");
+        }
+        if(frag_message_duration_maximum !=
+           current.frag_message_duration_maximum)
+        {
+            frag_message_duration_maximum =
+                current.frag_message_duration_maximum;
+            model.DirtyVariable("frag_message_duration_maximum");
+        }
+        const Rml::String duration_text = formatsensitivity(
+            current.frag_message_duration
+        );
+        if(!frag_message_duration_editing &&
+           frag_message_duration_input != duration_text)
+        {
+            frag_message_duration_input = duration_text;
+            model.DirtyVariable("frag_message_duration_input");
+        }
+
+        if(frag_message_self_frags != current.frag_message_self_frags)
+        {
+            frag_message_self_frags = current.frag_message_self_frags;
+            model.DirtyVariable("frag_message_self_frags");
+        }
+        if(frag_message_other_frags != current.frag_message_other_frags)
+        {
+            frag_message_other_frags = current.frag_message_other_frags;
+            model.DirtyVariable("frag_message_other_frags");
+        }
+        if(frag_message_team_kills != current.frag_message_team_kills)
+        {
+            frag_message_team_kills = current.frag_message_team_kills;
+            model.DirtyVariable("frag_message_team_kills");
+        }
+
+        if(frag_message_scale != current.frag_message_scale)
+        {
+            frag_message_scale = current.frag_message_scale;
+            model.DirtyVariable("frag_message_scale");
+        }
+        if(frag_message_scale_minimum != current.frag_message_scale_minimum)
+        {
+            frag_message_scale_minimum = current.frag_message_scale_minimum;
+            model.DirtyVariable("frag_message_scale_minimum");
+        }
+        if(frag_message_scale_maximum != current.frag_message_scale_maximum)
+        {
+            frag_message_scale_maximum = current.frag_message_scale_maximum;
+            model.DirtyVariable("frag_message_scale_maximum");
+        }
+        const Rml::String message_scale_text = formatsensitivity(
+            current.frag_message_scale
+        );
+        if(!frag_message_scale_editing &&
+           frag_message_scale_input != message_scale_text)
+        {
+            frag_message_scale_input = message_scale_text;
+            model.DirtyVariable("frag_message_scale_input");
+        }
+
+        if(frag_message_fade != current.frag_message_fade)
+        {
+            frag_message_fade = current.frag_message_fade;
+            model.DirtyVariable("frag_message_fade");
+        }
+
+        if(frag_message_x != current.frag_message_x)
+        {
+            frag_message_x = current.frag_message_x;
+            model.DirtyVariable("frag_message_x");
+        }
+        if(frag_message_x_minimum != current.frag_message_x_minimum)
+        {
+            frag_message_x_minimum = current.frag_message_x_minimum;
+            model.DirtyVariable("frag_message_x_minimum");
+        }
+        if(frag_message_x_maximum != current.frag_message_x_maximum)
+        {
+            frag_message_x_maximum = current.frag_message_x_maximum;
+            model.DirtyVariable("frag_message_x_maximum");
+        }
+        const Rml::String message_x_text = formatsensitivity(
+            current.frag_message_x
+        );
+        if(!frag_message_x_editing && frag_message_x_input != message_x_text)
+        {
+            frag_message_x_input = message_x_text;
+            model.DirtyVariable("frag_message_x_input");
+        }
+
+        if(frag_message_y != current.frag_message_y)
+        {
+            frag_message_y = current.frag_message_y;
+            model.DirtyVariable("frag_message_y");
+        }
+        if(frag_message_y_minimum != current.frag_message_y_minimum)
+        {
+            frag_message_y_minimum = current.frag_message_y_minimum;
+            model.DirtyVariable("frag_message_y_minimum");
+        }
+        if(frag_message_y_maximum != current.frag_message_y_maximum)
+        {
+            frag_message_y_maximum = current.frag_message_y_maximum;
+            model.DirtyVariable("frag_message_y_maximum");
+        }
+        const Rml::String message_y_text = formatsensitivity(
+            current.frag_message_y
+        );
+        if(!frag_message_y_editing && frag_message_y_input != message_y_text)
+        {
+            frag_message_y_input = message_y_text;
+            model.DirtyVariable("frag_message_y_input");
+        }
+
+        const bool stack_up = current.frag_message_stack_dir == -1;
+        const bool stack_auto = current.frag_message_stack_dir == 0;
+        const bool stack_down = current.frag_message_stack_dir == 1;
+        if(frag_message_stack_up != stack_up)
+        {
+            frag_message_stack_up = stack_up;
+            model.DirtyVariable("frag_message_stack_up");
+        }
+        if(frag_message_stack_auto != stack_auto)
+        {
+            frag_message_stack_auto = stack_auto;
+            model.DirtyVariable("frag_message_stack_auto");
+        }
+        if(frag_message_stack_down != stack_down)
+        {
+            frag_message_stack_down = stack_down;
+            model.DirtyVariable("frag_message_stack_down");
         }
 
         if(streak_milestone_scale != current.streak_milestone_scale)
@@ -1901,7 +3916,396 @@ namespace cowui
             hud_status = status;
             model.DirtyVariable("hud_status");
         }
-        return true;
+    }
+
+    void RmlSettings::finishhudwrite(bool accepted, settings::Hud &state)
+    {
+        const bool available = accepted || settings::readhud(state);
+        if(available)
+        {
+            presenthud(
+                state,
+                !streak_milestone_scale_editing
+            );
+        }
+        if(!accepted && available)
+        {
+            hud_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("hud_status");
+        }
+    }
+
+    bool RmlSettings::refreshgameclock()
+    {
+        settings::GameClock state = {};
+        const bool available = settings::readgameclock(state);
+        presentgameclock(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentgameclock(
+        const settings::GameClock &state,
+        bool available)
+    {
+        if(game_clock_available != available)
+        {
+            game_clock_available = available;
+            model.DirtyVariable("game_clock_available");
+        }
+        if(game_clock != state.enabled)
+        {
+            game_clock = state.enabled;
+            model.DirtyVariable("game_clock");
+        }
+        if(game_clock_scale != state.scale)
+        {
+            game_clock_scale = state.scale;
+            model.DirtyVariable("game_clock_scale");
+        }
+        if(game_clock_scale_minimum != state.scale_minimum)
+        {
+            game_clock_scale_minimum = state.scale_minimum;
+            model.DirtyVariable("game_clock_scale_minimum");
+        }
+        if(game_clock_scale_maximum != state.scale_maximum)
+        {
+            game_clock_scale_maximum = state.scale_maximum;
+            model.DirtyVariable("game_clock_scale_maximum");
+        }
+        const Rml::String scale_text = formatsensitivity(state.scale);
+        if(!game_clock_scale_editing &&
+           game_clock_scale_input != scale_text)
+        {
+            game_clock_scale_input = scale_text;
+            model.DirtyVariable("game_clock_scale_input");
+        }
+        if(game_clock_alpha != state.alpha)
+        {
+            game_clock_alpha = state.alpha;
+            model.DirtyVariable("game_clock_alpha");
+        }
+        if(game_clock_alpha_minimum != state.alpha_minimum)
+        {
+            game_clock_alpha_minimum = state.alpha_minimum;
+            model.DirtyVariable("game_clock_alpha_minimum");
+        }
+        if(game_clock_alpha_maximum != state.alpha_maximum)
+        {
+            game_clock_alpha_maximum = state.alpha_maximum;
+            model.DirtyVariable("game_clock_alpha_maximum");
+        }
+        if(game_clock_align != state.align)
+        {
+            game_clock_align = state.align;
+            model.DirtyVariable("game_clock_align");
+        }
+        if(game_clock_x != state.x)
+        {
+            game_clock_x = state.x;
+            model.DirtyVariable("game_clock_x");
+        }
+        if(game_clock_x_minimum != state.x_minimum)
+        {
+            game_clock_x_minimum = state.x_minimum;
+            model.DirtyVariable("game_clock_x_minimum");
+        }
+        if(game_clock_x_maximum != state.x_maximum)
+        {
+            game_clock_x_maximum = state.x_maximum;
+            model.DirtyVariable("game_clock_x_maximum");
+        }
+        const Rml::String x_text = formatsensitivity(state.x);
+        if(!game_clock_x_editing && game_clock_x_input != x_text)
+        {
+            game_clock_x_input = x_text;
+            model.DirtyVariable("game_clock_x_input");
+        }
+        if(game_clock_y != state.y)
+        {
+            game_clock_y = state.y;
+            model.DirtyVariable("game_clock_y");
+        }
+        if(game_clock_y_minimum != state.y_minimum)
+        {
+            game_clock_y_minimum = state.y_minimum;
+            model.DirtyVariable("game_clock_y_minimum");
+        }
+        if(game_clock_y_maximum != state.y_maximum)
+        {
+            game_clock_y_maximum = state.y_maximum;
+            model.DirtyVariable("game_clock_y_maximum");
+        }
+        const Rml::String y_text = formatsensitivity(state.y);
+        if(!game_clock_y_editing && game_clock_y_input != y_text)
+        {
+            game_clock_y_input = y_text;
+            model.DirtyVariable("game_clock_y_input");
+        }
+
+        const char *status = available
+            ? ""
+            : "Gameclock settings are unavailable";
+        if(game_clock_status != status)
+        {
+            game_clock_status = status;
+            model.DirtyVariable("game_clock_status");
+        }
+    }
+
+    void RmlSettings::selectgameclock(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_clock_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclock(enabled, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        presentgameclock(state, available);
+        if(!accepted && available)
+        {
+            game_clock_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_clock_status");
+        }
+    }
+
+    void RmlSettings::selectgameclockalign(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_clock_available || !game_clock)
+            return;
+
+        const int value = arguments[0].Get<int>();
+        if(value != -1 && value != 0 && value != 1)
+            return;
+
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockalign(value, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        presentgameclock(state, available);
+        if(!accepted && available)
+        {
+            game_clock_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_clock_status");
+        }
+    }
+
+    bool RmlSettings::refreshhudscore()
+    {
+        settings::HudScore state = {};
+        const bool available = settings::readhudscore(state);
+        presenthudscore(
+            state,
+            available,
+            !hudscore_scale_editing,
+            !hudscore_x_editing,
+            !hudscore_y_editing);
+        return available;
+    }
+
+    void RmlSettings::presenthudscore(
+        const settings::HudScore &state,
+        bool available,
+        bool update_scale_input,
+        bool update_x_input,
+        bool update_y_input)
+    {
+        if(hudscore_available != available)
+        {
+            hudscore_available = available;
+            model.DirtyVariable("hudscore_available");
+        }
+        if(hudscore != state.enabled)
+        {
+            hudscore = state.enabled;
+            model.DirtyVariable("hudscore");
+        }
+        if(hudscore_scale != state.scale)
+        {
+            hudscore_scale = state.scale;
+            model.DirtyVariable("hudscore_scale");
+        }
+        if(hudscore_scale_minimum != state.scale_minimum)
+        {
+            hudscore_scale_minimum = state.scale_minimum;
+            model.DirtyVariable("hudscore_scale_minimum");
+        }
+        if(hudscore_scale_maximum != state.scale_maximum)
+        {
+            hudscore_scale_maximum = state.scale_maximum;
+            model.DirtyVariable("hudscore_scale_maximum");
+        }
+        if(hudscore_alpha != state.alpha)
+        {
+            hudscore_alpha = state.alpha;
+            model.DirtyVariable("hudscore_alpha");
+        }
+        if(hudscore_alpha_minimum != state.alpha_minimum)
+        {
+            hudscore_alpha_minimum = state.alpha_minimum;
+            model.DirtyVariable("hudscore_alpha_minimum");
+        }
+        if(hudscore_alpha_maximum != state.alpha_maximum)
+        {
+            hudscore_alpha_maximum = state.alpha_maximum;
+            model.DirtyVariable("hudscore_alpha_maximum");
+        }
+        if(hudscore_sep != state.spacing)
+        {
+            hudscore_sep = state.spacing;
+            model.DirtyVariable("hudscore_sep");
+        }
+        if(hudscore_sep_minimum != state.spacing_minimum)
+        {
+            hudscore_sep_minimum = state.spacing_minimum;
+            model.DirtyVariable("hudscore_sep_minimum");
+        }
+        if(hudscore_sep_maximum != state.spacing_maximum)
+        {
+            hudscore_sep_maximum = state.spacing_maximum;
+            model.DirtyVariable("hudscore_sep_maximum");
+        }
+        if(hudscore_align != state.align)
+        {
+            hudscore_align = state.align;
+            model.DirtyVariable("hudscore_align");
+        }
+        if(hudscore_x != state.x)
+        {
+            hudscore_x = state.x;
+            model.DirtyVariable("hudscore_x");
+        }
+        if(hudscore_x_minimum != state.x_minimum)
+        {
+            hudscore_x_minimum = state.x_minimum;
+            model.DirtyVariable("hudscore_x_minimum");
+        }
+        if(hudscore_x_maximum != state.x_maximum)
+        {
+            hudscore_x_maximum = state.x_maximum;
+            model.DirtyVariable("hudscore_x_maximum");
+        }
+        if(hudscore_y != state.y)
+        {
+            hudscore_y = state.y;
+            model.DirtyVariable("hudscore_y");
+        }
+        if(hudscore_y_minimum != state.y_minimum)
+        {
+            hudscore_y_minimum = state.y_minimum;
+            model.DirtyVariable("hudscore_y_minimum");
+        }
+        if(hudscore_y_maximum != state.y_maximum)
+        {
+            hudscore_y_maximum = state.y_maximum;
+            model.DirtyVariable("hudscore_y_maximum");
+        }
+
+        if(update_scale_input)
+        {
+            const Rml::String text = formatsensitivity(state.scale);
+            if(hudscore_scale_input != text)
+            {
+                hudscore_scale_input = text;
+                model.DirtyVariable("hudscore_scale_input");
+            }
+        }
+        if(update_x_input)
+        {
+            const Rml::String text = formatsensitivity(state.x);
+            if(hudscore_x_input != text)
+            {
+                hudscore_x_input = text;
+                model.DirtyVariable("hudscore_x_input");
+            }
+        }
+        if(update_y_input)
+        {
+            const Rml::String text = formatsensitivity(state.y);
+            if(hudscore_y_input != text)
+            {
+                hudscore_y_input = text;
+                model.DirtyVariable("hudscore_y_input");
+            }
+        }
+
+        const char *status = !available
+            ? "Score overlay settings are unavailable"
+            : (state.enabled
+                ? "Score overlay drawn through the existing HUD path"
+                : "Score overlay off");
+        if(hudscore_status != status)
+        {
+            hudscore_status = status;
+            model.DirtyVariable("hudscore_status");
+        }
+    }
+
+    void RmlSettings::selecthudscore(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !hudscore_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscore(enabled, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        presenthudscore(
+            state,
+            available,
+            !hudscore_scale_editing,
+            !hudscore_x_editing,
+            !hudscore_y_editing);
+        if(!accepted && available)
+        {
+            hudscore_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("hudscore_status");
+        }
+    }
+
+    void RmlSettings::selecthudscorealign(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !hudscore_available)
+            return;
+
+        const int value = arguments[0].Get<int>();
+        if(value != -1 && value != 0 && value != 1)
+            return;
+
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorealign(value, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        presenthudscore(
+            state,
+            available,
+            !hudscore_scale_editing,
+            !hudscore_x_editing,
+            !hudscore_y_editing);
+        if(!accepted && available)
+        {
+            hudscore_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("hudscore_status");
+        }
     }
 
     bool RmlSettings::refreshchat()
@@ -1942,6 +4346,151 @@ namespace cowui
             model.DirtyVariable("team_colored_chat_names");
         }
         return true;
+    }
+
+    static Rml::String formatconsoleinteger(int value)
+    {
+        char text[16];
+        std::snprintf(text, sizeof(text), "%d", value);
+        return text;
+    }
+
+    bool RmlSettings::refreshconsole()
+    {
+        settings::Console state = {};
+        const bool available = settings::readconsole(state);
+        presentconsole(state, available, !console_size_editing);
+        return available;
+    }
+
+    void RmlSettings::presentconsole(
+        const settings::Console &state,
+        bool available,
+        bool update_size_input)
+    {
+        if(console_available != available)
+        {
+            console_available = available;
+            model.DirtyVariable("console_available");
+        }
+
+        const auto setbool = [this](bool &field, const char *name,
+            bool value)
+        {
+            if(field != value)
+            {
+                field = value;
+                model.DirtyVariable(name);
+            }
+        };
+        const auto setint = [this](int &field, const char *name,
+            int value)
+        {
+            if(field != value)
+            {
+                field = value;
+                model.DirtyVariable(name);
+            }
+        };
+
+        setbool(console_top_important, "console_top_important",
+            state.important_information_in_top_feed);
+        setbool(console_top_warnings, "console_top_warnings",
+            state.warnings_in_top_feed);
+        setbool(console_top_errors, "console_top_errors",
+            state.errors_in_top_feed);
+        setbool(console_top_script, "console_top_script",
+            state.script_messages_in_top_feed);
+        setbool(console_top_game_events, "console_top_game_events",
+            state.game_events_in_top_feed);
+        setbool(console_top_self_frags, "console_top_self_frags",
+            state.self_frags_in_top_feed);
+        setbool(console_top_other_frags, "console_top_other_frags",
+            state.other_player_frags_in_top_feed);
+        setbool(console_top_team_kills, "console_top_team_kills",
+            state.team_kills_in_top_feed);
+        setbool(console_full_important, "console_full_important",
+            state.important_information_in_full_console);
+        setbool(console_full_warnings, "console_full_warnings",
+            state.warnings_in_full_console);
+        setbool(console_full_errors, "console_full_errors",
+            state.errors_in_full_console);
+        setbool(console_full_script, "console_full_script",
+            state.script_messages_in_full_console);
+        setbool(console_full_chat, "console_full_chat",
+            state.public_messages_in_full_console);
+        setbool(console_full_team_chat, "console_full_team_chat",
+            state.team_messages_in_full_console);
+        setbool(console_full_game_events, "console_full_game_events",
+            state.game_events_in_full_console);
+        setbool(console_full_self_frags, "console_full_self_frags",
+            state.self_frags_in_full_console);
+        setbool(console_full_other_frags, "console_full_other_frags",
+            state.other_player_frags_in_full_console);
+        setbool(console_full_team_kills, "console_full_team_kills",
+            state.team_kills_in_full_console);
+        setint(console_size, "console_size", state.size);
+        setint(console_size_minimum, "console_size_minimum",
+            state.size_minimum);
+        setint(console_size_maximum, "console_size_maximum",
+            state.size_maximum);
+
+        if(update_size_input)
+        {
+            const Rml::String text = formatconsoleinteger(state.size);
+            if(console_size_input != text)
+            {
+                console_size_input = text;
+                model.DirtyVariable("console_size_input");
+            }
+        }
+
+        const char *status = !available
+            ? "Console settings are unavailable"
+            : "Filters apply immediately to the existing console feeds";
+        if(console_status != status)
+        {
+            console_status = status;
+            model.DirtyVariable("console_status");
+        }
+    }
+
+    void RmlSettings::applyconsolefilter(
+        bool (*writer)(bool, settings::Console &),
+        bool current)
+    {
+        if(!writer)
+            return;
+
+        settings::Console state = {};
+        const bool accepted = writer(!current, state);
+        const bool available = accepted || settings::readconsole(state);
+        presentconsole(state, available, !console_size_editing);
+        if(!accepted && available)
+        {
+            console_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("console_status");
+        }
+    }
+
+    void RmlSettings::commitconsolesize()
+    {
+        int requested = 0;
+        settings::Console state = {};
+        const bool accepted = parseinteger(console_size_input, requested) &&
+            console_available &&
+            settings::writeconsolesize(requested, state);
+        const bool available = accepted || settings::readconsole(state);
+        console_size_invalid = !accepted;
+        model.DirtyVariable("console_size_invalid");
+        presentconsole(state, available, true);
+        console_status = accepted
+            ? "Top-left console size applied"
+            : (available
+                ? "Invalid size; restored the last effective setting"
+                : "Console settings are unavailable");
+        model.DirtyVariable("console_status");
     }
 
     bool RmlSettings::refreshkeybindings()
@@ -2397,6 +4946,380 @@ namespace cowui
         model.DirtyVariable("hud_status");
     }
 
+    void RmlSettings::commitfragmessageduration()
+    {
+        float requested = 0.0f;
+        settings::Hud state = {};
+        const bool accepted = parsefloat(
+                frag_message_duration_input,
+                requested
+            ) &&
+            frag_messages_enabled &&
+            settings::writefragmessageduration(requested, state);
+        frag_message_duration_invalid = !accepted;
+        model.DirtyVariable("frag_message_duration_invalid");
+        const bool was_editing = frag_message_duration_editing;
+        frag_message_duration_editing = false;
+        finishhudwrite(accepted, state);
+        frag_message_duration_editing = was_editing;
+        if(accepted)
+        {
+            hud_status = "Duration applied";
+            model.DirtyVariable("hud_status");
+        }
+        else if(frag_messages_enabled)
+        {
+            hud_status =
+                "Invalid duration; restored the last effective setting";
+            model.DirtyVariable("hud_status");
+        }
+    }
+
+    void RmlSettings::commitfragmessagescale()
+    {
+        float requested = 0.0f;
+        settings::Hud state = {};
+        const bool accepted = parsefloat(
+                frag_message_scale_input,
+                requested
+            ) &&
+            frag_messages_enabled &&
+            settings::writefragmessagescale(requested, state);
+        frag_message_scale_invalid = !accepted;
+        model.DirtyVariable("frag_message_scale_invalid");
+        const bool was_editing = frag_message_scale_editing;
+        frag_message_scale_editing = false;
+        finishhudwrite(accepted, state);
+        frag_message_scale_editing = was_editing;
+        if(accepted)
+        {
+            hud_status = "Size applied";
+            model.DirtyVariable("hud_status");
+        }
+        else if(frag_messages_enabled)
+        {
+            hud_status =
+                "Invalid size; restored the last effective setting";
+            model.DirtyVariable("hud_status");
+        }
+    }
+
+    void RmlSettings::commitfragmessagex()
+    {
+        float requested = 0.0f;
+        settings::Hud state = {};
+        const bool accepted = parsefloat(
+                frag_message_x_input,
+                requested
+            ) &&
+            frag_messages_enabled &&
+            settings::writefragmessagex(requested, state);
+        frag_message_x_invalid = !accepted;
+        model.DirtyVariable("frag_message_x_invalid");
+        const bool was_editing = frag_message_x_editing;
+        frag_message_x_editing = false;
+        finishhudwrite(accepted, state);
+        frag_message_x_editing = was_editing;
+        if(accepted)
+        {
+            hud_status = "X position applied";
+            model.DirtyVariable("hud_status");
+        }
+        else if(frag_messages_enabled)
+        {
+            hud_status =
+                "Invalid X; restored the last effective setting";
+            model.DirtyVariable("hud_status");
+        }
+    }
+
+    void RmlSettings::commitfragmessagey()
+    {
+        float requested = 0.0f;
+        settings::Hud state = {};
+        const bool accepted = parsefloat(
+                frag_message_y_input,
+                requested
+            ) &&
+            frag_messages_enabled &&
+            settings::writefragmessagey(requested, state);
+        frag_message_y_invalid = !accepted;
+        model.DirtyVariable("frag_message_y_invalid");
+        const bool was_editing = frag_message_y_editing;
+        frag_message_y_editing = false;
+        finishhudwrite(accepted, state);
+        frag_message_y_editing = was_editing;
+        if(accepted)
+        {
+            hud_status = "Y position applied";
+            model.DirtyVariable("hud_status");
+        }
+        else if(frag_messages_enabled)
+        {
+            hud_status =
+                "Invalid Y; restored the last effective setting";
+            model.DirtyVariable("hud_status");
+        }
+    }
+
+    void RmlSettings::commitammobarscale()
+    {
+        float requested = 0.0f;
+        settings::Ammobar state = {};
+        const bool accepted = parsefloat(ammobar_scale_input, requested) &&
+            ammobar_available &&
+            settings::writeammobarscale(requested, state);
+        ammobar_scale_invalid = !accepted;
+        model.DirtyVariable("ammobar_scale_invalid");
+        const bool was_editing = ammobar_scale_editing;
+        ammobar_scale_editing = false;
+        finishammobarwrite(accepted, state);
+        ammobar_scale_editing = was_editing;
+        if(accepted)
+        {
+            ammobar_status = "Size applied";
+            model.DirtyVariable("ammobar_status");
+        }
+        else if(ammobar_available)
+        {
+            ammobar_status =
+                "Invalid size; restored the last effective setting";
+            model.DirtyVariable("ammobar_status");
+        }
+    }
+
+    void RmlSettings::commitammobarlabelsize()
+    {
+        float requested = 0.0f;
+        settings::Ammobar state = {};
+        const bool accepted =
+            parsefloat(ammobar_label_size_input, requested) &&
+            ammobar_available &&
+            settings::writeammobarcountscale(requested, state);
+        ammobar_label_size_invalid = !accepted;
+        model.DirtyVariable("ammobar_label_size_invalid");
+        const bool was_editing = ammobar_label_size_editing;
+        ammobar_label_size_editing = false;
+        finishammobarwrite(accepted, state);
+        ammobar_label_size_editing = was_editing;
+        if(accepted)
+        {
+            ammobar_status = "Label size applied";
+            model.DirtyVariable("ammobar_status");
+        }
+        else if(ammobar_available)
+        {
+            ammobar_status =
+                "Invalid label size; restored the last effective setting";
+            model.DirtyVariable("ammobar_status");
+        }
+    }
+
+    void RmlSettings::commitammobarx()
+    {
+        float requested = 0.0f;
+        settings::Ammobar state = {};
+        const bool accepted = parsefloat(ammobar_x_input, requested) &&
+            ammobar_available &&
+            settings::writeammobarx(requested, state);
+        ammobar_x_invalid = !accepted;
+        model.DirtyVariable("ammobar_x_invalid");
+        const bool was_editing = ammobar_x_editing;
+        ammobar_x_editing = false;
+        finishammobarwrite(accepted, state);
+        ammobar_x_editing = was_editing;
+        if(accepted)
+        {
+            ammobar_status = "X position applied";
+            model.DirtyVariable("ammobar_status");
+        }
+        else if(ammobar_available)
+        {
+            ammobar_status =
+                "Invalid x; restored the last effective setting";
+            model.DirtyVariable("ammobar_status");
+        }
+    }
+
+    void RmlSettings::commitammobary()
+    {
+        float requested = 0.0f;
+        settings::Ammobar state = {};
+        const bool accepted = parsefloat(ammobar_y_input, requested) &&
+            ammobar_available &&
+            settings::writeammobary(requested, state);
+        ammobar_y_invalid = !accepted;
+        model.DirtyVariable("ammobar_y_invalid");
+        const bool was_editing = ammobar_y_editing;
+        ammobar_y_editing = false;
+        finishammobarwrite(accepted, state);
+        ammobar_y_editing = was_editing;
+        if(accepted)
+        {
+            ammobar_status = "Y position applied";
+            model.DirtyVariable("ammobar_status");
+        }
+        else if(ammobar_available)
+        {
+            ammobar_status =
+                "Invalid y; restored the last effective setting";
+            model.DirtyVariable("ammobar_status");
+        }
+    }
+
+    void RmlSettings::commitgameclockscale()
+    {
+        float requested = 0.0f;
+        settings::GameClock state = {};
+        const bool accepted = parsefloat(
+                game_clock_scale_input,
+                requested
+            ) &&
+            settings::writegameclockscale(requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+
+        game_clock_scale_invalid = !accepted;
+        model.DirtyVariable("game_clock_scale_invalid");
+        const bool editing = game_clock_scale_editing;
+        game_clock_scale_editing = false;
+        presentgameclock(state, available);
+        game_clock_scale_editing = editing;
+        game_clock_status = accepted
+            ? "Size applied"
+            : "Invalid size; restored the last effective setting";
+        model.DirtyVariable("game_clock_status");
+    }
+
+    void RmlSettings::commitgameclockx()
+    {
+        float requested = 0.0f;
+        settings::GameClock state = {};
+        const bool accepted = parsefloat(
+                game_clock_x_input,
+                requested
+            ) &&
+            settings::writegameclockx(requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+
+        game_clock_x_invalid = !accepted;
+        model.DirtyVariable("game_clock_x_invalid");
+        const bool editing = game_clock_x_editing;
+        game_clock_x_editing = false;
+        presentgameclock(state, available);
+        game_clock_x_editing = editing;
+        game_clock_status = accepted
+            ? "X applied"
+            : "Invalid x; restored the last effective setting";
+        model.DirtyVariable("game_clock_status");
+    }
+
+    void RmlSettings::commitgameclocky()
+    {
+        float requested = 0.0f;
+        settings::GameClock state = {};
+        const bool accepted = parsefloat(
+                game_clock_y_input,
+                requested
+            ) &&
+            settings::writegameclocky(requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+
+        game_clock_y_invalid = !accepted;
+        model.DirtyVariable("game_clock_y_invalid");
+        const bool editing = game_clock_y_editing;
+        game_clock_y_editing = false;
+        presentgameclock(state, available);
+        game_clock_y_editing = editing;
+        game_clock_status = accepted
+            ? "Y applied"
+            : "Invalid y; restored the last effective setting";
+        model.DirtyVariable("game_clock_status");
+    }
+
+    void RmlSettings::commithudscorescale()
+    {
+        float requested = 0.0f;
+        settings::HudScore state = {};
+        const bool accepted = parsefloat(
+                hudscore_scale_input,
+                requested
+            ) &&
+            settings::writehudscorescale(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        hudscore_scale_invalid = !accepted;
+        model.DirtyVariable("hudscore_scale_invalid");
+        presenthudscore(
+            state,
+            available,
+            true,
+            !hudscore_x_editing,
+            !hudscore_y_editing);
+        hudscore_status = accepted
+            ? "Score overlay size applied"
+            : (available
+                ? "Invalid size; restored the last effective setting"
+                : "Score overlay settings are unavailable");
+        model.DirtyVariable("hudscore_status");
+    }
+
+    void RmlSettings::commithudscorex()
+    {
+        float requested = 0.0f;
+        settings::HudScore state = {};
+        const bool accepted = parsefloat(
+                hudscore_x_input,
+                requested
+            ) &&
+            settings::writehudscorex(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        hudscore_x_invalid = !accepted;
+        model.DirtyVariable("hudscore_x_invalid");
+        presenthudscore(
+            state,
+            available,
+            !hudscore_scale_editing,
+            true,
+            !hudscore_y_editing);
+        hudscore_status = accepted
+            ? "Score overlay x applied"
+            : (available
+                ? "Invalid x; restored the last effective setting"
+                : "Score overlay settings are unavailable");
+        model.DirtyVariable("hudscore_status");
+    }
+
+    void RmlSettings::commithudscorey()
+    {
+        float requested = 0.0f;
+        settings::HudScore state = {};
+        const bool accepted = parsefloat(
+                hudscore_y_input,
+                requested
+            ) &&
+            settings::writehudscorey(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        hudscore_y_invalid = !accepted;
+        model.DirtyVariable("hudscore_y_invalid");
+        presenthudscore(
+            state,
+            available,
+            !hudscore_scale_editing,
+            !hudscore_x_editing,
+            true);
+        hudscore_status = accepted
+            ? "Score overlay y applied"
+            : (available
+                ? "Invalid y; restored the last effective setting"
+                : "Score overlay settings are unavailable");
+        model.DirtyVariable("hudscore_status");
+    }
+
     void RmlSettings::setcategory(Category category)
     {
         if(category != Category::MouseKeyboard)
@@ -2409,6 +5332,7 @@ namespace cowui
             Category::MouseKeyboard;
         const bool crosshair = category == Category::Crosshair;
         const bool chat = category == Category::Chat;
+        const bool console = category == Category::Console;
         if(category_game != game)
         {
             category_game = game;
@@ -2444,15 +5368,35 @@ namespace cowui
             category_chat = chat;
             model.DirtyVariable("category_chat");
         }
+        if(category_console != console)
+        {
+            category_console = console;
+            model.DirtyVariable("category_console");
+        }
 
         if(audio)
             refreshaudio();
         else if(hud)
+        {
             refreshhud(!streak_milestone_scale_editing);
+            refreshammobar();
+            refreshgameclock();
+            refreshhudscore();
+            refreshscoreboardcolumns();
+        }
+        else if(game)
+        {
+            refreshgamefeedback();
+            refreshtrailcolors();
+            refreshgameradar();
+            refreshgamemodels();
+        }
         else if(crosshair)
             refreshcrosshair(!crosshair_size_editing);
         else if(chat)
             refreshchat();
+        else if(console)
+            refreshconsole();
     }
 
     void RmlSettings::setpresentation(
@@ -2558,6 +5502,74 @@ namespace cowui
         event.StopPropagation();
     }
 
+    void RmlSettings::selectdepthbuffer(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 1)
+            return;
+
+        const int bits = arguments[0].Get<int>();
+        const bool request_changed = bits != depth_buffer_requested;
+
+        if(!validdepthbufferchoice(bits) || !settings::writedepthbits(bits))
+        {
+            depth_buffer_status = "Depth buffer request was rejected";
+            model.DirtyVariable("depth_buffer_status");
+            event.StopPropagation();
+            return;
+        }
+
+        depth_buffer_requested = bits;
+        const bool depth_default = bits == 0;
+        const bool depth_16 = bits == 16;
+        const bool depth_24 = bits == 24;
+        const bool depth_32 = bits == 32;
+        if(depth_buffer_default != depth_default)
+        {
+            depth_buffer_default = depth_default;
+            model.DirtyVariable("depth_buffer_default");
+        }
+        if(depth_buffer_16 != depth_16)
+        {
+            depth_buffer_16 = depth_16;
+            model.DirtyVariable("depth_buffer_16");
+        }
+        if(depth_buffer_24 != depth_24)
+        {
+            depth_buffer_24 = depth_24;
+            model.DirtyVariable("depth_buffer_24");
+        }
+        if(depth_buffer_32 != depth_32)
+        {
+            depth_buffer_32 = depth_32;
+            model.DirtyVariable("depth_buffer_32");
+        }
+
+        if(!request_changed)
+        {
+            char status[96];
+            formatdepthbufferstatus(
+                bits,
+                depth_buffer,
+                depth_buffer_label.c_str(),
+                status,
+                sizeof(status)
+            );
+            depth_buffer_status = status;
+            model.DirtyVariable("depth_buffer_status");
+        }
+        else
+        {
+            pending_depth_buffer = bits;
+            depth_buffer_status = "Rebuilding the graphics context";
+            model.DirtyVariable("depth_buffer_status");
+        }
+
+        event.StopPropagation();
+    }
+
     void RmlSettings::selectcrosshair(
         Rml::DataModelHandle,
         Rml::Event &event,
@@ -2637,6 +5649,62 @@ namespace cowui
         event.StopPropagation();
     }
 
+    void RmlSettings::selectsoundfrequency(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 1)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const int requested = arguments[0].Get<int>();
+        if(requested == sound_frequency)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Audio state = {};
+        const bool accepted = settings::writesoundfrequency(requested, state);
+        refreshaudio();
+        if(!accepted)
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected sound frequency %d\n",
+                requested
+            );
+            sound_frequency_status =
+                "Frequency change was not accepted; current engine state is shown";
+            model.DirtyVariable("sound_frequency_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::selectmumble(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::Audio state = {};
+        const bool accepted = settings::writemumble(enabled, state);
+        refreshaudio();
+        if(!accepted)
+        {
+            mumble_status =
+                "Mumble change was not accepted; current engine state is shown";
+            model.DirtyVariable("mumble_status");
+        }
+    }
+
     void RmlSettings::changefovaction(Rml::Event &event)
     {
         if(!instance)
@@ -2657,6 +5725,1424 @@ namespace cowui
 
         instance->refresh();
         event.StopPropagation();
+    }
+
+    bool RmlSettings::refreshgamefeedback()
+    {
+        settings::GameFeedback state = {};
+        const bool available = settings::readgamefeedback(state);
+        presentgamefeedback(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentgamefeedback(
+        const settings::GameFeedback &state,
+        bool available)
+    {
+        if(game_feedback_available != available)
+        {
+            game_feedback_available = available;
+            model.DirtyVariable("game_feedback_available");
+        }
+        if(blood != state.blood)
+        {
+            blood = state.blood;
+            model.DirtyVariable("blood");
+        }
+        if(hit_sound != state.hit_sound)
+        {
+            hit_sound = state.hit_sound;
+            model.DirtyVariable("hit_sound");
+        }
+        if(outline_capture_meters != state.outline_capture_meters)
+        {
+            outline_capture_meters = state.outline_capture_meters;
+            model.DirtyVariable("outline_capture_meters");
+        }
+        if(show_scoreboard_at_death != state.show_scoreboard_at_death)
+        {
+            show_scoreboard_at_death = state.show_scoreboard_at_death;
+            model.DirtyVariable("show_scoreboard_at_death");
+        }
+
+        const char *status = available
+            ? ""
+            : "Combat feedback settings are unavailable";
+        if(game_feedback_status != status)
+        {
+            game_feedback_status = status;
+            model.DirtyVariable("game_feedback_status");
+        }
+    }
+
+    void RmlSettings::selectblood(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_feedback_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameFeedback state = {};
+        const bool accepted = settings::writeblood(enabled, state);
+        const bool available = accepted ||
+            settings::readgamefeedback(state);
+        presentgamefeedback(state, available);
+        if(!accepted && available)
+        {
+            game_feedback_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_feedback_status");
+        }
+    }
+
+    void RmlSettings::selecthitsound(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_feedback_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameFeedback state = {};
+        const bool accepted = settings::writehitsound(enabled, state);
+        const bool available = accepted ||
+            settings::readgamefeedback(state);
+        presentgamefeedback(state, available);
+        if(!accepted && available)
+        {
+            game_feedback_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_feedback_status");
+        }
+    }
+
+    void RmlSettings::selectoutlinecapturemeters(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_feedback_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameFeedback state = {};
+        const bool accepted = settings::writeoutlinemeters(enabled, state);
+        const bool available = accepted ||
+            settings::readgamefeedback(state);
+        presentgamefeedback(state, available);
+        if(!accepted && available)
+        {
+            game_feedback_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_feedback_status");
+        }
+    }
+
+    void RmlSettings::selectshowscoreboardatdeath(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_feedback_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameFeedback state = {};
+        const bool accepted = settings::writedeathscore(enabled, state);
+        const bool available = accepted ||
+            settings::readgamefeedback(state);
+        presentgamefeedback(state, available);
+        if(!accepted && available)
+        {
+            game_feedback_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_feedback_status");
+        }
+    }
+
+    bool RmlSettings::refreshtrailcolors()
+    {
+        settings::TrailColors state = {};
+        const bool available = settings::readtrailcolors(state);
+        presenttrailcolors(state, available);
+        return available;
+    }
+
+    void RmlSettings::presenttrailcolors(
+        const settings::TrailColors &state,
+        bool available)
+    {
+        if(trail_colors_available != available)
+        {
+            trail_colors_available = available;
+            model.DirtyVariable("trail_colors_available");
+        }
+        if(trail_color_channel_minimum != state.channel_minimum)
+        {
+            trail_color_channel_minimum = state.channel_minimum;
+            model.DirtyVariable("trail_color_channel_minimum");
+        }
+        if(trail_color_channel_maximum != state.channel_maximum)
+        {
+            trail_color_channel_maximum = state.channel_maximum;
+            model.DirtyVariable("trail_color_channel_maximum");
+        }
+
+        const int shotgun_red = unpacktrailred(state.shotgun);
+        const int shotgun_green = unpacktrailgreen(state.shotgun);
+        const int shotgun_blue = unpacktrailblue(state.shotgun);
+        if(trail_color_shotgun_red != shotgun_red)
+        {
+            trail_color_shotgun_red = shotgun_red;
+            model.DirtyVariable("trail_color_shotgun_red");
+        }
+        if(trail_color_shotgun_green != shotgun_green)
+        {
+            trail_color_shotgun_green = shotgun_green;
+            model.DirtyVariable("trail_color_shotgun_green");
+        }
+        if(trail_color_shotgun_blue != shotgun_blue)
+        {
+            trail_color_shotgun_blue = shotgun_blue;
+            model.DirtyVariable("trail_color_shotgun_blue");
+        }
+
+        const int chaingun_red = unpacktrailred(state.chaingun);
+        const int chaingun_green = unpacktrailgreen(state.chaingun);
+        const int chaingun_blue = unpacktrailblue(state.chaingun);
+        if(trail_color_chaingun_red != chaingun_red)
+        {
+            trail_color_chaingun_red = chaingun_red;
+            model.DirtyVariable("trail_color_chaingun_red");
+        }
+        if(trail_color_chaingun_green != chaingun_green)
+        {
+            trail_color_chaingun_green = chaingun_green;
+            model.DirtyVariable("trail_color_chaingun_green");
+        }
+        if(trail_color_chaingun_blue != chaingun_blue)
+        {
+            trail_color_chaingun_blue = chaingun_blue;
+            model.DirtyVariable("trail_color_chaingun_blue");
+        }
+
+        const int rocket_red = unpacktrailred(state.rocketlauncher);
+        const int rocket_green = unpacktrailgreen(state.rocketlauncher);
+        const int rocket_blue = unpacktrailblue(state.rocketlauncher);
+        if(trail_color_rocket_launcher_red != rocket_red)
+        {
+            trail_color_rocket_launcher_red = rocket_red;
+            model.DirtyVariable("trail_color_rocket_launcher_red");
+        }
+        if(trail_color_rocket_launcher_green != rocket_green)
+        {
+            trail_color_rocket_launcher_green = rocket_green;
+            model.DirtyVariable("trail_color_rocket_launcher_green");
+        }
+        if(trail_color_rocket_launcher_blue != rocket_blue)
+        {
+            trail_color_rocket_launcher_blue = rocket_blue;
+            model.DirtyVariable("trail_color_rocket_launcher_blue");
+        }
+
+        const int rifle_red = unpacktrailred(state.rifle);
+        const int rifle_green = unpacktrailgreen(state.rifle);
+        const int rifle_blue = unpacktrailblue(state.rifle);
+        if(trail_color_rifle_red != rifle_red)
+        {
+            trail_color_rifle_red = rifle_red;
+            model.DirtyVariable("trail_color_rifle_red");
+        }
+        if(trail_color_rifle_green != rifle_green)
+        {
+            trail_color_rifle_green = rifle_green;
+            model.DirtyVariable("trail_color_rifle_green");
+        }
+        if(trail_color_rifle_blue != rifle_blue)
+        {
+            trail_color_rifle_blue = rifle_blue;
+            model.DirtyVariable("trail_color_rifle_blue");
+        }
+
+        const int grenade_red = unpacktrailred(state.grenadelauncher);
+        const int grenade_green = unpacktrailgreen(state.grenadelauncher);
+        const int grenade_blue = unpacktrailblue(state.grenadelauncher);
+        if(trail_color_grenade_launcher_red != grenade_red)
+        {
+            trail_color_grenade_launcher_red = grenade_red;
+            model.DirtyVariable("trail_color_grenade_launcher_red");
+        }
+        if(trail_color_grenade_launcher_green != grenade_green)
+        {
+            trail_color_grenade_launcher_green = grenade_green;
+            model.DirtyVariable("trail_color_grenade_launcher_green");
+        }
+        if(trail_color_grenade_launcher_blue != grenade_blue)
+        {
+            trail_color_grenade_launcher_blue = grenade_blue;
+            model.DirtyVariable("trail_color_grenade_launcher_blue");
+        }
+
+        const int pistol_red = unpacktrailred(state.pistol);
+        const int pistol_green = unpacktrailgreen(state.pistol);
+        const int pistol_blue = unpacktrailblue(state.pistol);
+        if(trail_color_pistol_red != pistol_red)
+        {
+            trail_color_pistol_red = pistol_red;
+            model.DirtyVariable("trail_color_pistol_red");
+        }
+        if(trail_color_pistol_green != pistol_green)
+        {
+            trail_color_pistol_green = pistol_green;
+            model.DirtyVariable("trail_color_pistol_green");
+        }
+        if(trail_color_pistol_blue != pistol_blue)
+        {
+            trail_color_pistol_blue = pistol_blue;
+            model.DirtyVariable("trail_color_pistol_blue");
+        }
+
+        const char *status = available
+            ? ""
+            : "Trail color settings are unavailable";
+        if(trail_colors_status != status)
+        {
+            trail_colors_status = status;
+            model.DirtyVariable("trail_colors_status");
+        }
+    }
+
+    void RmlSettings::selecttrailcolorchannel(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 2 && arguments.size() != 3)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const int weapon = arguments[0].Get<int>(-1);
+        const int channel = arguments[1].Get<int>(-1);
+
+        // Native trailcolors tabs: shotgun, chaingun, rocketlauncher,
+        // rifle, grenadelauncher, pistol. Channels are red, green, blue.
+
+        int red = 0;
+        int green = 0;
+        int blue = 0;
+        switch(weapon)
+        {
+            case 0:
+                red = trail_color_shotgun_red;
+                green = trail_color_shotgun_green;
+                blue = trail_color_shotgun_blue;
+                break;
+            case 1:
+                red = trail_color_chaingun_red;
+                green = trail_color_chaingun_green;
+                blue = trail_color_chaingun_blue;
+                break;
+            case 2:
+                red = trail_color_rocket_launcher_red;
+                green = trail_color_rocket_launcher_green;
+                blue = trail_color_rocket_launcher_blue;
+                break;
+            case 3:
+                red = trail_color_rifle_red;
+                green = trail_color_rifle_green;
+                blue = trail_color_rifle_blue;
+                break;
+            case 4:
+                red = trail_color_grenade_launcher_red;
+                green = trail_color_grenade_launcher_green;
+                blue = trail_color_grenade_launcher_blue;
+                break;
+            case 5:
+                red = trail_color_pistol_red;
+                green = trail_color_pistol_green;
+                blue = trail_color_pistol_blue;
+                break;
+            default:
+                event.StopPropagation();
+                return;
+        }
+
+        int current = 0;
+        switch(channel)
+        {
+            case 0:
+                current = red;
+                break;
+            case 1:
+                current = green;
+                break;
+            case 2:
+                current = blue;
+                break;
+            default:
+                event.StopPropagation();
+                return;
+        }
+
+        int requested = current;
+        if(arguments.size() == 3)
+            requested = arguments[2].Get<int>(current);
+        else
+            requested = event.GetParameter<int>("value", current);
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == current)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(!trail_colors_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(requested < trail_color_channel_minimum ||
+           requested > trail_color_channel_maximum)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        switch(channel)
+        {
+            case 0:
+                red = requested;
+                break;
+            case 1:
+                green = requested;
+                break;
+            case 2:
+                blue = requested;
+                break;
+        }
+
+        const int packed = packtrailcolor(red, green, blue);
+        settings::TrailColors state = {};
+        bool accepted = false;
+        switch(weapon)
+        {
+            case 0:
+                accepted = settings::writetrailcolorshotgun(packed, state);
+                break;
+            case 1:
+                accepted = settings::writetrailcolorchaingun(packed, state);
+                break;
+            case 2:
+                accepted = settings::writetrailcolorrocketlauncher(
+                    packed, state);
+                break;
+            case 3:
+                accepted = settings::writetrailcolorrifle(packed, state);
+                break;
+            case 4:
+                accepted = settings::writetrailcolorgrenadelauncher(
+                    packed, state);
+                break;
+            case 5:
+                accepted = settings::writetrailcolorpistol(packed, state);
+                break;
+        }
+
+        const bool available = accepted ||
+            settings::readtrailcolors(state);
+        presenttrailcolors(state, available);
+        if(!accepted && available)
+        {
+            trail_colors_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("trail_colors_status");
+        }
+        event.StopPropagation();
+    }
+
+    bool RmlSettings::refreshgameradar()
+    {
+        settings::GameRadar state = {};
+        const bool available = settings::readgameradar(state);
+        presentgameradar(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentgameradar(
+        const settings::GameRadar &state,
+        bool available)
+    {
+        if(game_radar_available != available)
+        {
+            game_radar_available = available;
+            model.DirtyVariable("game_radar_available");
+        }
+        if(numbered_capture_bases != state.numbered_capture_bases)
+        {
+            numbered_capture_bases = state.numbered_capture_bases;
+            model.DirtyVariable("numbered_capture_bases");
+        }
+        if(show_teammates_on_radar != state.show_teammates_on_radar)
+        {
+            show_teammates_on_radar = state.show_teammates_on_radar;
+            model.DirtyVariable("show_teammates_on_radar");
+        }
+
+        const char *status = available
+            ? ""
+            : "Radar settings are unavailable";
+        if(game_radar_status != status)
+        {
+            game_radar_status = status;
+            model.DirtyVariable("game_radar_status");
+        }
+    }
+
+    void RmlSettings::selectnumberedcapturebases(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_radar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameRadar state = {};
+        const bool accepted = settings::writebasenumbers(enabled, state);
+        const bool available = accepted ||
+            settings::readgameradar(state);
+        presentgameradar(state, available);
+        if(!accepted && available)
+        {
+            game_radar_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_radar_status");
+        }
+    }
+
+    void RmlSettings::selectshowteammatesonradar(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_radar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameRadar state = {};
+        const bool accepted = settings::writeradarteammates(enabled, state);
+        const bool available = accepted ||
+            settings::readgameradar(state);
+        presentgameradar(state, available);
+        if(!accepted && available)
+        {
+            game_radar_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_radar_status");
+        }
+    }
+
+    bool RmlSettings::refreshgamemodels()
+    {
+        settings::GameModels state = {};
+        const bool available = settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentgamemodels(
+        const settings::GameModels &state,
+        bool available)
+    {
+        if(game_models_available != available)
+        {
+            game_models_available = available;
+            model.DirtyVariable("game_models_available");
+        }
+        if(ragdoll_deaths != state.ragdoll_deaths)
+        {
+            ragdoll_deaths = state.ragdoll_deaths;
+            model.DirtyVariable("ragdoll_deaths");
+        }
+        if(keep_ragdoll_after_respawn != state.keep_ragdoll_after_respawn)
+        {
+            keep_ragdoll_after_respawn = state.keep_ragdoll_after_respawn;
+            model.DirtyVariable("keep_ragdoll_after_respawn");
+        }
+        if(deadpush != state.deadpush)
+        {
+            deadpush = state.deadpush;
+            model.DirtyVariable("deadpush");
+        }
+        if(deadpush_minimum != state.deadpush_minimum)
+        {
+            deadpush_minimum = state.deadpush_minimum;
+            model.DirtyVariable("deadpush_minimum");
+        }
+        if(deadpush_maximum != state.deadpush_maximum)
+        {
+            deadpush_maximum = state.deadpush_maximum;
+            model.DirtyVariable("deadpush_maximum");
+        }
+        if(hide_dead_players != state.hide_dead_players)
+        {
+            hide_dead_players = state.hide_dead_players;
+            model.DirtyVariable("hide_dead_players");
+        }
+        if(fullbright_player_models != state.fullbright_player_models)
+        {
+            fullbright_player_models = state.fullbright_player_models;
+            model.DirtyVariable("fullbright_player_models");
+        }
+        const int intensity = fullbrightintensityselected(
+            state.fullbrightmodels);
+        if(fullbright_intensity_selected != intensity)
+        {
+            fullbright_intensity_selected = intensity;
+            model.DirtyVariable("fullbright_intensity_selected");
+        }
+        if(force_matching_player_models !=
+           state.force_matching_player_models)
+        {
+            force_matching_player_models =
+                state.force_matching_player_models;
+            model.DirtyVariable("force_matching_player_models");
+        }
+        if(always_use_team_skins != state.always_use_team_skins)
+        {
+            always_use_team_skins = state.always_use_team_skins;
+            model.DirtyVariable("always_use_team_skins");
+        }
+
+        Rml::String status;
+        if(!available)
+            status = "Player model settings are unavailable";
+        else
+        {
+            if(state.hidedead > 1)
+            {
+                char text[160];
+                std::snprintf(
+                    text,
+                    sizeof(text),
+                    "Hide-dead is %d; shown on without rewriting. A toggle writes 0 or 1.",
+                    state.hidedead
+                );
+                status = text;
+            }
+            if(state.ragdoll_millis != 0 &&
+               state.ragdoll_millis != 10000)
+            {
+                char text[192];
+                std::snprintf(
+                    text,
+                    sizeof(text),
+                    "Ragdolls stay for %d ms; shown on without rewriting. A toggle writes 10000 or 0.",
+                    state.ragdoll_millis
+                );
+                if(!status.empty())
+                    status += " ";
+                status += text;
+            }
+            if(state.fullbrightmodels != 0 &&
+               fullbrightintensityselected(state.fullbrightmodels) < 0)
+            {
+                char text[192];
+                std::snprintf(
+                    text,
+                    sizeof(text),
+                    "Fullbright intensity is %d; no radio is selected. Opening Settings does not rewrite.",
+                    state.fullbrightmodels
+                );
+                if(!status.empty())
+                    status += " ";
+                status += text;
+            }
+        }
+        if(game_models_status != status)
+        {
+            game_models_status = status;
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectragdolldeaths(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writeragdoll(enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectkeepragdollafterrespawn(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writeragdollmillis(enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selecthidedeadplayers(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writehidedead(enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectfullbrightplayermodels(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writefullbrightmodels(
+            enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectfullbrightintensity(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const int value = arguments[0].Get<int>();
+        if(fullbrightintensityselected(value) < 0)
+            return;
+
+        settings::GameModels state = {};
+        const bool accepted = settings::writefullbrightintensity(
+            value, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectforceplayermodels(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writeforceplayermodels(
+            enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    void RmlSettings::selectalwaysuseteamskins(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !game_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::GameModels state = {};
+        const bool accepted = settings::writeteamskins(enabled, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            game_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("game_models_status");
+        }
+    }
+
+    bool RmlSettings::refreshammobar()
+    {
+        settings::Ammobar state = {};
+        const bool available = settings::readammobar(state);
+        presentammobar(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentammobar(
+        const settings::Ammobar &state,
+        bool available)
+    {
+        if(ammobar_available != available)
+        {
+            ammobar_available = available;
+            model.DirtyVariable("ammobar_available");
+        }
+
+        const char *status = available
+            ? ""
+            : "Ammobar settings are unavailable";
+        if(ammobar_status != status)
+        {
+            ammobar_status = status;
+            model.DirtyVariable("ammobar_status");
+        }
+
+        if(!available)
+            return;
+
+        if(ammobar_visible != state.visible)
+        {
+            ammobar_visible = state.visible;
+            model.DirtyVariable("ammobar_visible");
+            if(ammobar_visible)
+            {
+                ammobar_icon_spacing_armed = false;
+                ammobar_label_offset_armed = false;
+            }
+        }
+        if(ammobar_horizontal != state.horizontal)
+        {
+            ammobar_horizontal = state.horizontal;
+            model.DirtyVariable("ammobar_horizontal");
+        }
+        if(ammobar_flip != state.flip)
+        {
+            ammobar_flip = state.flip;
+            model.DirtyVariable("ammobar_flip");
+        }
+        if(ammobar_scale != state.scale)
+        {
+            ammobar_scale = state.scale;
+            model.DirtyVariable("ammobar_scale");
+        }
+        if(ammobar_scale_minimum != state.scale_minimum)
+        {
+            ammobar_scale_minimum = state.scale_minimum;
+            model.DirtyVariable("ammobar_scale_minimum");
+        }
+        if(ammobar_scale_maximum != state.scale_maximum)
+        {
+            ammobar_scale_maximum = state.scale_maximum;
+            model.DirtyVariable("ammobar_scale_maximum");
+        }
+        if(ammobar_icon_spacing != state.icon_spacing)
+        {
+            ammobar_icon_spacing = state.icon_spacing;
+            model.DirtyVariable("ammobar_icon_spacing");
+        }
+        if(ammobar_icon_spacing_minimum != state.icon_spacing_minimum)
+        {
+            ammobar_icon_spacing_minimum = state.icon_spacing_minimum;
+            model.DirtyVariable("ammobar_icon_spacing_minimum");
+        }
+        if(ammobar_icon_spacing_maximum != state.icon_spacing_maximum)
+        {
+            ammobar_icon_spacing_maximum = state.icon_spacing_maximum;
+            model.DirtyVariable("ammobar_icon_spacing_maximum");
+        }
+        if(ammobar_label_size != state.label_size)
+        {
+            ammobar_label_size = state.label_size;
+            model.DirtyVariable("ammobar_label_size");
+        }
+        if(ammobar_label_size_minimum != state.label_size_minimum)
+        {
+            ammobar_label_size_minimum = state.label_size_minimum;
+            model.DirtyVariable("ammobar_label_size_minimum");
+        }
+        if(ammobar_label_size_maximum != state.label_size_maximum)
+        {
+            ammobar_label_size_maximum = state.label_size_maximum;
+            model.DirtyVariable("ammobar_label_size_maximum");
+        }
+        if(ammobar_label_offset != state.label_offset)
+        {
+            ammobar_label_offset = state.label_offset;
+            model.DirtyVariable("ammobar_label_offset");
+        }
+        if(ammobar_label_offset_minimum != state.label_offset_minimum)
+        {
+            ammobar_label_offset_minimum = state.label_offset_minimum;
+            model.DirtyVariable("ammobar_label_offset_minimum");
+        }
+        if(ammobar_label_offset_maximum != state.label_offset_maximum)
+        {
+            ammobar_label_offset_maximum = state.label_offset_maximum;
+            model.DirtyVariable("ammobar_label_offset_maximum");
+        }
+
+        const bool align_first = state.align == -1;
+        const bool align_center = state.align == 0;
+        const bool align_last = state.align == 1;
+        if(ammobar_align_first != align_first)
+        {
+            ammobar_align_first = align_first;
+            model.DirtyVariable("ammobar_align_first");
+        }
+        if(ammobar_align_center != align_center)
+        {
+            ammobar_align_center = align_center;
+            model.DirtyVariable("ammobar_align_center");
+        }
+        if(ammobar_align_last != align_last)
+        {
+            ammobar_align_last = align_last;
+            model.DirtyVariable("ammobar_align_last");
+        }
+
+        if(ammobar_x != state.x)
+        {
+            ammobar_x = state.x;
+            model.DirtyVariable("ammobar_x");
+        }
+        if(ammobar_x_minimum != state.x_minimum)
+        {
+            ammobar_x_minimum = state.x_minimum;
+            model.DirtyVariable("ammobar_x_minimum");
+        }
+        if(ammobar_x_maximum != state.x_maximum)
+        {
+            ammobar_x_maximum = state.x_maximum;
+            model.DirtyVariable("ammobar_x_maximum");
+        }
+        if(ammobar_y != state.y)
+        {
+            ammobar_y = state.y;
+            model.DirtyVariable("ammobar_y");
+        }
+        if(ammobar_y_minimum != state.y_minimum)
+        {
+            ammobar_y_minimum = state.y_minimum;
+            model.DirtyVariable("ammobar_y_minimum");
+        }
+        if(ammobar_y_maximum != state.y_maximum)
+        {
+            ammobar_y_maximum = state.y_maximum;
+            model.DirtyVariable("ammobar_y_maximum");
+        }
+        if(ammobar_hide_empty != state.hide_empty)
+        {
+            ammobar_hide_empty = state.hide_empty;
+            model.DirtyVariable("ammobar_hide_empty");
+        }
+
+        const Rml::String scale_text = formatsensitivity(state.scale);
+        if(!ammobar_scale_editing && ammobar_scale_input != scale_text)
+        {
+            ammobar_scale_input = scale_text;
+            model.DirtyVariable("ammobar_scale_input");
+        }
+        const Rml::String label_size_text =
+            formatsensitivity(state.label_size);
+        if(!ammobar_label_size_editing &&
+           ammobar_label_size_input != label_size_text)
+        {
+            ammobar_label_size_input = label_size_text;
+            model.DirtyVariable("ammobar_label_size_input");
+        }
+        const Rml::String x_text = formatsensitivity(state.x);
+        if(!ammobar_x_editing && ammobar_x_input != x_text)
+        {
+            ammobar_x_input = x_text;
+            model.DirtyVariable("ammobar_x_input");
+        }
+        const Rml::String y_text = formatsensitivity(state.y);
+        if(!ammobar_y_editing && ammobar_y_input != y_text)
+        {
+            ammobar_y_input = y_text;
+            model.DirtyVariable("ammobar_y_input");
+        }
+    }
+
+    void RmlSettings::finishammobarwrite(
+        bool accepted,
+        settings::Ammobar &state)
+    {
+        const bool available = accepted || settings::readammobar(state);
+        presentammobar(state, available);
+        if(!accepted && available)
+        {
+            ammobar_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("ammobar_status");
+        }
+    }
+
+    void RmlSettings::selectammobar(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !ammobar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobar(enabled, state);
+        finishammobarwrite(accepted, state);
+    }
+
+    void RmlSettings::selectammobarhorizontal(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !ammobar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarhorizontal(enabled, state);
+        finishammobarwrite(accepted, state);
+    }
+
+    void RmlSettings::selectammobarflip(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !ammobar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarflip(enabled, state);
+        finishammobarwrite(accepted, state);
+    }
+
+    void RmlSettings::selectammobarhideempty(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !ammobar_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarhideempty(enabled, state);
+        finishammobarwrite(accepted, state);
+    }
+
+    void RmlSettings::selectammobaralign(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !ammobar_available)
+            return;
+
+        const int requested = arguments[0].Get<int>();
+        if(requested != -1 && requested != 0 && requested != 1)
+            return;
+
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobaralign(requested, state);
+        finishammobarwrite(accepted, state);
+    }
+
+    bool RmlSettings::refreshscoreboardcolumns()
+    {
+        settings::ScoreboardColumns state = {};
+        const bool available = settings::readscoreboardcolumns(state);
+        presentscoreboardcolumns(state, available);
+        return available;
+    }
+
+    void RmlSettings::presentscoreboardcolumns(
+        const settings::ScoreboardColumns &state,
+        bool available)
+    {
+        if(scoreboard_available != available)
+        {
+            scoreboard_available = available;
+            model.DirtyVariable("scoreboard_available");
+        }
+
+        if(scoreboard_flags != state.show_flags)
+        {
+            scoreboard_flags = state.show_flags;
+            model.DirtyVariable("scoreboard_flags");
+        }
+        if(scoreboard_frags != state.show_frags)
+        {
+            scoreboard_frags = state.show_frags;
+            model.DirtyVariable("scoreboard_frags");
+        }
+        if(scoreboard_deaths != state.show_deaths)
+        {
+            scoreboard_deaths = state.show_deaths;
+            model.DirtyVariable("scoreboard_deaths");
+        }
+        if(scoreboard_suicides != state.show_suicides)
+        {
+            scoreboard_suicides = state.show_suicides;
+            model.DirtyVariable("scoreboard_suicides");
+        }
+        if(scoreboard_kpd != state.show_kpd)
+        {
+            scoreboard_kpd = state.show_kpd;
+            model.DirtyVariable("scoreboard_kpd");
+        }
+        if(scoreboard_accuracy != state.show_accuracy)
+        {
+            scoreboard_accuracy = state.show_accuracy;
+            model.DirtyVariable("scoreboard_accuracy");
+        }
+        if(scoreboard_damage != state.show_damage)
+        {
+            scoreboard_damage = state.show_damage;
+            model.DirtyVariable("scoreboard_damage");
+        }
+        if(scoreboard_damage_dealt != state.show_damage_dealt)
+        {
+            scoreboard_damage_dealt = state.show_damage_dealt;
+            model.DirtyVariable("scoreboard_damage_dealt");
+        }
+        if(scoreboard_damage_net != state.show_damage_net)
+        {
+            scoreboard_damage_net = state.show_damage_net;
+            model.DirtyVariable("scoreboard_damage_net");
+        }
+        if(scoreboard_damage_received != state.show_damage_received)
+        {
+            scoreboard_damage_received = state.show_damage_received;
+            model.DirtyVariable("scoreboard_damage_received");
+        }
+        if(scoreboard_ping != state.show_ping)
+        {
+            scoreboard_ping = state.show_ping;
+            model.DirtyVariable("scoreboard_ping");
+        }
+        if(scoreboard_pj != state.show_pj)
+        {
+            scoreboard_pj = state.show_pj;
+            model.DirtyVariable("scoreboard_pj");
+        }
+        if(scoreboard_clientnum != state.show_clientnum)
+        {
+            scoreboard_clientnum = state.show_clientnum;
+            model.DirtyVariable("scoreboard_clientnum");
+        }
+
+        Rml::String status;
+        if(!available)
+            status = "Scoreboard column settings are unavailable";
+        else
+        {
+            if(state.showping == 2)
+            {
+                status =
+                    "Ping is 2; shown on without rewriting. A toggle off writes 0, on from 0 writes 1.";
+            }
+            if(state.show_damage &&
+               !state.show_damage_dealt &&
+               !state.show_damage_net)
+            {
+                char text[192];
+                std::snprintf(
+                    text,
+                    sizeof(text),
+                    "Damage is %d; no radio is selected. Opening Settings does not rewrite.",
+                    state.showdamage
+                );
+                if(!status.empty())
+                    status += " ";
+                status += text;
+            }
+        }
+        if(scoreboard_status != status)
+        {
+            scoreboard_status = status;
+            model.DirtyVariable("scoreboard_status");
+        }
+    }
+
+    void RmlSettings::finishscoreboardwrite(
+        bool accepted,
+        settings::ScoreboardColumns &state)
+    {
+        const bool available = accepted ||
+            settings::readscoreboardcolumns(state);
+        presentscoreboardcolumns(state, available);
+        if(!accepted && available)
+        {
+            scoreboard_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("scoreboard_status");
+        }
+    }
+
+    void RmlSettings::selectscoreboardflags(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowflags(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardfrags(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writehidefrags(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboarddeaths(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowdeaths(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardsuicides(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowsuicides(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardkpd(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowkpd(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardaccuracy(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowaccuracy(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboarddamage(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowdamage(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboarddamagemode(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const int value = arguments[0].Get<int>();
+        if(value != 1 && value != 2)
+            return;
+
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowdamagemode(value, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboarddamagereceived(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowdamagereceived(
+            enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardping(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowping(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardpj(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowpj(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectscoreboardclientnum(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !scoreboard_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::ScoreboardColumns state = {};
+        const bool accepted = settings::writeshowclientnum(enabled, state);
+        finishscoreboardwrite(accepted, state);
+    }
+
+    void RmlSettings::selectfragmessagestackdir(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !frag_messages_enabled)
+            return;
+
+        const int requested = arguments[0].Get<int>();
+        if(requested != -1 && requested != 0 && requested != 1)
+            return;
+
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagestackdir(
+            requested, state);
+        finishhudwrite(accepted, state);
     }
 
     void RmlSettings::gamecategoryaction(Rml::Event &event)
@@ -2705,6 +7191,13 @@ namespace cowui
     {
         if(instance)
             instance->setcategory(Category::Chat);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolecategoryaction(Rml::Event &event)
+    {
+        if(instance)
+            instance->setcategory(Category::Console);
         event.StopPropagation();
     }
 
@@ -3597,6 +8090,50 @@ namespace cowui
         }
     }
 
+    void RmlSettings::refreshbumpmodels()
+    {
+        settings::BumpModelsState state = {};
+        const bool available = settings::readbumpmodels(state);
+        presentbumpmodels(state, available);
+    }
+
+    void RmlSettings::presentbumpmodels(
+        const settings::BumpModelsState &state,
+        bool available)
+    {
+        bump_models_available = available;
+        bump_models = state.enabled;
+        bump_models_status = available
+            ? ""
+            : "Model bump maps state is unavailable";
+
+        model.DirtyVariable("bump_models_available");
+        model.DirtyVariable("bump_models");
+        model.DirtyVariable("bump_models_status");
+    }
+
+    void RmlSettings::selectbumpmodels(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !bump_models_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::BumpModelsState state = {};
+        const bool accepted = settings::writebumpmodels(enabled, state);
+        const bool available = accepted ||
+            settings::readbumpmodels(state);
+        presentbumpmodels(state, available);
+        if(!accepted && available)
+        {
+            bump_models_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("bump_models_status");
+        }
+    }
+
     void RmlSettings::refreshenvironmentmapresolution()
     {
         settings::EnvironmentMapResolutionState state = {};
@@ -4073,6 +8610,49 @@ namespace cowui
                     decal_persistence_status;
             }
             model.DirtyVariable("decal_persistence_status");
+        }
+    }
+
+    void RmlSettings::refreshfixtjoints()
+    {
+        settings::FixTJointsState state = {};
+        const bool available = settings::readfixtjoints(state);
+        presentfixtjoints(state, available);
+    }
+
+    void RmlSettings::presentfixtjoints(
+        const settings::FixTJointsState &state,
+        bool available)
+    {
+        fix_t_joints_available = available;
+        fix_t_joints = state.enabled;
+        fix_t_joints_status = available
+            ? ""
+            : "Fix T-Joints state is unavailable";
+
+        model.DirtyVariable("fix_t_joints_available");
+        model.DirtyVariable("fix_t_joints");
+        model.DirtyVariable("fix_t_joints_status");
+    }
+
+    void RmlSettings::selectfixtjoints(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !fix_t_joints_available)
+            return;
+
+        const bool enabled = arguments[0].Get<bool>();
+        settings::FixTJointsState state = {};
+        const bool accepted = settings::writefixtjoints(enabled, state);
+        const bool available = accepted || settings::readfixtjoints(state);
+        presentfixtjoints(state, available);
+        if(!accepted && available)
+        {
+            fix_t_joints_status =
+                "Change not accepted; current engine state is shown";
+            model.DirtyVariable("fix_t_joints_status");
         }
     }
 
@@ -4854,6 +9434,250 @@ namespace cowui
         event.StopPropagation();
     }
 
+    void RmlSettings::refreshgamma()
+    {
+        settings::Gamma state = {};
+        const bool available = settings::readgamma(state);
+        presentgamma(state, available);
+    }
+
+    void RmlSettings::presentgamma(const settings::Gamma &state, bool available)
+    {
+        const int requested = available ? state.requested : 100;
+        const int minimum = available ? state.minimum : 30;
+        const int maximum = available ? state.maximum : 300;
+
+        if(gamma != requested)
+        {
+            gamma = requested;
+            model.DirtyVariable("gamma");
+        }
+        if(gamma_minimum != minimum)
+        {
+            gamma_minimum = minimum;
+            model.DirtyVariable("gamma_minimum");
+        }
+        if(gamma_maximum != maximum)
+        {
+            gamma_maximum = maximum;
+            model.DirtyVariable("gamma_maximum");
+        }
+
+        char value_label[32];
+        if(available)
+        {
+            std::snprintf(
+                value_label,
+                sizeof(value_label),
+                "%d",
+                state.requested
+            );
+        }
+        else std::snprintf(value_label, sizeof(value_label), "Unavailable");
+
+        if(gamma_label != value_label)
+        {
+            gamma_label = value_label;
+            model.DirtyVariable("gamma_label");
+        }
+
+        Rml::String status;
+        if(!available)
+            status = "Gamma state is unavailable";
+        else if(state.requested != state.effective)
+        {
+            char text[96];
+            std::snprintf(
+                text,
+                sizeof(text),
+                "Requested %d; display reports %d",
+                state.requested,
+                state.effective
+            );
+            status = text;
+        }
+        else status = "Immediate window brightness";
+
+        if(gamma_status != status)
+        {
+            gamma_status = status;
+            model.DirtyVariable("gamma_status");
+        }
+    }
+
+    void RmlSettings::changegammaaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->gamma
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for the RML default
+        // (100) and min/max clamps during InstanceElement, before the range
+        // is parented.
+        if(requested == instance->gamma)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Gamma state = {};
+        const bool accepted = settings::writegamma(requested, state);
+        const bool available = accepted || settings::readgamma(state);
+        instance->presentgamma(state, available);
+        if(!accepted && available)
+        {
+            instance->gamma_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("gamma_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changedeadpushaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->deadpush
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->deadpush)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(!instance->game_models_available || !instance->ragdoll_deaths)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::GameModels state = {};
+        const bool accepted = settings::writedeadpush(requested, state);
+        const bool available = accepted ||
+            settings::readgamemodels(state);
+        instance->presentgamemodels(state, available);
+        if(!accepted && available)
+        {
+            instance->game_models_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("game_models_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changeammobariconspacingaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->ammobar_icon_spacing
+        );
+
+        // Ignore programmatic range updates so opening Settings or revealing
+        // the data-if layout cannot rewrite the native ident. RmlUi emits
+        // change for an RML default during InstanceElement. Do not arm until
+        // the bound engine value has been applied.
+        if(!instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+        if(!instance->ammobar_icon_spacing_armed)
+        {
+            if(requested == instance->ammobar_icon_spacing)
+                instance->ammobar_icon_spacing_armed = true;
+            event.StopPropagation();
+            return;
+        }
+        if(requested == instance->ammobar_icon_spacing)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarsep(requested, state);
+        instance->finishammobarwrite(accepted, state);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changeammobarlabeloffsetaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->ammobar_label_offset
+        );
+
+        if(!instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+        if(!instance->ammobar_label_offset_armed)
+        {
+            if(requested == instance->ammobar_label_offset)
+                instance->ammobar_label_offset_armed = true;
+            event.StopPropagation();
+            return;
+        }
+        if(requested == instance->ammobar_label_offset)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarcountsep(requested, state);
+        instance->finishammobarwrite(accepted, state);
+        event.StopPropagation();
+    }
+
     void RmlSettings::changefpslimitaction(Rml::Event &event)
     {
         if(!instance)
@@ -4913,6 +9737,88 @@ namespace cowui
             std::fprintf(
                 stderr,
                 "Cowbraten UI: rejected the music volume %d\n",
+                requested
+            );
+        }
+
+        instance->refreshaudio();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changesoundchannelsaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->sound_channels
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->sound_channels)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Audio state = {};
+        if(!settings::writesoundchannels(requested, state))
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected sound channels %d\n",
+                requested
+            );
+        }
+
+        instance->refreshaudio();
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changesoundbufferlengthaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->sound_buffer_length
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->sound_buffer_length)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Audio state = {};
+        if(!settings::writesoundbufferlength(requested, state))
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: rejected sound buffer length %d\n",
                 requested
             );
         }
@@ -5172,6 +10078,46 @@ namespace cowui
         event.StopPropagation();
     }
 
+    void RmlSettings::showfpsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writeshowfps(!instance->show_fps);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::wallclockaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writewallclock(!instance->wall_clock);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::wallclock24action(Rml::Event &event)
+    {
+        if(instance && instance->wall_clock)
+        {
+            settings::writewallclock24hour(!instance->wall_clock_24_hour);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::wallclocksecondsaction(Rml::Event &event)
+    {
+        if(instance && instance->wall_clock)
+        {
+            settings::writewallclockseconds(!instance->wall_clock_seconds);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
     void RmlSettings::damagescreenaction(Rml::Event &event)
     {
         if(instance)
@@ -5187,6 +10133,46 @@ namespace cowui
         if(instance)
         {
             settings::writedamagecompass(!instance->damage_compass);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::hudgunsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writehudguns(!instance->hud_guns);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::hudgunswayaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writehudgunsway(!instance->hud_gun_sway);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::muzzleflashaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writemuzzleflash(!instance->muzzle_flash);
+            instance->refreshhud();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::muzzlelightaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            settings::writemuzzlelight(!instance->muzzle_light);
             instance->refreshhud();
         }
         event.StopPropagation();
@@ -5218,6 +10204,462 @@ namespace cowui
             instance->refreshhud();
         }
         event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessageselffragsaction(Rml::Event &event)
+    {
+        if(instance && instance->frag_messages_enabled)
+        {
+            settings::Hud state = {};
+            const bool accepted = settings::writefragmessageselffrags(
+                !instance->frag_message_self_frags,
+                state
+            );
+            instance->finishhudwrite(accepted, state);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessageotherfragsaction(Rml::Event &event)
+    {
+        if(instance && instance->frag_messages_enabled)
+        {
+            settings::Hud state = {};
+            const bool accepted = settings::writefragmessageotherfrags(
+                !instance->frag_message_other_frags,
+                state
+            );
+            instance->finishhudwrite(accepted, state);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessageteamkillsaction(Rml::Event &event)
+    {
+        if(instance && instance->frag_messages_enabled)
+        {
+            settings::Hud state = {};
+            const bool accepted = settings::writefragmessageteamkills(
+                !instance->frag_message_team_kills,
+                state
+            );
+            instance->finishhudwrite(accepted, state);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::fragmessagefadeaction(Rml::Event &event)
+    {
+        if(instance && instance->frag_messages_enabled)
+        {
+            settings::Hud state = {};
+            const bool accepted = settings::writefragmessagefade(
+                !instance->frag_message_fade,
+                state
+            );
+            instance->finishhudwrite(accepted, state);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changemaxfragmessagesaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->max_frag_messages
+        );
+
+        if(!instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+        if(!instance->max_frag_messages_armed)
+        {
+            if(requested == instance->max_frag_messages)
+                instance->max_frag_messages_armed = true;
+            event.StopPropagation();
+            return;
+        }
+        if(requested == instance->max_frag_messages)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::Hud state = {};
+        const bool accepted = settings::writemaxfragmessages(
+            requested, state);
+        instance->finishhudwrite(accepted, state);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::decreasefragmessagedurationaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->frag_message_duration_minimum,
+            stepfragmessagefloat(instance->frag_message_duration, -1, 0.1)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessageduration(
+            requested, state);
+        instance->frag_message_duration_invalid = false;
+        instance->model.DirtyVariable("frag_message_duration_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Duration adjusted by 0.1";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasefragmessagedurationaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->frag_message_duration_maximum,
+            stepfragmessagefloat(instance->frag_message_duration, 1, 0.1)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessageduration(
+            requested, state);
+        instance->frag_message_duration_invalid = false;
+        instance->model.DirtyVariable("frag_message_duration_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Duration adjusted by 0.1";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusfragmessagedurationaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->frag_message_duration_editing = true;
+            if(instance->frag_message_duration_invalid)
+            {
+                instance->frag_message_duration_invalid = false;
+                instance->model.DirtyVariable(
+                    "frag_message_duration_invalid"
+                );
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurfragmessagedurationaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitfragmessageduration();
+            instance->frag_message_duration_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitfragmessagedurationaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitfragmessageduration();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasefragmessagescaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->frag_message_scale_minimum,
+            stepfragmessagefloat(instance->frag_message_scale, -1, 0.1)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagescale(
+            requested, state);
+        instance->frag_message_scale_invalid = false;
+        instance->model.DirtyVariable("frag_message_scale_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Size adjusted by 0.1";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasefragmessagescaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->frag_message_scale_maximum,
+            stepfragmessagefloat(instance->frag_message_scale, 1, 0.1)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagescale(
+            requested, state);
+        instance->frag_message_scale_invalid = false;
+        instance->model.DirtyVariable("frag_message_scale_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Size adjusted by 0.1";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusfragmessagescaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->frag_message_scale_editing = true;
+            if(instance->frag_message_scale_invalid)
+            {
+                instance->frag_message_scale_invalid = false;
+                instance->model.DirtyVariable("frag_message_scale_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurfragmessagescaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitfragmessagescale();
+            instance->frag_message_scale_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitfragmessagescaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitfragmessagescale();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasefragmessagexaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->frag_message_x_minimum,
+            stepfragmessagefloat(instance->frag_message_x, -1, 0.01)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagex(requested, state);
+        instance->frag_message_x_invalid = false;
+        instance->model.DirtyVariable("frag_message_x_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "X adjusted by 0.01";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasefragmessagexaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->frag_message_x_maximum,
+            stepfragmessagefloat(instance->frag_message_x, 1, 0.01)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagex(requested, state);
+        instance->frag_message_x_invalid = false;
+        instance->model.DirtyVariable("frag_message_x_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "X adjusted by 0.01";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusfragmessagexaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->frag_message_x_editing = true;
+            if(instance->frag_message_x_invalid)
+            {
+                instance->frag_message_x_invalid = false;
+                instance->model.DirtyVariable("frag_message_x_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurfragmessagexaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitfragmessagex();
+            instance->frag_message_x_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitfragmessagexaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitfragmessagex();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasefragmessageyaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->frag_message_y_minimum,
+            stepfragmessagefloat(instance->frag_message_y, -1, 0.01)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagey(requested, state);
+        instance->frag_message_y_invalid = false;
+        instance->model.DirtyVariable("frag_message_y_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Y adjusted by 0.01";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasefragmessageyaction(Rml::Event &event)
+    {
+        if(!instance || !instance->frag_messages_enabled)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->frag_message_y_maximum,
+            stepfragmessagefloat(instance->frag_message_y, 1, 0.01)
+        );
+        settings::Hud state = {};
+        const bool accepted = settings::writefragmessagey(requested, state);
+        instance->frag_message_y_invalid = false;
+        instance->model.DirtyVariable("frag_message_y_invalid");
+        instance->finishhudwrite(accepted, state);
+        if(accepted)
+        {
+            instance->hud_status = "Y adjusted by 0.01";
+            instance->model.DirtyVariable("hud_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusfragmessageyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->frag_message_y_editing = true;
+            if(instance->frag_message_y_invalid)
+            {
+                instance->frag_message_y_invalid = false;
+                instance->model.DirtyVariable("frag_message_y_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurfragmessageyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitfragmessagey();
+            instance->frag_message_y_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitfragmessageyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitfragmessagey();
+            event.StopPropagation();
+        }
     }
 
     void RmlSettings::decreasestreakscaleaction(Rml::Event &event)
@@ -5304,6 +10746,1107 @@ namespace cowui
         }
     }
 
+    void RmlSettings::decreaseammobarscaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->ammobar_scale_minimum,
+            stepammobarfloat(instance->ammobar_scale, -1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarscale(requested, state);
+        instance->ammobar_scale_invalid = false;
+        instance->model.DirtyVariable("ammobar_scale_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Size adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increaseammobarscaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->ammobar_scale_maximum,
+            stepammobarfloat(instance->ammobar_scale, 1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarscale(requested, state);
+        instance->ammobar_scale_invalid = false;
+        instance->model.DirtyVariable("ammobar_scale_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Size adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusammobarscaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->ammobar_scale_editing = true;
+            if(instance->ammobar_scale_invalid)
+            {
+                instance->ammobar_scale_invalid = false;
+                instance->model.DirtyVariable("ammobar_scale_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurammobarscaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitammobarscale();
+            instance->ammobar_scale_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitammobarscaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitammobarscale();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreaseammobarlabelsizeaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->ammobar_label_size_minimum,
+            stepammobarfloat(instance->ammobar_label_size, -1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarcountscale(
+            requested, state);
+        instance->ammobar_label_size_invalid = false;
+        instance->model.DirtyVariable("ammobar_label_size_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Label size adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increaseammobarlabelsizeaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->ammobar_label_size_maximum,
+            stepammobarfloat(instance->ammobar_label_size, 1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarcountscale(
+            requested, state);
+        instance->ammobar_label_size_invalid = false;
+        instance->model.DirtyVariable("ammobar_label_size_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Label size adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusammobarlabelsizeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->ammobar_label_size_editing = true;
+            if(instance->ammobar_label_size_invalid)
+            {
+                instance->ammobar_label_size_invalid = false;
+                instance->model.DirtyVariable("ammobar_label_size_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurammobarlabelsizeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitammobarlabelsize();
+            instance->ammobar_label_size_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitammobarlabelsizeaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitammobarlabelsize();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreaseammobarxaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->ammobar_x_minimum,
+            stepammobarfloat(instance->ammobar_x, -1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarx(requested, state);
+        instance->ammobar_x_invalid = false;
+        instance->model.DirtyVariable("ammobar_x_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "X adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increaseammobarxaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->ammobar_x_maximum,
+            stepammobarfloat(instance->ammobar_x, 1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobarx(requested, state);
+        instance->ammobar_x_invalid = false;
+        instance->model.DirtyVariable("ammobar_x_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "X adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusammobarxaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->ammobar_x_editing = true;
+            if(instance->ammobar_x_invalid)
+            {
+                instance->ammobar_x_invalid = false;
+                instance->model.DirtyVariable("ammobar_x_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurammobarxaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitammobarx();
+            instance->ammobar_x_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitammobarxaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitammobarx();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreaseammobaryaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->ammobar_y_minimum,
+            stepammobarfloat(instance->ammobar_y, -1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobary(requested, state);
+        instance->ammobar_y_invalid = false;
+        instance->model.DirtyVariable("ammobar_y_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Y adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increaseammobaryaction(Rml::Event &event)
+    {
+        if(!instance || !instance->ammobar_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->ammobar_y_maximum,
+            stepammobarfloat(instance->ammobar_y, 1)
+        );
+        settings::Ammobar state = {};
+        const bool accepted = settings::writeammobary(requested, state);
+        instance->ammobar_y_invalid = false;
+        instance->model.DirtyVariable("ammobar_y_invalid");
+        instance->finishammobarwrite(accepted, state);
+        if(accepted)
+        {
+            instance->ammobar_status = "Y adjusted by 0.01";
+            instance->model.DirtyVariable("ammobar_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusammobaryaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->ammobar_y_editing = true;
+            if(instance->ammobar_y_invalid)
+            {
+                instance->ammobar_y_invalid = false;
+                instance->model.DirtyVariable("ammobar_y_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurammobaryaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitammobary();
+            instance->ammobar_y_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitammobaryaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitammobary();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::changegameclockalphaaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->game_clock_alpha
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->game_clock_alpha)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(!instance->game_clock_available || !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockalpha(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->presentgameclock(state, available);
+        if(!accepted && available)
+        {
+            instance->game_clock_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("game_clock_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::decreasegameclockscaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->game_clock_scale_minimum,
+            stepgameclockfloat(instance->game_clock_scale, -1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockscale(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_scale_invalid = false;
+        instance->model.DirtyVariable("game_clock_scale_invalid");
+        const bool editing = instance->game_clock_scale_editing;
+        instance->game_clock_scale_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_scale_editing = editing;
+        instance->game_clock_status = accepted
+            ? "Size adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasegameclockscaleaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->game_clock_scale_maximum,
+            stepgameclockfloat(instance->game_clock_scale, 1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockscale(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_scale_invalid = false;
+        instance->model.DirtyVariable("game_clock_scale_invalid");
+        const bool editing = instance->game_clock_scale_editing;
+        instance->game_clock_scale_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_scale_editing = editing;
+        instance->game_clock_status = accepted
+            ? "Size adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusgameclockscaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->game_clock_scale_editing = true;
+            if(instance->game_clock_scale_invalid)
+            {
+                instance->game_clock_scale_invalid = false;
+                instance->model.DirtyVariable(
+                    "game_clock_scale_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurgameclockscaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitgameclockscale();
+            instance->game_clock_scale_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitgameclockscaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitgameclockscale();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasegameclockxaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->game_clock_x_minimum,
+            stepgameclockfloat(instance->game_clock_x, -1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockx(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_x_invalid = false;
+        instance->model.DirtyVariable("game_clock_x_invalid");
+        const bool editing = instance->game_clock_x_editing;
+        instance->game_clock_x_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_x_editing = editing;
+        instance->game_clock_status = accepted
+            ? "X adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasegameclockxaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->game_clock_x_maximum,
+            stepgameclockfloat(instance->game_clock_x, 1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclockx(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_x_invalid = false;
+        instance->model.DirtyVariable("game_clock_x_invalid");
+        const bool editing = instance->game_clock_x_editing;
+        instance->game_clock_x_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_x_editing = editing;
+        instance->game_clock_status = accepted
+            ? "X adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusgameclockxaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->game_clock_x_editing = true;
+            if(instance->game_clock_x_invalid)
+            {
+                instance->game_clock_x_invalid = false;
+                instance->model.DirtyVariable("game_clock_x_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurgameclockxaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitgameclockx();
+            instance->game_clock_x_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitgameclockxaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitgameclockx();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasegameclockyaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::max(
+            instance->game_clock_y_minimum,
+            stepgameclockfloat(instance->game_clock_y, -1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclocky(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_y_invalid = false;
+        instance->model.DirtyVariable("game_clock_y_invalid");
+        const bool editing = instance->game_clock_y_editing;
+        instance->game_clock_y_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_y_editing = editing;
+        instance->game_clock_status = accepted
+            ? "Y adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasegameclockyaction(Rml::Event &event)
+    {
+        if(!instance || !instance->game_clock_available ||
+           !instance->game_clock)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        const float requested = std::min(
+            instance->game_clock_y_maximum,
+            stepgameclockfloat(instance->game_clock_y, 1)
+        );
+        settings::GameClock state = {};
+        const bool accepted = settings::writegameclocky(
+            requested, state);
+        const bool available = accepted ||
+            settings::readgameclock(state);
+        instance->game_clock_y_invalid = false;
+        instance->model.DirtyVariable("game_clock_y_invalid");
+        const bool editing = instance->game_clock_y_editing;
+        instance->game_clock_y_editing = false;
+        instance->presentgameclock(state, available);
+        instance->game_clock_y_editing = editing;
+        instance->game_clock_status = accepted
+            ? "Y adjusted by 0.01"
+            : "Change not accepted; current engine state is shown";
+        instance->model.DirtyVariable("game_clock_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusgameclockyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->game_clock_y_editing = true;
+            if(instance->game_clock_y_invalid)
+            {
+                instance->game_clock_y_invalid = false;
+                instance->model.DirtyVariable("game_clock_y_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurgameclockyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitgameclocky();
+            instance->game_clock_y_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitgameclockyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitgameclocky();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::changehudscorealphaaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->hudscore_alpha
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->hudscore_alpha)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(!instance->hudscore_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorealpha(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            !instance->hudscore_x_editing,
+            !instance->hudscore_y_editing);
+        if(!accepted && available)
+        {
+            instance->hudscore_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("hudscore_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::changehudscoresepaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int requested = event.GetParameter<int>(
+            "value",
+            instance->hudscore_sep
+        );
+
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change for min/max clamps
+        // during InstanceElement, before the range is parented. There is
+        // no hardcoded RML value default.
+        if(requested == instance->hudscore_sep)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        if(!instance->hudscore_available)
+        {
+            event.StopPropagation();
+            return;
+        }
+
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscoresep(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            !instance->hudscore_x_editing,
+            !instance->hudscore_y_editing);
+        if(!accepted && available)
+        {
+            instance->hudscore_status =
+                "Change not accepted; current engine state is shown";
+            instance->model.DirtyVariable("hudscore_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::decreasehudscorescaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::max(
+            instance->hudscore_scale_minimum,
+            stephudscore(instance->hudscore_scale, -1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorescale(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_scale_invalid = false;
+        instance->model.DirtyVariable("hudscore_scale_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            true,
+            !instance->hudscore_x_editing,
+            !instance->hudscore_y_editing);
+        instance->hudscore_status = accepted
+            ? "Score overlay size adjusted by 0.01"
+            : (available
+                ? "Score overlay size change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasehudscorescaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::min(
+            instance->hudscore_scale_maximum,
+            stephudscore(instance->hudscore_scale, 1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorescale(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_scale_invalid = false;
+        instance->model.DirtyVariable("hudscore_scale_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            true,
+            !instance->hudscore_x_editing,
+            !instance->hudscore_y_editing);
+        instance->hudscore_status = accepted
+            ? "Score overlay size adjusted by 0.01"
+            : (available
+                ? "Score overlay size change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focushudscorescaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->hudscore_scale_editing = true;
+            if(instance->hudscore_scale_invalid)
+            {
+                instance->hudscore_scale_invalid = false;
+                instance->model.DirtyVariable("hudscore_scale_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurhudscorescaleaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commithudscorescale();
+            instance->hudscore_scale_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commithudscorescaleaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commithudscorescale();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasehudscorexaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::max(
+            instance->hudscore_x_minimum,
+            stephudscore(instance->hudscore_x, -1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorex(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_x_invalid = false;
+        instance->model.DirtyVariable("hudscore_x_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            true,
+            !instance->hudscore_y_editing);
+        instance->hudscore_status = accepted
+            ? "Score overlay x adjusted by 0.01"
+            : (available
+                ? "Score overlay x change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasehudscorexaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::min(
+            instance->hudscore_x_maximum,
+            stephudscore(instance->hudscore_x, 1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorex(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_x_invalid = false;
+        instance->model.DirtyVariable("hudscore_x_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            true,
+            !instance->hudscore_y_editing);
+        instance->hudscore_status = accepted
+            ? "Score overlay x adjusted by 0.01"
+            : (available
+                ? "Score overlay x change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focushudscorexaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->hudscore_x_editing = true;
+            if(instance->hudscore_x_invalid)
+            {
+                instance->hudscore_x_invalid = false;
+                instance->model.DirtyVariable("hudscore_x_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurhudscorexaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commithudscorex();
+            instance->hudscore_x_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commithudscorexaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commithudscorex();
+            event.StopPropagation();
+        }
+    }
+
+    void RmlSettings::decreasehudscoreyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::max(
+            instance->hudscore_y_minimum,
+            stephudscore(instance->hudscore_y, -1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorey(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_y_invalid = false;
+        instance->model.DirtyVariable("hudscore_y_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            !instance->hudscore_x_editing,
+            true);
+        instance->hudscore_status = accepted
+            ? "Score overlay y adjusted by 0.01"
+            : (available
+                ? "Score overlay y change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increasehudscoreyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const float requested = std::min(
+            instance->hudscore_y_maximum,
+            stephudscore(instance->hudscore_y, 1)
+        );
+        settings::HudScore state = {};
+        const bool accepted = settings::writehudscorey(requested, state);
+        const bool available = accepted ||
+            settings::readhudscore(state);
+        instance->hudscore_y_invalid = false;
+        instance->model.DirtyVariable("hudscore_y_invalid");
+        instance->presenthudscore(
+            state,
+            available,
+            !instance->hudscore_scale_editing,
+            !instance->hudscore_x_editing,
+            true);
+        instance->hudscore_status = accepted
+            ? "Score overlay y adjusted by 0.01"
+            : (available
+                ? "Score overlay y change was rejected"
+                : "Score overlay settings are unavailable");
+        instance->model.DirtyVariable("hudscore_status");
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focushudscoreyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->hudscore_y_editing = true;
+            if(instance->hudscore_y_invalid)
+            {
+                instance->hudscore_y_invalid = false;
+                instance->model.DirtyVariable("hudscore_y_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurhudscoreyaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commithudscorey();
+            instance->hudscore_y_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commithudscoreyaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commithudscorey();
+            event.StopPropagation();
+        }
+    }
+
     void RmlSettings::publicchatintopfeedaction(Rml::Event &event)
     {
         if(instance)
@@ -5362,5 +11905,293 @@ namespace cowui
             instance->refreshchat();
         }
         event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopimportantaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeimportantintopfeed,
+                instance->console_top_important);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopwarningsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writewarningsintopfeed,
+                instance->console_top_warnings);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletoperrorsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeerrorsintopfeed,
+                instance->console_top_errors);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopscriptaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writescriptmessagesintopfeed,
+                instance->console_top_script);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopgameeventsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writegameeventsintopfeed,
+                instance->console_top_game_events);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopselffragsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeselffragsintopfeed,
+                instance->console_top_self_frags);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopotherfragsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeotherplayerfragsintopfeed,
+                instance->console_top_other_frags);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consoletopteamkillsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeteamkillsintopfeed,
+                instance->console_top_team_kills);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullimportantaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeimportantinfullconsole,
+                instance->console_full_important);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullwarningsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writewarningsinfullconsole,
+                instance->console_full_warnings);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullerrorsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeerrorsinfullconsole,
+                instance->console_full_errors);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullscriptaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writescriptmessagesinfullconsole,
+                instance->console_full_script);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullchataction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writepublicchatinfullconsole,
+                instance->console_full_chat);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullteamchataction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeteamchatinfullconsole,
+                instance->console_full_team_chat);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullgameeventsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writegameeventsinfullconsole,
+                instance->console_full_game_events);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullselffragsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeselffragsinfullconsole,
+                instance->console_full_self_frags);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullotherfragsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeotherplayerfragsinfullconsole,
+                instance->console_full_other_frags);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::consolefullteamkillsaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->applyconsolefilter(
+                settings::writeteamkillsinfullconsole,
+                instance->console_full_team_kills);
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::decreaseconsolesizeaction(Rml::Event &event)
+    {
+        if(instance && instance->console_available)
+        {
+            const int requested = std::max(
+                instance->console_size_minimum,
+                instance->console_size - 1
+            );
+            settings::Console state = {};
+            const bool accepted = settings::writeconsolesize(
+                requested, state);
+            const bool available = accepted ||
+                settings::readconsole(state);
+            instance->console_size_invalid = false;
+            instance->model.DirtyVariable("console_size_invalid");
+            instance->presentconsole(state, available, true);
+            instance->console_status = accepted
+                ? "Top-left console size adjusted by 1"
+                : (available
+                    ? "Console size change was rejected"
+                    : "Console settings are unavailable");
+            instance->model.DirtyVariable("console_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::increaseconsolesizeaction(Rml::Event &event)
+    {
+        if(instance && instance->console_available)
+        {
+            const int requested = std::min(
+                instance->console_size_maximum,
+                instance->console_size + 1
+            );
+            settings::Console state = {};
+            const bool accepted = settings::writeconsolesize(
+                requested, state);
+            const bool available = accepted ||
+                settings::readconsole(state);
+            instance->console_size_invalid = false;
+            instance->model.DirtyVariable("console_size_invalid");
+            instance->presentconsole(state, available, true);
+            instance->console_status = accepted
+                ? "Top-left console size adjusted by 1"
+                : (available
+                    ? "Console size change was rejected"
+                    : "Console settings are unavailable");
+            instance->model.DirtyVariable("console_status");
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::focusconsolesizeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->console_size_editing = true;
+            if(instance->console_size_invalid)
+            {
+                instance->console_size_invalid = false;
+                instance->model.DirtyVariable("console_size_invalid");
+            }
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::blurconsolesizeaction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            instance->commitconsolesize();
+            instance->console_size_editing = false;
+        }
+        event.StopPropagation();
+    }
+
+    void RmlSettings::commitconsolesizeaction(Rml::Event &event)
+    {
+        if(!instance)
+            return;
+
+        const int key = event.GetParameter<int>("key_identifier", 0);
+        if(key == Rml::Input::KI_RETURN ||
+           key == Rml::Input::KI_NUMPADENTER)
+        {
+            instance->commitconsolesize();
+            event.StopPropagation();
+        }
     }
 }

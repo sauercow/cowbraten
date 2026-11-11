@@ -3,13 +3,22 @@
 
 #include "sauer_settings_bridge.h"
 
+#ifdef __APPLE__
+#include <SDL2_mixer/SDL_mixer.h>
+#else
+#include "SDL_mixer.h"
+#endif
+
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 
 extern int scr_w, scr_h, fullscreendesktop;
 extern int grass, motionblur;
 extern bool nosound;
+extern int maxchannels;
 extern void resetgl();
+extern void resetsound();
 extern void screenres(int width, int height);
 extern void loadcrosshair(const char *name, int index);
 extern const char *getcrosshairname(int index);
@@ -32,6 +41,148 @@ namespace cowui
         static ident *fovident()
         {
             ident *id = getident("fov");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *bloodident()
+        {
+            ident *id = getident("blood");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hitsoundident()
+        {
+            ident *id = getident("hitsound");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *outlinemetersident()
+        {
+            ident *id = getident("outlinemeters");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *deathscoreident()
+        {
+            ident *id = getident("deathscore");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hexvarident(const char *name)
+        {
+            ident *id = getident(name);
+            return id && id->type == ID_VAR && (id->flags & IDF_HEX)
+                ? id
+                : nullptr;
+        }
+
+        static ident *trailcolorshotgunident()
+        {
+            return hexvarident("trailcolorshotgun");
+        }
+
+        static ident *trailcolorchaingunident()
+        {
+            return hexvarident("trailcolorchaingun");
+        }
+
+        static ident *trailcolorrocketlauncherident()
+        {
+            return hexvarident("trailcolorrocketlauncher");
+        }
+
+        static ident *trailcolorrifleident()
+        {
+            return hexvarident("trailcolorrifle");
+        }
+
+        static ident *trailcolorgrenadelauncherident()
+        {
+            return hexvarident("trailcolorgrenadelauncher");
+        }
+
+        static ident *trailcolorpistolident()
+        {
+            return hexvarident("trailcolorpistol");
+        }
+
+        static ident *basenumbersident()
+        {
+            ident *id = getident("basenumbers");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *radarteammatesident()
+        {
+            ident *id = getident("radarteammates");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ragdollident()
+        {
+            ident *id = getident("ragdoll");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ragdollmillisident()
+        {
+            ident *id = getident("ragdollmillis");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *deadpushident()
+        {
+            ident *id = getident("deadpush");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hidedeadident()
+        {
+            ident *id = getident("hidedead");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *fullbrightmodelsident()
+        {
+            ident *id = getident("fullbrightmodels");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *forceplayermodelsident()
+        {
+            ident *id = getident("forceplayermodels");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *teamskinsident()
+        {
+            ident *id = getident("teamskins");
             return id && id->type == ID_VAR
                 ? id
                 : nullptr;
@@ -69,9 +220,25 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *gammaident()
+        {
+            ident *id = getident("gamma");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         static ident *fsaaident()
         {
             ident *id = getident("fsaa");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *depthbitsident()
+        {
+            ident *id = getident("depthbits");
             return id && id->type == ID_VAR
                 ? id
                 : nullptr;
@@ -99,6 +266,43 @@ namespace cowui
             return id && id->type == ID_SVAR
                 ? id
                 : nullptr;
+        }
+
+        static ident *soundchansident()
+        {
+            ident *id = getident("soundchans");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *soundfreqident()
+        {
+            ident *id = getident("soundfreq");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *soundbufferlenident()
+        {
+            ident *id = getident("soundbufferlen");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *mumbleident()
+        {
+            ident *id = getident("mumble");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static bool nativesoundfrequency(int value)
+        {
+            return value == 11025 || value == 22050 || value == 44100;
         }
 
         static ident *sensitivityident()
@@ -173,6 +377,38 @@ namespace cowui
                 : nullptr;
         }
 
+        static ident *showfpsident()
+        {
+            ident *id = getident("showfps");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *wallclockident()
+        {
+            ident *id = getident("wallclock");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *wallclock24ident()
+        {
+            ident *id = getident("wallclock24");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *wallclocksecsident()
+        {
+            ident *id = getident("wallclocksecs");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
         static ident *damagescreenident()
         {
             ident *id = getident("damagescreen");
@@ -184,6 +420,38 @@ namespace cowui
         static ident *damagecompassident()
         {
             ident *id = getident("damagecompass");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudgunident()
+        {
+            ident *id = getident("hudgun");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudgunswayident()
+        {
+            ident *id = getident("hudgunsway");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *muzzleflashident()
+        {
+            ident *id = getident("muzzleflash");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *muzzlelightident()
+        {
+            ident *id = getident("muzzlelight");
             return id && id->type == ID_VAR
                 ? id
                 : nullptr;
@@ -201,6 +469,356 @@ namespace cowui
         {
             ident *id = getident("streakmilestonescale");
             return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *maxhudfragmessagesident()
+        {
+            ident *id = getident("maxhudfragmessages");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagedurationident()
+        {
+            ident *id = getident("hudfragmessageduration");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagefilterident()
+        {
+            // HVARP is ID_VAR with IDF_HEX; there is no ID_HVAR type.
+            ident *id = getident("hudfragmessagefilter");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagescaleident()
+        {
+            ident *id = getident("hudfragmessagescale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagefadeident()
+        {
+            ident *id = getident("hudfragmessagefade");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagexident()
+        {
+            ident *id = getident("hudfragmessagex");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessageyident()
+        {
+            ident *id = getident("hudfragmessagey");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudfragmessagestackdirident()
+        {
+            ident *id = getident("hudfragmessagestackdir");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarident()
+        {
+            ident *id = getident("ammobar");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarhorizontalident()
+        {
+            ident *id = getident("ammobarhorizontal");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarflipident()
+        {
+            ident *id = getident("ammobarflip");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarhideemptyident()
+        {
+            ident *id = getident("ammobarhideempty");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarsepident()
+        {
+            ident *id = getident("ammobarsep");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarcountsepident()
+        {
+            ident *id = getident("ammobarcountsep");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobaralignident()
+        {
+            ident *id = getident("ammobaralign");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarscaleident()
+        {
+            ident *id = getident("ammobarscale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarcountscaleident()
+        {
+            ident *id = getident("ammobarcountscale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobarxident()
+        {
+            ident *id = getident("ammobarx");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *ammobaryident()
+        {
+            ident *id = getident("ammobary");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockident()
+        {
+            ident *id = getident("gameclock");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockscaleident()
+        {
+            ident *id = getident("gameclockscale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockalphaident()
+        {
+            ident *id = getident("gameclockalpha");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockalignident()
+        {
+            ident *id = getident("gameclockalign");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockxident()
+        {
+            ident *id = getident("gameclockx");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *gameclockyident()
+        {
+            ident *id = getident("gameclocky");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static bool isgameclockalign(int value)
+        {
+            return value == -1 || value == 0 || value == 1;
+        }
+
+        static ident *hudscoreident()
+        {
+            ident *id = getident("hudscore");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscorescaleident()
+        {
+            ident *id = getident("hudscorescale");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscorealphaident()
+        {
+            ident *id = getident("hudscorealpha");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscoresepident()
+        {
+            ident *id = getident("hudscoresep");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscorealignident()
+        {
+            ident *id = getident("hudscorealign");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscorexident()
+        {
+            ident *id = getident("hudscorex");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hudscoreyident()
+        {
+            ident *id = getident("hudscorey");
+            return id && id->type == ID_FVAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *hidefragsident()
+        {
+            ident *id = getident("hidefrags");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showdeathsident()
+        {
+            ident *id = getident("showdeaths");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showpingident()
+        {
+            ident *id = getident("showping");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showpjident()
+        {
+            ident *id = getident("showpj");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showclientnumident()
+        {
+            ident *id = getident("showclientnum");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showflagsident()
+        {
+            ident *id = getident("showflags");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showsuicidesident()
+        {
+            ident *id = getident("showsuicides");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showkpdident()
+        {
+            ident *id = getident("showkpd");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showaccuracyident()
+        {
+            ident *id = getident("showaccuracy");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showdamageident()
+        {
+            ident *id = getident("showdamage");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *showdamagereceivedident()
+        {
+            ident *id = getident("showdamagereceived");
+            return id && id->type == ID_VAR
                 ? id
                 : nullptr;
         }
@@ -224,6 +842,22 @@ namespace cowui
         static ident *teamcolorchatident()
         {
             ident *id = getident("teamcolorchat");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *fullconsolefilterident()
+        {
+            ident *id = getident("fullconfilter");
+            return id && id->type == ID_VAR
+                ? id
+                : nullptr;
+        }
+
+        static ident *consolesizeident()
+        {
+            ident *id = getident("consize");
             return id && id->type == ID_VAR
                 ? id
                 : nullptr;
@@ -324,6 +958,20 @@ namespace cowui
             }
         }
 
+        static bool validdepthbits(int bits)
+        {
+            switch(bits)
+            {
+                case 0:
+                case 16:
+                case 24:
+                case 32:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         bool readfov(Fov &result)
         {
             ident *id = fovident();
@@ -344,6 +992,476 @@ namespace cowui
 
             setvarchecked(id, value);
             return true;
+        }
+
+        bool readgamefeedback(GameFeedback &result)
+        {
+            result.blood = false;
+            result.hit_sound = false;
+            result.outline_capture_meters = false;
+            result.show_scoreboard_at_death = false;
+
+            ident *blood_id = bloodident();
+            ident *hitsound_id = hitsoundident();
+            ident *meters_id = outlinemetersident();
+            ident *death_id = deathscoreident();
+            if(!blood_id || !blood_id->storage.i ||
+               !hitsound_id || !hitsound_id->storage.i ||
+               !meters_id || !meters_id->storage.i ||
+               !death_id || !death_id->storage.i)
+            {
+                return false;
+            }
+
+            result.blood = *blood_id->storage.i != 0;
+            result.hit_sound = *hitsound_id->storage.i != 0;
+            result.outline_capture_meters = *meters_id->storage.i != 0;
+            result.show_scoreboard_at_death = *death_id->storage.i != 0;
+            return true;
+        }
+
+        static bool writegamefeedbackboolean(
+            ident *id,
+            bool enabled,
+            GameFeedback &result)
+        {
+            if(!readgamefeedback(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readgamefeedback(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        bool writeblood(bool enabled, GameFeedback &result)
+        {
+            return writegamefeedbackboolean(bloodident(), enabled, result);
+        }
+
+        bool writehitsound(bool enabled, GameFeedback &result)
+        {
+            return writegamefeedbackboolean(hitsoundident(), enabled, result);
+        }
+
+        bool writeoutlinemeters(bool enabled, GameFeedback &result)
+        {
+            return writegamefeedbackboolean(
+                outlinemetersident(),
+                enabled,
+                result);
+        }
+
+        bool writedeathscore(bool enabled, GameFeedback &result)
+        {
+            return writegamefeedbackboolean(
+                deathscoreident(),
+                enabled,
+                result);
+        }
+
+        static void defaulttrailcolors(TrailColors &result)
+        {
+            result.shotgun = 0xFFC864;
+            result.chaingun = 0xFFC864;
+            result.rocketlauncher = 0x404040;
+            result.rifle = 0x404040;
+            result.grenadelauncher = 0x404040;
+            result.pistol = 0xFFC864;
+            result.channel_minimum = 0;
+            result.channel_maximum = 255;
+        }
+
+        bool readtrailcolors(TrailColors &result)
+        {
+            defaulttrailcolors(result);
+
+            ident *shotgun_id = trailcolorshotgunident();
+            ident *chaingun_id = trailcolorchaingunident();
+            ident *rocket_id = trailcolorrocketlauncherident();
+            ident *rifle_id = trailcolorrifleident();
+            ident *grenade_id = trailcolorgrenadelauncherident();
+            ident *pistol_id = trailcolorpistolident();
+            if(!shotgun_id || !shotgun_id->storage.i ||
+               !chaingun_id || !chaingun_id->storage.i ||
+               !rocket_id || !rocket_id->storage.i ||
+               !rifle_id || !rifle_id->storage.i ||
+               !grenade_id || !grenade_id->storage.i ||
+               !pistol_id || !pistol_id->storage.i)
+            {
+                return false;
+            }
+
+            result.shotgun = *shotgun_id->storage.i;
+            result.chaingun = *chaingun_id->storage.i;
+            result.rocketlauncher = *rocket_id->storage.i;
+            result.rifle = *rifle_id->storage.i;
+            result.grenadelauncher = *grenade_id->storage.i;
+            result.pistol = *pistol_id->storage.i;
+            result.channel_minimum = 0;
+            result.channel_maximum = 255;
+            return true;
+        }
+
+        static bool writetrailcolorpacked(
+            ident *id,
+            int packed,
+            TrailColors &result)
+        {
+            if(!readtrailcolors(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               packed < id->minval || packed > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == packed)
+                return true;
+
+            setvarchecked(id, packed);
+            if(!readtrailcolors(result))
+                return false;
+            return *id->storage.i == packed;
+        }
+
+        bool writetrailcolorshotgun(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorshotgunident(),
+                packed,
+                result);
+        }
+
+        bool writetrailcolorchaingun(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorchaingunident(),
+                packed,
+                result);
+        }
+
+        bool writetrailcolorrocketlauncher(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorrocketlauncherident(),
+                packed,
+                result);
+        }
+
+        bool writetrailcolorrifle(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorrifleident(),
+                packed,
+                result);
+        }
+
+        bool writetrailcolorgrenadelauncher(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorgrenadelauncherident(),
+                packed,
+                result);
+        }
+
+        bool writetrailcolorpistol(int packed, TrailColors &result)
+        {
+            return writetrailcolorpacked(
+                trailcolorpistolident(),
+                packed,
+                result);
+        }
+
+        bool readgameradar(GameRadar &result)
+        {
+            result.numbered_capture_bases = false;
+            result.show_teammates_on_radar = false;
+
+            ident *bases_id = basenumbersident();
+            ident *teammates_id = radarteammatesident();
+            if(!bases_id || !bases_id->storage.i ||
+               !teammates_id || !teammates_id->storage.i)
+            {
+                return false;
+            }
+
+            result.numbered_capture_bases = *bases_id->storage.i != 0;
+            result.show_teammates_on_radar = *teammates_id->storage.i != 0;
+            return true;
+        }
+
+        static bool writegameradarboolean(
+            ident *id,
+            bool enabled,
+            GameRadar &result)
+        {
+            if(!readgameradar(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readgameradar(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        bool writebasenumbers(bool enabled, GameRadar &result)
+        {
+            return writegameradarboolean(
+                basenumbersident(),
+                enabled,
+                result);
+        }
+
+        bool writeradarteammates(bool enabled, GameRadar &result)
+        {
+            return writegameradarboolean(
+                radarteammatesident(),
+                enabled,
+                result);
+        }
+
+        enum
+        {
+            kRagdollKeepAfterRespawnMillis = 10000,
+            kFullbrightSubtle = 60,
+            kFullbrightBright = 100,
+            kFullbrightOverbright = 150,
+            kFullbrightMax = 200
+        };
+
+        static bool isfullbrightintensity(int value)
+        {
+            return value == kFullbrightSubtle ||
+                value == kFullbrightBright ||
+                value == kFullbrightOverbright ||
+                value == kFullbrightMax;
+        }
+
+        bool readgamemodels(GameModels &result)
+        {
+            result.ragdoll_deaths = false;
+            result.keep_ragdoll_after_respawn = false;
+            result.ragdoll_millis = 0;
+            result.deadpush = 2;
+            result.deadpush_minimum = 1;
+            result.deadpush_maximum = 20;
+            result.hide_dead_players = false;
+            result.hidedead = 0;
+            result.fullbright_player_models = false;
+            result.fullbrightmodels = 0;
+            result.force_matching_player_models = false;
+            result.always_use_team_skins = false;
+
+            ident *ragdoll_id = ragdollident();
+            ident *ragdollmillis_id = ragdollmillisident();
+            ident *deadpush_id = deadpushident();
+            ident *hidedead_id = hidedeadident();
+            ident *fullbright_id = fullbrightmodelsident();
+            ident *force_id = forceplayermodelsident();
+            ident *teamskins_id = teamskinsident();
+            if(!ragdoll_id || !ragdoll_id->storage.i ||
+               !ragdollmillis_id || !ragdollmillis_id->storage.i ||
+               !deadpush_id || !deadpush_id->storage.i ||
+               !hidedead_id || !hidedead_id->storage.i ||
+               !fullbright_id || !fullbright_id->storage.i ||
+               !force_id || !force_id->storage.i ||
+               !teamskins_id || !teamskins_id->storage.i)
+            {
+                return false;
+            }
+
+            result.ragdoll_deaths = *ragdoll_id->storage.i != 0;
+            result.ragdoll_millis = *ragdollmillis_id->storage.i;
+            result.keep_ragdoll_after_respawn = result.ragdoll_millis != 0;
+            result.deadpush = *deadpush_id->storage.i;
+            result.deadpush_minimum = deadpush_id->minval;
+            result.deadpush_maximum = deadpush_id->maxval;
+            result.hidedead = *hidedead_id->storage.i;
+            result.hide_dead_players = result.hidedead != 0;
+            result.fullbrightmodels = *fullbright_id->storage.i;
+            result.fullbright_player_models = result.fullbrightmodels != 0;
+            result.force_matching_player_models = *force_id->storage.i != 0;
+            result.always_use_team_skins = *teamskins_id->storage.i != 0;
+            return true;
+        }
+
+        static bool writegamemodelsboolean(
+            ident *id,
+            bool enabled,
+            GameModels &result)
+        {
+            if(!readgamemodels(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readgamemodels(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        // Native Settings checkboxes with a dedicated on-value only write
+        // when the user toggles. A non-off engine value stays put on open
+        // and on a no-op "checked" event.
+        static bool writegamemodelsonoff(
+            ident *id,
+            bool enabled,
+            int on_value,
+            int off_value,
+            GameModels &result)
+        {
+            if(!readgamemodels(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            if(enabled)
+            {
+                if(*id->storage.i == off_value)
+                {
+                    if(on_value < id->minval || on_value > id->maxval)
+                        return false;
+                    setvarchecked(id, on_value);
+                }
+            }
+            else if(*id->storage.i != off_value)
+            {
+                if(off_value < id->minval || off_value > id->maxval)
+                    return false;
+                setvarchecked(id, off_value);
+            }
+
+            if(!readgamemodels(result))
+                return false;
+            return enabled
+                ? *id->storage.i != off_value
+                : *id->storage.i == off_value;
+        }
+
+        bool writeragdoll(bool enabled, GameModels &result)
+        {
+            return writegamemodelsboolean(
+                ragdollident(),
+                enabled,
+                result);
+        }
+
+        bool writeragdollmillis(bool enabled, GameModels &result)
+        {
+            return writegamemodelsonoff(
+                ragdollmillisident(),
+                enabled,
+                kRagdollKeepAfterRespawnMillis,
+                0,
+                result);
+        }
+
+        bool writedeadpush(int value, GameModels &result)
+        {
+            if(!readgamemodels(result))
+                return false;
+
+            ident *id = deadpushident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readgamemodels(result))
+                return false;
+            return result.deadpush == value;
+        }
+
+        bool writehidedead(bool enabled, GameModels &result)
+        {
+            return writegamemodelsonoff(
+                hidedeadident(),
+                enabled,
+                1,
+                0,
+                result);
+        }
+
+        bool writefullbrightmodels(bool enabled, GameModels &result)
+        {
+            return writegamemodelsonoff(
+                fullbrightmodelsident(),
+                enabled,
+                kFullbrightSubtle,
+                0,
+                result);
+        }
+
+        bool writefullbrightintensity(int value, GameModels &result)
+        {
+            if(!readgamemodels(result))
+                return false;
+
+            ident *id = fullbrightmodelsident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               !isfullbrightintensity(value) ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readgamemodels(result))
+                return false;
+            return result.fullbrightmodels == value;
+        }
+
+        bool writeforceplayermodels(bool enabled, GameModels &result)
+        {
+            return writegamemodelsboolean(
+                forceplayermodelsident(),
+                enabled,
+                result);
+        }
+
+        bool writeteamskins(bool enabled, GameModels &result)
+        {
+            return writegamemodelsboolean(
+                teamskinsident(),
+                enabled,
+                result);
         }
 
         bool readvideo(Video &result)
@@ -522,6 +1640,55 @@ namespace cowui
             return *id->storage.i == value;
         }
 
+        static int windowgamma()
+        {
+            if(!screen)
+                return 100;
+            return int(std::lround(
+                double(SDL_GetWindowBrightness(screen)) * 100.0));
+        }
+
+        bool readgamma(Gamma &result)
+        {
+            result.requested = 100;
+            result.effective = 100;
+            result.minimum = 30;
+            result.maximum = 300;
+
+            ident *id = gammaident();
+            if(!id || !id->storage.i || !screen)
+                return false;
+
+            result.requested = *id->storage.i;
+            result.minimum = id->minval;
+            result.maximum = id->maxval;
+            result.effective = windowgamma();
+            return true;
+        }
+
+        bool writegamma(int value, Gamma &result)
+        {
+            if(!readgamma(result))
+                return false;
+
+            ident *id = gammaident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            // Same requested value: keep the ident untouched so opening
+            // Settings cannot rewrite SDL brightness.
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readgamma(result))
+                return false;
+            return result.requested == value;
+        }
+
         bool readantialiasing(Antialiasing &result)
         {
             ident *id = fsaaident();
@@ -556,6 +1723,36 @@ namespace cowui
             if(*id->storage.i != samples)
                 setvarchecked(id, samples);
             return *id->storage.i == samples;
+        }
+
+        bool readdepthbits(DepthBuffer &result)
+        {
+            ident *id = depthbitsident();
+            if(!id || !id->storage.i || !screen)
+                return false;
+
+            int bits = 0;
+            if(SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &bits) < 0)
+                return false;
+
+            result.requested_bits = *id->storage.i;
+            result.actual_bits = max(bits, 0);
+            return true;
+        }
+
+        bool writedepthbits(int bits)
+        {
+            ident *id = depthbitsident();
+            if(!id || !id->storage.i ||
+               !validdepthbits(bits) ||
+               bits < id->minval || bits > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != bits)
+                setvarchecked(id, bits);
+            return *id->storage.i == bits;
         }
 
         void resetgraphics()
@@ -1214,6 +2411,50 @@ namespace cowui
             return result.enabled == enabled;
         }
 
+        bool readbumpmodels(BumpModelsState &result)
+        {
+            result.enabled = false;
+
+            ident *id = getident("bumpmodels");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writebumpmodels(bool enabled, BumpModelsState &result)
+        {
+            if(!readbumpmodels(result))
+                return false;
+
+            ident *id = getident("bumpmodels");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            const bool changed = *id->storage.i != value;
+            if(!changed)
+            {
+                if(!readbumpmodels(result))
+                    return false;
+                return result.enabled == enabled;
+            }
+
+            if(!SDL_GL_GetCurrentContext())
+                return false;
+
+            setvarchecked(id, value);
+
+            if(!readbumpmodels(result))
+                return false;
+            return result.enabled == enabled;
+        }
+
         static bool environmentmapresolution(
             int exponent,
             EnvironmentMapResolution &level)
@@ -1545,6 +2786,44 @@ namespace cowui
                 setvarchecked(id, target);
 
             if(!readdecals(result))
+                return false;
+            return result.enabled == enabled;
+        }
+
+        bool readfixtjoints(FixTJointsState &result)
+        {
+            result.enabled = false;
+
+            ident *id = getident("filltjoints");
+            if(!id || id->type != ID_VAR || !id->storage.i)
+                return false;
+
+            result.enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writefixtjoints(bool enabled, FixTJointsState &result)
+        {
+            if(!readfixtjoints(result))
+                return false;
+
+            ident *id = getident("filltjoints");
+            const int value = enabled ? 1 : 0;
+            if(!id || id->type != ID_VAR || !id->storage.i ||
+               id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+            {
+                if(!SDL_GL_GetCurrentContext())
+                    return false;
+                setvarchecked(id, value);
+            }
+
+            if(!readfixtjoints(result))
                 return false;
             return result.enabled == enabled;
         }
@@ -2390,10 +3669,18 @@ namespace cowui
             ident *sound_id = soundvolumeident();
             ident *music_id = musicvolumeident();
             ident *soundpack_id = soundpackident();
+            ident *channels_id = soundchansident();
+            ident *frequency_id = soundfreqident();
+            ident *buffer_id = soundbufferlenident();
+            ident *mumble_id = mumbleident();
             if(!sound_id || !sound_id->storage.i ||
                !music_id || !music_id->storage.i ||
                !soundpack_id || !soundpack_id->storage.s ||
-               !*soundpack_id->storage.s)
+               !*soundpack_id->storage.s ||
+               !channels_id || !channels_id->storage.i ||
+               !frequency_id || !frequency_id->storage.i ||
+               !buffer_id || !buffer_id->storage.i ||
+               !mumble_id || !mumble_id->storage.i)
             {
                 return false;
             }
@@ -2406,6 +3693,24 @@ namespace cowui
             result.music_volume_maximum = music_id->maxval;
             result.active_soundpack = *soundpack_id->storage.s;
             result.backend_active = !::nosound;
+            result.sound_channels = *channels_id->storage.i;
+            result.sound_channels_minimum = channels_id->minval;
+            result.sound_channels_maximum = channels_id->maxval;
+            result.effective_sound_channels = ::nosound ? 0 : maxchannels;
+            result.sound_frequency = *frequency_id->storage.i;
+            result.effective_sound_frequency = 0;
+            if(!::nosound)
+            {
+                int frequency = 0;
+                Uint16 format = 0;
+                int mixer_channels = 0;
+                if(Mix_QuerySpec(&frequency, &format, &mixer_channels))
+                    result.effective_sound_frequency = frequency;
+            }
+            result.sound_buffer_length = *buffer_id->storage.i;
+            result.sound_buffer_length_minimum = buffer_id->minval;
+            result.sound_buffer_length_maximum = buffer_id->maxval;
+            result.mumble = *mumble_id->storage.i != 0;
             return true;
         }
 
@@ -2492,6 +3797,76 @@ namespace cowui
             setsvarchecked(id, requested);
             return *id->storage.s &&
                 !std::strcmp(*id->storage.s, requested);
+        }
+
+        static bool writeaudiointeger(ident *id, int value, Audio &result)
+        {
+            if(!id || !id->storage.i ||
+               value < id->minval || value > id->maxval)
+            {
+                readaudio(result);
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+            if(!readaudio(result))
+                return false;
+            return *id->storage.i == value;
+        }
+
+        bool writesoundchannels(int value, Audio &result)
+        {
+            return writeaudiointeger(soundchansident(), value, result);
+        }
+
+        bool writesoundfrequency(int value, Audio &result)
+        {
+            if(!nativesoundfrequency(value))
+            {
+                readaudio(result);
+                return false;
+            }
+
+            return writeaudiointeger(soundfreqident(), value, result);
+        }
+
+        bool writesoundbufferlength(int value, Audio &result)
+        {
+            return writeaudiointeger(soundbufferlenident(), value, result);
+        }
+
+        bool writemumble(bool enabled, Audio &result)
+        {
+            ident *id = mumbleident();
+            if(!id || !id->storage.i)
+            {
+                readaudio(result);
+                return false;
+            }
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+            {
+                readaudio(result);
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+            if(!readaudio(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        bool hassoundchanges()
+        {
+            return haschanges(CHANGE_SOUND);
+        }
+
+        void resetsound()
+        {
+            ::resetsound();
         }
 
         bool readmouseinput(MouseInput &result)
@@ -2656,20 +4031,60 @@ namespace cowui
 
         bool readhud(Hud &result)
         {
+            ident *fps_id = showfpsident();
+            ident *clock_id = wallclockident();
+            ident *clock24_id = wallclock24ident();
+            ident *clocksecs_id = wallclocksecsident();
             ident *screen_id = damagescreenident();
             ident *compass_id = damagecompassident();
+            ident *guns_id = hudgunident();
+            ident *sway_id = hudgunswayident();
+            ident *flash_id = muzzleflashident();
+            ident *light_id = muzzlelightident();
             ident *messages_id = fragmessagesident();
+            ident *max_id = maxhudfragmessagesident();
+            ident *duration_id = hudfragmessagedurationident();
+            ident *filter_id = hudfragmessagefilterident();
+            ident *scale_id = hudfragmessagescaleident();
+            ident *fade_id = hudfragmessagefadeident();
+            ident *x_id = hudfragmessagexident();
+            ident *y_id = hudfragmessageyident();
+            ident *stack_id = hudfragmessagestackdirident();
             ident *streak_id = streakmilestonescaleident();
-            if(!screen_id || !screen_id->storage.i ||
+            if(!fps_id || !fps_id->storage.i ||
+               !clock_id || !clock_id->storage.i ||
+               !clock24_id || !clock24_id->storage.i ||
+               !clocksecs_id || !clocksecs_id->storage.i ||
+               !screen_id || !screen_id->storage.i ||
                !compass_id || !compass_id->storage.i ||
+               !guns_id || !guns_id->storage.i ||
+               !sway_id || !sway_id->storage.i ||
+               !flash_id || !flash_id->storage.i ||
+               !light_id || !light_id->storage.i ||
                !messages_id || !messages_id->storage.i ||
+               !max_id || !max_id->storage.i ||
+               !duration_id || !duration_id->storage.f ||
+               !filter_id || !filter_id->storage.i ||
+               !scale_id || !scale_id->storage.f ||
+               !fade_id || !fade_id->storage.i ||
+               !x_id || !x_id->storage.f ||
+               !y_id || !y_id->storage.f ||
+               !stack_id || !stack_id->storage.i ||
                !streak_id || !streak_id->storage.f)
             {
                 return false;
             }
 
+            result.show_fps = *fps_id->storage.i != 0;
+            result.wall_clock = *clock_id->storage.i != 0;
+            result.wall_clock_24_hour = *clock24_id->storage.i != 0;
+            result.wall_clock_seconds = *clocksecs_id->storage.i != 0;
             result.damage_screen = *screen_id->storage.i != 0;
             result.damage_compass = *compass_id->storage.i != 0;
+            result.hud_guns = *guns_id->storage.i != 0;
+            result.hud_gun_sway = *sway_id->storage.i != 0;
+            result.muzzle_flash = *flash_id->storage.i != 0;
+            result.muzzle_light = *light_id->storage.i != 0;
             switch(*messages_id->storage.i)
             {
                 case 0:
@@ -2682,10 +4097,53 @@ namespace cowui
                     result.frag_messages = FragMessagesMode::AllModes;
                     break;
             }
+            result.max_frag_messages = *max_id->storage.i;
+            result.max_frag_messages_minimum = max_id->minval;
+            result.max_frag_messages_maximum = max_id->maxval;
+            result.frag_message_duration = *duration_id->storage.f;
+            result.frag_message_duration_minimum = duration_id->minvalf;
+            result.frag_message_duration_maximum = duration_id->maxvalf;
+            result.frag_message_self_frags =
+                (*filter_id->storage.i & CON_FRAG_SELF) != 0;
+            result.frag_message_other_frags =
+                (*filter_id->storage.i & CON_FRAG_OTHER) != 0;
+            result.frag_message_team_kills =
+                (*filter_id->storage.i & CON_TEAMKILL) != 0;
+            result.frag_message_scale = *scale_id->storage.f;
+            result.frag_message_scale_minimum = scale_id->minvalf;
+            result.frag_message_scale_maximum = scale_id->maxvalf;
+            result.frag_message_fade = *fade_id->storage.i != 0;
+            result.frag_message_x = *x_id->storage.f;
+            result.frag_message_x_minimum = x_id->minvalf;
+            result.frag_message_x_maximum = x_id->maxvalf;
+            result.frag_message_y = *y_id->storage.f;
+            result.frag_message_y_minimum = y_id->minvalf;
+            result.frag_message_y_maximum = y_id->maxvalf;
+            result.frag_message_stack_dir = *stack_id->storage.i;
             result.streak_milestone_scale = *streak_id->storage.f;
             result.streak_milestone_scale_minimum = streak_id->minvalf;
             result.streak_milestone_scale_maximum = streak_id->maxvalf;
             return true;
+        }
+
+        bool writeshowfps(bool enabled)
+        {
+            return writeboolean(showfpsident(), enabled);
+        }
+
+        bool writewallclock(bool enabled)
+        {
+            return writeboolean(wallclockident(), enabled);
+        }
+
+        bool writewallclock24hour(bool enabled)
+        {
+            return writeboolean(wallclock24ident(), enabled);
+        }
+
+        bool writewallclockseconds(bool enabled)
+        {
+            return writeboolean(wallclocksecsident(), enabled);
         }
 
         bool writedamagescreen(bool enabled)
@@ -2696,6 +4154,26 @@ namespace cowui
         bool writedamagecompass(bool enabled)
         {
             return writeboolean(damagecompassident(), enabled);
+        }
+
+        bool writehudguns(bool enabled)
+        {
+            return writeboolean(hudgunident(), enabled);
+        }
+
+        bool writehudgunsway(bool enabled)
+        {
+            return writeboolean(hudgunswayident(), enabled);
+        }
+
+        bool writemuzzleflash(bool enabled)
+        {
+            return writeboolean(muzzleflashident(), enabled);
+        }
+
+        bool writemuzzlelight(bool enabled)
+        {
+            return writeboolean(muzzlelightident(), enabled);
         }
 
         bool writefragmessages(FragMessagesMode mode)
@@ -2723,6 +4201,144 @@ namespace cowui
             return *id->storage.i == value;
         }
 
+        static bool writehudboolean(ident *id, bool enabled, Hud &result)
+        {
+            if(!readhud(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readhud(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        static bool writehudinteger(ident *id, int value, Hud &result)
+        {
+            if(!readhud(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readhud(result))
+                return false;
+            return *id->storage.i == value;
+        }
+
+        static bool writehudfloat(ident *id, float value, Hud &result)
+        {
+            if(!readhud(result))
+                return false;
+
+            if(!id || !id->storage.f || id->flags&IDF_READONLY ||
+               !finitefloat(value))
+            {
+                return false;
+            }
+
+            float clamped = value;
+            if(clamped < id->minvalf)
+                clamped = id->minvalf;
+            else if(clamped > id->maxvalf)
+                clamped = id->maxvalf;
+
+            if(*id->storage.f == clamped)
+                return true;
+
+            setfvarchecked(id, value);
+            if(!readhud(result))
+                return false;
+            return true;
+        }
+
+        static bool writehudfilterbit(int bit, bool enabled, Hud &result)
+        {
+            if(!readhud(result))
+                return false;
+
+            if(!writefilterbit(hudfragmessagefilterident(), bit, enabled))
+                return false;
+
+            return readhud(result);
+        }
+
+        bool writemaxfragmessages(int value, Hud &result)
+        {
+            return writehudinteger(maxhudfragmessagesident(), value, result);
+        }
+
+        bool writefragmessageduration(float value, Hud &result)
+        {
+            return writehudfloat(
+                hudfragmessagedurationident(),
+                value,
+                result);
+        }
+
+        bool writefragmessageselffrags(bool enabled, Hud &result)
+        {
+            return writehudfilterbit(CON_FRAG_SELF, enabled, result);
+        }
+
+        bool writefragmessageotherfrags(bool enabled, Hud &result)
+        {
+            return writehudfilterbit(CON_FRAG_OTHER, enabled, result);
+        }
+
+        bool writefragmessageteamkills(bool enabled, Hud &result)
+        {
+            return writehudfilterbit(CON_TEAMKILL, enabled, result);
+        }
+
+        bool writefragmessagescale(float value, Hud &result)
+        {
+            return writehudfloat(hudfragmessagescaleident(), value, result);
+        }
+
+        bool writefragmessagefade(bool enabled, Hud &result)
+        {
+            return writehudboolean(hudfragmessagefadeident(), enabled, result);
+        }
+
+        bool writefragmessagex(float value, Hud &result)
+        {
+            return writehudfloat(hudfragmessagexident(), value, result);
+        }
+
+        bool writefragmessagey(float value, Hud &result)
+        {
+            return writehudfloat(hudfragmessageyident(), value, result);
+        }
+
+        bool writefragmessagestackdir(int value, Hud &result)
+        {
+            if(value != -1 && value != 0 && value != 1)
+            {
+                readhud(result);
+                return false;
+            }
+
+            return writehudinteger(
+                hudfragmessagestackdirident(),
+                value,
+                result);
+        }
+
         bool writestreakmilestonescale(float value)
         {
             ident *id = streakmilestonescaleident();
@@ -2734,6 +4350,800 @@ namespace cowui
 
             setfvarchecked(id, value);
             return *id->storage.f == value;
+        }
+
+        bool readammobar(Ammobar &result)
+        {
+            ident *visible_id = ammobarident();
+            ident *horizontal_id = ammobarhorizontalident();
+            ident *flip_id = ammobarflipident();
+            ident *scale_id = ammobarscaleident();
+            ident *sep_id = ammobarsepident();
+            ident *count_scale_id = ammobarcountscaleident();
+            ident *count_sep_id = ammobarcountsepident();
+            ident *align_id = ammobaralignident();
+            ident *x_id = ammobarxident();
+            ident *y_id = ammobaryident();
+            ident *hide_empty_id = ammobarhideemptyident();
+            if(!visible_id || !visible_id->storage.i ||
+               !horizontal_id || !horizontal_id->storage.i ||
+               !flip_id || !flip_id->storage.i ||
+               !scale_id || !scale_id->storage.f ||
+               !sep_id || !sep_id->storage.i ||
+               !count_scale_id || !count_scale_id->storage.f ||
+               !count_sep_id || !count_sep_id->storage.i ||
+               !align_id || !align_id->storage.i ||
+               !x_id || !x_id->storage.f ||
+               !y_id || !y_id->storage.f ||
+               !hide_empty_id || !hide_empty_id->storage.i)
+            {
+                return false;
+            }
+
+            result.visible = *visible_id->storage.i != 0;
+            result.horizontal = *horizontal_id->storage.i != 0;
+            result.flip = *flip_id->storage.i != 0;
+            result.scale = *scale_id->storage.f;
+            result.scale_minimum = scale_id->minvalf;
+            result.scale_maximum = scale_id->maxvalf;
+            result.icon_spacing = *sep_id->storage.i;
+            result.icon_spacing_minimum = sep_id->minval;
+            result.icon_spacing_maximum = sep_id->maxval;
+            result.label_size = *count_scale_id->storage.f;
+            result.label_size_minimum = count_scale_id->minvalf;
+            result.label_size_maximum = count_scale_id->maxvalf;
+            result.label_offset = *count_sep_id->storage.i;
+            result.label_offset_minimum = count_sep_id->minval;
+            result.label_offset_maximum = count_sep_id->maxval;
+            result.align = *align_id->storage.i;
+            result.x = *x_id->storage.f;
+            result.x_minimum = x_id->minvalf;
+            result.x_maximum = x_id->maxvalf;
+            result.y = *y_id->storage.f;
+            result.y_minimum = y_id->minvalf;
+            result.y_maximum = y_id->maxvalf;
+            result.hide_empty = *hide_empty_id->storage.i != 0;
+            return true;
+        }
+
+        static bool writeammobarboolean(
+            ident *id,
+            bool enabled,
+            Ammobar &result)
+        {
+            if(!readammobar(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readammobar(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        static bool writeammobarinteger(
+            ident *id,
+            int value,
+            Ammobar &result)
+        {
+            if(!readammobar(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readammobar(result))
+                return false;
+            return *id->storage.i == value;
+        }
+
+        static bool writeammobarfloat(
+            ident *id,
+            float value,
+            Ammobar &result)
+        {
+            if(!readammobar(result))
+                return false;
+
+            if(!id || !id->storage.f || id->flags&IDF_READONLY ||
+               !finitefloat(value))
+            {
+                return false;
+            }
+
+            float clamped = value;
+            if(clamped < id->minvalf)
+                clamped = id->minvalf;
+            else if(clamped > id->maxvalf)
+                clamped = id->maxvalf;
+
+            if(*id->storage.f == clamped)
+                return true;
+
+            setfvarchecked(id, value);
+            if(!readammobar(result))
+                return false;
+            return true;
+        }
+
+        bool writeammobar(bool enabled, Ammobar &result)
+        {
+            return writeammobarboolean(ammobarident(), enabled, result);
+        }
+
+        bool writeammobarhorizontal(bool enabled, Ammobar &result)
+        {
+            return writeammobarboolean(
+                ammobarhorizontalident(),
+                enabled,
+                result);
+        }
+
+        bool writeammobarflip(bool enabled, Ammobar &result)
+        {
+            return writeammobarboolean(ammobarflipident(), enabled, result);
+        }
+
+        bool writeammobarscale(float value, Ammobar &result)
+        {
+            return writeammobarfloat(ammobarscaleident(), value, result);
+        }
+
+        bool writeammobarsep(int value, Ammobar &result)
+        {
+            return writeammobarinteger(ammobarsepident(), value, result);
+        }
+
+        bool writeammobarcountscale(float value, Ammobar &result)
+        {
+            return writeammobarfloat(
+                ammobarcountscaleident(),
+                value,
+                result);
+        }
+
+        bool writeammobarcountsep(int value, Ammobar &result)
+        {
+            return writeammobarinteger(ammobarcountsepident(), value, result);
+        }
+
+        bool writeammobaralign(int value, Ammobar &result)
+        {
+            if(value != -1 && value != 0 && value != 1)
+            {
+                readammobar(result);
+                return false;
+            }
+
+            return writeammobarinteger(ammobaralignident(), value, result);
+        }
+
+        bool writeammobarx(float value, Ammobar &result)
+        {
+            return writeammobarfloat(ammobarxident(), value, result);
+        }
+
+        bool writeammobary(float value, Ammobar &result)
+        {
+            return writeammobarfloat(ammobaryident(), value, result);
+        }
+
+        bool writeammobarhideempty(bool enabled, Ammobar &result)
+        {
+            return writeammobarboolean(
+                ammobarhideemptyident(),
+                enabled,
+                result);
+        }
+
+        static void cleargameclock(GameClock &result)
+        {
+            result.enabled = false;
+            result.scale = 1.0f;
+            result.scale_minimum = 0.5f;
+            result.scale_maximum = 2.0f;
+            result.alpha = 255;
+            result.alpha_minimum = 0;
+            result.alpha_maximum = 255;
+            result.align = 0;
+            result.x = 0.50f;
+            result.x_minimum = 0.0f;
+            result.x_maximum = 1.0f;
+            result.y = 0.03f;
+            result.y_minimum = 0.0f;
+            result.y_maximum = 1.0f;
+        }
+
+        bool readgameclock(GameClock &result)
+        {
+            cleargameclock(result);
+
+            ident *enabled_id = gameclockident();
+            ident *scale_id = gameclockscaleident();
+            ident *alpha_id = gameclockalphaident();
+            ident *align_id = gameclockalignident();
+            ident *x_id = gameclockxident();
+            ident *y_id = gameclockyident();
+            if(!enabled_id || !enabled_id->storage.i ||
+               !scale_id || !scale_id->storage.f ||
+               !alpha_id || !alpha_id->storage.i ||
+               !align_id || !align_id->storage.i ||
+               !x_id || !x_id->storage.f ||
+               !y_id || !y_id->storage.f)
+            {
+                return false;
+            }
+
+            result.enabled = *enabled_id->storage.i != 0;
+            result.scale = *scale_id->storage.f;
+            result.scale_minimum = scale_id->minvalf;
+            result.scale_maximum = scale_id->maxvalf;
+            result.alpha = *alpha_id->storage.i;
+            result.alpha_minimum = alpha_id->minval;
+            result.alpha_maximum = alpha_id->maxval;
+            result.align = *align_id->storage.i;
+            result.x = *x_id->storage.f;
+            result.x_minimum = x_id->minvalf;
+            result.x_maximum = x_id->maxvalf;
+            result.y = *y_id->storage.f;
+            result.y_minimum = y_id->minvalf;
+            result.y_maximum = y_id->maxvalf;
+            return true;
+        }
+
+        static bool writegameclockboolean(
+            ident *id,
+            bool enabled,
+            GameClock &result)
+        {
+            if(!readgameclock(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readgameclock(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        static bool writegameclockint(
+            ident *id,
+            int value,
+            GameClock &result)
+        {
+            if(!readgameclock(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readgameclock(result))
+                return false;
+            return *id->storage.i == value;
+        }
+
+        static bool writegameclockfloat(
+            ident *id,
+            float value,
+            GameClock &result)
+        {
+            if(!readgameclock(result))
+                return false;
+
+            if(!id || !id->storage.f || id->flags&IDF_READONLY ||
+               !finitefloat(value))
+            {
+                return false;
+            }
+
+            if(*id->storage.f == value)
+                return true;
+
+            setfvarchecked(id, value);
+            if(!readgameclock(result))
+                return false;
+            return finitefloat(*id->storage.f);
+        }
+
+        bool writegameclock(bool enabled, GameClock &result)
+        {
+            return writegameclockboolean(
+                gameclockident(),
+                enabled,
+                result);
+        }
+
+        bool writegameclockscale(float value, GameClock &result)
+        {
+            return writegameclockfloat(
+                gameclockscaleident(),
+                value,
+                result);
+        }
+
+        bool writegameclockalpha(int value, GameClock &result)
+        {
+            return writegameclockint(
+                gameclockalphaident(),
+                value,
+                result);
+        }
+
+        bool writegameclockalign(int value, GameClock &result)
+        {
+            if(!isgameclockalign(value))
+            {
+                readgameclock(result);
+                return false;
+            }
+
+            return writegameclockint(
+                gameclockalignident(),
+                value,
+                result);
+        }
+
+        bool writegameclockx(float value, GameClock &result)
+        {
+            return writegameclockfloat(
+                gameclockxident(),
+                value,
+                result);
+        }
+
+        bool writegameclocky(float value, GameClock &result)
+        {
+            return writegameclockfloat(
+                gameclockyident(),
+                value,
+                result);
+        }
+
+        static void defaulthudscore(HudScore &result)
+        {
+            result.enabled = false;
+            result.scale = 1.0f;
+            result.scale_minimum = 0.5f;
+            result.scale_maximum = 2.0f;
+            result.alpha = 255;
+            result.alpha_minimum = 0;
+            result.alpha_maximum = 255;
+            result.spacing = 200;
+            result.spacing_minimum = 0;
+            result.spacing_maximum = 1000;
+            result.align = 0;
+            result.x = 0.50f;
+            result.x_minimum = 0.0f;
+            result.x_maximum = 1.0f;
+            result.y = 0.03f;
+            result.y_minimum = 0.0f;
+            result.y_maximum = 1.0f;
+        }
+
+        bool readhudscore(HudScore &result)
+        {
+            defaulthudscore(result);
+
+            ident *enabled_id = hudscoreident();
+            ident *scale_id = hudscorescaleident();
+            ident *alpha_id = hudscorealphaident();
+            ident *sep_id = hudscoresepident();
+            ident *align_id = hudscorealignident();
+            ident *x_id = hudscorexident();
+            ident *y_id = hudscoreyident();
+            if(!enabled_id || !enabled_id->storage.i ||
+               !scale_id || !scale_id->storage.f ||
+               !alpha_id || !alpha_id->storage.i ||
+               !sep_id || !sep_id->storage.i ||
+               !align_id || !align_id->storage.i ||
+               !x_id || !x_id->storage.f ||
+               !y_id || !y_id->storage.f)
+            {
+                return false;
+            }
+
+            result.enabled = *enabled_id->storage.i != 0;
+            result.scale = *scale_id->storage.f;
+            result.scale_minimum = scale_id->minvalf;
+            result.scale_maximum = scale_id->maxvalf;
+            result.alpha = *alpha_id->storage.i;
+            result.alpha_minimum = alpha_id->minval;
+            result.alpha_maximum = alpha_id->maxval;
+            result.spacing = *sep_id->storage.i;
+            result.spacing_minimum = sep_id->minval;
+            result.spacing_maximum = sep_id->maxval;
+            result.align = *align_id->storage.i;
+            result.x = *x_id->storage.f;
+            result.x_minimum = x_id->minvalf;
+            result.x_maximum = x_id->maxvalf;
+            result.y = *y_id->storage.f;
+            result.y_minimum = y_id->minvalf;
+            result.y_maximum = y_id->maxvalf;
+            return true;
+        }
+
+        static bool writehudscoreboolean(
+            ident *id,
+            bool enabled,
+            HudScore &result)
+        {
+            if(!readhudscore(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readhudscore(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        static bool writehudscoreint(
+            ident *id,
+            int value,
+            HudScore &result)
+        {
+            if(!readhudscore(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readhudscore(result))
+                return false;
+            return *id->storage.i == value;
+        }
+
+        static bool writehudscorefloat(
+            ident *id,
+            float value,
+            HudScore &result)
+        {
+            if(!readhudscore(result))
+                return false;
+
+            if(!id || !id->storage.f || id->flags&IDF_READONLY ||
+               !finitefloat(value) ||
+               value < id->minvalf || value > id->maxvalf)
+            {
+                return false;
+            }
+
+            if(*id->storage.f == value)
+                return true;
+
+            setfvarchecked(id, value);
+            if(!readhudscore(result))
+                return false;
+            return *id->storage.f == value;
+        }
+
+        bool writehudscore(bool enabled, HudScore &result)
+        {
+            return writehudscoreboolean(hudscoreident(), enabled, result);
+        }
+
+        bool writehudscorescale(float value, HudScore &result)
+        {
+            return writehudscorefloat(hudscorescaleident(), value, result);
+        }
+
+        bool writehudscorealpha(int value, HudScore &result)
+        {
+            return writehudscoreint(hudscorealphaident(), value, result);
+        }
+
+        bool writehudscoresep(int value, HudScore &result)
+        {
+            return writehudscoreint(hudscoresepident(), value, result);
+        }
+
+        bool writehudscorealign(int value, HudScore &result)
+        {
+            if(value != -1 && value != 0 && value != 1)
+            {
+                if(!readhudscore(result))
+                    return false;
+                return false;
+            }
+
+            return writehudscoreint(hudscorealignident(), value, result);
+        }
+
+        bool writehudscorex(float value, HudScore &result)
+        {
+            return writehudscorefloat(hudscorexident(), value, result);
+        }
+
+        bool writehudscorey(float value, HudScore &result)
+        {
+            return writehudscorefloat(hudscoreyident(), value, result);
+        }
+
+        bool readscoreboardcolumns(ScoreboardColumns &result)
+        {
+            result.show_flags = false;
+            result.show_frags = false;
+            result.show_deaths = false;
+            result.show_suicides = false;
+            result.show_kpd = false;
+            result.show_accuracy = false;
+            result.show_damage = false;
+            result.showdamage = 0;
+            result.show_damage_dealt = false;
+            result.show_damage_net = false;
+            result.show_damage_received = false;
+            result.show_ping = false;
+            result.showping = 0;
+            result.show_pj = false;
+            result.show_clientnum = false;
+
+            ident *flags_id = showflagsident();
+            ident *frags_id = hidefragsident();
+            ident *deaths_id = showdeathsident();
+            ident *suicides_id = showsuicidesident();
+            ident *kpd_id = showkpdident();
+            ident *accuracy_id = showaccuracyident();
+            ident *damage_id = showdamageident();
+            ident *received_id = showdamagereceivedident();
+            ident *ping_id = showpingident();
+            ident *pj_id = showpjident();
+            ident *clientnum_id = showclientnumident();
+            if(!flags_id || !flags_id->storage.i ||
+               !frags_id || !frags_id->storage.i ||
+               !deaths_id || !deaths_id->storage.i ||
+               !suicides_id || !suicides_id->storage.i ||
+               !kpd_id || !kpd_id->storage.i ||
+               !accuracy_id || !accuracy_id->storage.i ||
+               !damage_id || !damage_id->storage.i ||
+               !received_id || !received_id->storage.i ||
+               !ping_id || !ping_id->storage.i ||
+               !pj_id || !pj_id->storage.i ||
+               !clientnum_id || !clientnum_id->storage.i)
+            {
+                return false;
+            }
+
+            result.show_flags = *flags_id->storage.i != 0;
+            // Native guicheckbox "frags" [hidefrags] 0 1: checked when != off(1).
+            result.show_frags = *frags_id->storage.i != 1;
+            result.show_deaths = *deaths_id->storage.i != 0;
+            result.show_suicides = *suicides_id->storage.i != 0;
+            result.show_kpd = *kpd_id->storage.i != 0;
+            result.show_accuracy = *accuracy_id->storage.i != 0;
+            result.showdamage = *damage_id->storage.i;
+            result.show_damage = result.showdamage != 0;
+            result.show_damage_dealt = result.showdamage == 1;
+            result.show_damage_net = result.showdamage == 2;
+            result.show_damage_received = *received_id->storage.i != 0;
+            result.showping = *ping_id->storage.i;
+            result.show_ping = result.showping != 0;
+            result.show_pj = *pj_id->storage.i != 0;
+            result.show_clientnum = *clientnum_id->storage.i != 0;
+            return true;
+        }
+
+        static bool writescoreboardboolean(
+            ident *id,
+            bool enabled,
+            ScoreboardColumns &result)
+        {
+            if(!readscoreboardcolumns(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = enabled ? 1 : 0;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readscoreboardcolumns(result))
+                return false;
+            return (*id->storage.i != 0) == enabled;
+        }
+
+        // Native Settings checkboxes with a dedicated on-value only write
+        // when the user toggles. A non-off engine value stays put on open
+        // and on a no-op "checked" event.
+        static bool writescoreboardonoff(
+            ident *id,
+            bool enabled,
+            int on_value,
+            int off_value,
+            ScoreboardColumns &result)
+        {
+            if(!readscoreboardcolumns(result))
+                return false;
+
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            if(enabled)
+            {
+                if(*id->storage.i == off_value)
+                {
+                    if(on_value < id->minval || on_value > id->maxval)
+                        return false;
+                    setvarchecked(id, on_value);
+                }
+            }
+            else if(*id->storage.i != off_value)
+            {
+                if(off_value < id->minval || off_value > id->maxval)
+                    return false;
+                setvarchecked(id, off_value);
+            }
+
+            if(!readscoreboardcolumns(result))
+                return false;
+            return enabled
+                ? *id->storage.i != off_value
+                : *id->storage.i == off_value;
+        }
+
+        bool writeshowflags(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(showflagsident(), enabled, result);
+        }
+
+        bool writehidefrags(bool show_column, ScoreboardColumns &result)
+        {
+            if(!readscoreboardcolumns(result))
+                return false;
+
+            ident *id = hidefragsident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY)
+                return false;
+
+            const int value = show_column ? 0 : 1;
+            if(value < id->minval || value > id->maxval)
+                return false;
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readscoreboardcolumns(result))
+                return false;
+            return result.show_frags == show_column;
+        }
+
+        bool writeshowdeaths(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(
+                showdeathsident(),
+                enabled,
+                result);
+        }
+
+        bool writeshowsuicides(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(
+                showsuicidesident(),
+                enabled,
+                result);
+        }
+
+        bool writeshowkpd(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(showkpdident(), enabled, result);
+        }
+
+        bool writeshowaccuracy(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(
+                showaccuracyident(),
+                enabled,
+                result);
+        }
+
+        bool writeshowdamage(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardonoff(
+                showdamageident(),
+                enabled,
+                1,
+                0,
+                result);
+        }
+
+        bool writeshowdamagemode(int value, ScoreboardColumns &result)
+        {
+            if(!readscoreboardcolumns(result))
+                return false;
+
+            ident *id = showdamageident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               (value != 1 && value != 2) ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i == value)
+                return true;
+
+            setvarchecked(id, value);
+            if(!readscoreboardcolumns(result))
+                return false;
+            return result.showdamage == value;
+        }
+
+        bool writeshowdamagereceived(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(
+                showdamagereceivedident(),
+                enabled,
+                result);
+        }
+
+        bool writeshowping(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardonoff(
+                showpingident(),
+                enabled,
+                1,
+                0,
+                result);
+        }
+
+        bool writeshowpj(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(showpjident(), enabled, result);
+        }
+
+        bool writeshowclientnum(bool enabled, ScoreboardColumns &result)
+        {
+            return writescoreboardboolean(
+                showclientnumident(),
+                enabled,
+                result);
         }
 
         bool readchat(Chat &result)
@@ -2795,6 +5205,282 @@ namespace cowui
         bool writeteamcoloredchatnames(bool enabled)
         {
             return writeboolean(teamcolorchatident(), enabled);
+        }
+
+        // Native guibitfield "important information" uses 0x11.
+        static const int console_important_mask = CON_INFO | CON_INIT;
+
+        static void defaultconsole(Console &result)
+        {
+            result.important_information_in_top_feed = true;
+            result.warnings_in_top_feed = true;
+            result.errors_in_top_feed = true;
+            result.script_messages_in_top_feed = true;
+            result.game_events_in_top_feed = true;
+            result.self_frags_in_top_feed = true;
+            result.other_player_frags_in_top_feed = true;
+            result.team_kills_in_top_feed = true;
+            result.important_information_in_full_console = true;
+            result.warnings_in_full_console = true;
+            result.errors_in_full_console = true;
+            result.script_messages_in_full_console = true;
+            result.public_messages_in_full_console = true;
+            result.team_messages_in_full_console = true;
+            result.game_events_in_full_console = true;
+            result.self_frags_in_full_console = true;
+            result.other_player_frags_in_full_console = true;
+            result.team_kills_in_full_console = true;
+            result.size = 5;
+            result.size_minimum = 0;
+            result.size_maximum = 100;
+        }
+
+        static void fillconsolefilters(int top, int full, Console &result)
+        {
+            result.important_information_in_top_feed =
+                (top & console_important_mask) != 0;
+            result.warnings_in_top_feed = (top & CON_WARN) != 0;
+            result.errors_in_top_feed = (top & CON_ERROR) != 0;
+            result.script_messages_in_top_feed = (top & CON_ECHO) != 0;
+            result.game_events_in_top_feed = (top & CON_GAMEINFO) != 0;
+            result.self_frags_in_top_feed = (top & CON_FRAG_SELF) != 0;
+            result.other_player_frags_in_top_feed =
+                (top & CON_FRAG_OTHER) != 0;
+            result.team_kills_in_top_feed = (top & CON_TEAMKILL) != 0;
+            result.important_information_in_full_console =
+                (full & console_important_mask) != 0;
+            result.warnings_in_full_console = (full & CON_WARN) != 0;
+            result.errors_in_full_console = (full & CON_ERROR) != 0;
+            result.script_messages_in_full_console =
+                (full & CON_ECHO) != 0;
+            result.public_messages_in_full_console =
+                (full & CON_CHAT) != 0;
+            result.team_messages_in_full_console =
+                (full & CON_TEAMCHAT) != 0;
+            result.game_events_in_full_console =
+                (full & CON_GAMEINFO) != 0;
+            result.self_frags_in_full_console =
+                (full & CON_FRAG_SELF) != 0;
+            result.other_player_frags_in_full_console =
+                (full & CON_FRAG_OTHER) != 0;
+            result.team_kills_in_full_console =
+                (full & CON_TEAMKILL) != 0;
+        }
+
+        bool readconsole(Console &result)
+        {
+            defaultconsole(result);
+
+            ident *top_id = consolefilterident();
+            ident *full_id = fullconsolefilterident();
+            ident *size_id = consolesizeident();
+            if(!top_id || !top_id->storage.i ||
+               !full_id || !full_id->storage.i ||
+               !size_id || !size_id->storage.i)
+            {
+                return false;
+            }
+
+            fillconsolefilters(*top_id->storage.i, *full_id->storage.i,
+                result);
+            result.size = *size_id->storage.i;
+            result.size_minimum = size_id->minval;
+            result.size_maximum = size_id->maxval;
+            return true;
+        }
+
+        static bool writeconsolefilterbit(
+            ident *id,
+            int mask,
+            bool enabled,
+            Console &result)
+        {
+            const bool accepted = writefilterbit(id, mask, enabled);
+            if(!readconsole(result))
+                return false;
+            return accepted;
+        }
+
+        bool writeimportantintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                console_important_mask,
+                enabled,
+                result);
+        }
+
+        bool writewarningsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_WARN,
+                enabled,
+                result);
+        }
+
+        bool writeerrorsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_ERROR,
+                enabled,
+                result);
+        }
+
+        bool writescriptmessagesintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_ECHO,
+                enabled,
+                result);
+        }
+
+        bool writegameeventsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_GAMEINFO,
+                enabled,
+                result);
+        }
+
+        bool writeselffragsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_FRAG_SELF,
+                enabled,
+                result);
+        }
+
+        bool writeotherplayerfragsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_FRAG_OTHER,
+                enabled,
+                result);
+        }
+
+        bool writeteamkillsintopfeed(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                consolefilterident(),
+                CON_TEAMKILL,
+                enabled,
+                result);
+        }
+
+        bool writeimportantinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                console_important_mask,
+                enabled,
+                result);
+        }
+
+        bool writewarningsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_WARN,
+                enabled,
+                result);
+        }
+
+        bool writeerrorsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_ERROR,
+                enabled,
+                result);
+        }
+
+        bool writescriptmessagesinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_ECHO,
+                enabled,
+                result);
+        }
+
+        bool writepublicchatinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_CHAT,
+                enabled,
+                result);
+        }
+
+        bool writeteamchatinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_TEAMCHAT,
+                enabled,
+                result);
+        }
+
+        bool writegameeventsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_GAMEINFO,
+                enabled,
+                result);
+        }
+
+        bool writeselffragsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_FRAG_SELF,
+                enabled,
+                result);
+        }
+
+        bool writeotherplayerfragsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_FRAG_OTHER,
+                enabled,
+                result);
+        }
+
+        bool writeteamkillsinfullconsole(bool enabled, Console &result)
+        {
+            return writeconsolefilterbit(
+                fullconsolefilterident(),
+                CON_TEAMKILL,
+                enabled,
+                result);
+        }
+
+        bool writeconsolesize(int value, Console &result)
+        {
+            if(!readconsole(result))
+                return false;
+
+            ident *id = consolesizeident();
+            if(!id || !id->storage.i || id->flags&IDF_READONLY ||
+               value < id->minval || value > id->maxval)
+            {
+                return false;
+            }
+
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
+
+            if(!readconsole(result))
+                return false;
+            return *id->storage.i == value;
         }
     }
 }
