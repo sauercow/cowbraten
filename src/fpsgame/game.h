@@ -244,6 +244,8 @@ enum
     N_INITTOKENS, N_TAKETOKEN, N_EXPIRETOKENS, N_DROPTOKENS, N_DEPOSITTOKENS, N_STEALTOKENS,
     N_SERVCMD,
     N_DEMOPACKET,
+    N_HDPOS, // L4ZY: reliable high-precision aim, gated by server handshake
+    N_SENDDEMOHD, // L4ZY: downloadable HD demo sidecar
     N_P1X_SETIP = 900, // only from proxy to server (see addtrustedproxyip cmd)
     // N_P1X_CLIENT_DEMO_UPLOAD_SUPPORTED = 1000, N_P1X_RECORDDEMO, // legacy
     N_P1X_CLIENT_DEMO_UPLOAD_SUPPORTED = 1002, N_P1X_RECORDDEMO, // guarded by CAP_PROBE_CLIENT_DEMO_UPLOAD
@@ -281,6 +283,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_INITTOKENS, 0, N_TAKETOKEN, 2, N_EXPIRETOKENS, 0, N_DROPTOKENS, 0, N_DEPOSITTOKENS, 2, N_STEALTOKENS, 0,
     N_SERVCMD, 0,
     N_DEMOPACKET, 0,
+    N_HDPOS, 0, N_SENDDEMOHD, 0,
     N_P1X_SETIP, 2,
     N_P1X_CLIENT_DEMO_UPLOAD_SUPPORTED, 1, N_P1X_RECORDDEMO, 1,
     N_P1X_DEMO_AIM, 0, N_P1X_DEMO_SHOT_AIM, 0,
@@ -294,6 +297,10 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 #define PROTOCOL_VERSION 260            // bump when protocol changes
 #define DEMO_VERSION 1                  // bump when demo format changes
 #define DEMO_MAGIC "SAUERBRATEN_DEMO"
+
+// L4ZY extension v1; handshake is required before sending N_HDPOS.
+#define CLANMOD_HELLO "l4zy/clanmod/v1/7f3a9c2e1b44"
+#define CLANMOD_ACK   "l4zy/clanmod/ack/v1/7f3a9c2e1b44"
 
 struct demoheader
 {
@@ -790,6 +797,10 @@ namespace game
     extern void forceintermission();
     extern void c2sinfo(bool force = false);
     extern void sendposition(fpsent *d, bool reliable = false);
+    extern bool hdserverready();
+    extern void hdclearspecqueue();
+    extern void hdupdatespecqueue();
+    extern int hdspecdelay();
     extern void broadcastp1xbratenversion();
     extern bool setp1xbratenversion(fpsent *d, int version);
     extern void filternonalphanum(char *dst, const char *src, size_t len);
@@ -885,6 +896,20 @@ namespace game
     // clientdemo
     extern stream *demorecord;
     extern void setupdemorecord();
+    extern void starthddemorecord(const char *dmopath);
+    extern void stophddemorecord();
+    extern void loadhdplayback(const char *file);
+    extern void clearhdplayback();
+    extern bool hdplaybackloaded();
+    extern int hdplaybackrecorder();
+    extern const char *hdplaybackstatus();
+    extern bool hdplaybackcamera(fpsent *target);
+    extern void hdplaybackothers(fpsent *followed);
+    extern void hdplaybackzoom();
+    extern void hdclearstreams();
+    extern void hdcaptureliveframe();
+    extern void hdflushlive();
+    extern void hdreceivelive(ucharbuf &p);
     extern void recordpacket(int chan, uchar *data, int len);
     extern bool recordmsg(int type, const char *fmt = NULL, ...);
     extern void recorddemoaim(fpsent *d);

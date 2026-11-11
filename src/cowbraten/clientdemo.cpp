@@ -77,6 +77,7 @@ namespace game {
     void enddemorecord(bool send)
     {
         if(!demorecord) return;
+        stophddemorecord();
         DELETEP(demorecord);
         conoutf("stopped client demo recording");
         if(!demo) return;
@@ -253,8 +254,18 @@ namespace game {
         len = strlen(fname);
         if(len < 4 || strcasecmp(&fname[len-4], ".dmo")) concatstring(fname, ".dmo");
 
-        if(const char *buf = server::getdemofile(fname, true)) demo = openrawfile(buf, "w+b");
-        if(!demo) demo = openrawfile(fname, "w+b");
+        string recordpath;
+        const char *buf = server::getdemofile(fname, true);
+        if(buf)
+        {
+            demo = openrawfile(buf, "w+b");
+            if(demo) copystring(recordpath, buf);
+        }
+        if(!demo)
+        {
+            demo = openrawfile(fname, "w+b");
+            if(demo) copystring(recordpath, fname);
+        }
         if(!demo) return;
 
         stream *f = opengzfile(NULL, "wb", demo);
@@ -272,6 +283,7 @@ namespace game {
         demorecord->write(&hdr, sizeof(demoheader));
 
         demostartmillis = lastmillis;
+        starthddemorecord(recordpath);
 
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         welcomepacket(p);

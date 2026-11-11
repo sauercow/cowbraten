@@ -850,6 +850,18 @@ void disablezoom()
     zoomprogress = 0;
 }
 
+float getzoomprogress() { return zoomprogress; }
+
+// Called only after the recorded player's camera has been selected.
+void forcezoom(float progress)
+{
+    progress = clamp(progress, 0.0f, 1.0f);
+    zoom = progress > 0.001f ? 1 : 0;
+    zoomprogress = zoom ? progress : 0.0f;
+    curfov = zoomfov*zoomprogress + fov*(1.0f-zoomprogress);
+    curavatarfov = avatarzoomfov*zoomprogress + avatarfov*(1.0f-zoomprogress);
+}
+
 void computezoom()
 {
     if(!zoom) { zoomprogress = 0; curfov = fov; curavatarfov = avatarfov; return; }
@@ -921,6 +933,7 @@ void recomputecamera()
 {
     game::setupcamera();
     computezoom();
+    game::hdplaybackzoom();
 
     bool allowthirdperson = game::allowthirdperson();
     bool shoulddetach = (allowthirdperson && thirdperson > 1) || game::detachcamera();
@@ -981,6 +994,7 @@ void recomputecamera()
     }
 
     setviewcell(camera1->o);
+    game::recordhdframe();
 }
 
 extern const matrix4 viewmatrix(vec(-1, 0, 0), vec(0, 0, 1), vec(0, -1, 0));

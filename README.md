@@ -2,7 +2,7 @@
 
 This repository contains **cowbraten**, a standalone-branded fork of [p1xbraten](https://github.com/sauerbraten/p1xbraten) with additional demo playback, HUD, crosshair, and sound features. It retains p1xbraten network detection compatibility while versioning and packaging cowbraten separately.
 
-Current fork version: **1.0.0**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights.
+Current fork version: **1.0.1-rc.3**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights.
 
 - [Installation](#installation)
   - [Windows](#windows)
@@ -61,7 +61,7 @@ Packages from https://github.com/sauerbraten/p1xbraten/releases/latest contain u
 
 ### Windows
 
-The Windows target can be cross-compiled on Linux with Zig. With Zig and NSIS installed, run `./package.sh windows` to build `cowbraten_x86_64_client.exe` and create `dist/cowbraten_setup_<version>.exe`. The installer adds cowbraten alongside an existing Sauerbraten installation so the original game content remains available.
+The Windows target can be cross-compiled on Linux with Zig. The recommended Zig version is specified in `.zig-version`. With Zig and NSIS installed, run `./package.sh windows` to build `cowbraten_x86_64_client.exe` and create `dist/cowbraten_setup_<version>.exe`. The installer adds cowbraten alongside an existing Sauerbraten installation so the original game content remains available.
 
 ### macOS
 
@@ -469,7 +469,7 @@ cowbraten is derived from [p1xbraten](https://github.com/sauerbraten/p1xbraten),
 - development headers for the usual Sauerbraten build dependencies, including zlib and SDL2, SDL2_image, and SDL2_mixer
 - libarchive-zip-perl / perl-Archive-Zip
 - development headers of libcurl (when checkupdate.patch is included and you're building targets other than linux64)
-- Zig for cross-compiling Windows or macOS targets
+- Zig for cross-compiling Windows or macOS targets; the recommended version is specified in `.zig-version`.
 - NSIS for creating the Windows installer
 
 ### Building

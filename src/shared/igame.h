@@ -24,6 +24,8 @@ namespace entities
 
 namespace game
 {
+    extern void recordhdframe(); // optional .dmohd capture after camera update
+    extern void hdplaybackzoom(); // optional recorded zoom override
     extern void parseoptions(vector<const char *> &args);
 
     extern void gamedisconnect(bool cleanup);
