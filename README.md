@@ -2,7 +2,7 @@
 
 This repository contains **cowbraten**, a standalone-branded fork of [p1xbraten](https://github.com/sauerbraten/p1xbraten) with additional demo playback, HUD, crosshair, and sound features. It retains p1xbraten network detection compatibility while versioning and packaging cowbraten separately.
 
-Current fork version: **1.0.1-rc.3**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights.
+Current fork version: **1.1.0-rc.1**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights and the [RmlUi roadmap](./RMLUI_ROADMAP.md) for the current migration scope and remaining work.
 
 - [Installation](#installation)
   - [Windows](#windows)
@@ -74,7 +74,9 @@ Install the normal Sauerbraten runtime/content and the build dependencies, then 
 
 ## Menu
 
-For easy configuration of the new features, an updated version of the `menus.cfg` file is automatically installed when you start cowbraten for the first time. The new file brings UI options for added features and also includes various cleanups of the vanilla GUI.
+Cowbraten uses a native RmlUi layer for the main menu, server browser, and Settings. These screens use typed C++ APIs for engine state, preserve the existing Sauer configuration format, and hand non-migrated screens back to the legacy GUI.
+
+The updated `menus.cfg` remains installed on first start for legacy screens and compatibility. It includes UI options for Cowbraten features and cleanups of the vanilla GUI.
 
 If you do not want to use the cowbraten menus, run `/usecowbratenmenus 0`.
 

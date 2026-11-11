@@ -1,5 +1,36 @@
 # Changelog
 
+## cowbraten 1.1.0-rc.1 — 2026-11-11
+
+This release candidate combines the 1.0.1 maintenance line with the first production RmlUi interface.
+
+### RmlUi
+
+- Add the native RmlUi runtime, renderer, input integration, Sauer-backed file loading, shared theme, and typed action routing.
+- Replace the main menu, server browser, and Settings entry points while retaining the legacy GUI for screens that have not been migrated.
+- Add server filtering, sorting, selection, refresh, and connection through snapshots of the existing Sauer server list.
+- Add typed Settings pages for gameplay, HUD, graphics, audio, mouse and keyboard, crosshair, chat, and console options.
+- Add key binding capture with multiple bindings, exact removal, readable key names, conflict detection, and explicit replacement.
+- Add RmlUi controls for Cowbraten and p1x features including weapon trails, feedback, radar, player models, clocks, score overlay, ammobar, frag messages, scoreboard columns, console filters, soundpacks, and audio devices.
+- Preserve configuration persistence, legacy console handoff, GL reset recovery, drawable-size updates, and exact-name `showgui` compatibility for migrated screens.
+
+### Integrated maintenance work
+
+- Carry forward the 1.0.1 release-candidate fixes for HiDPI rendering, display transitions, kill-streak lifecycle handling, and HD demos.
+- Retain p1xbraten 9.0.0 detection and the existing Sauer network and demo format versions.
+
+### Validation
+
+- Build the Linux client and standalone server from the combined branch.
+- Start the client with SDL's offscreen video driver, load the Settings document at 800x600, render a screenshot, and exit cleanly.
+
+### Known scope
+
+- Demos, profile, console, about, and exit actions on the new main menu are still placeholders.
+- Game setup, map selection, player model selection, master controls, campaigns, bot matches, and editing tools continue to use the legacy GUI.
+- Server favorites and history, navigation history, modal stacking, and a complete interactive platform matrix remain future work.
+- See [RMLUI_ROADMAP.md](./RMLUI_ROADMAP.md) for priorities and release gates.
+
 ## cowbraten 1.0.1-rc.3 — 2026-10-23
 
 ### HD Demos

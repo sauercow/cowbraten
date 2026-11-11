@@ -3790,7 +3790,7 @@
                             <div class="eyebrow settings-eyebrow">Input / Gameplay</div>
                             <div class="settings-stage-title">Mouse &amp; Keyboard</div>
                             <div class="settings-stage-copy">
-                                Adjust the existing gameplay mouse response. Key binding capture remains intentionally separate.
+                                Adjust gameplay mouse response and manage typed key bindings with explicit conflict handling.
                             </div>
                         </div>
 

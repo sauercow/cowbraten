@@ -320,10 +320,12 @@ belongs to the legacy 3D GUI and does not control RmlUi's absolute pointer.
 Mouse acceleration, zoom-specific response, and sensitivity scaling remain
 outside this basic slice.
 
-No keyboard binding API is exposed yet. A future binding milestone must own
-capture state, cancellation, conflict policy, multiple bindings, readable key
-names, and persistence explicitly; it must not pass arbitrary bind commands
-from markup.
+The key binding panel exposes a curated set of movement, combat, and interface
+actions through `keybindings_api`. The Rml model owns capture and cancellation
+state, displays every current binding with a readable key name, removes one
+exact binding at a time, and requires an explicit decision before replacing a
+conflicting binding. The Sauer bridge owns command identity and persistence;
+markup cannot supply or evaluate an arbitrary bind command.
 
 The first Crosshair slice follows the same fixed-name boundary. Its value
 snapshot contains the persistent `crosshairsize`, `crosshairfx`,
