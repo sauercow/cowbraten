@@ -15,6 +15,7 @@ This release candidate combines the 1.0.1 maintenance line with the first produc
 - Preserve configuration persistence, legacy console handoff, GL reset recovery, drawable-size updates, and exact-name `showgui` compatibility for migrated screens.
 - Preserve logical interface size on HiDPI displays with density-independent styling and drawable-resolution rendering.
 - Improve responsive layouts at 800x600 and other compact viewports, raise microtext legibility, and simplify user-facing Settings descriptions.
+- Normalize nested gameplay sections with compact headings, values, toggles, and sliders, plus clear weapon grouping for trail-color controls.
 
 ### Integrated maintenance work
 

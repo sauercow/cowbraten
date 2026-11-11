@@ -278,6 +278,34 @@ body
     line-height: 20dp;
 }
 
+.settings-subsection-header
+{
+    margin-top: var(--space-4);
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+    border-top-width: 1dp;
+    border-top-color: var(--color-border);
+}
+
+.settings-subsection-header .settings-eyebrow
+{
+    margin-bottom: 4dp;
+}
+
+.settings-subsection-header .settings-stage-title
+{
+    font-size: 24dp;
+    line-height: 32dp;
+    letter-spacing: 2dp;
+}
+
+.settings-subsection-header .settings-stage-copy
+{
+    margin-top: 4dp;
+    font-size: 12dp;
+    line-height: 18dp;
+}
+
 .settings-section
 {
     display: block;
@@ -839,6 +867,120 @@ body
 .settings-compact-section
 {
     margin-top: var(--space-3);
+}
+
+.settings-subsection-panel
+{
+    margin-top: var(--space-2);
+}
+
+.settings-subsection-panel .settings-display-row
+{
+    min-height: 44dp;
+}
+
+.settings-subsection-panel .settings-control-title
+{
+    font-size: 15dp;
+    line-height: 20dp;
+}
+
+.settings-subsection-panel .settings-control-description
+{
+    max-width: 760dp;
+    margin-top: 3dp;
+    font-size: 11dp;
+    line-height: 16dp;
+}
+
+.settings-subsection-panel .settings-display-toggle
+{
+    min-width: 144dp;
+    height: 36dp;
+    font-size: 12dp;
+}
+
+.settings-subsection-panel .settings-control-divider
+{
+    margin-top: var(--space-1);
+    padding-top: var(--space-1);
+}
+
+.settings-subsection-panel .settings-value
+{
+    width: 112dp;
+    height: 44dp;
+    margin-left: var(--space-2);
+}
+
+.settings-subsection-panel .settings-value-number
+{
+    font-size: 18dp;
+    line-height: 42dp;
+}
+
+.settings-subsection-panel .settings-value-unit
+{
+    font-size: 10dp;
+}
+
+.settings-subsection-panel .settings-range-row
+{
+    margin-top: var(--space-1);
+}
+
+.settings-subsection-panel .settings-range
+{
+    height: 24dp;
+}
+
+.settings-subsection-panel .settings-range slidertrack
+{
+    margin-top: 10dp;
+}
+
+.settings-subsection-panel .settings-range sliderbar
+{
+    width: 14dp;
+    height: 14dp;
+    margin-top: 5dp;
+    margin-left: -7dp;
+    margin-right: -7dp;
+    border-radius: 7dp;
+}
+
+.settings-subsection-panel .settings-range-bound
+{
+    width: 32dp;
+    font-size: 10dp;
+}
+
+.settings-subsection-panel .settings-color-swatch
+{
+    width: 48dp;
+    height: 28dp;
+    margin-left: var(--space-2);
+}
+
+.settings-trail-colors .settings-color-weapon
+{
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+    border-top-width: 2dp;
+    border-top-color: var(--color-primary-pressed);
+}
+
+.settings-trail-colors .settings-color-weapon-first
+{
+    margin-top: 0;
+    padding-top: 0;
+    border-top-width: 0;
+}
+
+.settings-trail-colors .settings-color-weapon .settings-control-title
+{
+    font-size: 17dp;
+    letter-spacing: 1dp;
 }
 
 .settings-console-columns

@@ -191,7 +191,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-stage-header">
+                        <div class="settings-stage-header settings-subsection-header">
                             <div class="eyebrow settings-eyebrow">Game / Combat Feedback</div>
                             <div class="settings-stage-title">Feedback</div>
                             <div class="settings-stage-copy">
@@ -199,7 +199,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section panel">
+                        <div class="settings-section settings-compact-section settings-subsection-panel panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Hit Sound</div>
@@ -274,7 +274,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-stage-header">
+                        <div class="settings-stage-header settings-subsection-header">
                             <div class="eyebrow settings-eyebrow">Game / Trail Colors</div>
                             <div class="settings-stage-title">Trail Colors</div>
                             <div class="settings-stage-copy">
@@ -282,8 +282,8 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section panel">
-                            <div class="settings-display-row">
+                        <div class="settings-section settings-compact-section settings-subsection-panel settings-trail-colors panel">
+                            <div class="settings-display-row settings-color-weapon settings-color-weapon-first">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Shotgun</div>
                                     <div class="settings-control-description">
@@ -360,7 +360,7 @@
                                 <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
                             </div>
 
-                            <div class="settings-display-row settings-control-divider">
+                            <div class="settings-display-row settings-control-divider settings-color-weapon">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Chaingun</div>
                                     <div class="settings-control-description">
@@ -437,7 +437,7 @@
                                 <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
                             </div>
 
-                            <div class="settings-display-row settings-control-divider">
+                            <div class="settings-display-row settings-control-divider settings-color-weapon">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Rocket Launcher</div>
                                     <div class="settings-control-description">
@@ -514,7 +514,7 @@
                                 <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
                             </div>
 
-                            <div class="settings-display-row settings-control-divider">
+                            <div class="settings-display-row settings-control-divider settings-color-weapon">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Rifle</div>
                                     <div class="settings-control-description">
@@ -591,7 +591,7 @@
                                 <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
                             </div>
 
-                            <div class="settings-display-row settings-control-divider">
+                            <div class="settings-display-row settings-control-divider settings-color-weapon">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Grenade Launcher</div>
                                     <div class="settings-control-description">
@@ -668,7 +668,7 @@
                                 <span class="settings-range-bound settings-range-maximum">{{ trail_color_channel_maximum }}</span>
                             </div>
 
-                            <div class="settings-display-row settings-control-divider">
+                            <div class="settings-display-row settings-control-divider settings-color-weapon">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Pistol</div>
                                     <div class="settings-control-description">
@@ -751,7 +751,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-stage-header">
+                        <div class="settings-stage-header settings-subsection-header">
                             <div class="eyebrow settings-eyebrow">Game / Radar</div>
                             <div class="settings-stage-title">Radar</div>
                             <div class="settings-stage-copy">
@@ -759,7 +759,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section panel">
+                        <div class="settings-section settings-compact-section settings-subsection-panel panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Numbered Capture Bases</div>
@@ -800,7 +800,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-stage-header">
+                        <div class="settings-stage-header settings-subsection-header">
                             <div class="eyebrow settings-eyebrow">Game / Models</div>
                             <div class="settings-stage-title">Models</div>
                             <div class="settings-stage-copy">
@@ -808,7 +808,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section panel">
+                        <div class="settings-section settings-compact-section settings-subsection-panel panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Ragdoll Deaths</div>
