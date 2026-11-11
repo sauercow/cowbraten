@@ -1474,16 +1474,16 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">HUD / Scoreboard</div>
                                     <div class="settings-control-description">
-                                        Column checkboxes from the native scoreboard GUI. Show at death stays on Game. These columns are always shown here; they are not gated on hudscore.
+                                        Choose which columns appear on the scoreboard. Automatic opening after death is configured under Game.
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="settings-display-row">
+                            <div class="settings-display-row settings-section-first-row">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Flags</div>
                                     <div class="settings-control-description">
-                                        Shows captured flags on the CTF scoreboard.
+                                        Show captured flags on the CTF scoreboard.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1500,7 +1500,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Frags</div>
                                     <div class="settings-control-description">
-                                        Shows the frags column. Native hidefrags is inverted: checked writes 0, unchecked writes 1.
+                                        Show each player's frag count.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1517,7 +1517,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Deaths</div>
                                     <div class="settings-control-description">
-                                        Shows each player's death count.
+                                        Show each player's death count.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1534,7 +1534,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Suicides</div>
                                     <div class="settings-control-description">
-                                        Shows each player's suicide count.
+                                        Show each player's suicide count.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1551,7 +1551,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">KPD</div>
                                     <div class="settings-control-description">
-                                        Shows kills per death.
+                                        Show each player's kill-to-death ratio.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1568,7 +1568,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Accuracy</div>
                                     <div class="settings-control-description">
-                                        Shows each player's shot accuracy.
+                                        Show each player's shot accuracy.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1585,7 +1585,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Damage</div>
                                     <div class="settings-control-description">
-                                        Shows damage dealt or net. Enabling from off writes dealt (1). Opening Settings does not rewrite an unmatched non-zero value.
+                                        Show damage dealt or net damage.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1615,7 +1615,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Damage Received</div>
                                     <div class="settings-control-description">
-                                        Shows damage taken by each player.
+                                        Show damage taken by each player.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1632,7 +1632,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Ping</div>
                                     <div class="settings-control-description">
-                                        Show ping. Existing custom non-zero values remain unchanged until toggled.
+                                        Show each player's network latency.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1649,7 +1649,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">PJ</div>
                                     <div class="settings-control-description">
-                                        Shows packet jump on the multiplayer scoreboard.
+                                        Show packet-jump information on the multiplayer scoreboard.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">
@@ -1666,7 +1666,7 @@
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">CN</div>
                                     <div class="settings-control-description">
-                                        Shows each player's client number. Masters still see client numbers when this is off.
+                                        Show each player's client number. Server masters can always see this column.
                                     </div>
                                 </div>
                                 <label class="checkbox-row settings-display-toggle">

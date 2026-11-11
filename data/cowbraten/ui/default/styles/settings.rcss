@@ -249,7 +249,7 @@ body
     display: flex;
     flex: none;
     flex-direction: column;
-    padding-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
     border-bottom-width: 1dp;
     border-bottom-color: var(--color-border);
 }
@@ -262,9 +262,9 @@ body
 .settings-stage-title
 {
     color: var(--color-text);
-    font-size: 40dp;
-    line-height: 48dp;
-    letter-spacing: 3dp;
+    font-size: 24dp;
+    line-height: 32dp;
+    letter-spacing: 2dp;
     text-transform: uppercase;
 }
 
@@ -272,10 +272,10 @@ body
 {
     display: block;
     max-width: 720dp;
-    margin-top: var(--space-1);
+    margin-top: 4dp;
     color: var(--color-text-muted);
-    font-size: 13dp;
-    line-height: 20dp;
+    font-size: 12dp;
+    line-height: 18dp;
 }
 
 .settings-subsection-header
@@ -287,31 +287,12 @@ body
     border-top-color: var(--color-border);
 }
 
-.settings-subsection-header .settings-eyebrow
-{
-    margin-bottom: 4dp;
-}
-
-.settings-subsection-header .settings-stage-title
-{
-    font-size: 24dp;
-    line-height: 32dp;
-    letter-spacing: 2dp;
-}
-
-.settings-subsection-header .settings-stage-copy
-{
-    margin-top: 4dp;
-    font-size: 12dp;
-    line-height: 18dp;
-}
-
 .settings-section
 {
     display: block;
     flex: none;
-    margin-top: var(--space-4);
-    padding: var(--space-3);
+    margin-top: var(--space-2);
+    padding: var(--space-2);
     background-color: var(--color-background);
 }
 
@@ -333,8 +314,8 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 18dp;
-    line-height: 24dp;
+    font-size: 15dp;
+    line-height: 20dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -342,11 +323,11 @@ body
 .settings-control-description
 {
     display: block;
-    max-width: 640dp;
-    margin-top: var(--space-1);
+    max-width: 760dp;
+    margin-top: 3dp;
     color: var(--color-text-muted);
-    font-size: 12dp;
-    line-height: 18dp;
+    font-size: 11dp;
+    line-height: 16dp;
 }
 
 .settings-value
@@ -354,9 +335,9 @@ body
     box-sizing: border-box;
     display: flex;
     flex: none;
-    width: 144dp;
-    height: 56dp;
-    margin-left: var(--space-3);
+    width: 112dp;
+    height: 44dp;
+    margin-left: var(--space-2);
     align-items: baseline;
     justify-content: center;
     background-color: var(--color-surface-2);
@@ -367,8 +348,8 @@ body
 .settings-value-number
 {
     color: var(--color-primary);
-    font-size: 24dp;
-    line-height: 54dp;
+    font-size: 18dp;
+    line-height: 42dp;
 }
 
 .settings-value-unit
@@ -384,9 +365,9 @@ body
 {
     box-sizing: border-box;
     flex: none;
-    width: 56dp;
-    height: 32dp;
-    margin-left: var(--space-3);
+    width: 48dp;
+    height: 28dp;
+    margin-left: var(--space-2);
     border-width: 1dp;
     border-color: var(--color-border);
 }
@@ -394,14 +375,14 @@ body
 .settings-range-row
 {
     display: flex;
-    margin-top: var(--space-4);
+    margin-top: var(--space-1);
     align-items: center;
 }
 
 .settings-range-bound
 {
     flex: none;
-    width: 40dp;
+    width: 32dp;
     color: var(--color-disabled);
     font-size: 10dp;
     letter-spacing: 1dp;
@@ -416,14 +397,14 @@ body
 {
     display: block;
     flex: 1;
-    height: 32dp;
+    height: 24dp;
     tab-index: auto;
 }
 
 .settings-range slidertrack
 {
     height: 4dp;
-    margin-top: 14dp;
+    margin-top: 10dp;
     background-color: var(--color-surface-2);
     border-width: 1dp;
     border-color: var(--color-border);
@@ -443,15 +424,15 @@ body
 
 .settings-range sliderbar
 {
-    width: 16dp;
-    height: 16dp;
-    margin-top: 8dp;
-    margin-left: -8dp;
-    margin-right: -8dp;
+    width: 14dp;
+    height: 14dp;
+    margin-top: 5dp;
+    margin-left: -7dp;
+    margin-right: -7dp;
     background-color: var(--color-primary);
     border-width: 2dp;
     border-color: var(--color-background);
-    border-radius: 8dp;
+    border-radius: 7dp;
 }
 
 .settings-range sliderbar:hover,
@@ -561,7 +542,7 @@ body
 .settings-mode-selector
 {
     display: flex;
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
     gap: var(--space-1);
 }
 
@@ -582,7 +563,7 @@ body
 .settings-display-row
 {
     display: flex;
-    min-height: 56dp;
+    min-height: 44dp;
     align-items: center;
     justify-content: space-between;
 }
@@ -591,9 +572,9 @@ body
 {
     box-sizing: border-box;
     flex: none;
-    min-width: 160dp;
-    height: 40dp;
-    margin-left: var(--space-3);
+    min-width: 144dp;
+    height: 36dp;
+    margin-left: var(--space-2);
     padding: 0 var(--space-2);
     justify-content: center;
     background-color: var(--color-surface-2);
@@ -601,13 +582,14 @@ body
     border-color: var(--color-border);
     border-radius: var(--radius-control);
     color: var(--color-text);
+    font-size: 12dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
 .settings-performance-section
 {
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .settings-control-footer-compact
@@ -618,22 +600,22 @@ body
 
 .settings-fps-heading
 {
-    margin-top: var(--space-3);
-    padding-top: var(--space-3);
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
     border-top-width: 1dp;
     border-top-color: var(--color-border);
 }
 
 .settings-fps-value
 {
-    width: 168dp;
+    width: 128dp;
 }
 
 .settings-fps-value-label
 {
     color: var(--color-primary);
-    font-size: 16dp;
-    line-height: 54dp;
+    font-size: 14dp;
+    line-height: 42dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -645,7 +627,7 @@ body
 
 .settings-antialiasing-section
 {
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .settings-antialiasing-current
@@ -656,7 +638,7 @@ body
 .settings-antialiasing-selector
 {
     display: flex;
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
     gap: var(--space-1);
 }
 
@@ -676,7 +658,7 @@ body
 
 .settings-resolution-section
 {
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .settings-resolution-current
@@ -685,8 +667,8 @@ body
     display: flex;
     flex: none;
     min-width: 184dp;
-    height: 56dp;
-    margin-left: var(--space-3);
+    height: 44dp;
+    margin-left: var(--space-2);
     padding: 0 var(--space-2);
     flex-direction: column;
     justify-content: center;
@@ -718,7 +700,7 @@ body
 .settings-resolution-grid
 {
     display: flex;
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
     flex-wrap: wrap;
     gap: var(--space-1);
 }
@@ -758,22 +740,22 @@ body
 
 .settings-audio-section
 {
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .settings-audio-value
 {
-    width: 136dp;
+    width: 112dp;
 }
 
 .settings-audio-range-row
 {
-    margin-top: var(--space-3);
+    margin-top: var(--space-1);
 }
 
 .settings-audio-info-row
 {
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .settings-soundpack-current
@@ -783,8 +765,8 @@ body
     flex: none;
     width: 176dp;
     min-width: 0;
-    height: 54dp;
-    margin-left: var(--space-3);
+    height: 44dp;
+    margin-left: var(--space-2);
     padding: 0 var(--space-2);
     align-items: center;
     justify-content: center;
@@ -810,7 +792,7 @@ body
 .settings-soundpack-grid
 {
     display: flex;
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
     flex-wrap: wrap;
     gap: var(--space-1);
 }
@@ -861,105 +843,17 @@ body
 
 .settings-input-section
 {
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .settings-compact-section
 {
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .settings-subsection-panel
 {
     margin-top: var(--space-2);
-}
-
-.settings-subsection-panel .settings-display-row
-{
-    min-height: 44dp;
-}
-
-.settings-subsection-panel .settings-control-title
-{
-    font-size: 15dp;
-    line-height: 20dp;
-}
-
-.settings-subsection-panel .settings-control-description
-{
-    max-width: 760dp;
-    margin-top: 3dp;
-    font-size: 11dp;
-    line-height: 16dp;
-}
-
-.settings-subsection-panel .settings-display-toggle
-{
-    min-width: 144dp;
-    height: 36dp;
-    font-size: 12dp;
-}
-
-.settings-subsection-panel .settings-control-divider
-{
-    margin-top: var(--space-1);
-    padding-top: var(--space-1);
-}
-
-.settings-subsection-panel .settings-value
-{
-    width: 112dp;
-    height: 44dp;
-    margin-left: var(--space-2);
-}
-
-.settings-subsection-panel .settings-value-number
-{
-    font-size: 18dp;
-    line-height: 42dp;
-}
-
-.settings-subsection-panel .settings-value-unit
-{
-    font-size: 10dp;
-}
-
-.settings-subsection-panel .settings-range-row
-{
-    margin-top: var(--space-1);
-}
-
-.settings-subsection-panel .settings-range
-{
-    height: 24dp;
-}
-
-.settings-subsection-panel .settings-range slidertrack
-{
-    margin-top: 10dp;
-}
-
-.settings-subsection-panel .settings-range sliderbar
-{
-    width: 14dp;
-    height: 14dp;
-    margin-top: 5dp;
-    margin-left: -7dp;
-    margin-right: -7dp;
-    border-radius: 7dp;
-}
-
-.settings-subsection-panel .settings-range-bound
-{
-    width: 32dp;
-    font-size: 10dp;
-}
-
-.settings-subsection-panel .settings-color-swatch
-{
-    width: 48dp;
-    height: 28dp;
-    margin-left: var(--space-2);
 }
 
 .settings-trail-colors .settings-color-weapon
@@ -999,6 +893,14 @@ body
 }
 
 .settings-control-divider
+{
+    margin-top: var(--space-1);
+    padding-top: var(--space-1);
+    border-top-width: 1dp;
+    border-top-color: var(--color-border);
+}
+
+.settings-section-first-row
 {
     margin-top: var(--space-2);
     padding-top: var(--space-2);
@@ -1042,7 +944,7 @@ body
 .settings-crosshair-grid
 {
     display: flex;
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
     flex-wrap: wrap;
     gap: var(--space-1);
 }
@@ -1094,21 +996,21 @@ body
 {
     display: flex;
     flex: none;
-    width: 232dp;
-    height: 40dp;
-    margin-left: var(--space-3);
+    width: 184dp;
+    height: 36dp;
+    margin-left: var(--space-2);
     gap: var(--space-1);
 }
 
 .settings-stepper-button
 {
-    width: 48dp;
-    min-width: 48dp;
-    height: 40dp;
+    width: 40dp;
+    min-width: 40dp;
+    height: 36dp;
     padding: 0;
     color: var(--color-primary);
-    font-size: 20dp;
-    line-height: 38dp;
+    font-size: 18dp;
+    line-height: 34dp;
 }
 
 .settings-stepper-value
@@ -1116,14 +1018,14 @@ body
     box-sizing: border-box;
     flex: 1;
     width: auto;
-    height: 40dp;
+    height: 36dp;
     padding: 0;
     background-color: var(--color-surface-2);
     border-width: 1dp;
     border-color: var(--color-border);
     color: var(--color-primary);
-    font-size: 17dp;
-    line-height: 38dp;
+    font-size: 15dp;
+    line-height: 34dp;
     letter-spacing: 1dp;
     text-align: center;
 }
@@ -1137,7 +1039,7 @@ body
 .settings-unavailable-note
 {
     display: block;
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
     padding: var(--space-2);
     background-color: var(--color-surface-2);
     border-left-width: 3dp;
@@ -1146,13 +1048,13 @@ body
 
 .settings-keybindings-panel
 {
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .settings-keybinding-group
 {
     display: block;
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
 }
 
 .settings-keybinding-group-title
@@ -1459,8 +1361,8 @@ body
 
     .settings-stage-title
     {
-        font-size: 32dp;
-        line-height: 40dp;
+        font-size: 24dp;
+        line-height: 32dp;
     }
 
     .settings-stage-copy
@@ -1477,7 +1379,7 @@ body
 
     .settings-display-row
     {
-        min-height: 48dp;
+        min-height: 44dp;
     }
 
     .settings-display-section .settings-control-footer
