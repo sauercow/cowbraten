@@ -5715,6 +5715,17 @@ namespace cowui
             instance->fov
         );
 
+        Rml::Element *element = event.GetCurrentElement();
+        // Ignore programmatic range updates so opening Settings cannot
+        // rewrite the native ident. RmlUi emits change both while creating
+        // the range and while binding min/max/value into the hidden document.
+        if(!element || !element->GetParentNode() ||
+           !element->IsVisible(true) || requested == instance->fov)
+        {
+            event.StopPropagation();
+            return;
+        }
+
         if(!settings::writefov(requested))
         {
             std::fprintf(

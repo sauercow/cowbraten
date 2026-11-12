@@ -162,7 +162,6 @@
                                     min="10"
                                     max="150"
                                     step="1"
-                                    value="100"
                                     data-attr-min="fov_minimum"
                                     data-attr-max="fov_maximum"
                                     data-attr-value="fov"
