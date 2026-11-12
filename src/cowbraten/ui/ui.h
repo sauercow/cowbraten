@@ -3,15 +3,20 @@
 
 union SDL_Event;
 
+namespace Rml
+{
+    class ElementDocument;
+}
+
 namespace cowui
 {
     enum class ScreenId
     {
         Test,
-        Main,
         Servers,
         Demos,
-        Settings
+        Settings,
+        Profile
     };
 
     // Window dimensions define logical UI density and SDL input coordinates;
@@ -55,7 +60,10 @@ namespace cowui
     void selectfirstdemo();
     bool playselecteddemo();
     void showsettings();
+    void showprofile();
     void showtest();
+    void settheme(const char *name);
+    bool applytheme(Rml::ElementDocument *document);
     void close();
     // The modal session survives temporary console/chat ownership.
     bool modalactive();

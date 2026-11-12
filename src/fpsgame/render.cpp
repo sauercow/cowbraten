@@ -471,6 +471,25 @@ namespace game
 
     void renderplayerpreview(int model, int team, int weap)
     {
+        renderplayerpreview(
+            model,
+            team,
+            weap,
+            0,
+            lastmillis,
+            fmod(lastmillis/10000.0f*360.0f, 360.0f),
+            1.0f);
+    }
+
+    void renderplayerpreview(
+        int model,
+        int team,
+        int weap,
+        int animation,
+        int animation_started,
+        float yaw,
+        float zoom)
+    {
         static fpsent *previewent = NULL;
         if(!previewent)
         {
@@ -479,10 +498,41 @@ namespace game
             previewent->light.dir = vec(0, -1, 2).normalize();
             loopi(GUN_PISTOL-GUN_FIST) previewent->ammo[GUN_FIST+1+i] = 1;
         }
+        previewent->state = CS_ALIVE;
+        previewent->move = previewent->strafe = 0;
+        previewent->timeinair = 0;
+        previewent->lastaction = 0;
+        previewent->lastpain = 0;
+        previewent->lastattackgun = weap;
+
+        switch(animation)
+        {
+            case 1:
+                previewent->move = 1;
+                break;
+            case 2:
+                previewent->lastaction = max(animation_started, 1);
+                break;
+            case 3:
+                previewent->timeinair = 200;
+                break;
+            case 4:
+                previewent->state = CS_DEAD;
+                previewent->lastpain = max(animation_started, 1);
+                break;
+            default:
+                break;
+        }
+
         float height = previewent->eyeheight + previewent->aboveeye,
               zrad = height/2;
         vec2 xyrad = vec2(previewent->xradius, previewent->yradius).max(height/4);
-        previewent->o = calcmodelpreviewpos(vec(xyrad, zrad), previewent->yaw).addz(previewent->eyeheight - zrad);
+        float automatic_yaw = 0;
+        const float preview_zoom = clamp(zoom, 0.70f, 1.45f);
+        previewent->o = calcmodelpreviewpos(
+            vec(xyrad, zrad).div(preview_zoom),
+            automatic_yaw).addz(previewent->eyeheight - zrad);
+        previewent->yaw = yaw;
         previewent->gunselect = clamp(weap, int(GUN_FIST), int(GUN_PISTOL));
         previewent->light.millis = -1;
         const playermodelinfo *mdlinfo = getplayermodelinfo(model);
@@ -560,4 +610,3 @@ namespace game
     }
 
 }
-

@@ -1,0 +1,146 @@
+<rml>
+<head>
+    <title>Cowbraten Profile / Character</title>
+    <link type="text/template" href="../templates/app_shell.rml" />
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/profile.rcss" />
+</head>
+
+<body template="app-shell" class="app-page-profile" data-model="profile">
+    <div class="profile-screen">
+        <div class="profile-shell">
+            <div class="profile-content">
+                <div class="profile-stage">
+                    <div class="profile-stage-header">
+                        <div class="eyebrow profile-eyebrow">Profile&nbsp;&nbsp;/&nbsp;&nbsp;Identity</div>
+                        <div class="profile-stage-title">Player Profile</div>
+                        <div class="profile-stage-copy">Manage your player name and choose how you appear in game.</div>
+                    </div>
+
+                    <div class="profile-identity profile-panel">
+                        <div class="profile-identity-heading">
+                            <div class="profile-identity-kicker">Current Identity</div>
+                            <div class="profile-identity-current">{{ current_name }}</div>
+                        </div>
+                        <div class="profile-name-editor">
+                            <div class="profile-name-label">Player Name</div>
+                            <input class="text-input profile-name-input" type="text"
+                                maxlength="15"
+                                data-value="name_input"
+                                data-event-change="set_name_input(ev.value)" />
+                        </div>
+                        <button class="button button-primary profile-name-action"
+                            onclick="profile.name.apply">Apply</button>
+                        <button class="button profile-name-action"
+                            onclick="profile.name.save">Save Name</button>
+                        <div class="profile-name-menu"
+                            data-class-is-open="saved_names_open">
+                            <button class="profile-name-menu-toggle"
+                                onclick="profile.names.toggle">
+                                <span>Saved names</span>
+                                <span class="profile-name-menu-caret"></span>
+                            </button>
+                            <div class="profile-name-popover">
+                                <div class="profile-name-popover-title">Choose identity</div>
+                                <div class="profile-name-empty"
+                                    data-if="saved_names.size == 0">No saved names</div>
+                                <div class="profile-name-row"
+                                    data-for="preset : saved_names">
+                                    <button class="profile-name-load"
+                                        data-class-is-selected="preset.value == current_name"
+                                        data-event-click="select_name(preset.value)">{{ preset.value }}</button>
+                                    <button class="profile-name-remove"
+                                        title="Remove saved name"
+                                        data-event-click="delete_name(preset.value)">X</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="profile-name-status">{{ name_status }}</div>
+                    </div>
+
+                    <div class="profile-workspace">
+                        <div class="profile-roster profile-panel">
+                            <div class="profile-panel-title">Player Models</div>
+                            <div class="profile-character-list">
+                                <button class="profile-character-row"
+                                    data-for="character : characters"
+                                    data-class-is-selected="character.id == selected_id"
+                                    data-event-click="select_character(character.id)">
+                                    <img class="profile-character-icon" data-attr-src="character.icon" />
+                                    <span class="profile-character-name">{{ character.name }}</span>
+                                    <span class="profile-character-status"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="profile-preview-panel profile-panel">
+                            <div class="profile-preview-heading">
+                                <div>
+                                    <div class="profile-preview-name">{{ selected_name }}</div>
+                                    <div class="profile-preview-state">{{ animation_name }}</div>
+                                </div>
+                                <div class="profile-preview-live"><span></span> Active model</div>
+                            </div>
+                            <div id="profile-preview" class="profile-preview"
+                                ondragstart="profile.preview.drag-start"
+                                ondrag="profile.preview.drag"
+                                ondragend="profile.preview.drag-end"
+                                onmousescroll="profile.preview.scroll"></div>
+                            <div class="profile-preview-hint">Drag to rotate&nbsp;&nbsp;//&nbsp;&nbsp;Scroll to zoom</div>
+                            <div class="profile-preview-story">{{ selected_story }}</div>
+                        </div>
+
+                        <div class="profile-inspector">
+                            <div class="profile-panel profile-animation-panel">
+                                <div class="profile-panel-title">Preview Animation</div>
+                                <button class="profile-animation-button"
+                                    data-class-is-selected="animation_name == 'Idle'"
+                                    onclick="profile.animation.idle">Idle</button>
+                                <button class="profile-animation-button"
+                                    data-class-is-selected="animation_name == 'Run'"
+                                    onclick="profile.animation.run">Run</button>
+                                <button class="profile-animation-button"
+                                    data-class-is-selected="animation_name == 'Attack'"
+                                    onclick="profile.animation.attack">Attack</button>
+                                <button class="profile-animation-button"
+                                    data-class-is-selected="animation_name == 'Jump'"
+                                    onclick="profile.animation.jump">Jump</button>
+                                <button class="profile-animation-button"
+                                    data-class-is-selected="animation_name == 'Death'"
+                                    onclick="profile.animation.death">Death</button>
+                            </div>
+
+                            <div class="profile-panel profile-scale-panel">
+                                <div class="profile-scale-heading">
+                                    <div class="profile-scale-labels">
+                                        <div class="profile-panel-title">Preview Scale</div>
+                                        <div class="profile-scale-copy">Visual preview only</div>
+                                    </div>
+                                    <div class="profile-scale-value">{{ preview_scale_text }}</div>
+                                </div>
+                                <div class="profile-scale-control">
+                                    <span class="profile-scale-bound">0.70x</span>
+                                    <input class="profile-scale-range" type="range"
+                                        min="0.70" max="1.45" step="0.05"
+                                        data-attr-value="preview_scale"
+                                        data-event-change="set_preview_scale(ev.value)" />
+                                    <span class="profile-scale-bound profile-scale-bound-maximum">1.45x</span>
+                                </div>
+                            </div>
+
+                            <div class="profile-panel profile-summary-panel">
+                                <div class="profile-summary-label">Local Model</div>
+                                <div class="profile-summary-value">{{ selected_name }}</div>
+                                <div class="profile-summary-rule"></div>
+                                <div class="profile-summary-copy">Used locally and sent to compatible servers through Cowbraten's existing player-model setting.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</rml>

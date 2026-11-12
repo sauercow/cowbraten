@@ -969,6 +969,8 @@ namespace cowui
     {
         static const char crosshair_prefix[] =
             "?cowbraten-crosshair:";
+        static const char resource_prefix[] =
+            "?cowbraten-resource:";
 
         texture_dimensions = Rml::Vector2i(0, 0);
 
@@ -977,9 +979,16 @@ namespace cowui
             crosshair_prefix,
             sizeof(crosshair_prefix) - 1
         ) == 0;
-        const char *file_source = crosshair_mask
-            ? source.c_str() + sizeof(crosshair_prefix) - 1
-            : source.c_str();
+        const bool rooted_resource = std::strncmp(
+            source.c_str(),
+            resource_prefix,
+            sizeof(resource_prefix) - 1
+        ) == 0;
+        const char *file_source = source.c_str();
+        if(crosshair_mask)
+            file_source += sizeof(crosshair_prefix) - 1;
+        else if(rooted_resource)
+            file_source += sizeof(resource_prefix) - 1;
         if(!file_source[0])
             return 0;
 

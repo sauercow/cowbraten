@@ -1,12 +1,13 @@
 <rml>
 <head>
     <title>Cowbraten Server Browser</title>
+    <link type="text/template" href="../templates/app_shell.rml" />
     <link type="text/rcss" href="../styles/base.rcss" />
     <link type="text/rcss" href="../styles/controls.rcss" />
     <link type="text/rcss" href="../styles/server_browser.rcss" />
 </head>
 
-<body data-model="server_browser">
+<body template="app-shell" class="app-page-servers" data-model="server_browser">
     <div class="servers-screen">
         <div class="servers-shell panel">
             <div class="servers-header">

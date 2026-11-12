@@ -91,6 +91,11 @@ namespace cowui
         if(load_attempted || !context) return false;
         load_attempted = true;
         document = context->LoadDocument("data/cowbraten/ui/default/screens/demo_player.rml");
+        if(document && !applytheme(document))
+        {
+            document->Close();
+            document = nullptr;
+        }
         if(!document)
             std::fprintf(stderr, "Cowbraten UI: failed to load demo player overlay\n");
         return document != nullptr;

@@ -1,0 +1,73 @@
+@media (theme: modern-metallic)
+{
+    body
+    {
+        --color-background: #0D0F13;
+        --color-surface: #141820;
+        --color-surface-2: #1A1E24;
+        --color-border: #2F3640;
+        --color-text: #F5F6F8;
+        --color-text-muted: #A2A9B4;
+
+        --color-primary: #086BFF;
+        --color-primary-hover: #3387FF;
+        --color-primary-pressed: #064DB8;
+        --color-secondary: #FF7A00;
+        --color-secondary-hover: #FF963D;
+        --color-secondary-pressed: #BE5B00;
+
+        --color-success: #37C84D;
+        --color-warning: #F0B91B;
+        --color-error: #E34242;
+        --color-error-hover: #F15A5A;
+        --color-error-pressed: #A92F2F;
+        --color-disabled: #626A75;
+
+        --space-1: 8dp;
+        --space-2: 16dp;
+        --space-3: 24dp;
+        --space-4: 32dp;
+        --radius-control: 4dp;
+        --radius-panel: 6dp;
+    }
+
+    .panel,
+    .profile-panel
+    {
+        border-color: #3A424E;
+    }
+
+    .button,
+    .text-input,
+    .nav-item,
+    .profile-character-row,
+    .profile-animation-button
+    {
+        border-radius: 4dp;
+    }
+
+    .profile-stage
+    {
+        background-color: #151920;
+    }
+
+    .profile-panel-title,
+    .profile-preview-heading,
+    .profile-footer
+    {
+        background-color: #1C2128;
+    }
+
+    .profile-preview
+    {
+        background-color: #090B0E;
+        border-color: #3A424E;
+    }
+
+    .profile-character-row.is-selected,
+    .profile-animation-button.is-selected
+    {
+        background-color: #0756C9;
+        border-color: #1B82FF;
+    }
+}

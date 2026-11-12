@@ -5,6 +5,7 @@
 #include "rml_server_browser.h"
 #include "rml_demo_manager.h"
 #include "rml_demo_player.h"
+#include "rml_profile.h"
 #include "rml_settings.h"
 #include "sauer_demo_bridge.h"
 #include "sauer_input_bridge.h"
@@ -14,6 +15,8 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
+#include <RmlUi/Core/Factory.h>
+#include <RmlUi/Core/StyleSheetContainer.h>
 #include <RmlUi/Core/TextInputContext.h>
 #include <RmlUi/Core/TextInputHandler.h>
 
@@ -22,6 +25,9 @@
 #include <cstdio>
 #include <cstring>
 #include <array>
+#include <string>
+
+extern char *uitheme;
 
 namespace cowui
 {
@@ -31,6 +37,7 @@ namespace cowui
     static RmlServerBrowser server_browser;
     static RmlDemoManager demo_manager;
     static RmlDemoPlayer demo_player;
+    static RmlProfile profile_model;
     static RmlSettings settings_model;
     static Rml::Context *context = nullptr;
 
@@ -49,11 +56,6 @@ namespace cowui
             nullptr
         },
         {
-            ScreenId::Main,
-            "data/cowbraten/ui/default/screens/main.rml",
-            nullptr
-        },
-        {
             ScreenId::Servers,
             "data/cowbraten/ui/default/screens/servers.rml",
             nullptr
@@ -67,6 +69,11 @@ namespace cowui
             ScreenId::Settings,
             "data/cowbraten/ui/default/screens/settings.rml",
             nullptr
+        },
+        {
+            ScreenId::Profile,
+            "data/cowbraten/ui/default/screens/profile.rml",
+            nullptr
         }
     };
 
@@ -76,6 +83,48 @@ namespace cowui
     static bool legacy_console_input = false;
     static bool legacy_console_presentation = false;
     static bool demo_player_input_active = false;
+    static std::string requested_theme = "default";
+    static Rml::String active_theme;
+    static Rml::SharedPtr<Rml::StyleSheetContainer> theme_style_sheet;
+
+    static const char *normalizetheme(const char *name)
+    {
+        if(name && !std::strcmp(name, "modern-metallic"))
+            return "modern-metallic";
+        return "default";
+    }
+
+    static void activaterequestedtheme()
+    {
+        if(!context)
+            return;
+
+        const char *next = normalizetheme(requested_theme.c_str());
+        if(active_theme == next)
+            return;
+
+        if(!active_theme.empty() && active_theme != "default")
+            context->ActivateTheme(active_theme, false);
+
+        active_theme = next;
+        if(active_theme != "default")
+            context->ActivateTheme(active_theme, true);
+    }
+
+    bool applytheme(Rml::ElementDocument *document)
+    {
+        if(!document || !theme_style_sheet)
+            return false;
+
+        const Rml::StyleSheetContainer *base =
+            document->GetStyleSheetContainer();
+        if(!base)
+            return false;
+
+        document->SetStyleSheetContainer(
+            base->CombineStyleSheetContainer(*theme_style_sheet));
+        return true;
+    }
 
     struct UiDimensions
     {
@@ -203,7 +252,7 @@ namespace cowui
     static void showmainmenu(Rml::Event &event)
     {
         event.StopPropagation();
-        show(ScreenId::Main);
+        show(ScreenId::Profile);
     }
 
     static void showserverbrowser(Rml::Event &event)
@@ -222,6 +271,12 @@ namespace cowui
     {
         event.StopPropagation();
         show(ScreenId::Settings);
+    }
+
+    static void showprofilescreen(Rml::Event &event)
+    {
+        event.StopPropagation();
+        show(ScreenId::Profile);
     }
 
     static void quitapplication(Rml::Event &event)
@@ -583,6 +638,20 @@ namespace cowui
             ui_dimensions.density_ratio
         );
 
+        theme_style_sheet = Rml::Factory::InstanceStyleSheetFile(
+            "data/cowbraten/ui/themes/modern-metallic/theme.rcss");
+        if(!theme_style_sheet)
+        {
+            theme_style_sheet.reset();
+            Rml::Shutdown();
+            context = nullptr;
+            render_interface.shutdowngl();
+            return false;
+        }
+
+        requested_theme = uitheme && uitheme[0] ? uitheme : "default";
+        activaterequestedtheme();
+
         action_router.clear();
 
         if(!action_router.registeraction(
@@ -607,18 +676,24 @@ namespace cowui
                "navigation.settings",
                showsettingsscreen) ||
            !action_router.registeraction(
+               "navigation.profile",
+               showprofilescreen) ||
+           !action_router.registeraction(
                "navigation.exit",
                quitapplication) ||
            !server_browser.init(context, action_router) ||
            !demo_manager.init(context, action_router) ||
            !demo_player.init(context, action_router) ||
+           !profile_model.init(context, action_router) ||
            !settings_model.init(context, action_router))
         {
             settings_model.shutdown(context);
+            profile_model.shutdown(context);
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
             server_browser.shutdown(context);
             action_router.clear();
+            theme_style_sheet.reset();
             Rml::Shutdown();
             context = nullptr;
             render_interface.shutdowngl();
@@ -647,12 +722,15 @@ namespace cowui
         if(initialized)
         {
             settings_model.shutdown(context);
+            profile_model.shutdown(context);
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
             server_browser.shutdown(context);
+            theme_style_sheet.reset();
             Rml::Shutdown();
             context = nullptr;
             initialized = false;
+            active_theme.clear();
         }
         else
         {
@@ -864,7 +942,8 @@ namespace cowui
             }
         }
 
-        if(event.type == SDL_KEYDOWN &&
+        if(!text_input_handler.active() &&
+           event.type == SDL_KEYDOWN &&
            !event.key.repeat &&
            sauerinput::openconsolefromkey(event.key.keysym.sym))
         {
@@ -923,9 +1002,9 @@ namespace cowui
                     if(!event.key.repeat)
                     {
                         const bool can_close = sauerinput::canclosemenu();
-                        if(active_screen->id != ScreenId::Main &&
+                        if(active_screen->id != ScreenId::Profile &&
                            !can_close)
-                            show(ScreenId::Main);
+                            show(ScreenId::Profile);
                         else if(can_close)
                             close();
                     }
@@ -994,6 +1073,8 @@ namespace cowui
                 server_browser.update();
             else if(active_screen->id == ScreenId::Demos)
                 demo_manager.update();
+            else if(active_screen->id == ScreenId::Profile)
+                profile_model.update();
         }
 
         if(!demo_player.visible() &&
@@ -1028,6 +1109,14 @@ namespace cowui
         render_interface.beginframe();
         context->Render();
         render_interface.endframe();
+
+        if(active_screen && active_screen->id == ScreenId::Profile)
+        {
+            profile_model.renderpreview(
+                active_screen->document,
+                ui_dimensions.context_width,
+                ui_dimensions.context_height);
+        }
     }
 
     bool show(ScreenId id)
@@ -1053,6 +1142,8 @@ namespace cowui
             demo_manager.activate();
         else if(id == ScreenId::Settings)
             settings_model.activate();
+        else if(id == ScreenId::Profile)
+            profile_model.activate();
 
         if(!screen->document)
         {
@@ -1067,6 +1158,17 @@ namespace cowui
                     "Cowbraten UI: failed to load screen '%s'\n",
                     screen->path
                 );
+                return false;
+            }
+
+            if(!applytheme(screen->document))
+            {
+                std::fprintf(
+                    stderr,
+                    "Cowbraten UI: failed to apply theme to '%s'\n",
+                    screen->path);
+                screen->document->Close();
+                screen->document = nullptr;
                 return false;
             }
         }
@@ -1094,13 +1196,15 @@ namespace cowui
 
         ScreenId screen;
         if(!std::strcmp(name, "main"))
-            screen = ScreenId::Main;
+            screen = ScreenId::Profile;
         else if(!std::strcmp(name, "servers"))
             screen = ScreenId::Servers;
         else if(!std::strcmp(name, "demos"))
             screen = ScreenId::Demos;
         else if(!std::strcmp(name, "options"))
             screen = ScreenId::Settings;
+        else if(!std::strcmp(name, "playermodel"))
+            screen = ScreenId::Profile;
         else
             return false;
 
@@ -1114,7 +1218,7 @@ namespace cowui
 
     void showmain()
     {
-        show(ScreenId::Main);
+        show(ScreenId::Profile);
     }
 
     void showservers()
@@ -1165,6 +1269,25 @@ namespace cowui
     void showsettings()
     {
         show(ScreenId::Settings);
+    }
+
+    void showprofile()
+    {
+        show(ScreenId::Profile);
+    }
+
+    void settheme(const char *name)
+    {
+        requested_theme = name && name[0] ? name : "default";
+        const char *effective = normalizetheme(requested_theme.c_str());
+        if(requested_theme != effective)
+        {
+            std::fprintf(
+                stderr,
+                "Cowbraten UI: unknown theme '%s', using default\n",
+                requested_theme.c_str());
+        }
+        activaterequestedtheme();
     }
 
     void close()

@@ -1,11 +1,12 @@
 <rml>
 <head>
     <title>Cowbraten Demo Manager</title>
+    <link type="text/template" href="../templates/app_shell.rml" />
     <link type="text/rcss" href="../styles/base.rcss" />
     <link type="text/rcss" href="../styles/controls.rcss" />
     <link type="text/rcss" href="../styles/demos.rcss" />
 </head>
-<body data-model="demo_manager">
+<body template="app-shell" class="app-page-demos" data-model="demo_manager">
     <div class="demos-screen">
         <div class="demos-shell panel">
             <div class="demos-header">

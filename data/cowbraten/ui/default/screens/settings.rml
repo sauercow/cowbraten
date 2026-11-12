@@ -1,12 +1,13 @@
 <rml>
 <head>
     <title>Cowbraten Settings</title>
+    <link type="text/template" href="../templates/app_shell.rml" />
     <link type="text/rcss" href="../styles/base.rcss" />
     <link type="text/rcss" href="../styles/controls.rcss" />
     <link type="text/rcss" href="../styles/settings.rcss" />
 </head>
 
-<body data-model="settings">
+<body template="app-shell" class="app-page-settings" data-model="settings">
     <div class="settings-screen">
         <div class="settings-shell panel">
             <div class="settings-header">

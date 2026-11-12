@@ -42,10 +42,10 @@
                             <span class="main-nav-label">Demos</span>
                             <span class="main-nav-state">Manage</span>
                         </button>
-                        <button class="nav-item main-nav-item" disabled="true">
+                        <button class="nav-item main-nav-item" onclick="navigation.profile">
                             <span class="main-nav-index">04</span>
                             <span class="main-nav-label">Profile</span>
-                            <span class="main-nav-state">Planned</span>
+                            <span class="main-nav-state">Character</span>
                         </button>
                         <button class="nav-item main-nav-item" onclick="navigation.settings">
                             <span class="main-nav-index">05</span>

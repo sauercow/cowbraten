@@ -1,0 +1,66 @@
+<template name="app-shell" content="app-content">
+<head>
+    <link type="text/rcss" href="../styles/app_shell.rcss" />
+</head>
+<body>
+    <div class="app-shell">
+        <div class="app-header">
+            <div class="app-lockup">
+                <div class="app-mark">C</div>
+                <div class="app-lockup-copy">
+                    <div class="app-product">Cowbraten</div>
+                    <div class="app-product-subtitle">Native Cube 2 client</div>
+                </div>
+            </div>
+            <button class="button app-return" onclick="navigation.close">
+                Esc&nbsp;&nbsp;/&nbsp;&nbsp;Return
+            </button>
+        </div>
+
+        <div class="app-frame">
+            <div class="app-sidebar">
+                <div class="app-navigation-label">Navigation</div>
+                <div class="nav-list app-navigation">
+                    <button class="nav-item app-nav-item app-nav-profile" onclick="navigation.profile">
+                        <span class="app-nav-index">01</span>
+                        <span class="app-nav-label">Profile / Identity</span>
+                    </button>
+                    <button class="nav-item app-nav-item app-nav-servers" onclick="navigation.servers">
+                        <span class="app-nav-index">02</span>
+                        <span class="app-nav-label">Servers</span>
+                    </button>
+                    <button class="nav-item app-nav-item app-nav-demos" onclick="navigation.demos">
+                        <span class="app-nav-index">03</span>
+                        <span class="app-nav-label">Demos</span>
+                    </button>
+                    <button class="nav-item app-nav-item app-nav-settings" onclick="navigation.settings">
+                        <span class="app-nav-index">04</span>
+                        <span class="app-nav-label">Settings</span>
+                    </button>
+                </div>
+
+                <div class="app-sidebar-spacer"></div>
+
+                <div class="app-navigation app-navigation-utility">
+                    <button class="nav-item app-nav-item" onclick="navigation.close">
+                        <span class="app-nav-index">05</span>
+                        <span class="app-nav-label">Return to Game</span>
+                    </button>
+                    <button class="nav-item app-nav-item app-nav-exit" onclick="navigation.exit">
+                        <span class="app-nav-index">06</span>
+                        <span class="app-nav-label">Exit</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="app-content" class="app-content"></div>
+        </div>
+
+        <div class="app-footer">
+            <div>Cowbraten</div>
+            <div>Escape returns to gameplay</div>
+            <div class="app-footer-status"><span></span> Interface active</div>
+        </div>
+    </div>
+</body>
+</template>

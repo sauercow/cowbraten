@@ -42,18 +42,48 @@ The small C++ screen table owns explicit screen identifiers and asset paths. It
 lazily loads each document once, caches it for the RmlUi context lifetime, and
 shows or hides documents on transitions.
 
+All production documents instantiate the native `app-shell` RML template. The
+template owns the fixed-width global sidebar, product header, gameplay return,
+exit action, and status footer; each screen injects only its module content into
+the `app-content` slot and declares an `app-page-*` class for the active item.
+Consequently navigation geometry and hover/focus behavior cannot drift between
+Main, Servers, Demos, Profile, and Settings. Module navigation remains local:
+for example, Settings categories live inside Settings content, while Profile
+does not duplicate links to unrelated modules.
+
 `data/cowbraten/ui/default/` is the current default theme, not an engine-owned
 layout contract. Concrete default screen and font paths are centralized in
 `ui.cpp`; settings models and actions do not reference DOM ids, classes, RML
-hierarchy, pixel positions, or style values. A future theme resolver may replace
-those physical paths while retaining the same `ScreenId`, typed model fields,
-and whitelisted action names. RML and RCSS remain responsible for arranging and
+hierarchy, pixel positions, or style values. The theme resolver extends those
+documents while retaining the same `ScreenId`, typed model fields, and
+whitelisted action names. RML and RCSS remain responsible for arranging and
 presenting that semantic contract.
 
-Only implemented screens receive identifiers. Main, Servers, and Settings are
-the current production identifiers, while Test remains a developer-only
-identifier. Later screens are added to the table when their documents and
-actions exist; disabled Main Menu items do not create placeholder screens.
+The theme resolver uses RmlUi's native media-theme mechanism. Every document
+combines its structural styles with the registered theme sheets; the persistent
+`uitheme` setting activates one supported theme through
+`Context::ActivateTheme()`. `default` leaves the foundation tokens unchanged,
+while `modern-metallic` overrides semantic tokens and component presentation in
+`data/cowbraten/ui/themes/modern-metallic/theme.rcss`. Theme selection never
+changes a model, action name, or legacy setting. A new theme therefore adds an
+RCSS sheet and any licensed font/assets, not engine-side UI behavior.
+
+Only implemented screens receive identifiers. Profile, Servers, Demos, and
+Settings are production identifiers, while Test remains a developer-only
+identifier. The former branding-only Main document is not a navigation target:
+`/ui_main` and legacy `showgui main` open Profile / Identity directly. Later
+screens are added to the table when their documents and actions exist.
+
+Profile / Identity is the first screen built against the themed component
+contract and is the default menu destination. Its RML owns player-name editing,
+saved-name selection, the character roster, controls, selection states,
+responsive layout, and preview interaction. `RmlProfile` owns presentation
+state and calls the typed `profile_api`; only `sauer_profile_bridge` knows
+`game::switchname`, the persistent `profile_name_1` through `profile_name_5`
+preset slots, the `playermodel` ident, and the engine model-preview renderer.
+The 3D model is rendered into the content rectangle calculated by RmlUi after
+the normal RML pass, so viewport coordinates are not duplicated in C++.
+Legacy `showgui main` and `showgui playermodel` route to this native screen.
 
 At most one normal screen is active. Switching screens hides the previous
 document without releasing menu input ownership, while closing the active
@@ -78,8 +108,11 @@ framebuffer precision.
 The legacy Sauer command line temporarily takes text-input ownership without
 closing or hiding the active RmlUi screen. Its normal `saycommand`,
 `sayteamcommand`, and `inputcommand` key bindings are recognized by the legacy
-input layer. RmlUi releases control focus, remains visible, and the engine
-defers the active command line to a post-RmlUi render pass. Passive console
+input layer only when no RmlUi text input is active. While an editable control
+has focus, RmlUi owns every keyboard and text event so printable bind keys are
+inserted rather than opening the legacy command line. RmlUi releases control
+focus when a legacy command line legitimately opens, remains visible, and the
+engine defers that command line to a post-RmlUi render pass. Passive console
 messages remain below modal RmlUi documents. The full legacy console has
 exclusive presentation ownership instead: `toggleconsole` hides the cached
 RmlUi document until the console closes, then restores the same screen while
