@@ -2199,7 +2199,14 @@ namespace game
                 neterr("type", cn < 0);
                 return;
         }
-        if(mapchanged) execident("mapstart");
+        if(mapchanged)
+        {
+            execident("mapstart");
+            // Runs after the complete welcome/map packet has initialized
+            // players and spectator state. setupdemorecord() is idempotent and
+            // refuses demo playback, unsupported modes, and duplicate starts.
+            autorecordmapload();
+        }
     }
 
     struct demoreq

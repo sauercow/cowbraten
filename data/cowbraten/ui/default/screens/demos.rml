@@ -1,0 +1,148 @@
+<rml>
+<head>
+    <title>Cowbraten Demo Manager</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/demos.rcss" />
+</head>
+<body data-model="demo_manager">
+    <div class="demos-screen">
+        <div class="demos-shell panel">
+            <div class="demos-header">
+                <div class="demos-lockup">
+                    <div class="demos-mark">C</div>
+                    <div><div class="demos-product">Cowbraten</div><div class="demos-title">Demo Manager</div></div>
+                </div>
+                <button class="button" onclick="navigation.main">Back&nbsp;&nbsp;/&nbsp;&nbsp;Main Menu</button>
+            </div>
+
+            <div class="demos-tabs">
+                <button class="demo-tab" data-class-is-selected="tab_library" onclick="demos.tab.library">Library</button>
+                <button class="demo-tab" data-class-is-selected="tab_recording" onclick="demos.tab.recording">Recording</button>
+                <button class="demo-tab" data-class-is-selected="tab_playback" onclick="demos.tab.playback">Playback</button>
+                <button class="demo-tab" data-class-is-selected="tab_trash" onclick="demos.tab.trash">Trash</button>
+                <div class="demos-tabs-spacer"></div>
+                <div class="demos-count">{{ result_count }}</div>
+            </div>
+
+            <div class="demos-page demos-library" data-if="tab_library">
+                <div class="demo-toolbar">
+                    <input class="text-input demo-global-search" type="text" placeholder="Search all metadata"
+                        data-value="search_value" onchange="demos.filter.search" />
+                    <button class="button" onclick="demos.refresh">Reindex</button>
+                    <button class="button" onclick="demos.select-filtered">Select Results</button>
+                    <button class="button" onclick="demos.filters.save">Save View</button>
+                    <button class="button" data-class-is-disabled="!saved_filter_available" data-attrif-disabled="!saved_filter_available" onclick="demos.filters.load">Load View</button>
+                    <button class="button" onclick="demos.filters.clear">Clear Filters</button>
+                </div>
+                <div class="demo-filters">
+                    <div class="demo-filter"><span>Mode</span><input class="text-input" type="text" placeholder="instagib" data-value="mode_value" onchange="demos.filter.mode" /></div>
+                    <div class="demo-filter"><span>Player</span><input class="text-input" type="text" placeholder="participant" data-value="player_value" onchange="demos.filter.player" /></div>
+                    <div class="demo-filter"><span>Map</span><input class="text-input" type="text" placeholder="partial map" data-value="map_value" onchange="demos.filter.map" /></div>
+                    <div class="demo-filter"><span>Server</span><input class="text-input" type="text" placeholder="origin" data-value="server_value" onchange="demos.filter.server" /></div>
+                    <div class="demo-filter"><span>Date</span><input class="text-input" type="text" placeholder="YYYY-MM-DD" data-value="date_value" onchange="demos.filter.date" /></div>
+                    <div class="demo-filter demo-filter-select"><span>Category</span>
+                        <select data-value="category_value" onchange="demos.filter.category">
+                            <option value="all">All</option><option value="duel">Duel</option><option value="match">Match</option><option value="unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div class="demo-filter demo-filter-select"><span>Duration</span>
+                        <select data-value="duration_value" onchange="demos.filter.duration">
+                            <option value="all">All</option><option value="lt2">Under 2 min</option><option value="lt5">Under 5 min</option>
+                            <option value="lt10">Under 10 min</option><option value="lt15">Under 15 min</option>
+                            <option value="10to20">10 to 20 min</option><option value="gt20">Over 20 min</option><option value="custom">Custom range</option>
+                        </select>
+                    </div>
+                    <div class="demo-filter demo-duration-custom"><span>Custom minutes (min / max)</span><div><input class="text-input" type="text" placeholder="min" data-value="duration_min_value" onchange="demos.filter.duration-min" /><input class="text-input" type="text" placeholder="max" data-value="duration_max_value" onchange="demos.filter.duration-max" /></div></div>
+                    <div class="demo-filter"><span>Format</span><input class="text-input" type="text" placeholder="DMO / HD" data-value="format_value" onchange="demos.filter.format" /></div>
+                    <div class="demo-filter demo-filter-select"><span>Size</span><select data-value="size_value" onchange="demos.filter.size"><option value="all">All</option><option value="lt1">Under 1 MB</option><option value="1to10">1 to 10 MB</option><option value="gt10">Over 10 MB</option></select></div>
+                    <div class="demo-filter-checks">
+                        <label class="checkbox-row"><input class="checkbox" type="checkbox" data-checked="favorites_only" onchange="demos.filter.favorites" /><span>Favorites</span></label>
+                        <label class="checkbox-row"><input class="checkbox" type="checkbox" data-checked="active_players_only" onchange="demos.filter.active" /><span>Active roles only</span></label>
+                    </div>
+                </div>
+                <div class="demo-table">
+                    <div class="demo-grid demo-columns">
+                        <div class="demo-cell-check"></div>
+                        <button class="demo-heading demo-cell-name" onclick="demos.sort.name">Name</button>
+                        <button class="demo-heading demo-cell-mode" onclick="demos.sort.mode">Mode</button>
+                        <button class="demo-heading demo-cell-map" onclick="demos.sort.map">Map</button>
+                        <button class="demo-heading demo-cell-duration" onclick="demos.sort.duration">Duration</button>
+                        <button class="demo-heading demo-cell-date" onclick="demos.sort.date">Date</button>
+                        <button class="demo-heading demo-cell-size" onclick="demos.sort.size">Size</button>
+                        <div class="demo-heading-label demo-cell-class">Category</div>
+                    </div>
+                    <div class="demo-rows">
+                        <div class="demo-row-repeat" data-for="demo : demos">
+                            <div class="demo-grid demo-row" data-class-is-selected="demo.selected">
+                                <span class="demo-cell-check"><button class="demo-check" data-class-is-selected="demo.selected" data-event-click="toggle_demo(demo.id)">{{ demo.selected ? 'X' : '' }}</button></span>
+                                <button class="demo-row-select" data-event-click="select_demo(demo.id)">
+                                    <span class="demo-cell-name"><span class="demo-name">{{ demo.favorite ? '* ' : '' }}{{ demo.name }}</span><span class="demo-subline">{{ demo.format }} // {{ demo.status }}</span></span>
+                                    <span class="demo-cell-mode">{{ demo.mode }}</span><span class="demo-cell-map">{{ demo.map }}</span>
+                                    <span class="demo-cell-duration">{{ demo.duration }}</span><span class="demo-cell-date">{{ demo.date }}</span>
+                                    <span class="demo-cell-size">{{ demo.size }}</span><span class="demo-cell-class">{{ demo.category }}</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="demo-empty" data-if="visible_count == 0"><div>No demos match this view</div><span>Use Reindex to discover files or clear active filters.</span></div>
+                    </div>
+                </div>
+                <div class="demo-selection">
+                    <div class="demo-selection-info"><div class="demo-selection-label">Selection</div><div class="demo-selection-name">{{ selected_name }}</div><div class="demo-selection-details">{{ selected_details }}</div><div class="demo-selection-people">{{ selected_participants }}</div></div>
+                    <div class="demo-actions">
+                        <button class="button button-primary" data-class-is-disabled="!can_play" data-attrif-disabled="!can_play" onclick="demos.play">Play</button>
+                        <button class="button" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.favorite">Favorite</button>
+                        <button class="button" data-class-is-disabled="!single_selection" data-attrif-disabled="!single_selection" onclick="demos.open-location">Open Folder</button>
+                        <button class="button" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.organize.request">Organize</button>
+                        <button class="button button-destructive" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.trash.request">Trash</button>
+                    </div>
+                    <div class="demo-edit-row" data-if="single_selection">
+                        <input class="text-input" type="text" data-value="rename_value" onchange="demos.rename.input" /><button class="button" onclick="demos.rename">Rename</button>
+                        <input class="text-input" type="text" data-value="move_value" placeholder="relative folder" onchange="demos.move.input" /><button class="button" onclick="demos.move">Move</button>
+                    </div>
+                    <div class="demo-classify" data-if="has_selection"><span>Manual class:</span><button onclick="demos.classify.duel">Duel</button><button onclick="demos.classify.match">Match</button><button onclick="demos.classify.unknown">Unknown</button></div>
+                </div>
+            </div>
+
+            <div class="demos-page demo-settings-page" data-if="tab_recording">
+                <div class="demo-page-heading"><div class="eyebrow">Recording</div><div class="display-title">Capture Settings</div><div class="body-copy">Persistent engine settings. Changes here and console commands update the same variables.</div></div>
+                <div class="demo-settings-grid">
+                    <label class="demo-setting-card"><input class="checkbox" type="checkbox" data-checked="hd_playback" onchange="demos.settings.hd-playback" /><span><strong>Enable HD Demo Playback</strong><small>Uses /demohdplay. Default: enabled.</small></span></label>
+                    <label class="demo-setting-card"><input class="checkbox" type="checkbox" data-checked="hd_recording" onchange="demos.settings.hd-recording" /><span><strong>Enable HD Demo Recording</strong><small>Writes compatible .dmohd sidecars. Default: enabled.</small></span></label>
+                    <label class="demo-setting-card"><input class="checkbox" type="checkbox" data-checked="automatic_recording" onchange="demos.settings.auto-recording" /><span><strong>Automatically Record on Map Load</strong><small>Starts recordclientdemo 2 semantics once per real map load. Default: disabled.</small></span></label>
+                </div>
+                <div class="demo-record-status"><span data-if="recording_active" class="is-recording">REC&nbsp;&nbsp;Client demo recording is active</span><span data-if="!recording_active">No client demo is currently being written.</span></div>
+                <div class="demo-note"><strong>Legacy autoexec migration</strong><span>If autoexec already runs recordclientdemo 2 on mapstart, remove that line only after enabling this option. Duplicate starts are guarded, and autoexec is never modified automatically.</span></div>
+            </div>
+
+            <div class="demos-page demo-settings-page" data-if="tab_playback">
+                <div class="demo-page-heading"><div class="eyebrow">Playback</div><div class="display-title">Player Controls</div><div class="body-copy">Only controls backed by the current demo engine are shown.</div></div>
+                <div class="playback-state"><div class="playback-indicator" data-class-is-active="playback_active"></div><div><strong>{{ playback_active ? 'Demo playback active' : 'No demo playing' }}</strong><small>{{ playback_paused ? 'Paused' : 'Running / idle' }}</small></div></div>
+                <div class="playback-controls">
+                    <button class="button" data-class-is-disabled="!playback_active" data-attrif-disabled="!playback_active" onclick="demos.playback.back">-5 sec</button>
+                    <button class="button button-primary" data-class-is-disabled="!playback_active" data-attrif-disabled="!playback_active" onclick="demos.playback.pause">{{ playback_paused ? 'Resume' : 'Pause' }}</button>
+                    <button class="button" data-class-is-disabled="!playback_active" data-attrif-disabled="!playback_active" onclick="demos.playback.forward">+5 sec</button>
+                    <button class="button button-destructive" data-class-is-disabled="!playback_active" data-attrif-disabled="!playback_active" onclick="demos.playback.stop">Stop</button>
+                </div>
+                <div class="speed-controls"><span>Playback speed</span><button onclick="demos.playback.speed" value="25">0.25x</button><button onclick="demos.playback.speed" value="50">0.50x</button><button onclick="demos.playback.speed" value="100">1.00x</button><button onclick="demos.playback.speed" value="200">2.00x</button><button onclick="demos.playback.speed" value="400">4.00x</button></div>
+                <div class="demo-note"><strong>In-game timeline</strong><span>Seek, perspective following, frame stepping, and the interactive timeline remain available in the existing playback HUD.</span></div>
+            </div>
+
+            <div class="demos-page demos-library" data-if="tab_trash">
+                <div class="demo-toolbar"><div class="trash-title"><strong>Trash</strong><span>{{ trash_usage }}</span></div><label class="trash-retention"><span>Retention</span><select data-value="retention_value" onchange="demos.trash.retention"><option value="never">Never</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option></select></label><button class="button" onclick="demos.refresh">Refresh</button><button class="button button-destructive" onclick="demos.empty.request">Empty Trash</button></div>
+                <div class="demo-table trash-table">
+                    <div class="demo-grid demo-columns"><div class="demo-cell-check"></div><div class="demo-heading-label demo-cell-name">Name</div><div class="demo-heading-label demo-cell-mode">Mode</div><div class="demo-heading-label demo-cell-map">Map</div><div class="demo-heading-label demo-cell-duration">Duration</div><div class="demo-heading-label demo-cell-date">Deleted / Indexed</div><div class="demo-heading-label demo-cell-size">Size</div><div class="demo-heading-label demo-cell-class">Category</div></div>
+                    <div class="demo-rows"><div class="demo-row-repeat" data-for="demo : demos"><div class="demo-grid demo-row" data-class-is-selected="demo.selected"><span class="demo-cell-check"><button class="demo-check" data-class-is-selected="demo.selected" data-event-click="toggle_demo(demo.id)">{{ demo.selected ? 'X' : '' }}</button></span><button class="demo-row-select" data-event-click="select_demo(demo.id)"><span class="demo-cell-name"><span class="demo-name">{{ demo.name }}</span><span class="demo-subline">{{ demo.format }}</span></span><span class="demo-cell-mode">{{ demo.mode }}</span><span class="demo-cell-map">{{ demo.map }}</span><span class="demo-cell-duration">{{ demo.duration }}</span><span class="demo-cell-date">{{ demo.date }}</span><span class="demo-cell-size">{{ demo.size }}</span><span class="demo-cell-class">{{ demo.category }}</span></button></div></div><div class="demo-empty" data-if="visible_count == 0"><div>Trash is empty</div><span>Deleted demos are moved here and remain restorable.</span></div></div>
+                </div>
+                <div class="trash-actions"><div><strong>{{ selected_name }}</strong><span>{{ selected_details }}</span></div><button class="button button-primary" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.restore">Restore</button><button class="button button-destructive" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.erase.request">Delete Permanently</button></div>
+            </div>
+
+            <div class="demos-footer"><span data-class-is-error="status_error">{{ status }}</span><span>Sort&nbsp;&nbsp;//&nbsp;&nbsp;{{ sort_ascending ? 'Ascending' : 'Descending' }}</span><span>Escape returns to gameplay</span></div>
+        </div>
+
+        <div class="demo-modal-layer" data-if="confirm_visible">
+            <div class="demo-modal panel"><div class="eyebrow">Confirmation</div><div class="demo-modal-text">{{ confirm_text }}</div><div class="demo-modal-actions"><button class="button" onclick="demos.confirm.cancel">Cancel</button><button class="button button-destructive" onclick="demos.confirm">Confirm</button></div></div>
+        </div>
+    </div>
+</body>
+</rml>

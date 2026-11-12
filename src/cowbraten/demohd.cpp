@@ -7,7 +7,7 @@
 #include "game.h"
 #include <cmath>
 
-VARP(demohdrecord, 0, 0, 1);
+VARP(demohdrecord, 0, 1, 1);
 VARP(demohdplay, 0, 1, 1);
 VARP(hdcurve, 0, 1, 1);
 

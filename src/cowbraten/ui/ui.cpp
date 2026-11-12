@@ -3,6 +3,7 @@
 #include "rml_render.h"
 #include "rml_file.h"
 #include "rml_server_browser.h"
+#include "rml_demo_manager.h"
 #include "rml_settings.h"
 #include "sauer_input_bridge.h"
 
@@ -26,6 +27,7 @@ namespace cowui
     static RmlFileInterface file_interface;
     static RmlActionRouter action_router;
     static RmlServerBrowser server_browser;
+    static RmlDemoManager demo_manager;
     static RmlSettings settings_model;
     static Rml::Context *context = nullptr;
 
@@ -51,6 +53,11 @@ namespace cowui
         {
             ScreenId::Servers,
             "data/cowbraten/ui/default/screens/servers.rml",
+            nullptr
+        },
+        {
+            ScreenId::Demos,
+            "data/cowbraten/ui/default/screens/demos.rml",
             nullptr
         },
         {
@@ -175,6 +182,12 @@ namespace cowui
     {
         event.StopPropagation();
         show(ScreenId::Servers);
+    }
+
+    static void showdemoscreen(Rml::Event &event)
+    {
+        event.StopPropagation();
+        show(ScreenId::Demos);
     }
 
     static void showsettingsscreen(Rml::Event &event)
@@ -554,12 +567,17 @@ namespace cowui
                "navigation.servers",
                showserverbrowser) ||
            !action_router.registeraction(
+               "navigation.demos",
+               showdemoscreen) ||
+           !action_router.registeraction(
                "navigation.settings",
                showsettingsscreen) ||
            !server_browser.init(context, action_router) ||
+           !demo_manager.init(context, action_router) ||
            !settings_model.init(context, action_router))
         {
             settings_model.shutdown(context);
+            demo_manager.shutdown(context);
             server_browser.shutdown(context);
             action_router.clear();
             Rml::Shutdown();
@@ -589,6 +607,7 @@ namespace cowui
         if(initialized)
         {
             settings_model.shutdown(context);
+            demo_manager.shutdown(context);
             server_browser.shutdown(context);
             Rml::Shutdown();
             context = nullptr;
@@ -884,6 +903,8 @@ namespace cowui
 
             if(active_screen->id == ScreenId::Servers)
                 server_browser.update();
+            else if(active_screen->id == ScreenId::Demos)
+                demo_manager.update();
 
             context->Update();
         }
@@ -924,6 +945,8 @@ namespace cowui
 
         if(id == ScreenId::Servers)
             server_browser.activate();
+        else if(id == ScreenId::Demos)
+            demo_manager.activate();
         else if(id == ScreenId::Settings)
             settings_model.activate();
 
@@ -969,6 +992,8 @@ namespace cowui
             screen = ScreenId::Main;
         else if(!std::strcmp(name, "servers"))
             screen = ScreenId::Servers;
+        else if(!std::strcmp(name, "demos"))
+            screen = ScreenId::Demos;
         else if(!std::strcmp(name, "options"))
             screen = ScreenId::Settings;
         else
@@ -990,6 +1015,46 @@ namespace cowui
     void showservers()
     {
         show(ScreenId::Servers);
+    }
+
+    void showdemos()
+    {
+        show(ScreenId::Demos);
+    }
+
+    void showdemosrecording()
+    {
+        if(show(ScreenId::Demos)) demo_manager.showrecording();
+    }
+
+    void showdemosplayback()
+    {
+        if(show(ScreenId::Demos)) demo_manager.showplayback();
+    }
+
+    void showdemostrash()
+    {
+        if(show(ScreenId::Demos)) demo_manager.showtrash();
+    }
+
+    void showdemosduels()
+    {
+        if(show(ScreenId::Demos)) demo_manager.showduels();
+    }
+
+    void filterdemos(const char *value)
+    {
+        if(show(ScreenId::Demos)) demo_manager.setsearch(value);
+    }
+
+    void selectfirstdemo()
+    {
+        if(show(ScreenId::Demos)) demo_manager.selectfirst();
+    }
+
+    bool playselecteddemo()
+    {
+        return demo_manager.playselected();
     }
 
     void showsettings()

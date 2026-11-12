@@ -896,6 +896,7 @@ namespace game
     // clientdemo
     extern stream *demorecord;
     extern void setupdemorecord();
+    extern void autorecordmapload();
     extern void starthddemorecord(const char *dmopath);
     extern void stophddemorecord();
     extern void loadhdplayback(const char *file);

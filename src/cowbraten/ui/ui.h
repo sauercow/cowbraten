@@ -10,6 +10,7 @@ namespace cowui
         Test,
         Main,
         Servers,
+        Demos,
         Settings
     };
 
@@ -45,6 +46,14 @@ namespace cowui
     bool tryroutelegacygui(const char *name);
     void showmain();
     void showservers();
+    void showdemos();
+    void showdemosrecording();
+    void showdemosplayback();
+    void showdemostrash();
+    void showdemosduels();
+    void filterdemos(const char *value);
+    void selectfirstdemo();
+    bool playselecteddemo();
     void showsettings();
     void showtest();
     void close();

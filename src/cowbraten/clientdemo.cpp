@@ -17,6 +17,12 @@
 //  - N_JUMPPAD
 
 namespace game {
+    // Native map-load recording. This is intentionally independent from HD
+    // sidecar recording and uses the same persistent config path as other
+    // player preferences. setupdemorecord() remains the duplicate guard, so a
+    // legacy `mapstart = [recordclientdemo 2]` cannot create a second stream.
+    VARP(autorecordclientdemo, 0, 0, 1);
+
     stream *demo = NULL, *demorecord = NULL;
     int demostartmillis = 0;
 
@@ -306,6 +312,12 @@ namespace game {
     }
     ICOMMAND(recordclientdemo, "i", (int *val), recordclientdemo(*val));
     ICOMMAND(stopclientdemo, "", (), enddemorecord());
+
+    void autorecordmapload()
+    {
+        if(autorecordclientdemo && !demoplayback && !demorecord)
+            setupdemorecord();
+    }
 
     // mostly just a copy of addmsg()
     // differences:
