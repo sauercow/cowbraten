@@ -61,6 +61,9 @@ namespace cowui
     bool modalactive();
     // RmlUi receives events only while the console is not taking its turn.
     bool receivesinput();
+    // The fullscreen demo overlay draws the legacy cursor texture itself so
+    // it remains visible above RmlUi without also drawing the engine copy.
+    bool ownsplaybackcursor();
     bool visible();
 }
 

@@ -1,6 +1,7 @@
 // rendergl.cpp: core opengl rendering stuff
 
 #include "engine.h"
+#include "ui/ui.h"
 
 bool hasVAO = false, hasFBO = false, hasAFBO = false, hasDS = false, hasTF = false, hasTRG = false, hasTSW = false, hasS3TC = false, hasFXT1 = false, hasLATC = false, hasRGTC = false, hasAF = false, hasFBB = false, hasUBO = false, hasMBR = false;
 bool cantexcompressrgtc = false, cantexcompresslatc = false;
@@ -2309,6 +2310,8 @@ void writecrosshairs(stream *f)
 
 void drawcrosshair(int w, int h)
 {
+    if(cowui::ownsplaybackcursor()) return;
+
     bool windowhit = g3d_windowhit(true, false) || game::cursoractive();
     if(!windowhit && (hidehud || mainmenu)) return; //(hidehud || player->state==CS_SPECTATOR || player->state==CS_DEAD)) return;
 

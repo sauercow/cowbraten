@@ -4,7 +4,9 @@
 #include "rml_file.h"
 #include "rml_server_browser.h"
 #include "rml_demo_manager.h"
+#include "rml_demo_player.h"
 #include "rml_settings.h"
+#include "sauer_demo_bridge.h"
 #include "sauer_input_bridge.h"
 
 #include <RmlUi/Core.h>
@@ -28,6 +30,7 @@ namespace cowui
     static RmlActionRouter action_router;
     static RmlServerBrowser server_browser;
     static RmlDemoManager demo_manager;
+    static RmlDemoPlayer demo_player;
     static RmlSettings settings_model;
     static Rml::Context *context = nullptr;
 
@@ -71,6 +74,7 @@ namespace cowui
 
     static bool initialized = false;
     static bool console_suspended = false;
+    static bool demo_player_input_active = false;
 
     struct UiDimensions
     {
@@ -574,9 +578,11 @@ namespace cowui
                showsettingsscreen) ||
            !server_browser.init(context, action_router) ||
            !demo_manager.init(context, action_router) ||
+           !demo_player.init(context, action_router) ||
            !settings_model.init(context, action_router))
         {
             settings_model.shutdown(context);
+            demo_player.shutdown(context);
             demo_manager.shutdown(context);
             server_browser.shutdown(context);
             action_router.clear();
@@ -598,6 +604,7 @@ namespace cowui
         captured_keys.fill(false);
         captured_buttons.fill(false);
         captured_key_count = 0;
+        demo_player_input_active = false;
         if(active_screen)
             close();
 
@@ -607,6 +614,7 @@ namespace cowui
         if(initialized)
         {
             settings_model.shutdown(context);
+            demo_player.shutdown(context);
             demo_manager.shutdown(context);
             server_browser.shutdown(context);
             Rml::Shutdown();
@@ -738,7 +746,49 @@ namespace cowui
         else if(event.type == SDL_TEXTINPUT && captured_key_count)
             return true;
 
-        if(!initialized || !context || !active_screen)
+        if(!initialized || !context)
+            return false;
+
+        if(!active_screen && demo_player.receivesinput())
+        {
+            switch(event.type)
+            {
+                case SDL_MOUSEMOTION:
+                {
+                    sauerdemo::move_playback_cursor(event.motion.xrel, event.motion.yrel);
+                    float x = 0, y = 0;
+                    sauerdemo::playback_cursor(x, y);
+                    context->ProcessMouseMove(
+                        int(x * ui_dimensions.context_width),
+                        int(y * ui_dimensions.context_height),
+                        keymodifierstate()
+                    );
+                    return true;
+                }
+                case SDL_MOUSEBUTTONDOWN:
+                    context->ProcessMouseButtonDown(
+                        mousebutton(event.button.button),
+                        keymodifierstate()
+                    );
+                    return true;
+                case SDL_MOUSEBUTTONUP:
+                    context->ProcessMouseButtonUp(
+                        mousebutton(event.button.button),
+                        keymodifierstate()
+                    );
+                    return true;
+                case SDL_MOUSEWHEEL:
+                    context->ProcessMouseWheel(
+                        Rml::Vector2f(float(event.wheel.x), float(-event.wheel.y)),
+                        keymodifierstate()
+                    );
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        if(!active_screen)
             return false;
 
         syncconsoleownership();
@@ -892,30 +942,50 @@ namespace cowui
 
     void update()
     {
-        if(initialized &&
-           context &&
-           active_screen)
-        {
+        if(!initialized || !context)
+            return;
+
+        if(active_screen)
             syncconsoleownership();
 
-            if(console_suspended)
-                return;
+        demo_player.update(active_screen != nullptr);
 
+        const bool player_input = demo_player.receivesinput();
+        if(demo_player_input_active && !player_input)
+            context->ProcessMouseLeave();
+        demo_player_input_active = player_input;
+
+        if(active_screen && !console_suspended)
+        {
             if(active_screen->id == ScreenId::Servers)
                 server_browser.update();
             else if(active_screen->id == ScreenId::Demos)
                 demo_manager.update();
-
-            context->Update();
         }
+
+        if(!demo_player.visible() && (!active_screen || console_suspended))
+            return;
+
+        if(player_input)
+        {
+            float x = 0, y = 0;
+            sauerdemo::playback_cursor(x, y);
+            context->ProcessMouseMove(
+                int(x * ui_dimensions.context_width),
+                int(y * ui_dimensions.context_height),
+                keymodifierstate()
+            );
+        }
+
+        context->Update();
     }
 
     void render()
     {
         if(!initialized ||
            !context ||
-           !active_screen ||
-           console_suspended ||
+           (!active_screen && !demo_player.visible()) ||
+           (active_screen && console_suspended) ||
            !render_interface.ready())
         {
             return;
@@ -1082,6 +1152,12 @@ namespace cowui
     bool receivesinput()
     {
         return modalactive() && !console_suspended;
+    }
+
+    bool ownsplaybackcursor()
+    {
+        return initialized && demo_player.visible() &&
+            demo_player.receivesinput();
     }
 
     bool visible()

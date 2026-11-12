@@ -19,7 +19,6 @@
             <div class="demos-tabs">
                 <button class="demo-tab" data-class-is-selected="tab_library" onclick="demos.tab.library">Library</button>
                 <button class="demo-tab" data-class-is-selected="tab_recording" onclick="demos.tab.recording">Recording</button>
-                <button class="demo-tab" data-class-is-selected="tab_playback" onclick="demos.tab.playback">Playback</button>
                 <button class="demo-tab" data-class-is-selected="tab_trash" onclick="demos.tab.trash">Trash</button>
                 <div class="demos-tabs-spacer"></div>
                 <div class="demos-count">{{ result_count }}</div>
@@ -113,19 +112,6 @@
                 </div>
                 <div class="demo-record-status"><span data-if="recording_active" class="is-recording">REC&nbsp;&nbsp;Client demo recording is active</span><span data-if="!recording_active">No client demo is currently being written.</span></div>
                 <div class="demo-note"><strong>Legacy autoexec migration</strong><span>If autoexec already runs recordclientdemo 2 on mapstart, remove that line only after enabling this option. Duplicate starts are guarded, and autoexec is never modified automatically.</span></div>
-            </div>
-
-            <div class="demos-page demo-settings-page" data-if="tab_playback">
-                <div class="demo-page-heading"><div class="eyebrow">Playback</div><div class="display-title">Player Controls</div><div class="body-copy">Only controls backed by the current demo engine are shown.</div></div>
-                <div class="playback-state"><div class="playback-indicator" data-class-is-active="playback_active"></div><div><strong>{{ playback_active ? 'Demo playback active' : 'No demo playing' }}</strong><small>{{ playback_paused ? 'Paused' : 'Running / idle' }}</small></div></div>
-                <div class="playback-controls">
-                    <button class="button" data-class-is-disabled="!playback_active" data-attrif-disabled="!playback_active" onclick="demos.playback.back">-5 sec</button>
-                    <button class="button button-primary" data-class-is-disabled="!playback_active" data-attrif-disabled="!playback_active" onclick="demos.playback.pause">{{ playback_paused ? 'Resume' : 'Pause' }}</button>
-                    <button class="button" data-class-is-disabled="!playback_active" data-attrif-disabled="!playback_active" onclick="demos.playback.forward">+5 sec</button>
-                    <button class="button button-destructive" data-class-is-disabled="!playback_active" data-attrif-disabled="!playback_active" onclick="demos.playback.stop">Stop</button>
-                </div>
-                <div class="speed-controls"><span>Playback speed</span><button onclick="demos.playback.speed" value="25">0.25x</button><button onclick="demos.playback.speed" value="50">0.50x</button><button onclick="demos.playback.speed" value="100">1.00x</button><button onclick="demos.playback.speed" value="200">2.00x</button><button onclick="demos.playback.speed" value="400">4.00x</button></div>
-                <div class="demo-note"><strong>In-game timeline</strong><span>Seek, perspective following, frame stepping, and the interactive timeline remain available in the existing playback HUD.</span></div>
             </div>
 
             <div class="demos-page demos-library" data-if="tab_trash">

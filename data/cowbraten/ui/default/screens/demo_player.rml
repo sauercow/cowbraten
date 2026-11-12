@@ -1,0 +1,48 @@
+<rml>
+<head>
+    <title>Cowbraten Demo Player</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/demo_player.rcss" />
+</head>
+<body data-model="demo_player">
+    <div class="demo-player" data-class-is-interactive="interactive">
+        <div class="demo-player-controls">
+            <div class="demo-player-status-row">
+                <div class="demo-player-status" data-class-is-paused="paused">
+                    <span class="demo-player-status-dot"></span>
+                    <strong>{{ paused ? 'Paused' : 'Playing' }}</strong>
+                </div>
+                <div class="demo-player-clock">{{ position_text }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ duration_text }}</div>
+                <div class="demo-player-metadata">{{ map_name }}&nbsp;&nbsp;//&nbsp;&nbsp;{{ mode_name }}&nbsp;&nbsp;//&nbsp;&nbsp;{{ camera_name }}</div>
+                <div class="demo-player-hint">{{ interactive ? 'Release Alt to return to camera' : 'Hold Alt to interact' }}</div>
+            </div>
+
+            <button class="demo-player-timeline" onclick="demo-player.seek">
+                <span class="demo-player-track">
+                    <span class="demo-player-progress" data-style-width="progress_width"></span>
+                    <span class="demo-player-marker" data-style-left="progress_width"></span>
+                </span>
+            </button>
+
+            <div class="demo-player-button-row">
+                <button class="demo-player-button demo-player-step" onclick="demo-player.step-back">Frame -</button>
+                <button class="demo-player-button" onclick="demo-player.rewind">-5 sec</button>
+                <button class="demo-player-button demo-player-primary" onclick="demo-player.toggle">{{ paused ? 'Play' : 'Pause' }}</button>
+                <button class="demo-player-button" onclick="demo-player.forward">+5 sec</button>
+                <button class="demo-player-button demo-player-step" onclick="demo-player.step-forward">Frame +</button>
+                <button class="demo-player-button demo-player-speed" onclick="demo-player.speed">Speed&nbsp;&nbsp;{{ speed_text }}</button>
+                <div class="demo-player-spacer"></div>
+                <button class="demo-player-button" onclick="demo-player.library">Library</button>
+                <button class="demo-player-button demo-player-stop" onclick="demo-player.stop">End demo</button>
+            </div>
+        </div>
+
+    </div>
+
+    <img class="demo-player-cursor" src="?cowbraten-crosshair:data/guicursor.png"
+        data-if="interactive" data-style-left="cursor_left"
+        data-style-top="cursor_top" data-style-width="cursor_size"
+        data-style-height="cursor_size" />
+</body>
+</rml>

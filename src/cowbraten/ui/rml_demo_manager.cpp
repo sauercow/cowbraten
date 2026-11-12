@@ -81,13 +81,12 @@ namespace cowui
             constructor.Bind("total_count", &total_count) && constructor.Bind("visible_count", &visible_count) &&
             constructor.Bind("selected_count", &selected_count) &&
             constructor.Bind("sort_ascending", &sort_ascending) && constructor.Bind("tab_library", &tab_library_value) &&
-            constructor.Bind("tab_recording", &tab_recording_value) && constructor.Bind("tab_playback", &tab_playback_value) &&
-            constructor.Bind("tab_trash", &tab_trash_value) && constructor.Bind("confirm_visible", &confirm_visible) &&
+            constructor.Bind("tab_recording", &tab_recording_value) && constructor.Bind("tab_trash", &tab_trash_value) &&
+            constructor.Bind("confirm_visible", &confirm_visible) &&
             constructor.Bind("can_play", &can_play) && constructor.Bind("has_selection", &has_selection) &&
             constructor.Bind("single_selection", &single_selection) && constructor.Bind("hd_playback", &hd_playback) &&
             constructor.Bind("hd_recording", &hd_recording) && constructor.Bind("automatic_recording", &automatic_recording) &&
-            constructor.Bind("recording_active", &recording_active) && constructor.Bind("playback_active", &playback_active) &&
-            constructor.Bind("playback_paused", &playback_paused) && constructor.Bind("favorites_only", &favorites_only) &&
+            constructor.Bind("recording_active", &recording_active) && constructor.Bind("favorites_only", &favorites_only) &&
             constructor.Bind("active_players_only", &active_players_only) &&
             constructor.Bind("saved_filter_available", &saved_filter_available) &&
             constructor.BindEventCallback("select_demo", &RmlDemoManager::select_callback, this) &&
@@ -95,7 +94,7 @@ namespace cowui
 
 #define ACTION(name, fn) valid = valid && router.registeraction(name, fn)
         ACTION("demos.tab.library", tab_library); ACTION("demos.tab.recording", tab_recording);
-        ACTION("demos.tab.playback", tab_playback); ACTION("demos.tab.trash", tab_trash);
+        ACTION("demos.tab.trash", tab_trash);
         ACTION("demos.refresh", refresh); ACTION("demos.filters.clear", clear_filters);
         ACTION("demos.filter.search", filter_search); ACTION("demos.filter.mode", filter_mode);
         ACTION("demos.filter.player", filter_player); ACTION("demos.filter.map", filter_map);
@@ -121,9 +120,6 @@ namespace cowui
         ACTION("demos.open-location", open_location); ACTION("demos.settings.hd-playback", toggle_hd_playback);
         ACTION("demos.settings.hd-recording", toggle_hd_recording);
         ACTION("demos.settings.auto-recording", toggle_auto_recording);
-        ACTION("demos.playback.stop", playback_stop); ACTION("demos.playback.pause", playback_pause);
-        ACTION("demos.playback.back", playback_back); ACTION("demos.playback.forward", playback_forward);
-        ACTION("demos.playback.speed", playback_speed);
 #undef ACTION
         if(!valid)
         {
@@ -186,7 +182,11 @@ namespace cowui
 
     void RmlDemoManager::showlibrary() { set_tab(Tab::Library); }
     void RmlDemoManager::showrecording() { set_tab(Tab::Recording); }
-    void RmlDemoManager::showplayback() { set_tab(Tab::Playback); }
+    void RmlDemoManager::showplayback()
+    {
+        set_tab(Tab::Library);
+        set_status("Playback controls are available in-game; hold Alt to interact");
+    }
     void RmlDemoManager::showtrash() { set_tab(Tab::Trash); }
     void RmlDemoManager::showduels()
     {
@@ -223,11 +223,10 @@ namespace cowui
     void RmlDemoManager::sync_settings()
     {
         const sauerdemo::Settings settings = sauerdemo::settings();
-        const bool recording = sauerdemo::recording(), playing = sauerdemo::playback(), paused = sauerdemo::paused();
+        const bool recording = sauerdemo::recording();
 #define SYNC(variable, value) if(variable != value) { variable = value; model.DirtyVariable(#variable); }
         SYNC(hd_playback, settings.hd_playback); SYNC(hd_recording, settings.hd_recording);
         SYNC(automatic_recording, settings.automatic_recording); SYNC(recording_active, recording);
-        SYNC(playback_active, playing); SYNC(playback_paused, paused);
 #undef SYNC
     }
 
@@ -328,10 +327,10 @@ namespace cowui
     void RmlDemoManager::set_tab(Tab value)
     {
         tab = value; tab_library_value = value == Tab::Library; tab_recording_value = value == Tab::Recording;
-        tab_playback_value = value == Tab::Playback; tab_trash_value = value == Tab::Trash;
+        tab_trash_value = value == Tab::Trash;
         selected.clear(); confirm_visible = false; pending = Pending::None;
         model.DirtyVariable("tab_library"); model.DirtyVariable("tab_recording");
-        model.DirtyVariable("tab_playback"); model.DirtyVariable("tab_trash"); model.DirtyVariable("confirm_visible");
+        model.DirtyVariable("tab_trash"); model.DirtyVariable("confirm_visible");
         rebuild();
     }
 
@@ -352,7 +351,7 @@ namespace cowui
     }
 
 #define TAB_ACTION(name, value) void RmlDemoManager::name(Rml::Event &e) { if(instance) instance->set_tab(Tab::value); stop(e); }
-    TAB_ACTION(tab_library, Library) TAB_ACTION(tab_recording, Recording) TAB_ACTION(tab_playback, Playback) TAB_ACTION(tab_trash, Trash)
+    TAB_ACTION(tab_library, Library) TAB_ACTION(tab_recording, Recording) TAB_ACTION(tab_trash, Trash)
 #undef TAB_ACTION
 
     void RmlDemoManager::refresh(Rml::Event &e) { if(instance) { instance->library.begin_refresh(); instance->set_status("Discovering demos..."); } stop(e); }
@@ -660,9 +659,4 @@ namespace cowui
     void RmlDemoManager::toggle_hd_playback(Rml::Event &e) { if(instance) { sauerdemo::set_hd_playback(event_checked(e)); instance->sync_settings(); } stop(e); }
     void RmlDemoManager::toggle_hd_recording(Rml::Event &e) { if(instance) { sauerdemo::set_hd_recording(event_checked(e)); instance->sync_settings(); } stop(e); }
     void RmlDemoManager::toggle_auto_recording(Rml::Event &e) { if(instance) { sauerdemo::set_automatic_recording(event_checked(e)); instance->sync_settings(); } stop(e); }
-    void RmlDemoManager::playback_stop(Rml::Event &e) { sauerdemo::stop(); if(instance) instance->sync_settings(); stop(e); }
-    void RmlDemoManager::playback_pause(Rml::Event &e) { sauerdemo::toggle_pause(); if(instance) instance->sync_settings(); stop(e); }
-    void RmlDemoManager::playback_back(Rml::Event &e) { sauerdemo::seek_relative(-5000); stop(e); }
-    void RmlDemoManager::playback_forward(Rml::Event &e) { sauerdemo::seek_relative(5000); stop(e); }
-    void RmlDemoManager::playback_speed(Rml::Event &e) { sauerdemo::set_speed(std::atoi(event_value(e).c_str())); stop(e); }
 }

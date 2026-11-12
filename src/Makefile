@@ -84,6 +84,7 @@ UI_OBJS= \
 	cowbraten/ui/rml_file.o \
 	cowbraten/ui/demo_library.o \
 	cowbraten/ui/rml_demo_manager.o \
+	cowbraten/ui/rml_demo_player.o \
 	cowbraten/ui/rml_server_browser.o \
 	cowbraten/ui/rml_settings.o \
 	cowbraten/ui/settings_api.o \
@@ -200,7 +201,7 @@ clean:
 
 $(CLIENT_OBJS): CXXFLAGS += $(INCLUDES) $(CLIENT_INCLUDES) -MMD -MP
 
-cowbraten/ui/ui.o cowbraten/ui/rml_action.o cowbraten/ui/rml_render.o cowbraten/ui/rml_file.o cowbraten/ui/rml_server_browser.o cowbraten/ui/rml_demo_manager.o cowbraten/ui/rml_settings.o: CXXFLAGS += -Ithird_party/RmlUi/Include -DRMLUI_STATIC_LIB -fexceptions -frtti
+cowbraten/ui/ui.o cowbraten/ui/rml_action.o cowbraten/ui/rml_render.o cowbraten/ui/rml_file.o cowbraten/ui/rml_server_browser.o cowbraten/ui/rml_demo_manager.o cowbraten/ui/rml_demo_player.o cowbraten/ui/rml_settings.o: CXXFLAGS += -Ithird_party/RmlUi/Include -DRMLUI_STATIC_LIB -fexceptions -frtti
 
 $(SERVER_OBJS): CXXFLAGS += $(INCLUDES) -DSTANDALONE -MMD -MP
 

@@ -39,7 +39,7 @@ namespace cowui
             bool selected = false, favorite = false, playable = false;
         };
 
-        enum class Tab { Library, Recording, Playback, Trash };
+        enum class Tab { Library, Recording, Trash };
         enum class Pending { None, Trash, Erase, EmptyTrash, Organize };
 
         void rebuild();
@@ -54,7 +54,7 @@ namespace cowui
         void toggle_callback(Rml::DataModelHandle, Rml::Event &, const Rml::VariantList &);
 
         static void tab_library(Rml::Event &); static void tab_recording(Rml::Event &);
-        static void tab_playback(Rml::Event &); static void tab_trash(Rml::Event &);
+        static void tab_trash(Rml::Event &);
         static void refresh(Rml::Event &); static void clear_filters(Rml::Event &);
         static void filter_search(Rml::Event &); static void filter_mode(Rml::Event &);
         static void filter_player(Rml::Event &); static void filter_map(Rml::Event &);
@@ -80,9 +80,6 @@ namespace cowui
         static void open_location(Rml::Event &);
         static void toggle_hd_playback(Rml::Event &); static void toggle_hd_recording(Rml::Event &);
         static void toggle_auto_recording(Rml::Event &);
-        static void playback_stop(Rml::Event &); static void playback_pause(Rml::Event &);
-        static void playback_back(Rml::Event &); static void playback_forward(Rml::Event &);
-        static void playback_speed(Rml::Event &);
 
         demos::Library library;
         demos::Filter filter;
@@ -100,11 +97,10 @@ namespace cowui
         int total_count = 0, visible_count = 0, selected_count = 0;
         bool status_error = false, sort_ascending = false;
         bool tab_library_value = true, tab_recording_value = false;
-        bool tab_playback_value = false, tab_trash_value = false;
+        bool tab_trash_value = false;
         bool confirm_visible = false, can_play = false, has_selection = false;
         bool single_selection = false, hd_playback = true, hd_recording = true;
         bool automatic_recording = false, recording_active = false;
-        bool playback_active = false, playback_paused = false;
         bool favorites_only = false, active_players_only = false;
         bool saved_filter_available = false;
         Tab tab = Tab::Library;
