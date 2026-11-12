@@ -3,6 +3,7 @@
 #include "sauer_input_bridge.h"
 
 extern void setinputgrabinhibited(bool inhibit);
+extern void quit();
 
 namespace cowui
 {
@@ -42,6 +43,11 @@ namespace cowui
         bool openconsolefromkey(int key)
         {
             return processconsolebind(key);
+        }
+
+        void quit()
+        {
+            ::quit();
         }
 
         const char *capturekeyname(const SDL_Event &event)

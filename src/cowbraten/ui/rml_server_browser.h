@@ -99,8 +99,8 @@ namespace cowui
         int visible_count = 0;
 
         bool can_connect = false;
-        bool hide_empty = false;
-        bool compatible_only = false;
+        bool hide_empty = true;
+        bool compatible_only = true;
         bool sort_name = false;
         bool sort_mode = false;
         bool sort_map = false;

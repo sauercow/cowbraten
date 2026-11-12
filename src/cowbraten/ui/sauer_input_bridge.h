@@ -16,6 +16,7 @@ namespace cowui
 
         bool consoleactive();
         bool openconsolefromkey(int key);
+        void quit();
 
         // Borrowed canonical keymap name, or nullptr for unmapped input.
         const char *capturekeyname(const SDL_Event &event);

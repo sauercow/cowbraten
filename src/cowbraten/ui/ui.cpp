@@ -200,6 +200,12 @@ namespace cowui
         show(ScreenId::Settings);
     }
 
+    static void quitapplication(Rml::Event &event)
+    {
+        event.StopPropagation();
+        sauerinput::quit();
+    }
+
     class RmlTextInputHandler final : public Rml::TextInputHandler
     {
     public:
@@ -576,6 +582,9 @@ namespace cowui
            !action_router.registeraction(
                "navigation.settings",
                showsettingsscreen) ||
+           !action_router.registeraction(
+               "navigation.exit",
+               quitapplication) ||
            !server_browser.init(context, action_router) ||
            !demo_manager.init(context, action_router) ||
            !demo_player.init(context, action_router) ||

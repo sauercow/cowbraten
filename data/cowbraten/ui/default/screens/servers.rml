@@ -65,38 +65,38 @@
 
             <div class="servers-table">
                 <div class="server-grid servers-columns">
-                    <button class="server-heading-button server-cell-name"
-                        data-class-is-selected="sort_name"
-                        onclick="servers.sort.name">
-                        Server
-                    </button>
-                    <button class="server-heading-button server-cell-mode"
-                        data-class-is-selected="sort_mode"
-                        onclick="servers.sort.mode">
-                        Mode
-                    </button>
-                    <button class="server-heading-button server-cell-map"
-                        data-class-is-selected="sort_map"
-                        onclick="servers.sort.map">
-                        Map
-                    </button>
-                    <button class="server-heading-button server-cell-players"
-                        data-class-is-selected="sort_players"
-                        onclick="servers.sort.players">
-                        Players
-                    </button>
-                    <button class="server-heading-button server-cell-ping"
-                        data-class-is-selected="sort_ping"
-                        onclick="servers.sort.ping">
-                        Ping
-                    </button>
+                    <div class="server-heading-cell server-cell-name">
+                        <button class="server-heading-button"
+                            data-class-is-selected="sort_name"
+                            onclick="servers.sort.name">Server</button>
+                    </div>
+                    <div class="server-heading-cell server-cell-mode">
+                        <button class="server-heading-button"
+                            data-class-is-selected="sort_mode"
+                            onclick="servers.sort.mode">Mode</button>
+                    </div>
+                    <div class="server-heading-cell server-cell-map">
+                        <button class="server-heading-button"
+                            data-class-is-selected="sort_map"
+                            onclick="servers.sort.map">Map</button>
+                    </div>
+                    <div class="server-heading-cell server-cell-players">
+                        <button class="server-heading-button"
+                            data-class-is-selected="sort_players"
+                            onclick="servers.sort.players">Players</button>
+                    </div>
+                    <div class="server-heading-cell server-cell-ping">
+                        <button class="server-heading-button"
+                            data-class-is-selected="sort_ping"
+                            onclick="servers.sort.ping">Ping</button>
+                    </div>
                     <div class="server-heading-label server-cell-status">Status</div>
                 </div>
 
                 <div class="server-rows">
                     <div class="server-row-repeat"
                         data-for="server : servers">
-                        <button class="server-grid server-row"
+                        <div class="server-grid server-row"
                             data-class-is-selected="server.id == selected_id"
                             data-class-is-unavailable="!server.selectable"
                             data-class-is-full="server.full"
@@ -117,7 +117,7 @@
                                 {{ server.ping }}
                             </span>
                             <span class="server-cell-status server-status">{{ server.status }}</span>
-                        </button>
+                        </div>
                     </div>
 
                     <div class="servers-empty" data-if="visible_count == 0">

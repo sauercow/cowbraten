@@ -62,10 +62,10 @@
                             <span class="main-nav-label">Credits / About</span>
                             <span class="main-nav-state">Planned</span>
                         </button>
-                        <button class="nav-item main-nav-item main-nav-exit" disabled="true">
+                        <button class="nav-item main-nav-item main-nav-exit" onclick="navigation.exit">
                             <span class="main-nav-index">08</span>
                             <span class="main-nav-label">Exit</span>
-                            <span class="main-nav-state">Unavailable</span>
+                            <span class="main-nav-state">Quit</span>
                         </button>
                     </div>
                 </div>

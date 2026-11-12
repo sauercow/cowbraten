@@ -146,8 +146,8 @@ namespace cowui
         total_count = 0;
         visible_count = 0;
         can_connect = false;
-        hide_empty = false;
-        compatible_only = false;
+        hide_empty = true;
+        compatible_only = true;
         sort_name = false;
         sort_mode = false;
         sort_map = false;
