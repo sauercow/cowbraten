@@ -2624,12 +2624,43 @@ void gl_drawhud()
     pushhudmatrix();
     hudmatrix.scale(conscale, conscale, 1);
     flushhudmatrix();
-    int commandheight = rendercommand(FONTH/2, abovehud - FONTH/2, conw-FONTH);
+    const bool defercommand = cowui::modalactive() && !fullconsole;
+    int commandheight = defercommand
+        ? 0
+        : rendercommand(FONTH/2, abovehud - FONTH/2, conw-FONTH);
     abovehud -= max(fullconsole ? FONTH : 0, commandheight);
     if(!hidehud || fullconsole) renderconsole(conw, conh, abovehud - FONTH/2);
     pophudmatrix();
 
     drawcrosshair(w, h);
+
+    glDisable(GL_BLEND);
+}
+
+void drawcommandlineoverlay()
+{
+    if(!cowui::modalactive() || fullconsole || !commandlineactive())
+        return;
+
+    int w = screenw, h = screenh;
+    if(forceaspect) w = int(ceil(h*forceaspect));
+    gettextres(w, h);
+
+    const int conw = int(w/conscale), conh = int(h/conscale);
+
+    hudmatrix.ortho(0, w, h, 0, -1, 1);
+    resethudmatrix();
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    hudshader->set();
+    gle::colorf(1, 1, 1);
+
+    pushhudmatrix();
+    hudmatrix.scale(conscale, conscale, 1);
+    flushhudmatrix();
+    rendercommand(FONTH/2, conh - FONTH/2, conw - FONTH);
+    pophudmatrix();
 
     glDisable(GL_BLEND);
 }

@@ -73,7 +73,8 @@ namespace cowui
     static Screen *active_screen = nullptr;
 
     static bool initialized = false;
-    static bool console_suspended = false;
+    static bool legacy_console_input = false;
+    static bool legacy_console_presentation = false;
     static bool demo_player_input_active = false;
 
     struct UiDimensions
@@ -121,18 +122,41 @@ namespace cowui
 
     static void syncconsoleownership()
     {
-        const bool should_suspend = active_screen &&
-            sauerinput::consoleactive();
+        const bool should_suspend_presentation = active_screen &&
+            sauerinput::fullconsoleactive();
+        const bool should_suspend_input = active_screen &&
+            (sauerinput::commandlineactive() ||
+             should_suspend_presentation);
 
-        if(should_suspend == console_suspended)
+        if(should_suspend_input == legacy_console_input &&
+           should_suspend_presentation == legacy_console_presentation)
             return;
 
-        console_suspended = should_suspend;
+        const bool input_started = should_suspend_input &&
+            !legacy_console_input;
+        const bool presentation_changed =
+            should_suspend_presentation != legacy_console_presentation;
+
+        legacy_console_input = should_suspend_input;
+        legacy_console_presentation = should_suspend_presentation;
 
         if(!active_screen || !active_screen->document)
             return;
 
-        if(console_suspended)
+        if(input_started && !should_suspend_presentation)
+        {
+            if(active_screen->id == ScreenId::Settings)
+                settings_model.cancelkeycapture();
+
+            // Release any focused RmlUi input while leaving the document
+            // visible behind the legacy chat/command line.
+            active_screen->document->Focus();
+        }
+
+        if(!presentation_changed)
+            return;
+
+        if(should_suspend_presentation)
         {
             hidedocument(*active_screen);
         }
@@ -802,7 +826,7 @@ namespace cowui
 
         syncconsoleownership();
 
-        if(console_suspended)
+        if(legacy_console_input)
             return false;
 
         if(settings_model.capturingkey())
@@ -964,7 +988,7 @@ namespace cowui
             context->ProcessMouseLeave();
         demo_player_input_active = player_input;
 
-        if(active_screen && !console_suspended)
+        if(active_screen && !legacy_console_presentation)
         {
             if(active_screen->id == ScreenId::Servers)
                 server_browser.update();
@@ -972,7 +996,8 @@ namespace cowui
                 demo_manager.update();
         }
 
-        if(!demo_player.visible() && (!active_screen || console_suspended))
+        if(!demo_player.visible() &&
+           (!active_screen || legacy_console_presentation))
             return;
 
         if(player_input)
@@ -994,7 +1019,7 @@ namespace cowui
         if(!initialized ||
            !context ||
            (!active_screen && !demo_player.visible()) ||
-           (active_screen && console_suspended) ||
+           (active_screen && legacy_console_presentation) ||
            !render_interface.ready())
         {
             return;
@@ -1052,7 +1077,8 @@ namespace cowui
 
         screen->document->Show();
         active_screen = screen;
-        console_suspended = false;
+        legacy_console_input = false;
+        legacy_console_presentation = false;
         syncconsoleownership();
 
         if(opening)
@@ -1148,7 +1174,8 @@ namespace cowui
 
         hidedocument(*active_screen);
         active_screen = nullptr;
-        console_suspended = false;
+        legacy_console_input = false;
+        legacy_console_presentation = false;
 
         sauerinput::endmenu();
     }
@@ -1160,7 +1187,7 @@ namespace cowui
 
     bool receivesinput()
     {
-        return modalactive() && !console_suspended;
+        return modalactive() && !legacy_console_input;
     }
 
     bool ownsplaybackcursor()

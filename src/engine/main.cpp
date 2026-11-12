@@ -1660,6 +1660,7 @@ int main(int argc, char **argv)
 
             cowui::update();
             cowui::render();
+            drawcommandlineoverlay();
 
             swapbuffers();
             renderedframe = inbetweenframes = true;

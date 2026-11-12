@@ -184,6 +184,7 @@ extern void invalidatepostfx();
 extern void gl_drawhud();
 extern void gl_drawframe();
 extern void gl_drawmainmenu();
+extern void drawcommandlineoverlay();
 extern void drawminimap();
 extern void drawtextures();
 extern void enablepolygonoffset(GLenum type, float scale = 1.0f);

@@ -75,13 +75,15 @@ coordinates are mapped into drawable context space before dispatch. This keeps
 the interface at the same logical size across scale factors without reducing
 framebuffer precision.
 
-The legacy Sauer command line temporarily takes presentation and text-input
-ownership without closing the active RmlUi screen. Its normal `saycommand`,
+The legacy Sauer command line temporarily takes text-input ownership without
+closing or hiding the active RmlUi screen. Its normal `saycommand`,
 `sayteamcommand`, and `inputcommand` key bindings are recognized by the legacy
-input layer. RmlUi then releases control focus and hides its cached document so
-Sauer can render and operate the command line normally. Closing the command
-line reshows the same document while retaining the menu's existing cursor/grab
-ownership throughout the transition.
+input layer. RmlUi releases control focus, remains visible, and the engine
+defers the active command line to a post-RmlUi render pass. Passive console
+messages remain below modal RmlUi documents. The full legacy console has
+exclusive presentation ownership instead: `toggleconsole` hides the cached
+RmlUi document until the console closes, then restores the same screen while
+retaining the menu's existing cursor/grab session.
 
 Legacy `showgui` calls pass through an exact-name compatibility router before
 the legacy menu table. The currently migrated names are `main` -> Main,

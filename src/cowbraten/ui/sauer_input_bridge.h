@@ -14,7 +14,8 @@ namespace cowui
         void keyrepeat(bool enabled);
         void textinput(bool enabled);
 
-        bool consoleactive();
+        bool commandlineactive();
+        bool fullconsoleactive();
         bool openconsolefromkey(int key);
         void quit();
 

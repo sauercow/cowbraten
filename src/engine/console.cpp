@@ -528,7 +528,8 @@ static bool isconsolebind(const char *action)
     {
         "saycommand",
         "sayteamcommand",
-        "inputcommand"
+        "inputcommand",
+        "toggleconsole"
     };
 
     loopi(sizeof(commands)/sizeof(commands[0]))
