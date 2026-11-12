@@ -922,7 +922,9 @@ namespace cowui
             if(!id || !id->storage.i)
                 return false;
 
-            setvarchecked(id, enabled ? 1 : 0);
+            const int value = enabled ? 1 : 0;
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
             return (*id->storage.i != 0) == enabled;
         }
 
@@ -1636,7 +1638,8 @@ namespace cowui
                 return false;
             }
 
-            setvarchecked(id, value);
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
             return *id->storage.i == value;
         }
 
@@ -3753,7 +3756,8 @@ namespace cowui
                 return false;
             }
 
-            setvarchecked(id, value);
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
             return *id->storage.i == value;
         }
 
@@ -3766,7 +3770,8 @@ namespace cowui
                 return false;
             }
 
-            setvarchecked(id, value);
+            if(*id->storage.i != value)
+                setvarchecked(id, value);
             return *id->storage.i == value;
         }
 

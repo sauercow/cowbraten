@@ -9291,6 +9291,20 @@ namespace cowui
             "value",
             instance->texture_reduction
         );
+
+        // Range elements emit change while their bound attributes are being
+        // applied. Only a visible, parented control whose value differs from
+        // the engine-backed model represents user input.
+        Rml::Element *element = event.GetCurrentElement();
+        if(!instance->texture_reduction_available ||
+           requested == instance->texture_reduction ||
+           !element || !element->GetParentNode() ||
+           !element->IsVisible(true))
+        {
+            event.StopPropagation();
+            return;
+        }
+
         settings::TextureReductionState state = {};
         const bool accepted = settings::writetexturereduction(
             requested, state);
@@ -9699,6 +9713,15 @@ namespace cowui
             instance->fps_limit
         );
 
+        Rml::Element *element = event.GetCurrentElement();
+        if(requested == instance->fps_limit ||
+           !element || !element->GetParentNode() ||
+           !element->IsVisible(true))
+        {
+            event.StopPropagation();
+            return;
+        }
+
         if(!settings::writefpslimit(requested))
         {
             std::fprintf(
@@ -9721,6 +9744,16 @@ namespace cowui
             "value",
             instance->sound_volume
         );
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(requested == instance->sound_volume ||
+           !element || !element->GetParentNode() ||
+           !element->IsVisible(true))
+        {
+            event.StopPropagation();
+            return;
+        }
+
         if(!settings::writesoundvolume(requested))
         {
             std::fprintf(
@@ -9743,6 +9776,16 @@ namespace cowui
             "value",
             instance->music_volume
         );
+
+        Rml::Element *element = event.GetCurrentElement();
+        if(requested == instance->music_volume ||
+           !element || !element->GetParentNode() ||
+           !element->IsVisible(true))
+        {
+            event.StopPropagation();
+            return;
+        }
+
         if(!settings::writemusicvolume(requested))
         {
             std::fprintf(

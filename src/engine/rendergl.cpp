@@ -2659,7 +2659,28 @@ void drawcommandlineoverlay()
     pushhudmatrix();
     hudmatrix.scale(conscale, conscale, 1);
     flushhudmatrix();
-    rendercommand(FONTH/2, conh - FONTH/2, conw - FONTH);
+    const int commandbarheight = 3*FONTH;
+    drawhudsolidrect(
+        0,
+        conh - commandbarheight,
+        conw,
+        commandbarheight,
+        14,
+        16,
+        18,
+        255
+    );
+    drawhudsolidrect(
+        0,
+        conh - commandbarheight,
+        conw,
+        1,
+        48,
+        52,
+        58,
+        255
+    );
+    rendercommand(FONTH/2, conh - FONTH, conw - FONTH);
     pophudmatrix();
 
     glDisable(GL_BLEND);
