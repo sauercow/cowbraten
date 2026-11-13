@@ -175,11 +175,11 @@
                                     <button class="game-menu-team-blue"
                                         data-class-is-selected="good_team &amp;&amp; !spectator"
                                         data-attrif-disabled="!actions_available"
-                                        onclick="game.team.good">Blue</button>
+                                        onclick="game.team.good"><strong>Blue</strong></button>
                                     <button class="game-menu-team-red"
                                         data-class-is-selected="evil_team &amp;&amp; !spectator"
                                         data-attrif-disabled="!actions_available"
-                                        onclick="game.team.evil">Red</button>
+                                        onclick="game.team.evil"><strong>Red</strong></button>
                                 </div>
                             </div>
 

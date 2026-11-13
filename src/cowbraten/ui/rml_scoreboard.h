@@ -27,6 +27,7 @@ namespace cowui
             int group_index = 0;
             bool group_first = false, local = false, spectator = false;
             bool dead = false, privileged = false;
+            bool good_team = false, evil_team = false;
             Rml::String group_title, name, role;
             Rml::String flags, frags, deaths, suicides, kpd, accuracy;
             Rml::String damage, damage_received, ping, pj, client_num;

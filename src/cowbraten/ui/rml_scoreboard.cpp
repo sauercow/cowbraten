@@ -17,7 +17,8 @@ namespace cowui
         return group_index == other.group_index &&
             group_first == other.group_first && local == other.local &&
             spectator == other.spectator && dead == other.dead &&
-            privileged == other.privileged && group_title == other.group_title &&
+            privileged == other.privileged && good_team == other.good_team &&
+            evil_team == other.evil_team && group_title == other.group_title &&
             name == other.name && role == other.role && flags == other.flags &&
             frags == other.frags && deaths == other.deaths &&
             suicides == other.suicides && kpd == other.kpd &&
@@ -41,6 +42,8 @@ namespace cowui
                 row.RegisterMember("spectator", &Row::spectator) &&
                 row.RegisterMember("dead", &Row::dead) &&
                 row.RegisterMember("privileged", &Row::privileged) &&
+                row.RegisterMember("good_team", &Row::good_team) &&
+                row.RegisterMember("evil_team", &Row::evil_team) &&
                 row.RegisterMember("group_title", &Row::group_title) &&
                 row.RegisterMember("name", &Row::name) &&
                 row.RegisterMember("role", &Row::role) &&
@@ -175,6 +178,10 @@ namespace cowui
             row.spectator = player.spectator;
             row.dead = player.dead;
             row.privileged = player.privilege != 0;
+            row.good_team = player.group_name == "good" ||
+                player.team == "good";
+            row.evil_team = player.group_name == "evil" ||
+                player.team == "evil";
             row.name = player.name;
             row.role = player.privilege >= 2 ? "ADMIN" :
                 (player.privilege ? "MASTER" :

@@ -63,6 +63,12 @@ int main()
           screen.find("game.team.good") != std::string::npos &&
           screen.find("game.team.evil") != std::string::npos,
         "team controls only appear for supported team matches");
+    check(style.find(".game-menu-team-buttons button") != std::string::npos &&
+          screen.find(">Blue</strong>") != std::string::npos &&
+          screen.find(">Red</strong>") != std::string::npos &&
+          style.find("align-items: center") != std::string::npos &&
+          style.find("justify-content: center") != std::string::npos,
+        "Blue and Red team labels remain centered inside their buttons");
     check(screen.find("onclick=\"game.master.claim\"") != std::string::npos &&
           screen.find("onclick=\"game.master.relinquish\"") != std::string::npos &&
           screen.find("select_master_mode(0)") != std::string::npos &&
@@ -94,6 +100,10 @@ int main()
     check(style.find("@media (max-width: 1040dp)") != std::string::npos &&
           style.find("overflow-y: auto") != std::string::npos,
         "dashboard stacks and scrolls on compact resolutions");
+    check(style.find(".game-menu-navigation") != std::string::npos &&
+          style.find("min-height: 0") != std::string::npos &&
+          style.find("overflow-y: auto") != std::string::npos,
+        "team-mode navigation scrolls instead of clipping Disconnect");
     check(style.find(".game-menu-master-modes") != std::string::npos &&
           style.find(".game-menu-quick-card") != std::string::npos &&
           style.find("overflow-y: auto") != std::string::npos,

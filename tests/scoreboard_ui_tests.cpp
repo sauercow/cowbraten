@@ -44,6 +44,15 @@ int main()
           bridge.find("game::groups") != std::string::npos &&
           bridge.find("game::spectators") != std::string::npos,
         "rows preserve native grouping, sorting, and spectators");
+    check(model.find("player.group_name == \"good\"") != std::string::npos &&
+          model.find("player.group_name == \"evil\"") != std::string::npos &&
+          rml.find("data-class-is-good-team=\"player.good_team\"") !=
+              std::string::npos &&
+          rml.find("data-class-is-evil-team=\"player.evil_team\"") !=
+              std::string::npos &&
+          style.find(".scoreboard-player.is-good-team") != std::string::npos &&
+          style.find(".scoreboard-player.is-evil-team") != std::string::npos,
+        "team groups and rows retain native blue and red identities");
     check(bridge.find("game::playeraccuracy") != std::string::npos &&
           bridge.find("game::playerdamage") != std::string::npos &&
           bridge.find("game::playernetdamage") != std::string::npos,
@@ -84,6 +93,10 @@ int main()
           style.find(".score-frags") != std::string::npos &&
           style.find(".score-deaths") != std::string::npos,
         "long Frags and Deaths labels receive dedicated wider columns");
+    check(style.find(".scoreboard-scroll") != std::string::npos &&
+          style.find("flex-shrink: 1") != std::string::npos &&
+          style.find("overflow-y: auto") != std::string::npos,
+        "large player and spectator lists scroll between fixed chrome");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

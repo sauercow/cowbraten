@@ -37,11 +37,15 @@
                     <span class="score-stat score-column score-cn" data-if="show_client_num"><i class="cb-ico cb-ico-network cb-ico--sm"></i><b>CN</b></span>
                 </div>
                 <div class="scoreboard-repeat" data-for="player : rows">
-                    <div class="scoreboard-group" data-if="player.group_first">{{ player.group_title }}</div>
+                    <div class="scoreboard-group" data-if="player.group_first"
+                        data-class-is-good-team="player.good_team"
+                        data-class-is-evil-team="player.evil_team">{{ player.group_title }}</div>
                     <div class="scoreboard-row scoreboard-player"
                         data-class-is-local="player.local"
                         data-class-is-spectator="player.spectator"
-                        data-class-is-dead="player.dead">
+                        data-class-is-dead="player.dead"
+                        data-class-is-good-team="player.good_team"
+                        data-class-is-evil-team="player.evil_team">
                         <span class="score-name">
                             <i class="score-player-icon cb-ico cb-ico-user-round cb-ico--lg"></i>
                             <i class="score-local-dot" data-if="player.local"></i>

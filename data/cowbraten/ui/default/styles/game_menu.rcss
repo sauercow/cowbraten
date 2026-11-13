@@ -214,10 +214,12 @@ body
 {
     display: flex;
     width: 490dp;
+    min-height: 0;
     padding: 10dp;
     flex: none;
     flex-direction: column;
     gap: 6dp;
+    overflow-y: auto;
 }
 
 .game-menu-action
@@ -734,7 +736,20 @@ body
 
 .game-menu-team-buttons button
 {
+    display: flex;
     flex: 1;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.game-menu-team-buttons button strong
+{
+    display: block;
+    font-size: 9dp;
+    font-weight: normal;
+    letter-spacing: 1dp;
+    text-transform: uppercase;
 }
 
 .game-menu-team-buttons button:hover,
