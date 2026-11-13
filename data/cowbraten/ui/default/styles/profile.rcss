@@ -725,11 +725,13 @@ body
     min-height: 0;
     flex-direction: column;
     gap: var(--space-2);
+    overflow-y: auto;
 }
 
 .profile-animation-panel
 {
     display: block;
+    flex: none;
     padding-bottom: var(--space-1);
 }
 
@@ -788,6 +790,7 @@ body
 .profile-scale-panel
 {
     display: flex;
+    flex: none;
     min-height: 112dp;
     flex-direction: column;
     overflow: hidden;
@@ -923,8 +926,8 @@ body
 .profile-spoof-panel
 {
     display: flex;
-    flex: 1;
-    min-height: 190dp;
+    flex: 1 0 240dp;
+    min-height: 240dp;
     flex-direction: column;
     overflow: hidden;
 }
@@ -1240,7 +1243,8 @@ body
 
     .profile-spoof-panel
     {
-        min-height: 148dp;
+        flex-basis: 164dp;
+        min-height: 164dp;
     }
 
     .profile-spoof-content

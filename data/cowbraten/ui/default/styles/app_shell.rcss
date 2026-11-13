@@ -322,3 +322,34 @@ body
         max-width: 280dp;
     }
 }
+
+@media (max-height: 760dp)
+{
+    .app-sidebar
+    {
+        padding: 16dp;
+    }
+
+    .app-navigation-label
+    {
+        margin-bottom: 8dp;
+    }
+
+    .app-sidebar .app-navigation
+    {
+        gap: 4dp;
+    }
+
+    .app-sidebar .app-nav-item
+    {
+        height: 38dp;
+        padding-left: 12dp;
+        padding-right: 12dp;
+        line-height: 36dp;
+    }
+
+    .app-navigation-utility
+    {
+        padding-top: 8dp;
+    }
+}

@@ -180,6 +180,11 @@ int main()
               std::string::npos &&
           rml.find("{{ reported_model_name }}") != std::string::npos,
         "Profile distinguishes local and reported model presentation");
+    check(style.find(".profile-inspector") != std::string::npos &&
+          style.find("overflow-y: auto;") != std::string::npos &&
+          style.find("flex: 1 0 240dp;") != std::string::npos &&
+          style.find("flex-basis: 164dp;") != std::string::npos,
+        "short Profile layouts scroll instead of clipping Model Spoofing");
 
     std::cout << '\n' << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

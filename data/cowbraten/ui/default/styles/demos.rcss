@@ -211,9 +211,44 @@ body { background-color: transparent; }
     width: auto;
     height: 34dp;
     margin-right: 24dp;
-    padding: 0 8dp;
+    /* Balance the arrow's reserved space so the value centers in the control. */
+    padding: 0 8dp 0 32dp;
     line-height: 34dp;
     text-align: center;
+}
+
+.trash-actions .button
+{
+    display: flex;
+    flex: none;
+    padding-left: 12dp;
+    padding-right: 12dp;
+    align-items: center;
+    justify-content: center;
+    gap: 7dp;
+    line-height: 16dp;
+    white-space: nowrap;
+}
+
+.trash-actions .button .cb-ico
+{
+    flex: none;
+    margin-right: 0;
+}
+
+.trash-action-label
+{
+    display: block;
+}
+
+.trash-actions .button-primary
+{
+    min-width: 120dp;
+}
+
+.trash-actions .button-destructive
+{
+    min-width: 218dp;
 }
 
 .trash-retention select selectarrow

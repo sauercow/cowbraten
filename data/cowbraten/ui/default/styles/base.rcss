@@ -48,6 +48,88 @@ body
     line-height: 1.35;
 }
 
+/*
+ * Keep overflow discoverable across every screen. RmlUi only creates these
+ * internal elements when a container actually overflows, so the thumb is a
+ * reliable indication that more content is available without reserving space
+ * on short lists and pages that already fit.
+ */
+scrollbarvertical
+{
+    width: 10dp;
+    background-color: transparent;
+}
+
+scrollbarvertical slidertrack
+{
+    width: 9dp;
+    background-color: transparent;
+}
+
+scrollbarvertical sliderbar
+{
+    width: 6dp;
+    min-height: 32dp;
+    margin-left: 2dp;
+    background-color: var(--color-disabled);
+    border-radius: var(--radius-control);
+}
+
+scrollbarvertical sliderbar:hover
+{
+    background-color: var(--color-primary-pressed);
+}
+
+scrollbarvertical sliderbar:active
+{
+    background-color: var(--color-primary);
+}
+
+scrollbarvertical sliderarrowdec,
+scrollbarvertical sliderarrowinc
+{
+    width: 0;
+    height: 0;
+}
+
+scrollbarhorizontal
+{
+    height: 10dp;
+    background-color: transparent;
+}
+
+scrollbarhorizontal slidertrack
+{
+    height: 9dp;
+    background-color: transparent;
+}
+
+scrollbarhorizontal sliderbar
+{
+    height: 6dp;
+    min-width: 32dp;
+    margin-top: 2dp;
+    background-color: var(--color-disabled);
+    border-radius: var(--radius-control);
+}
+
+scrollbarhorizontal sliderbar:hover
+{
+    background-color: var(--color-primary-pressed);
+}
+
+scrollbarhorizontal sliderbar:active
+{
+    background-color: var(--color-primary);
+}
+
+scrollbarhorizontal sliderarrowdec,
+scrollbarhorizontal sliderarrowinc
+{
+    width: 0;
+    height: 0;
+}
+
 .cube-color-0 { color: #40FF80; }
 .cube-color-1 { color: #1A76FF; }
 .cube-color-2 { color: #FFC040; }

@@ -27,6 +27,7 @@ int main()
     const std::string root = "../data/cowbraten/ui/default/";
     const std::string shell = readfile(root + "templates/app_shell.rml");
     const std::string style = readfile(root + "styles/app_shell.rcss");
+    const std::string base = readfile(root + "styles/base.rcss");
     const std::string icons = readfile(root + "icons/icons.rcss");
     const std::string atlas_1x = readfile(root + "icons/atlas/cowbraten-icons-24.png");
     const std::string atlas_2x = readfile(root + "icons/atlas/cowbraten-icons-48.png");
@@ -69,6 +70,11 @@ int main()
     check(style.find(".app-sidebar .app-nav-item:hover") != std::string::npos &&
           style.find(".app-sidebar .app-nav-item:focus-visible") != std::string::npos,
         "global navigation defines hover and keyboard focus states");
+    check(style.find("@media (max-height: 760dp)") != std::string::npos &&
+          style.find("height: 38dp;") != std::string::npos &&
+          base.find("scrollbarvertical sliderbar") != std::string::npos &&
+          base.find("scrollbarhorizontal sliderbar") != std::string::npos,
+        "short navigation compacts while overflowing content exposes scrollbars");
     check(style.find(".app-page-profile .app-nav-profile") != std::string::npos &&
           style.find(".app-page-settings .app-nav-settings") != std::string::npos &&
           style.find(".app-page-editor .app-nav-editor") != std::string::npos &&
