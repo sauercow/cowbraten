@@ -69,6 +69,13 @@ int main()
           screen.find("select_master_mode(3)") != std::string::npos &&
           screen.find("data-class-is-selected=\"master_mode == 0\"") != std::string::npos,
         "in-game quick actions expose master ownership and server access modes");
+    check(screen.find("cb-ico-crown") != std::string::npos &&
+          screen.find("cb-ico-unlock") != std::string::npos &&
+          screen.find("cb-ico-lock") != std::string::npos &&
+          screen.find("cb-ico-eye-off") != std::string::npos &&
+          style.find(".game-menu-master-modes button") != std::string::npos &&
+          style.find("justify-content: center") != std::string::npos,
+        "in-game access buttons align icon and label from the shared pack");
     check(implementation.find("admin::readstate") != std::string::npos &&
           implementation.find("admin::setlocalmaster(true)") != std::string::npos &&
           implementation.find("admin::setlocalmaster(false)") != std::string::npos &&

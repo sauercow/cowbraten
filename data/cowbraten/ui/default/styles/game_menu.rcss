@@ -759,12 +759,29 @@ body
 
 .game-menu-inline-button
 {
+    display: flex;
     width: 94dp;
     padding: 0;
     flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 7dp;
     border-radius: 4dp;
-    line-height: 32dp;
     text-align: center;
+}
+
+.game-menu-inline-button span
+{
+    flex: none;
+    image-color: #DDE3E9;
+}
+
+.game-menu-inline-button strong
+{
+    display: block;
+    font-size: 9dp;
+    font-weight: normal;
+    letter-spacing: 1dp;
 }
 
 .game-menu-master-row
@@ -795,9 +812,13 @@ body
 .game-menu-master-modes button
 {
     box-sizing: border-box;
+    display: flex;
     min-width: 0;
     height: 27dp;
     flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 5dp;
     background-color: #181F26;
     border-width: 1dp;
     border-color: #46515C;
@@ -808,6 +829,22 @@ body
     letter-spacing: 1dp;
     text-transform: uppercase;
     tab-index: auto;
+}
+
+.game-menu-master-modes button span
+{
+    width: 14dp;
+    height: 14dp;
+    flex: none;
+    image-color: #AAB4BE;
+}
+
+.game-menu-master-modes button strong
+{
+    display: block;
+    font-size: 8dp;
+    font-weight: normal;
+    letter-spacing: 1dp;
 }
 
 .game-menu-master-modes button:hover,
@@ -822,6 +859,11 @@ body
     background-color: #0759D9;
     border-color: #1685FF;
     color: #FFFFFF;
+}
+
+.game-menu-master-modes button.is-selected span
+{
+    image-color: #FFFFFF;
 }
 
 .game-menu-master-modes button:disabled

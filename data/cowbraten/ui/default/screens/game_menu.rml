@@ -189,7 +189,10 @@
                                     <strong>{{ player_name }}</strong>
                                     <small>{{ state_label }}{{ team_mode ? ' / ' + team_label : '' }}</small>
                                 </div>
-                                <button class="game-menu-inline-button" onclick="navigation.profile">Change</button>
+                                <button class="game-menu-inline-button" onclick="navigation.profile">
+                                    <span class="cb-ico cb-ico-user-cog cb-ico--sm"></span>
+                                    <strong>Change</strong>
+                                </button>
                             </div>
 
                             <div class="game-menu-quick-row game-menu-master-row" data-if="admin_connected">
@@ -201,24 +204,42 @@
                                     </div>
                                     <button class="game-menu-inline-button"
                                         data-if="!local_master"
-                                        onclick="game.master.claim">Claim</button>
+                                        onclick="game.master.claim">
+                                        <span class="cb-ico cb-ico-crown cb-ico--sm"></span>
+                                        <strong>Claim</strong>
+                                    </button>
                                     <button class="game-menu-inline-button game-menu-release-button"
                                         data-if="local_master"
-                                        onclick="game.master.relinquish">Release</button>
+                                        onclick="game.master.relinquish">
+                                        <span class="cb-ico cb-ico-unlock cb-ico--sm"></span>
+                                        <strong>Release</strong>
+                                    </button>
                                 </div>
                                 <div class="game-menu-master-modes">
                                     <button data-class-is-selected="master_mode == 0"
                                         data-attrif-disabled="!local_master"
-                                        data-event-click="select_master_mode(0)">Open</button>
+                                        data-event-click="select_master_mode(0)">
+                                        <span class="cb-ico cb-ico-unlock cb-ico--sm"></span>
+                                        <strong>Open</strong>
+                                    </button>
                                     <button data-class-is-selected="master_mode == 1"
                                         data-attrif-disabled="!local_master"
-                                        data-event-click="select_master_mode(1)">Veto</button>
+                                        data-event-click="select_master_mode(1)">
+                                        <span class="cb-ico cb-ico-shield cb-ico--sm"></span>
+                                        <strong>Veto</strong>
+                                    </button>
                                     <button data-class-is-selected="master_mode == 2"
                                         data-attrif-disabled="!local_master"
-                                        data-event-click="select_master_mode(2)">Locked</button>
+                                        data-event-click="select_master_mode(2)">
+                                        <span class="cb-ico cb-ico-lock cb-ico--sm"></span>
+                                        <strong>Locked</strong>
+                                    </button>
                                     <button data-class-is-selected="master_mode == 3"
                                         data-attrif-disabled="!local_master"
-                                        data-event-click="select_master_mode(3)">Private</button>
+                                        data-event-click="select_master_mode(3)">
+                                        <span class="cb-ico cb-ico-eye-off cb-ico--sm"></span>
+                                        <strong>Private</strong>
+                                    </button>
                                 </div>
                             </div>
                         </div>
