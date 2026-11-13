@@ -1155,7 +1155,10 @@ namespace cowui
             );
         }
 
-        context->Update();
+        // Cached menus (especially Settings) contain thousands of elements.
+        // Updating a chat message must not walk every menu opened this session.
+        // Show() refreshes a hidden document before it receives focus again.
+        context->Update(false);
     }
 
     void render()

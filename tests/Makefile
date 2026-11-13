@@ -1,8 +1,18 @@
 CXX ?= clang++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra
 
-.PHONY: all run clean
-all: demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests chat_ui_tests console_ui_tests console_text_tests
+.PHONY: all run clean rmlui
+all: demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
+
+RMLUI_BUILD ?= ../build/rmlui-x86_64-linux-Release
+
+rmlui:
+	$(MAKE) -C ../src rmlui
+
+ui_update_tests: ui_update_tests.cpp $(RMLUI_BUILD)/librmlui.a
+	$(CXX) $(CXXFLAGS) -DRMLUI_STATIC_LIB -I../src/third_party/RmlUi/Include -o $@ $< $(RMLUI_BUILD)/librmlui.a $$(pkg-config --libs freetype2)
+
+$(RMLUI_BUILD)/librmlui.a: rmlui
 
 demo_library_tests: demo_library_tests.cpp ../src/cowbraten/ui/demo_library.cpp ../src/cowbraten/ui/demo_library.h
 	$(CXX) $(CXXFLAGS) -I../src/cowbraten/ui -o $@ demo_library_tests.cpp ../src/cowbraten/ui/demo_library.cpp -lz
@@ -28,7 +38,7 @@ console_ui_tests: console_ui_tests.cpp ../data/cowbraten/ui/default/screens/cons
 console_text_tests: console_text_tests.cpp ../src/cowbraten/ui/rml_console_text.h
 	$(CXX) $(CXXFLAGS) -I../src/cowbraten/ui -o $@ console_text_tests.cpp
 
-run: demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests chat_ui_tests console_ui_tests console_text_tests
+run: all
 	./demo_library_tests
 	./settings_ui_tests
 	./profile_ui_tests
@@ -37,6 +47,7 @@ run: demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_
 	./chat_ui_tests
 	./console_ui_tests
 	./console_text_tests
+	./ui_update_tests
 
 clean:
-	$(RM) demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests chat_ui_tests console_ui_tests console_text_tests
+	$(RM) demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests

@@ -178,7 +178,7 @@ float Context::GetDensityIndependentPixelRatio() const
 	return density_independent_pixel_ratio;
 }
 
-bool Context::Update()
+bool Context::Update(bool update_hidden_documents)
 {
 	RMLUI_ZoneScoped;
 	DebugVerifyLocaleSetting();
@@ -202,12 +202,18 @@ bool Context::Update()
 	root->dirty_definition = false;
 	root->dirty_child_definitions = false;
 
-	root->Update(density_independent_pixel_ratio, Vector2f(dimensions));
+	root->Update(density_independent_pixel_ratio, Vector2f(dimensions), update_hidden_documents);
 
 	for (int i = 0; i < root->GetNumChildren(); ++i)
 	{
 		if (auto doc = root->GetChild(i)->GetOwnerDocument())
 		{
+			if (!update_hidden_documents)
+			{
+				if (!doc->IsVisible())
+					continue;
+				doc->Update(density_independent_pixel_ratio, Vector2f(dimensions));
+			}
 			doc->UpdateLayout();
 			doc->UpdatePosition();
 		}

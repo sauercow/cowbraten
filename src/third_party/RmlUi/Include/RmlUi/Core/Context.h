@@ -55,7 +55,9 @@ public:
 
 	/// Updates all elements in the context's documents.
 	/// This must be called before Context::Render, but after any elements have been changed, added, or removed.
-	bool Update();
+	/// When false, documents hidden with Hide() retain their DOM but defer element and layout updates until shown.
+	/// Data models are still synchronized. Explicit document updates, including Show(), are unaffected.
+	bool Update(bool update_hidden_documents = true);
 	/// Renders all visible elements in the context's documents.
 	bool Render();
 
