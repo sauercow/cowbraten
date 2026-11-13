@@ -411,7 +411,8 @@ body
 {
     width: 48dp;
     min-width: 48dp;
-    padding-right: 7dp;
+    padding-right: 0;
+    text-align: center;
 }
 
 .scoreboard-team .score-cn

@@ -446,13 +446,15 @@ struct collectclientmode : clientmode
     {
         if(d->state == CS_ALIVE && d->tokens > 0)
         {
-            int x = HICON_X + 3*HICON_STEP + (d->quadmillis ? HICON_SIZE + HICON_SPACE : 0);
+            float x = statushudnextx(w, h, d);
+            const float scale = 1.35f;
             pushhudmatrix();
-            hudmatrix.scale(2, 2, 1);
+            hudmatrix.scale(scale, scale, 1);
             flushhudmatrix();
-            draw_textf("%d", (x + HICON_SIZE + HICON_SPACE)/2, HICON_TEXTY/2, d->tokens);
+            draw_textf("%d", (x + statushudiconsize() + 18.0f)/scale,
+                statushudtexty()/scale, d->tokens);
             pophudmatrix();
-            drawicon(HICON_TOKEN, x, HICON_Y);
+            drawicon(HICON_TOKEN, x, statushudy(), statushudiconsize());
         }
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -932,4 +934,3 @@ case N_DEPOSITTOKENS:
 }
 
 #endif
-

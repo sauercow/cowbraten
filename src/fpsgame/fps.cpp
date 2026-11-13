@@ -1105,87 +1105,139 @@ namespace game
 
     VARP(ammohud, 0, 1, 1);
 
-    void drawammohud(fpsent *d)
+    static const float STATUS_ICON_SIZE = 92.0f;
+    static const float STATUS_BLOCK_WIDTH = 300.0f;
+    static const float STATUS_DOCK_Y = 1662.0f;
+
+    static float statusdockcenter(int w, int h)
     {
-        float x = HICON_X + 2*HICON_STEP, y = HICON_Y, sz = HICON_SIZE;
+        const float virtual_width = h > 0 ? 1800.0f*w/h : 3200.0f;
+        const float half_width = 1.5f*STATUS_BLOCK_WIDTH;
+        const float clear_of_chat = 0.46f*virtual_width + half_width + 30.0f;
+        return min(virtual_width - half_width - 30.0f,
+            max(0.60f*virtual_width, clear_of_chat));
+    }
+
+    static void drawstatusvalue(int icon, const char *value, float x,
+        const bvec &color, int alpha = 0xFF)
+    {
+        gle::color(bvec(0xFF, 0xFF, 0xFF), alpha);
+        drawicon(icon, x, STATUS_DOCK_Y, STATUS_ICON_SIZE);
+        gle::colorf(1, 1, 1);
+
+        const float scale = 1.35f;
         pushhudmatrix();
-        hudmatrix.scale(1/3.2f, 1/3.2f, 1);
+        hudmatrix.scale(scale, scale, 1);
         flushhudmatrix();
-        float xup = (x+sz)*3.2f, yup = y*3.2f + 0.1f*sz;
+        draw_text(value, (x + STATUS_ICON_SIZE + 18.0f)/scale,
+            (STATUS_DOCK_Y + 18.0f)/scale,
+            color.r, color.g, color.b, alpha);
+        pophudmatrix();
+    }
+
+    static void drawammohud(fpsent *d, float x, float y, float size)
+    {
+        const float small_scale = 1.0f/3.2f;
+        pushhudmatrix();
+        hudmatrix.scale(small_scale, small_scale, 1);
+        flushhudmatrix();
+
+        float xup = (x + size)*3.2f;
+        float yup = y*3.2f + 0.1f*size;
         loopi(3)
         {
-            int gun = ammohudup[i];
-            if(gun < GUN_FIST || gun > GUN_PISTOL || gun == d->gunselect || !d->ammo[gun]) continue;
-            drawicon(HICON_FIST+gun, xup, yup, sz);
-            yup += sz;
+            const int gun = ammohudup[i];
+            if(gun < GUN_FIST || gun > GUN_PISTOL ||
+               gun == d->gunselect || !d->ammo[gun]) continue;
+            drawicon(HICON_FIST+gun, xup, yup, size);
+            yup += size;
         }
-        float xdown = x*3.2f - sz, ydown = (y+sz)*3.2f - 0.1f*sz;
-        loopi(3)
+
+        float xdown = x*3.2f - size;
+        float ydown = (y + size)*3.2f - 0.1f*size;
+        for(int i = 2; i >= 0; --i)
         {
-            int gun = ammohuddown[3-i-1];
-            if(gun < GUN_FIST || gun > GUN_PISTOL || gun == d->gunselect || !d->ammo[gun]) continue;
-            ydown -= sz;
-            drawicon(HICON_FIST+gun, xdown, ydown, sz);
+            const int gun = ammohuddown[i];
+            if(gun < GUN_FIST || gun > GUN_PISTOL ||
+               gun == d->gunselect || !d->ammo[gun]) continue;
+            ydown -= size;
+            drawicon(HICON_FIST+gun, xdown, ydown, size);
         }
+
         int offset = 0, num = 0;
         loopi(7)
         {
-            int gun = ammohudcycle[i];
+            const int gun = ammohudcycle[i];
             if(gun < GUN_FIST || gun > GUN_PISTOL) continue;
             if(gun == d->gunselect) offset = i + 1;
-            else if(d->ammo[gun]) num++;
+            else if(d->ammo[gun]) ++num;
         }
-        float xcycle = (x+sz/2)*3.2f + 0.5f*num*sz, ycycle = y*3.2f-sz;
+        float xcycle = (x + size/2.0f)*3.2f + 0.5f*num*size;
+        const float ycycle = y*3.2f - size;
         loopi(7)
         {
-            int gun = ammohudcycle[(i + offset)%7];
-            if(gun < GUN_FIST || gun > GUN_PISTOL || gun == d->gunselect || !d->ammo[gun]) continue;
-            xcycle -= sz;
-            drawicon(HICON_FIST+gun, xcycle, ycycle, sz);
+            const int gun = ammohudcycle[(i + offset)%7];
+            if(gun < GUN_FIST || gun > GUN_PISTOL ||
+               gun == d->gunselect || !d->ammo[gun]) continue;
+            xcycle -= size;
+            drawicon(HICON_FIST+gun, xcycle, ycycle, size);
         }
+
         pophudmatrix();
     }
 
     VARP(healthcolors, 0, 1, 1);
 
-    void drawhudicons(fpsent *d)
+    extern int ammobar;
+
+    float statushudy() { return STATUS_DOCK_Y; }
+    float statushudiconsize() { return STATUS_ICON_SIZE; }
+    float statushudtexty() { return STATUS_DOCK_Y + 18.0f; }
+
+    float statushudnextx(int w, int h, const fpsent *d)
     {
-        pushhudmatrix();
-        hudmatrix.scale(2, 2, 1);
-        flushhudmatrix();
+        return statusdockcenter(w, h) + 1.5f*STATUS_BLOCK_WIDTH +
+            (d && d->quadmillis ? STATUS_ICON_SIZE + 24.0f : 0.0f);
+    }
 
+    void drawhudicons(fpsent *d, int w, int h)
+    {
+        const float center = statusdockcenter(w, h);
+        const float start = center - 1.5f*STATUS_BLOCK_WIDTH;
         defformatstring(health, "%d", d->state==CS_DEAD ? 0 : d->health);
-        bvec healthcolor = bvec::hexcolor(healthcolors && !m_insta ? (d->state==CS_DEAD ? COL_GRAY : (d->health<=25 ? COL_RED : (d->health<=50 ? COL_ORANGE : (d->health<=100 ? COL_WHITE : COL_CYAN)))) : COL_WHITE);
-        draw_text(health, (HICON_X + HICON_SIZE + HICON_SPACE)/2, HICON_TEXTY/2, healthcolor.r, healthcolor.g, healthcolor.b);
-        if(d->state!=CS_DEAD)
-        {
-            if(d->armour) draw_textf("%d", (HICON_X + HICON_STEP + HICON_SIZE + HICON_SPACE)/2, HICON_TEXTY/2, d->armour);
-            draw_textf("%d", (HICON_X + 2*HICON_STEP + HICON_SIZE + HICON_SPACE)/2, HICON_TEXTY/2, d->ammo[d->gunselect]);
-        }
-
-        pophudmatrix();
-
+        const bvec healthcolor = bvec::hexcolor(healthcolors && !m_insta
+            ? (d->state==CS_DEAD ? COL_GRAY : (d->health<=25 ? COL_RED
+                : (d->health<=50 ? COL_ORANGE : (d->health<=100
+                    ? COL_WHITE : COL_CYAN)))) : COL_WHITE);
         if(d->state != CS_DEAD && d->maxhealth > 100)
-        {
-            float scale = 0.66f;
-            pushhudmatrix();
-            hudmatrix.scale(scale, scale, 1);
-            flushhudmatrix();
+            formatstring(health, "%d/%d", d->health, d->maxhealth);
+        drawstatusvalue(HICON_HEALTH, health, start, healthcolor);
 
-            float width, height;
-            text_boundsf(health, width, height);
-            draw_textf("/%d", (HICON_X + HICON_SIZE + HICON_SPACE + width*2)/scale, (HICON_TEXTY + height)/scale, d->maxhealth);
-
-            pophudmatrix();
-        }
-
-        drawicon(HICON_HEALTH, HICON_X, HICON_Y);
         if(d->state!=CS_DEAD)
         {
-            if(d->armour) drawicon(HICON_BLUE_ARMOUR+d->armourtype, HICON_X + HICON_STEP, HICON_Y);
-            drawicon(HICON_FIST+d->gunselect, HICON_X + 2*HICON_STEP, HICON_Y);
-            if(d->quadmillis) drawicon(HICON_QUAD, HICON_X + 3*HICON_STEP, HICON_Y);
-            if(ammohud) drawammohud(d);
+            defformatstring(armour, "%d", d->armour);
+            drawstatusvalue(HICON_BLUE_ARMOUR+d->armourtype, armour,
+                start + STATUS_BLOCK_WIDTH, bvec(0xFF, 0xFF, 0xFF),
+                d->armour ? 0xFF : 0x68);
+
+            defformatstring(ammo, "%d", d->ammo[d->gunselect]);
+            const float ratio = d->gunselect >= GUN_SG &&
+                d->gunselect <= GUN_PISTOL
+                ? float(d->ammo[d->gunselect])/
+                    max(itemstats[d->gunselect-GUN_SG].add, 1)
+                : 1.0f;
+            const bvec ammocolor = bvec::hexcolor(
+                d->ammo[d->gunselect] == 0 ? COL_RED :
+                (ratio < 0.5f ? COL_ORANGE : COL_WHITE));
+            drawstatusvalue(HICON_FIST+d->gunselect, ammo,
+                start + 2.0f*STATUS_BLOCK_WIDTH, ammocolor);
+
+            if(d->quadmillis)
+                drawicon(HICON_QUAD, start + 3.0f*STATUS_BLOCK_WIDTH + 12.0f,
+                    STATUS_DOCK_Y, STATUS_ICON_SIZE);
+            if(ammohud && !ammobar)
+                drawammohud(d, start + 2.0f*STATUS_BLOCK_WIDTH,
+                    STATUS_DOCK_Y, STATUS_ICON_SIZE);
         }
     }
 
@@ -1487,7 +1539,7 @@ namespace game
         fpsent *d = hudplayer();
         if(d->state!=CS_EDITING)
         {
-            if(d->state!=CS_SPECTATOR) drawhudicons(d);
+            if(d->state!=CS_SPECTATOR) drawhudicons(d, w, h);
             if(cmode) cmode->drawhud(d, w, h);
         }
 

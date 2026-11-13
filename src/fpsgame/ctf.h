@@ -561,14 +561,17 @@ struct ctfclientmode : clientmode
             loopv(flags) if(flags[i].owner == d)
             {
                 flag &f = flags[i];
-                int x = HICON_X + 3*HICON_STEP + (d->quadmillis ? HICON_SIZE + HICON_SPACE : 0);
-                drawicon(m_hold ? HICON_NEUTRAL_FLAG : (f.team==ctfteamflag(player1->team) ? HICON_BLUE_FLAG : HICON_RED_FLAG), x, HICON_Y);
+                float x = statushudnextx(w, h, d);
+                drawicon(m_hold ? HICON_NEUTRAL_FLAG : (f.team==ctfteamflag(player1->team) ? HICON_BLUE_FLAG : HICON_RED_FLAG), x, statushudy(), statushudiconsize());
                 if(m_hold)
                 {
+                    const float scale = 1.35f;
                     pushhudmatrix();
-                    hudmatrix.scale(2, 2, 1);
+                    hudmatrix.scale(scale, scale, 1);
                     flushhudmatrix();
-                    draw_textf("%d", (x + HICON_SIZE + HICON_SPACE)/2, HICON_TEXTY/2, max(HOLDSECS - f.holdcounter()/1000, 0));
+                    draw_textf("%d", (x + statushudiconsize() + 18.0f)/scale,
+                        statushudtexty()/scale,
+                        max(HOLDSECS - f.holdcounter()/1000, 0));
                     pophudmatrix();
                 }
                 break;
@@ -1367,4 +1370,3 @@ case N_INVISFLAG:
 }
 
 #endif
-

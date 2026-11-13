@@ -115,6 +115,9 @@ int main()
     check(rml.find("player : spectator_rows") != std::string::npos &&
           style.find(".scoreboard-spectator-grid") != std::string::npos,
         "spectators use a compact grid below both team columns");
+    check(style.find(".scoreboard-team .score-stat") != std::string::npos &&
+          style.find("text-align: center") != std::string::npos,
+        "team values align with their centered column icons");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

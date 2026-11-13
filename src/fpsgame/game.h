@@ -343,6 +343,15 @@ enum
     HICON_SPACE   = 40
 };
 
+struct fpsent;
+namespace game
+{
+    float statushudnextx(int w, int h, const fpsent *d);
+    float statushudy();
+    float statushudiconsize();
+    float statushudtexty();
+}
+
 static struct itemstat { int add, max, sound; const char *name; int icon, info; } itemstats[] =
 {
     {10,    30,    S_ITEMAMMO,   "SG", HICON_SG, GUN_SG},

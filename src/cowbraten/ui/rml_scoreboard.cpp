@@ -1,5 +1,6 @@
 #include "rml_scoreboard.h"
 
+#include "cube_text.h"
 #include "rml_action.h"
 #include "scoreboard_api.h"
 #include "ui.h"
@@ -14,22 +15,6 @@
 
 namespace cowui
 {
-    static Rml::String plain_cube_text(const std::string &text)
-    {
-        Rml::String result;
-        result.reserve(text.size());
-        for(std::size_t i = 0; i < text.size(); ++i)
-        {
-            if(text[i] == '\f' && i + 1 < text.size())
-            {
-                ++i;
-                continue;
-            }
-            result.push_back(text[i]);
-        }
-        return result;
-    }
-
     bool RmlScoreboard::Row::operator==(const Row &other) const
     {
         return group_index == other.group_index &&

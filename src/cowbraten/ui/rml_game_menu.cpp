@@ -1,6 +1,7 @@
 #include "rml_game_menu.h"
 
 #include "admin_api.h"
+#include "cube_text.h"
 #include "rml_action.h"
 #include "settings_api.h"
 #include "ui.h"
@@ -122,7 +123,7 @@ namespace cowui
         do { if(member != (value)) { member = (value); model.DirtyVariable(#member); } } while(0)
 
         SYNC_VALUE(player_name, state.player_name);
-        SYNC_VALUE(server_name, state.server_name);
+        SYNC_VALUE(server_name, plain_cube_text(state.server_name));
         SYNC_VALUE(server_address, state.server_address);
         SYNC_VALUE(mode_name, state.mode_name);
         SYNC_VALUE(map_name, state.map_name.empty() ? "Untitled map" : state.map_name);
