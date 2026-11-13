@@ -19,6 +19,7 @@ namespace cowui
     namespace settings
     {
         enum class PresentationMode;
+        enum class Theme;
         struct Gamma;
         struct Audio;
         struct CrosshairChoice;
@@ -179,6 +180,7 @@ namespace cowui
             Crosshair,
             Chat,
             Console,
+            Interface,
             Autoexec
         };
 
@@ -194,6 +196,10 @@ namespace cowui
             Rml::Event &event, const Rml::VariantList &arguments);
         void selectshowscoreboardatdeath(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
+        bool refreshinterface();
+        void presenttheme(settings::Theme theme, bool available);
+        void selecttheme(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
         bool refreshtrailcolors();
         void presenttrailcolors(const settings::TrailColors &state,
             bool available);
@@ -576,6 +582,7 @@ namespace cowui
         static void crosshaircategoryaction(Rml::Event &event);
         static void chatcategoryaction(Rml::Event &event);
         static void consolecategoryaction(Rml::Event &event);
+        static void interfacecategoryaction(Rml::Event &event);
         static void autoexeccategoryaction(Rml::Event &event);
         static void windowedaction(Rml::Event &event);
         static void exclusivefullscreenaction(Rml::Event &event);
@@ -1194,6 +1201,10 @@ namespace cowui
         Rml::String auto_ignore_status;
         std::vector<AutoexecChoice> autoexec_choices;
         Rml::String autoexec_status;
+        bool theme_available = false;
+        bool theme_default = true;
+        bool theme_modern_metallic = false;
+        Rml::String theme_status;
         bool console_available = false;
         bool console_top_important = true;
         bool console_top_warnings = true;
@@ -1228,6 +1239,7 @@ namespace cowui
         bool category_crosshair = false;
         bool category_chat = false;
         bool category_console = false;
+        bool category_interface = false;
         bool category_autoexec = false;
 
         static RmlSettings *instance;

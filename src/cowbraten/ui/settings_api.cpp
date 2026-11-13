@@ -38,6 +38,30 @@ namespace cowui
             return sauersettings::PresentationMode::Windowed;
         }
 
+        static Theme theme(sauersettings::Theme value)
+        {
+            switch(value)
+            {
+                case sauersettings::Theme::Default:
+                    return Theme::Default;
+                case sauersettings::Theme::ModernMetallic:
+                    return Theme::ModernMetallic;
+            }
+            return Theme::Default;
+        }
+
+        static sauersettings::Theme theme(Theme value)
+        {
+            switch(value)
+            {
+                case Theme::Default:
+                    return sauersettings::Theme::Default;
+                case Theme::ModernMetallic:
+                    return sauersettings::Theme::ModernMetallic;
+            }
+            return sauersettings::Theme::Default;
+        }
+
         static FragMessagesMode fragmessagesmode(
             sauersettings::FragMessagesMode mode)
         {
@@ -2870,6 +2894,24 @@ namespace cowui
         bool runautoexecprofile(const char *id)
         {
             return sauersettings::runautoexecprofile(id);
+        }
+
+        bool readtheme(Theme &result)
+        {
+            sauersettings::Theme current;
+            if(!sauersettings::readtheme(current))
+                return false;
+            result = theme(current);
+            return true;
+        }
+
+        bool writetheme(Theme requested, Theme &result)
+        {
+            sauersettings::Theme current;
+            const bool accepted = sauersettings::writetheme(
+                theme(requested), current);
+            result = theme(current);
+            return accepted;
         }
 
         static void copyconsole(

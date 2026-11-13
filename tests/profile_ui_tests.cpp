@@ -48,6 +48,8 @@ int main()
         "../src/cowbraten/ui/ui_commands.cpp");
     const std::string renderer = readfile(
         "../src/cowbraten/ui/rml_render.cpp");
+    const std::string engine = readfile("../src/engine/main.cpp");
+    const std::string command = readfile("../src/engine/command.cpp");
 
     check(!rml.empty() && !implementation.empty() && !bridge.empty(),
         "load Profile contract and implementation");
@@ -149,6 +151,14 @@ int main()
     check(commands.find("if(initing == NOT_INITING) writecfg();") !=
               std::string::npos,
         "theme changes persist immediately outside startup");
+    check(commands.find("cowbraten-ui.cfg") != std::string::npos &&
+          commands.find("profile_name_5") != std::string::npos &&
+          commands.find("uitheme %s") != std::string::npos &&
+          engine.find("cowui::loadpersistentstate();") !=
+              std::string::npos &&
+          command.find("cowui::savepersistentstate();") !=
+              std::string::npos,
+        "names and theme survive config rewrites by legacy clients");
     check(bridge.find("?cowbraten-resource:packages/icons/") != std::string::npos &&
           renderer.find("?cowbraten-resource:") != std::string::npos,
         "character portraits resolve through the engine resource root");

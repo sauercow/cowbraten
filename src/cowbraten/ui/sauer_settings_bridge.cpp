@@ -872,6 +872,12 @@ namespace cowui
             return id && id->type == ID_SVAR ? id : nullptr;
         }
 
+        static ident *uithemeident()
+        {
+            ident *id = getident("uitheme");
+            return id && id->type == ID_SVAR ? id : nullptr;
+        }
+
         static ident *autoignorenameident(int slot)
         {
             if(slot < 0 || slot >= Chat::AutoIgnoreSlotCount)
@@ -5494,6 +5500,31 @@ namespace cowui
             if(loaded)
                 writecfg();
             return loaded;
+        }
+
+        bool readtheme(Theme &result)
+        {
+            ident *id = uithemeident();
+            if(!id || !id->storage.s || !*id->storage.s)
+                return false;
+            result = !std::strcmp(*id->storage.s, "modern-metallic")
+                ? Theme::ModernMetallic
+                : Theme::Default;
+            return true;
+        }
+
+        bool writetheme(Theme requested, Theme &result)
+        {
+            ident *id = uithemeident();
+            if(!id || !id->storage.s)
+                return false;
+            const char *name = requested == Theme::ModernMetallic
+                ? "modern-metallic"
+                : "default";
+            setsvarchecked(id, name);
+            if(!readtheme(result))
+                return false;
+            return result == requested;
         }
 
         // Native guibitfield "important information" uses 0x11.

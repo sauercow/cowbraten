@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "ui.h"
+#include "ui_persistence.h"
 
 SVARFP(uitheme, "default", {
     cowui::settheme(uitheme);
@@ -10,6 +11,36 @@ SVARP(profile_name_2, "");
 SVARP(profile_name_3, "");
 SVARP(profile_name_4, "");
 SVARP(profile_name_5, "");
+
+namespace cowui
+{
+    static const char *persistentstatefile = "cowbraten-ui.cfg";
+
+    bool loadpersistentstate()
+    {
+        return execfile(persistentstatefile, false);
+    }
+
+    bool savepersistentstate()
+    {
+        stream *f = openutf8file(persistentstatefile, "w");
+        if(!f)
+        {
+            conoutf(CON_ERROR, "could not save Cowbraten UI state");
+            return false;
+        }
+
+        f->printf("// Cowbraten-only UI state; legacy clients do not rewrite this file.\n");
+        f->printf("uitheme %s\n", escapestring(uitheme));
+        f->printf("profile_name_1 %s\n", escapestring(profile_name_1));
+        f->printf("profile_name_2 %s\n", escapestring(profile_name_2));
+        f->printf("profile_name_3 %s\n", escapestring(profile_name_3));
+        f->printf("profile_name_4 %s\n", escapestring(profile_name_4));
+        f->printf("profile_name_5 %s\n", escapestring(profile_name_5));
+        delete f;
+        return true;
+    }
+}
 
 ICOMMAND(ui_test, "", (), cowui::showtest());
 ICOMMAND(ui_main, "", (), cowui::showmain());

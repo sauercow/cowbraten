@@ -1333,6 +1333,18 @@ namespace cowui
             constructor.Bind("auto_ignore_status", &auto_ignore_status) &&
             constructor.Bind("autoexec_choices", &autoexec_choices) &&
             constructor.Bind("autoexec_status", &autoexec_status) &&
+            constructor.Bind("theme_available", &theme_available) &&
+            constructor.Bind("theme_default", &theme_default) &&
+            constructor.Bind(
+                "theme_modern_metallic",
+                &theme_modern_metallic
+            ) &&
+            constructor.Bind("theme_status", &theme_status) &&
+            constructor.BindEventCallback(
+                "select_theme",
+                &RmlSettings::selecttheme,
+                this
+            ) &&
             constructor.BindEventCallback(
                 "select_auto_ignore_enabled",
                 &RmlSettings::selectautoignoreenabled,
@@ -1480,6 +1492,10 @@ namespace cowui
                 &category_console
             ) &&
             constructor.Bind(
+                "category_interface",
+                &category_interface
+            ) &&
+            constructor.Bind(
                 "category_autoexec",
                 &category_autoexec
             ) &&
@@ -1559,6 +1575,10 @@ namespace cowui
             router.registeraction(
                 "settings.category.console",
                 consolecategoryaction
+            ) &&
+            router.registeraction(
+                "settings.category.interface",
+                interfacecategoryaction
             ) &&
             router.registeraction(
                 "settings.category.autoexec",
@@ -2642,6 +2662,10 @@ namespace cowui
         auto_ignore_status.clear();
         autoexec_choices.clear();
         autoexec_status.clear();
+        theme_available = false;
+        theme_default = true;
+        theme_modern_metallic = false;
+        theme_status.clear();
         console_available = false;
         console_top_important = true;
         console_top_warnings = true;
@@ -2676,6 +2700,7 @@ namespace cowui
         category_crosshair = false;
         category_chat = false;
         category_console = false;
+        category_interface = false;
         category_autoexec = false;
     }
 
@@ -2862,6 +2887,8 @@ namespace cowui
         if(!refreshhudscore())
             return false;
         if(!refreshchat())
+            return false;
+        if(!refreshinterface())
             return false;
         if(!refreshconsole())
             return false;
@@ -4559,6 +4586,59 @@ namespace cowui
         return true;
     }
 
+    bool RmlSettings::refreshinterface()
+    {
+        settings::Theme current;
+        const bool available = settings::readtheme(current);
+        presenttheme(current, available);
+        return available;
+    }
+
+    void RmlSettings::presenttheme(settings::Theme theme, bool available)
+    {
+        const bool use_default = available &&
+            theme == settings::Theme::Default;
+        const bool use_modern_metallic = available &&
+            theme == settings::Theme::ModernMetallic;
+        if(theme_available != available)
+        {
+            theme_available = available;
+            model.DirtyVariable("theme_available");
+        }
+        if(theme_default != use_default)
+        {
+            theme_default = use_default;
+            model.DirtyVariable("theme_default");
+        }
+        if(theme_modern_metallic != use_modern_metallic)
+        {
+            theme_modern_metallic = use_modern_metallic;
+            model.DirtyVariable("theme_modern_metallic");
+        }
+    }
+
+    void RmlSettings::selecttheme(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1)
+            return;
+        const int value = arguments[0].Get<int>();
+        if(value != 0 && value != 1)
+            return;
+        const settings::Theme requested = value == 1
+            ? settings::Theme::ModernMetallic
+            : settings::Theme::Default;
+        settings::Theme effective;
+        const bool accepted = settings::writetheme(requested, effective);
+        presenttheme(effective, accepted || settings::readtheme(effective));
+        theme_status = accepted
+            ? "Theme applied and saved"
+            : "Theme change was not accepted";
+        model.DirtyVariable("theme_status");
+    }
+
     void RmlSettings::selectautoexecprofile(
         Rml::DataModelHandle, Rml::Event &event,
         const Rml::VariantList &arguments)
@@ -5587,6 +5667,7 @@ namespace cowui
         const bool crosshair = category == Category::Crosshair;
         const bool chat = category == Category::Chat;
         const bool console = category == Category::Console;
+        const bool interface = category == Category::Interface;
         const bool autoexec = category == Category::Autoexec;
         if(category_game != game)
         {
@@ -5628,6 +5709,11 @@ namespace cowui
             category_console = console;
             model.DirtyVariable("category_console");
         }
+        if(category_interface != interface)
+        {
+            category_interface = interface;
+            model.DirtyVariable("category_interface");
+        }
         if(category_autoexec != autoexec)
         {
             category_autoexec = autoexec;
@@ -5657,6 +5743,8 @@ namespace cowui
             refreshchat();
         else if(console)
             refreshconsole();
+        else if(interface)
+            refreshinterface();
         else if(autoexec)
             refreshautoexec();
     }
@@ -7471,6 +7559,13 @@ namespace cowui
     {
         if(instance)
             instance->setcategory(Category::Console);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::interfacecategoryaction(Rml::Event &event)
+    {
+        if(instance)
+            instance->setcategory(Category::Interface);
         event.StopPropagation();
     }
 

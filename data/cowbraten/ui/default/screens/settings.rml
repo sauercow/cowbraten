@@ -77,9 +77,15 @@
                             <span>Console</span>
                         </button>
                         <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_interface"
+                            onclick="settings.category.interface">
+                            <span class="settings-nav-index">09</span>
+                            <span>Interface</span>
+                        </button>
+                        <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_autoexec"
                             onclick="settings.category.autoexec">
-                            <span class="settings-nav-index">09</span>
+                            <span class="settings-nav-index">10</span>
                             <span>Autoexec</span>
                         </button>
                     </div>
@@ -136,6 +142,12 @@
                         <div class="settings-scope-kicker">Startup Script</div>
                         <div class="settings-scope-copy">
                             Choose one startup script. Alternative profiles are discovered from autoexecs/*.cfg.
+                        </div>
+                    </div>
+                    <div class="settings-scope-note" data-if="category_interface">
+                        <div class="settings-scope-kicker">Visual Theme</div>
+                        <div class="settings-scope-copy">
+                            Theme changes apply immediately to every Cowbraten menu and remain selected after restart.
                         </div>
                     </div>
                 </div>
@@ -4634,6 +4646,53 @@
                         </div>
                     </div>
 
+                    <div class="settings-page" data-if="category_interface">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Interface / Appearance</div>
+                            <div class="settings-stage-title">Theme</div>
+                            <div class="settings-stage-copy">
+                                Choose the visual language used by Cowbraten menus. The selection applies immediately and is saved automatically.
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Menu Theme</div>
+                                    <div class="settings-control-description">
+                                        This changes interface colors, surfaces, borders, and component styling. Gameplay rendering is unaffected.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-theme-grid" data-if="theme_available">
+                                <button class="button settings-theme-choice"
+                                    data-class-is-selected="theme_default"
+                                    data-event-click="select_theme(0)">
+                                    <span class="settings-theme-name">Default</span>
+                                    <span class="settings-theme-description">Clean Cowbraten interface</span>
+                                    <span class="settings-theme-state" data-if="theme_default">Active</span>
+                                </button>
+                                <button class="button settings-theme-choice"
+                                    data-class-is-selected="theme_modern_metallic"
+                                    data-event-click="select_theme(1)">
+                                    <span class="settings-theme-name">Modern Metallic</span>
+                                    <span class="settings-theme-description">Dark metal surfaces and vivid accents</span>
+                                    <span class="settings-theme-state" data-if="theme_modern_metallic">Active</span>
+                                </button>
+                            </div>
+
+                            <div class="settings-control-description" data-if="!theme_available">
+                                Theme selection is unavailable in this build.
+                            </div>
+                        </div>
+
+                        <div class="settings-control-footer settings-control-footer-compact"
+                            data-if="theme_status != ''">
+                            <span>{{ theme_status }}</span>
+                        </div>
+                    </div>
+
                     <div class="settings-page" data-if="category_autoexec">
                         <div class="settings-stage-header">
                             <div class="eyebrow settings-eyebrow">Advanced / Startup</div>
@@ -4704,6 +4763,7 @@
                     <span data-if="category_crosshair">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Crosshair</span>
                     <span data-if="category_chat">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Chat</span>
                     <span data-if="category_console">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Console</span>
+                    <span data-if="category_interface">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Interface</span>
                     <span data-if="category_autoexec">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Autoexec</span>
                 </div>
                 <div class="settings-footer-help">Escape returns to gameplay</div>

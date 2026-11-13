@@ -36,6 +36,8 @@ int main()
     const std::string game = readfile("../src/fpsgame/fps.cpp");
     const std::string engine = readfile("../src/engine/main.cpp");
     const std::string world = readfile("../src/engine/world.cpp");
+    const std::string commands = readfile(
+        "../src/cowbraten/ui/ui_commands.cpp");
 
     check(!rml.empty(), "load Settings RML");
     check(!implementation.empty(), "load Settings action implementation");
@@ -123,6 +125,18 @@ int main()
               std::string::npos &&
           bridge.find("if(loaded)") != std::string::npos,
         "live Autoexec loading clears stale persistent map hooks");
+    check(rml.find("settings.category.interface") != std::string::npos &&
+          rml.find("select_theme(0)") != std::string::npos &&
+          rml.find("select_theme(1)") != std::string::npos &&
+          rml.find("theme_modern_metallic") != std::string::npos,
+        "Settings exposes persistent Default and Modern Metallic themes");
+    check(implementation.find("settings::writetheme") !=
+              std::string::npos &&
+          bridge.find("setsvarchecked(id, name);") != std::string::npos &&
+          commands.find("SVARFP(uitheme, \"default\"") !=
+              std::string::npos &&
+          commands.find("writecfg();") != std::string::npos,
+        "theme selection applies live and persists through uitheme");
     check(world.find("cowui::close();") != std::string::npos &&
           world.find("cleargui();") != std::string::npos,
         "loading a map closes native and legacy menus");

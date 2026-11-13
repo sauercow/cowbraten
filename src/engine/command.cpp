@@ -2,6 +2,7 @@
 // is largely backwards compatible with the quake console language.
 
 #include "engine.h"
+#include "ui/ui_persistence.h"
 
 hashnameset<ident> idents; // contains ALL vars/commands/aliases
 vector<ident *> identmap;
@@ -2533,7 +2534,11 @@ void writecfg(const char *name)
     writecompletions(f);
     delete f;
     // Exporting a named configuration must not replace the startup choice.
-    if(!name || !name[0]) game::saveautoexecprofile();
+    if(!name || !name[0])
+    {
+        game::saveautoexecprofile();
+        cowui::savepersistentstate();
+    }
     f = openutf8file(path(game::modconfig(), true), "w");
     if(!f) return;
     f->printf("// automatically written on exit, DO NOT MODIFY\n\n");

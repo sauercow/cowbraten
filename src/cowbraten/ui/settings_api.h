@@ -12,6 +12,12 @@ namespace cowui
             DesktopFullscreen
         };
 
+        enum class Theme
+        {
+            Default,
+            ModernMetallic
+        };
+
         struct Fov
         {
             int value;
@@ -955,6 +961,9 @@ namespace cowui
         bool visitautoexecprofiles(AutoexecChoiceVisitor visitor, void *data);
         bool writeautoexecprofile(const char *id);
         bool runautoexecprofile(const char *id);
+
+        bool readtheme(Theme &result);
+        bool writetheme(Theme theme, Theme &result);
 
         bool readconsole(Console &result);
         bool writeimportantintopfeed(bool enabled, Console &result);

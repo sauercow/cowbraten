@@ -2,6 +2,7 @@
 
 #include "engine.h"
 #include "ui/ui.h"
+#include "ui/ui_persistence.h"
 
 #ifdef SDL_VIDEO_DRIVER_X11
 #include "SDL_syswm.h"
@@ -1571,6 +1572,9 @@ int main(int argc, char **argv)
         writecfg(game::restoreconfig());
     }
     execfile(game::modconfig(), false);
+    // Legacy clients sharing config.cfg discard Cowbraten-only UI variables.
+    // Restore them from a file those clients never rewrite.
+    cowui::loadpersistentstate();
     game::loadautoexecprofile();
     // Event hooks written by an older autoexec can survive in config.cfg.
     // Reset mapstart before loading the selected profile so removing it from
