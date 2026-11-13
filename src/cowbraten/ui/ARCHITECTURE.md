@@ -80,7 +80,14 @@ saved-name selection, the character roster, controls, selection states,
 responsive layout, and preview interaction. `RmlProfile` owns presentation
 state and calls the typed `profile_api`; only `sauer_profile_bridge` knows
 `game::switchname`, the persistent `profile_name_1` through `profile_name_5`
-preset slots, the `playermodel` ident, and the engine model-preview renderer.
+preset slots, the `playermodel`, `modelspoofing`, and `spoofplayermodel`
+idents, and the engine model-preview renderer. Model spoofing keeps the local
+model authoritative for rendering while `reportedplayermodel()` supplies the
+configured model to the connection handshake and subsequent `N_SWITCHMODEL`
+messages. Toggling it or changing its reported model while connected sends an
+immediate update; Profile persists both settings immediately. The temporary
+version-detection model packet also restores the reported model so it cannot
+leak or overwrite the local choice on peers.
 The 3D model is rendered into the content rectangle calculated by RmlUi after
 the normal RML pass, so viewport coordinates are not duplicated in C++.
 Legacy `showgui main` and `showgui playermodel` route to this native screen.

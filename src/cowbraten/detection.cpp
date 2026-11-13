@@ -10,7 +10,7 @@ namespace game {
         if(!enablep1xbratendetection) return;
         static const semver v(p1xbratenversion);
         addmsg(N_SWITCHMODEL, "ri", P1XBRATEN_VERSION_PREFIX<<24 | int(v.maj) << 16 | int(v.min) << 8 | int(v.patch));
-        addmsg(N_SWITCHMODEL, "ri", player1->playermodel);
+        addmsg(N_SWITCHMODEL, "ri", reportedplayermodel());
     }
 
     bool setp1xbratenversion(fpsent *d, int version)

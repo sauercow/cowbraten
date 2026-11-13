@@ -130,6 +130,23 @@ namespace game
 
     VARP(deadpush, 1, 2, 20);
 
+    static void sendreportedplayermodel();
+
+    VARFP(modelspoofing, 0, 0, 1, sendreportedplayermodel());
+    VARFP(spoofplayermodel, 0, 0, 4,
+        if(modelspoofing) sendreportedplayermodel());
+
+    int reportedplayermodel()
+    {
+        return modelspoofing ? spoofplayermodel : playermodel;
+    }
+
+    static void sendreportedplayermodel()
+    {
+        if(connected && player1 && player1->clientnum >= 0)
+            addmsg(N_SWITCHMODEL, "ri", reportedplayermodel());
+    }
+
     void switchname(const char *name)
     {
         filtertext(player1->name, name, false, false, MAXNAMELEN);
@@ -169,7 +186,7 @@ namespace game
     void switchplayermodel(int playermodel)
     {
         player1->playermodel = playermodel;
-        addmsg(N_SWITCHMODEL, "ri", player1->playermodel);
+        addmsg(N_SWITCHMODEL, "ri", reportedplayermodel());
     }
 
     struct authkey
@@ -1165,7 +1182,7 @@ namespace game
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         putint(p, N_CONNECT);
         sendstring(player1->name, p);
-        putint(p, player1->playermodel);
+        putint(p, reportedplayermodel());
         string hash = "";
         if(connectpass[0])
         {

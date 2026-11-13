@@ -67,6 +67,10 @@ namespace cowui
             constructor.Bind("saved_names_open", &saved_names_open) &&
             constructor.Bind("selected_name", &selected_name) &&
             constructor.Bind("selected_story", &selected_story) &&
+            constructor.Bind("model_spoofing", &model_spoofing) &&
+            constructor.Bind("spoof_model_value", &spoof_model_value) &&
+            constructor.Bind("spoof_model_name", &spoof_model_name) &&
+            constructor.Bind("reported_model_name", &reported_model_name) &&
             constructor.Bind("animation_name", &animation_name) &&
             constructor.Bind("preview_scale", &preview_scale) &&
             constructor.Bind("preview_scale_text", &preview_scale_text) &&
@@ -77,6 +81,14 @@ namespace cowui
             constructor.BindEventCallback(
                 "set_preview_scale",
                 &RmlProfile::setscale,
+                this) &&
+            constructor.BindEventCallback(
+                "set_model_spoofing",
+                &RmlProfile::setmodelspoofing,
+                this) &&
+            constructor.BindEventCallback(
+                "select_spoof_model",
+                &RmlProfile::selectspoofmodel,
                 this) &&
             constructor.BindEventCallback(
                 "set_name_input",
@@ -209,6 +221,50 @@ namespace cowui
             selected_story = row.story;
             model.DirtyVariable("selected_story");
         }
+        syncreportedmodelname();
+    }
+
+    void RmlProfile::syncreportedmodelname()
+    {
+        const Rml::String &value =
+            model_spoofing ? spoof_model_name : selected_name;
+        if(reported_model_name != value)
+        {
+            reported_model_name = value;
+            model.DirtyVariable("reported_model_name");
+        }
+    }
+
+    void RmlProfile::syncmodelspoofing(
+        const profile::ModelSpoofing &value)
+    {
+        if(characters.empty())
+            return;
+
+        const int accepted =
+            std::max(0, std::min(int(characters.size()) - 1, value.model));
+        if(model_spoofing != value.enabled)
+        {
+            model_spoofing = value.enabled;
+            model.DirtyVariable("model_spoofing");
+        }
+        if(spoof_model_id != accepted)
+            spoof_model_id = accepted;
+
+        const Rml::String selected_value = Rml::CreateString("%d", accepted);
+        if(spoof_model_value != selected_value)
+        {
+            spoof_model_value = selected_value;
+            model.DirtyVariable("spoof_model_value");
+        }
+
+        const Rml::String &name = characters[accepted].name;
+        if(spoof_model_name != name)
+        {
+            spoof_model_name = name;
+            model.DirtyVariable("spoof_model_name");
+        }
+        syncreportedmodelname();
     }
 
     void RmlProfile::activate()
@@ -219,6 +275,9 @@ namespace cowui
         int value = selected_id;
         if(profile::readselection(value))
             syncselection(value);
+        profile::ModelSpoofing spoofing = {};
+        if(profile::readmodelspoofing(spoofing))
+            syncmodelspoofing(spoofing);
         std::string player_name;
         if(profile::readname(player_name))
             syncname(player_name, true);
@@ -238,6 +297,14 @@ namespace cowui
         int value = selected_id;
         if(profile::readselection(value) && value != selected_id)
             syncselection(value);
+
+        profile::ModelSpoofing spoofing = {};
+        if(profile::readmodelspoofing(spoofing) &&
+           (spoofing.enabled != model_spoofing ||
+            spoofing.model != spoof_model_id))
+        {
+            syncmodelspoofing(spoofing);
+        }
 
         std::string player_name;
         if(profile::readname(player_name) && current_name != player_name)
@@ -328,6 +395,40 @@ namespace cowui
             preview_scale_text = Rml::CreateString("%.2fx", preview_scale);
             model.DirtyVariable("preview_scale");
             model.DirtyVariable("preview_scale_text");
+        }
+        stop(event);
+    }
+
+    void RmlProfile::setmodelspoofing(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() == 1)
+        {
+            profile::ModelSpoofing accepted = {};
+            if(profile::writemodelspoofingenabled(
+                   arguments[0].Get<bool>(), accepted))
+            {
+                syncmodelspoofing(accepted);
+            }
+        }
+        stop(event);
+    }
+
+    void RmlProfile::selectspoofmodel(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() == 1)
+        {
+            profile::ModelSpoofing accepted = {};
+            if(profile::writemodelspoofingselection(
+                   arguments[0].Get<int>(), accepted))
+            {
+                syncmodelspoofing(accepted);
+            }
         }
         stop(event);
     }

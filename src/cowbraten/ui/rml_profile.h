@@ -50,6 +50,8 @@ namespace cowui
         bool loadcharacters();
         void reloadnames();
         void syncselection(int value);
+        void syncmodelspoofing(const profile::ModelSpoofing &value);
+        void syncreportedmodelname();
         void syncname(const std::string &value, bool sync_input);
         void setanimation(profile::PreviewAnimation value, const char *name);
 
@@ -58,6 +60,14 @@ namespace cowui
             Rml::Event &event,
             const Rml::VariantList &arguments);
         void setscale(
+            Rml::DataModelHandle,
+            Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void setmodelspoofing(
+            Rml::DataModelHandle,
+            Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectspoofmodel(
             Rml::DataModelHandle,
             Rml::Event &event,
             const Rml::VariantList &arguments);
@@ -97,6 +107,11 @@ namespace cowui
         Rml::String name_status;
         Rml::String selected_name;
         Rml::String selected_story;
+        bool model_spoofing = false;
+        int spoof_model_id = 0;
+        Rml::String spoof_model_value = "0";
+        Rml::String spoof_model_name;
+        Rml::String reported_model_name;
         Rml::String animation_name = "Idle";
         float preview_scale = 1.0f;
         Rml::String preview_scale_text = "1.00x";

@@ -23,10 +23,19 @@ namespace cowui
             bool ragdoll;
         };
 
+        struct ModelSpoofing
+        {
+            bool enabled;
+            int model;
+        };
+
         int charactercount();
         bool readcharacter(int index, Character &result);
         bool readselection(int &result);
         bool writeselection(int value, int &result);
+        bool readmodelspoofing(ModelSpoofing &result);
+        bool writemodelspoofingenabled(bool value, ModelSpoofing &result);
+        bool writemodelspoofingselection(int value, ModelSpoofing &result);
 
         bool readname(char *result, int result_size);
         bool writename(const char *value, char *result, int result_size);

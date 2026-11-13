@@ -891,46 +891,162 @@ body
     display: none;
 }
 
-.profile-summary-panel
+.profile-spoof-panel
+{
+    display: flex;
+    flex: 1;
+    min-height: 190dp;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.profile-spoof-content
+{
+    box-sizing: border-box;
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    padding: 12dp var(--space-2);
+    flex-direction: column;
+}
+
+.profile-spoof-controls
+{
+    display: flex;
+    flex: none;
+    align-items: flex-end;
+    gap: 10dp;
+}
+
+.profile-spoof-toggle
+{
+    flex: none;
+    width: 92dp;
+    height: 34dp;
+    color: var(--color-text);
+    font-size: 11dp;
+    letter-spacing: 1dp;
+    text-transform: uppercase;
+}
+
+.profile-spoof-field
 {
     display: block;
     flex: 1;
-    min-height: 112dp;
-    padding: var(--space-2);
+    min-width: 0;
 }
 
-.profile-summary-label
+.profile-spoof-label,
+.profile-spoof-summary span
 {
     display: block;
     color: var(--color-disabled);
     font-size: 9dp;
+    line-height: 13dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
-.profile-summary-value
+.profile-spoof-select
 {
+    box-sizing: border-box;
     display: block;
+    width: 100%;
+    height: 34dp;
     margin-top: 5dp;
+    padding: 0 8dp;
+    background-color: var(--color-surface-2);
+    border-width: 1dp;
+    border-color: var(--color-border);
     color: var(--color-text);
-    font-size: 16dp;
+    font-family: Lato;
+    font-size: 11dp;
+    line-height: 32dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
 
-.profile-summary-rule
+.profile-spoof-select:hover,
+.profile-spoof-select:focus-visible
 {
-    height: 1dp;
-    margin: var(--space-2) 0;
-    background-color: var(--color-border);
+    border-color: var(--color-primary);
 }
 
-.profile-summary-copy
+.profile-spoof-select:disabled
+{
+    border-color: var(--color-border);
+    color: var(--color-disabled);
+    opacity: 0.68;
+}
+
+.profile-spoof-select selectbox
+{
+    background-color: var(--color-surface-2);
+    border-width: 1dp;
+    border-color: var(--color-border);
+}
+
+.profile-spoof-select selectbox option
+{
+    box-sizing: border-box;
+    height: 30dp;
+    padding: 0 8dp;
+    background-color: var(--color-surface-2);
+    color: var(--color-text-muted);
+    line-height: 30dp;
+}
+
+.profile-spoof-select selectbox option:hover,
+.profile-spoof-select selectbox option:checked
+{
+    background-color: var(--color-primary-pressed);
+    color: var(--color-text);
+}
+
+.profile-spoof-summary
+{
+    display: flex;
+    margin-top: 12dp;
+    padding-top: 10dp;
+    gap: 10dp;
+    border-top-width: 1dp;
+    border-top-color: var(--color-border);
+}
+
+.profile-spoof-summary > div
 {
     display: block;
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-spoof-summary strong
+{
+    display: block;
+    margin-top: 3dp;
+    overflow: hidden;
     color: var(--color-text-muted);
-    font-size: 10dp;
+    font-size: 11dp;
     line-height: 16dp;
+    letter-spacing: 1dp;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.profile-spoof-summary strong.is-active
+{
+    color: var(--color-secondary);
+}
+
+.profile-spoof-copy
+{
+    display: block;
+    margin-top: auto;
+    padding-top: 10dp;
+    color: var(--color-text-muted);
+    font-size: 9dp;
+    line-height: 14dp;
 }
 
 .profile-footer
@@ -1073,9 +1189,9 @@ body
 
     .profile-animation-button
     {
-        height: 30dp;
-        margin-top: 4dp;
-        line-height: 28dp;
+        height: 26dp;
+        margin-top: 2dp;
+        line-height: 24dp;
     }
 
     .profile-scale-panel
@@ -1093,10 +1209,25 @@ body
         min-height: 52dp;
     }
 
-    .profile-summary-panel
+    .profile-spoof-panel
     {
-        min-height: 88dp;
-        padding: 12dp;
+        min-height: 148dp;
+    }
+
+    .profile-spoof-content
+    {
+        padding: 6dp 12dp;
+    }
+
+    .profile-spoof-summary
+    {
+        margin-top: 6dp;
+        padding-top: 6dp;
+    }
+
+    .profile-spoof-copy
+    {
+        display: none;
     }
 }
 
@@ -1137,13 +1268,13 @@ body
 
     .profile-animation-button
     {
-        height: 28dp;
-        line-height: 26dp;
+        height: 24dp;
+        line-height: 22dp;
     }
 
     .profile-preview-story,
     .profile-navigation-note,
-    .profile-summary-copy
+    .profile-spoof-copy
     {
         display: none;
     }

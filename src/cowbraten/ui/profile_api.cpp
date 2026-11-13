@@ -54,6 +54,39 @@ namespace cowui
             return sauerprofile::writeselection(value, result);
         }
 
+        bool readmodelspoofing(ModelSpoofing &result)
+        {
+            sauerprofile::ModelSpoofing source = {};
+            if(!sauerprofile::readmodelspoofing(source))
+                return false;
+
+            result.enabled = source.enabled;
+            result.model = source.model;
+            return true;
+        }
+
+        bool writemodelspoofingenabled(bool value, ModelSpoofing &result)
+        {
+            sauerprofile::ModelSpoofing accepted = {};
+            if(!sauerprofile::writemodelspoofingenabled(value, accepted))
+                return false;
+
+            result.enabled = accepted.enabled;
+            result.model = accepted.model;
+            return true;
+        }
+
+        bool writemodelspoofingselection(int value, ModelSpoofing &result)
+        {
+            sauerprofile::ModelSpoofing accepted = {};
+            if(!sauerprofile::writemodelspoofingselection(value, accepted))
+                return false;
+
+            result.enabled = accepted.enabled;
+            result.model = accepted.model;
+            return true;
+        }
+
         bool readname(std::string &result)
         {
             char value[64] = "";

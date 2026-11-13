@@ -10,7 +10,7 @@ demo_library_tests: demo_library_tests.cpp ../src/cowbraten/ui/demo_library.cpp 
 settings_ui_tests: settings_ui_tests.cpp ../data/cowbraten/ui/default/screens/settings.rml ../src/cowbraten/ui/rml_settings.cpp
 	$(CXX) $(CXXFLAGS) -o $@ settings_ui_tests.cpp
 
-profile_ui_tests: profile_ui_tests.cpp ../data/cowbraten/ui/default/screens/profile.rml ../data/cowbraten/ui/themes/modern-metallic/theme.rcss ../src/cowbraten/ui/rml_profile.cpp ../src/cowbraten/ui/sauer_profile_bridge.cpp
+profile_ui_tests: profile_ui_tests.cpp ../data/cowbraten/ui/default/screens/profile.rml ../data/cowbraten/ui/themes/modern-metallic/theme.rcss ../src/cowbraten/ui/rml_profile.cpp ../src/cowbraten/ui/sauer_profile_bridge.cpp ../src/fpsgame/client.cpp ../src/cowbraten/detection.cpp
 	$(CXX) $(CXXFLAGS) -o $@ profile_ui_tests.cpp
 
 app_shell_tests: app_shell_tests.cpp ../data/cowbraten/ui/default/templates/app_shell.rml ../data/cowbraten/ui/default/styles/app_shell.rcss

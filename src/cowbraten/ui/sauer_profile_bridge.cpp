@@ -55,6 +55,27 @@ namespace cowui
                 setsvarchecked(id, value ? value : "");
                 return true;
             }
+
+            static bool readintident(const char *name, int &result)
+            {
+                ident *id = getident(name);
+                if(!id || id->type != ID_VAR || !id->storage.i)
+                    return false;
+
+                result = *id->storage.i;
+                return true;
+            }
+
+            static bool writeintident(const char *name, int value)
+            {
+                ident *id = getident(name);
+                if(!id || id->type != ID_VAR || !id->storage.i)
+                    return false;
+
+                if(*id->storage.i != value)
+                    setvarchecked(id, value);
+                return true;
+            }
         }
 
         int charactercount()
@@ -94,6 +115,45 @@ namespace cowui
                 setvarchecked(id, value);
 
             return readselection(result);
+        }
+
+        bool readmodelspoofing(ModelSpoofing &result)
+        {
+            int enabled = 0, model = 0;
+            if(!readintident("modelspoofing", enabled) ||
+               !readintident("spoofplayermodel", model))
+            {
+                return false;
+            }
+
+            result.enabled = enabled != 0;
+            result.model = clamp(model, 0, charactercount() - 1);
+            return true;
+        }
+
+        bool writemodelspoofingenabled(bool value, ModelSpoofing &result)
+        {
+            if(!writeintident("modelspoofing", value ? 1 : 0) ||
+               !readmodelspoofing(result))
+            {
+                return false;
+            }
+
+            writecfg();
+            return true;
+        }
+
+        bool writemodelspoofingselection(int value, ModelSpoofing &result)
+        {
+            if(value < 0 || value >= charactercount() ||
+               !writeintident("spoofplayermodel", value) ||
+               !readmodelspoofing(result))
+            {
+                return false;
+            }
+
+            writecfg();
+            return true;
         }
 
         bool readname(char *result, int result_size)

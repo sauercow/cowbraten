@@ -791,6 +791,7 @@ namespace game
     extern void switchname(const char *name);
     extern void switchteam(const char *name);
     extern void switchplayermodel(int playermodel);
+    extern int reportedplayermodel();
     extern void sendmapinfo();
     extern void stopdemo();
     extern void changemap(const char *name, int mode);

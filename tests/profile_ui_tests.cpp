@@ -34,6 +34,10 @@ int main()
         "../src/cowbraten/ui/rml_profile.cpp");
     const std::string bridge = readfile(
         "../src/cowbraten/ui/sauer_profile_bridge.cpp");
+    const std::string client = readfile(
+        "../src/fpsgame/client.cpp");
+    const std::string detection = readfile(
+        "../src/cowbraten/detection.cpp");
     const std::string theme = readfile(
         "../data/cowbraten/ui/themes/modern-metallic/theme.rcss");
     const std::string shell = readfile(
@@ -83,6 +87,15 @@ int main()
     check(rml.find("set_preview_scale(ev.value)") != std::string::npos &&
           implementation.find("\"set_preview_scale\"") != std::string::npos,
         "preview scale uses a typed data-model callback");
+    check(rml.find("set_model_spoofing(ev.checked)") != std::string::npos &&
+          rml.find("select_spoof_model(ev.value)") != std::string::npos &&
+          rml.find("data-attrif-disabled=\"!model_spoofing\"") !=
+              std::string::npos &&
+          implementation.find("\"set_model_spoofing\"") !=
+              std::string::npos &&
+          implementation.find("\"select_spoof_model\"") !=
+              std::string::npos,
+        "Profile exposes typed model-spoofing controls");
     check(rml.find("set_name_input(ev.value)") != std::string::npos &&
           rml.find("select_name(preset.value)") !=
               std::string::npos &&
@@ -116,6 +129,23 @@ int main()
           bridge.find("retained_count") != std::string::npos &&
           bridge.find("writecfg();") != std::string::npos,
         "saved names persist immediately through the legacy bridge");
+    check(bridge.find("\"modelspoofing\"") != std::string::npos &&
+          bridge.find("\"spoofplayermodel\"") != std::string::npos &&
+          bridge.find("writemodelspoofingenabled") != std::string::npos &&
+          bridge.find("writemodelspoofingselection") != std::string::npos &&
+          bridge.find("writecfg();") != std::string::npos,
+        "model spoofing uses fixed persistent idents behind the bridge");
+    check(client.find("VARFP(modelspoofing, 0, 0, 1") !=
+              std::string::npos &&
+          client.find("VARFP(spoofplayermodel, 0, 0, 4") !=
+              std::string::npos &&
+          client.find("putint(p, reportedplayermodel());") !=
+              std::string::npos &&
+          client.find("addmsg(N_SWITCHMODEL, \"ri\", reportedplayermodel());") !=
+              std::string::npos &&
+          detection.find("addmsg(N_SWITCHMODEL, \"ri\", reportedplayermodel());") !=
+              std::string::npos,
+        "all outgoing model paths honor the reported model");
     check(commands.find("if(initing == NOT_INITING) writecfg();") !=
               std::string::npos,
         "theme changes persist immediately outside startup");
@@ -135,6 +165,11 @@ int main()
           style.find(".profile-name-remove") != std::string::npos &&
           style.find("color: var(--color-error);") != std::string::npos,
         "saved-name popover opens above the preview with a red remove action");
+    check(style.find(".profile-spoof-panel") != std::string::npos &&
+          style.find(".profile-spoof-select:disabled") !=
+              std::string::npos &&
+          rml.find("{{ reported_model_name }}") != std::string::npos,
+        "Profile distinguishes local and reported model presentation");
 
     std::cout << '\n' << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

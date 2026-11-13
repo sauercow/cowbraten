@@ -129,11 +129,43 @@
                                 </div>
                             </div>
 
-                            <div class="profile-panel profile-summary-panel">
-                                <div class="profile-summary-label">Local Model</div>
-                                <div class="profile-summary-value">{{ selected_name }}</div>
-                                <div class="profile-summary-rule"></div>
-                                <div class="profile-summary-copy">Used locally and sent to compatible servers through Cowbraten's existing player-model setting.</div>
+                            <div class="profile-panel profile-spoof-panel">
+                                <div class="profile-panel-title">Model Spoofing</div>
+                                <div class="profile-spoof-content">
+                                    <div class="profile-spoof-controls">
+                                        <label class="checkbox-row profile-spoof-toggle">
+                                            <input class="checkbox" type="checkbox"
+                                                data-attrif-checked="model_spoofing"
+                                                data-event-change="set_model_spoofing(ev.checked)" />
+                                            <span data-if="model_spoofing">Enabled</span>
+                                            <span data-if="!model_spoofing">Disabled</span>
+                                        </label>
+                                        <div class="profile-spoof-field">
+                                            <div class="profile-spoof-label">Reported model</div>
+                                            <select class="profile-spoof-select"
+                                                data-value="spoof_model_value"
+                                                data-attrif-disabled="!model_spoofing"
+                                                data-event-change="select_spoof_model(ev.value)">
+                                                <option value="0">Mr. Fixit</option>
+                                                <option value="1">Iron Snout</option>
+                                                <option value="2">Ogro</option>
+                                                <option value="3">Inky</option>
+                                                <option value="4">Captain Cannon</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="profile-spoof-summary">
+                                        <div>
+                                            <span>Local</span>
+                                            <strong>{{ selected_name }}</strong>
+                                        </div>
+                                        <div>
+                                            <span>Reported</span>
+                                            <strong data-class-is-active="model_spoofing">{{ reported_model_name }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="profile-spoof-copy">Changes only the model announced to the server and other players. Your local model and gameplay stay unchanged.</div>
+                                </div>
                             </div>
                         </div>
                     </div>
