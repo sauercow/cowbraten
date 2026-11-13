@@ -8,6 +8,7 @@
 #include "rml_demo_manager.h"
 #include "rml_demo_player.h"
 #include "rml_game_menu.h"
+#include "rml_game_setup.h"
 #include "rml_profile.h"
 #include "rml_settings.h"
 #include "sauer_demo_bridge.h"
@@ -43,6 +44,7 @@ namespace cowui
     static RmlDemoManager demo_manager;
     static RmlDemoPlayer demo_player;
     static RmlGameMenu game_menu_model;
+    static RmlGameSetup game_setup_model;
     static RmlProfile profile_model;
     static RmlSettings settings_model;
     static Rml::Context *context = nullptr;
@@ -64,6 +66,11 @@ namespace cowui
         {
             ScreenId::GameMenu,
             "data/cowbraten/ui/default/screens/game_menu.rml",
+            nullptr
+        },
+        {
+            ScreenId::Games,
+            "data/cowbraten/ui/default/screens/games.rml",
             nullptr
         },
         {
@@ -288,6 +295,13 @@ namespace cowui
         event.StopPropagation();
         preservegamemenubackstack();
         show(ScreenId::Servers);
+    }
+
+    static void showgamescreen(Rml::Event &event)
+    {
+        event.StopPropagation();
+        preservegamemenubackstack();
+        show(ScreenId::Games);
     }
 
     static void showdemoscreen(Rml::Event &event)
@@ -702,6 +716,9 @@ namespace cowui
                "navigation.main",
                showmainmenu) ||
            !action_router.registeraction(
+               "navigation.games",
+               showgamescreen) ||
+           !action_router.registeraction(
                "navigation.servers",
                showserverbrowser) ||
            !action_router.registeraction(
@@ -722,11 +739,13 @@ namespace cowui
            !demo_manager.init(context, action_router) ||
            !demo_player.init(context, action_router) ||
            !game_menu_model.init(context, action_router) ||
+           !game_setup_model.init(context, action_router) ||
            !profile_model.init(context, action_router) ||
            !settings_model.init(context, action_router))
         {
             settings_model.shutdown(context);
             profile_model.shutdown(context);
+            game_setup_model.shutdown(context);
             game_menu_model.shutdown(context);
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
@@ -764,6 +783,7 @@ namespace cowui
         {
             settings_model.shutdown(context);
             profile_model.shutdown(context);
+            game_setup_model.shutdown(context);
             game_menu_model.shutdown(context);
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
@@ -1134,6 +1154,8 @@ namespace cowui
                 demo_manager.update();
             else if(active_screen->id == ScreenId::Profile)
                 profile_model.update();
+            else if(active_screen->id == ScreenId::Games)
+                game_setup_model.update();
             else if(active_screen->id == ScreenId::GameMenu)
                 game_menu_model.update();
         }
@@ -1216,6 +1238,8 @@ namespace cowui
             settings_model.activate();
         else if(id == ScreenId::Profile)
             profile_model.activate();
+        else if(id == ScreenId::Games)
+            game_setup_model.activate();
         else if(id == ScreenId::GameMenu)
             game_menu_model.activate();
 
@@ -1281,6 +1305,26 @@ namespace cowui
             screen = ScreenId::Settings;
         else if(!std::strcmp(name, "playermodel"))
             screen = ScreenId::Profile;
+        else if(!std::strcmp(name, "gamemode") ||
+                !std::strcmp(name, "maps") ||
+                !std::strcmp(name, "capturemaps") ||
+                !std::strcmp(name, "ctfmaps") ||
+                !std::strcmp(name, "custommaps"))
+            screen = ScreenId::Games;
+        else if(!std::strcmp(name, "botmatch"))
+        {
+            if(!show(ScreenId::Games)) return false;
+            game_setup_model.activate(1);
+            return true;
+        }
+        else if(!std::strcmp(name, "campaign") ||
+                !std::strcmp(name, "armyofone") ||
+                !std::strcmp(name, "privatestansauer"))
+        {
+            if(!show(ScreenId::Games)) return false;
+            game_setup_model.activate(2);
+            return true;
+        }
         else
             return false;
 
@@ -1311,6 +1355,11 @@ namespace cowui
     void showservers()
     {
         show(ScreenId::Servers);
+    }
+
+    void showgames()
+    {
+        show(ScreenId::Games);
     }
 
     void showdemos()

@@ -1,0 +1,101 @@
+<rml>
+<head>
+    <title>Cowbraten Play</title>
+    <link type="text/template" href="../templates/app_shell.rml" />
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/games.rcss" />
+</head>
+<body template="app-shell" class="app-page-games" data-model="game_setup">
+    <div class="games-screen">
+        <div class="games-header">
+            <div>
+                <div class="eyebrow">Play</div>
+                <div class="games-title">Choose the next match</div>
+                <div class="games-copy">Start locally, vote on the current server, add bots, or launch a campaign.</div>
+            </div>
+            <div class="games-current"><small>Current match</small><strong>{{ current_match }}</strong></div>
+        </div>
+
+        <div class="games-tabs">
+            <button class="games-tab" data-class-is-selected="section_multiplayer" onclick="games.section.multiplayer">Multiplayer / local</button>
+            <button class="games-tab" data-class-is-selected="section_bots" onclick="games.section.bots">Bot match</button>
+            <button class="games-tab" data-class-is-selected="section_campaign" onclick="games.section.campaign">Campaign</button>
+        </div>
+
+        <div class="games-campaign" data-if="section_campaign">
+            <div class="campaign-intro panel">
+                <div class="eyebrow">Single player</div>
+                <div class="campaign-title">Campaign missions</div>
+                <div class="games-copy">Campaigns run locally and preserve the original Sauerbraten mission order.</div>
+            </div>
+            <div class="campaign-list">
+                <button class="campaign-card panel" data-for="mission : campaigns"
+                    data-event-click="launch_campaign(mission.id)">
+                    <span class="campaign-series">{{ mission.series }}</span>
+                    <strong>{{ mission.name }}</strong>
+                    <small>{{ mission.map }}</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="games-workspace" data-if="!section_campaign">
+            <div class="games-modes panel">
+                <div class="games-panel-heading"><span>01</span><strong>Mode</strong></div>
+                <div class="mode-list">
+                    <button class="mode-row" data-for="mode : modes"
+                        data-class-is-selected="mode.selected"
+                        data-event-click="select_mode(mode.id)">{{ mode.name }}</button>
+                </div>
+            </div>
+
+            <div class="games-maps panel">
+                <div class="games-panel-heading">
+                    <span>02</span><strong>Map</strong>
+                    <input class="text-input map-filter" type="text" placeholder="Filter installed maps"
+                        data-value="filter" data-event-change="set_filter(ev.value)" />
+                </div>
+                <div class="map-list">
+                    <button class="map-card" data-for="map : maps"
+                        data-class-is-selected="map.selected"
+                        data-event-click="select_map(map.name)">
+                        <span class="map-preview">
+                            <span class="map-fallback">MAP</span>
+                            <img data-if="map.image != ''" data-attr-src="map.image" />
+                        </span>
+                        <strong>{{ map.name }}</strong>
+                    </button>
+                    <div class="games-empty" data-if="visible_count == 0">No installed maps match this filter.</div>
+                </div>
+            </div>
+
+            <div class="games-summary panel">
+                <div class="games-panel-heading"><span>03</span><strong>Launch</strong></div>
+                <div class="summary-mode">{{ selected_mode_name }}</div>
+                <div class="summary-map">{{ selected_map }}</div>
+                <div class="summary-description">{{ selected_mode_description }}</div>
+
+                <div class="bot-options" data-if="section_bots">
+                    <label><span>Bots</span><strong>{{ bot_count }}</strong></label>
+                    <input type="range" min="0" max="32" data-value="bot_count"
+                        data-event-change="set_bot_count(ev.value)" />
+                    <label><span>Minimum skill</span><strong>{{ bot_min_skill }}</strong></label>
+                    <input type="range" min="1" max="101" data-value="bot_min_skill"
+                        data-event-change="set_bot_min(ev.value)" />
+                    <label><span>Maximum skill</span><strong>{{ bot_max_skill }}</strong></label>
+                    <input type="range" min="1" max="101" data-value="bot_max_skill"
+                        data-event-change="set_bot_max(ev.value)" />
+                </div>
+
+                <button class="button button-primary games-launch" onclick="games.launch"
+                    data-attrif-disabled="!can_launch" data-class-is-disabled="!can_launch">
+                    <span class="cb-ico cb-ico-play cb-ico--sm"></span>
+                    {{ section_bots ? 'Start bot match' : 'Play / vote' }}
+                </button>
+            </div>
+        </div>
+
+        <div class="games-status">{{ status }}</div>
+    </div>
+</body>
+</rml>

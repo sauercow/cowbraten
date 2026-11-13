@@ -2,7 +2,7 @@ CXX ?= clang++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra
 
 .PHONY: all run clean rmlui
-all: demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
+all: demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
 
 RMLUI_BUILD ?= ../build/rmlui-x86_64-linux-Release
 
@@ -29,6 +29,9 @@ app_shell_tests: app_shell_tests.cpp ../data/cowbraten/ui/default/templates/app_
 game_menu_ui_tests: game_menu_ui_tests.cpp ../data/cowbraten/ui/default/screens/game_menu.rml ../data/cowbraten/ui/default/styles/game_menu.rcss ../src/cowbraten/ui/rml_game_menu.cpp
 	$(CXX) $(CXXFLAGS) -o $@ game_menu_ui_tests.cpp
 
+game_setup_ui_tests: game_setup_ui_tests.cpp ../data/cowbraten/ui/default/screens/games.rml ../data/cowbraten/ui/default/styles/games.rcss ../src/cowbraten/ui/rml_game_setup.cpp ../src/cowbraten/ui/sauer_game_setup_bridge.cpp
+	$(CXX) $(CXXFLAGS) -o $@ game_setup_ui_tests.cpp
+
 chat_ui_tests: chat_ui_tests.cpp ../data/cowbraten/ui/default/screens/chat.rml ../data/cowbraten/ui/default/styles/chat.rcss ../src/cowbraten/ui/rml_chat.cpp ../src/cowbraten/ui/sauer_chat_bridge.cpp
 	$(CXX) $(CXXFLAGS) -o $@ chat_ui_tests.cpp
 
@@ -44,10 +47,11 @@ run: all
 	./profile_ui_tests
 	./app_shell_tests
 	./game_menu_ui_tests
+	./game_setup_ui_tests
 	./chat_ui_tests
 	./console_ui_tests
 	./console_text_tests
 	./ui_update_tests
 
 clean:
-	$(RM) demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
+	$(RM) demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests

@@ -14,6 +14,7 @@ namespace cowui
     {
         Test,
         GameMenu,
+        Games,
         Servers,
         Demos,
         Settings,
@@ -52,6 +53,7 @@ namespace cowui
     bool tryroutelegacygui(const char *name);
     void showmain();
     void showfullmenu();
+    void showgames();
     void showservers();
     void showdemos();
     void showdemosrecording();

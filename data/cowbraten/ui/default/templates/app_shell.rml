@@ -22,6 +22,10 @@
             <div class="app-sidebar">
                 <div class="app-navigation-label">Navigation</div>
                 <div class="nav-list app-navigation">
+                    <button class="nav-item app-nav-item app-nav-games" onclick="navigation.games">
+                        <span class="cb-ico cb-ico-gamepad cb-ico--md app-nav-icon"></span>
+                        <span class="app-nav-label">Play</span>
+                    </button>
                     <button class="nav-item app-nav-item app-nav-profile" onclick="navigation.profile">
                         <span class="cb-ico cb-ico-user cb-ico--md app-nav-icon"></span>
                         <span class="app-nav-label">Profile / Identity</span>

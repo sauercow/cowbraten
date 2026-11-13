@@ -68,22 +68,29 @@
                             <span class="game-menu-action-key">B</span>
                         </button>
 
-                        <button class="game-menu-action" onclick="navigation.settings">
+                        <button class="game-menu-action" onclick="navigation.games">
                             <span class="game-menu-action-index">05</span>
+                            <span class="game-menu-action-icon cb-ico cb-ico-play"></span>
+                            <strong>Play / vote map</strong>
+                            <span class="game-menu-action-key">M</span>
+                        </button>
+
+                        <button class="game-menu-action" onclick="navigation.settings">
+                            <span class="game-menu-action-index">06</span>
                             <span class="game-menu-action-icon cb-ico cb-ico-settings"></span>
                             <strong>Settings</strong>
                             <span class="game-menu-action-key">F10</span>
                         </button>
 
                         <button class="game-menu-action" onclick="navigation.profile">
-                            <span class="game-menu-action-index">06</span>
+                            <span class="game-menu-action-index">07</span>
                             <span class="game-menu-action-icon cb-ico cb-ico-user-cog"></span>
                             <strong>Player / character</strong>
                             <span class="game-menu-action-key">P</span>
                         </button>
 
                         <button class="game-menu-action game-menu-action-danger" onclick="game.disconnect">
-                            <span class="game-menu-action-index">07</span>
+                            <span class="game-menu-action-index">08</span>
                             <span class="game-menu-action-icon cb-ico cb-ico-log-out"></span>
                             <strong>Disconnect</strong>
                             <span class="game-menu-action-key">F4</span>
