@@ -2,7 +2,7 @@ CXX ?= clang++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra
 
 .PHONY: all run clean rmlui
-all: demo_library_tests demo_visualization_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests hud_layout_tests utilities_ui_tests editor_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
+all: demo_library_tests demo_visualization_tests server_browser_ui_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests hud_layout_tests utilities_ui_tests editor_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
 
 RMLUI_BUILD ?= ../build/rmlui-x86_64-linux-Release
 
@@ -19,6 +19,9 @@ demo_library_tests: demo_library_tests.cpp ../src/cowbraten/ui/demo_library.cpp 
 
 demo_visualization_tests: demo_visualization_tests.cpp ../src/fpsgame/render.cpp ../src/cowbraten/demohd.cpp ../src/engine/rendergl.cpp ../src/engine/rendermodel.cpp ../data/cowbraten/demoxray.cfg ../data/cowbraten/ui/default/screens/demo_player.rml ../data/cowbraten/ui/default/styles/base.rcss ../data/cowbraten/ui/default/styles/demo_player.rcss ../src/cowbraten/ui/rml_demo_player.cpp
 	$(CXX) $(CXXFLAGS) -o $@ demo_visualization_tests.cpp
+
+server_browser_ui_tests: server_browser_ui_tests.cpp ../data/cowbraten/ui/default/screens/servers.rml ../data/cowbraten/ui/default/styles/server_browser.rcss ../src/cowbraten/ui/rml_server_browser.cpp ../src/cowbraten/ui/rml_server_browser.h ../src/cowbraten/ui/ui_commands.cpp ../src/cowbraten/ui/ui_persistence.h
+	$(CXX) $(CXXFLAGS) -o $@ server_browser_ui_tests.cpp
 
 settings_ui_tests: settings_ui_tests.cpp ../data/cowbraten/ui/default/screens/settings.rml ../src/cowbraten/ui/rml_settings.cpp
 	$(CXX) $(CXXFLAGS) -o $@ settings_ui_tests.cpp
@@ -62,6 +65,7 @@ console_text_tests: console_text_tests.cpp ../src/cowbraten/ui/rml_console_text.
 run: all
 	./demo_library_tests
 	./demo_visualization_tests
+	./server_browser_ui_tests
 	./settings_ui_tests
 	./profile_ui_tests
 	./app_shell_tests
@@ -78,4 +82,4 @@ run: all
 	./ui_update_tests
 
 clean:
-	$(RM) demo_library_tests demo_visualization_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests hud_layout_tests utilities_ui_tests editor_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
+	$(RM) demo_library_tests demo_visualization_tests server_browser_ui_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests hud_layout_tests utilities_ui_tests editor_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests

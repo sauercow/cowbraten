@@ -2,6 +2,7 @@
 
 #include "rml_action.h"
 #include "ui.h"
+#include "ui_persistence.h"
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Element.h>
@@ -63,6 +64,8 @@ namespace cowui
                 row.RegisterMember("ping_good", &Row::ping_good) &&
                 row.RegisterMember("ping_medium", &Row::ping_medium) &&
                 row.RegisterMember("ping_slow", &Row::ping_slow);
+            valid = valid &&
+                row.RegisterMember("favorite", &Row::favorite);
         }
         else
         {
@@ -92,6 +95,11 @@ namespace cowui
             constructor.BindEventCallback(
                 "select_server",
                 &RmlServerBrowser::selectaction,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "toggle_favorite",
+                &RmlServerBrowser::togglefavoriteaction,
                 this
             );
 
@@ -236,6 +244,7 @@ namespace cowui
         row.ping_good = entry.ping >= 0 && entry.ping <= 80;
         row.ping_medium = entry.ping > 80 && entry.ping <= 150;
         row.ping_slow = entry.ping > 150;
+        row.favorite = isserverfavorite(entry.id);
 
         browser.all_rows.push_back(row);
     }
@@ -271,6 +280,9 @@ namespace cowui
             visible_rows.end(),
             [key, ascending](const Row &left, const Row &right)
             {
+                if(left.favorite != right.favorite)
+                    return left.favorite;
+
                 int comparison = 0;
 
                 switch(key)
@@ -439,6 +451,28 @@ namespace cowui
         selected_id = id;
         updateselection();
         event.StopPropagation();
+    }
+
+    void RmlServerBrowser::togglefavoriteaction(
+        Rml::DataModelHandle,
+        Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        if(arguments.size() != 1)
+            return;
+
+        const Rml::String id = arguments[0].Get<Rml::String>();
+        for(Row &row : all_rows)
+        {
+            if(row.id != id)
+                continue;
+
+            row.favorite = !row.favorite;
+            setserverfavorite(row.id.c_str(), row.favorite);
+            rebuildvisible();
+            event.StopPropagation();
+            return;
+        }
     }
 
     void RmlServerBrowser::connectaction(Rml::Event &event)

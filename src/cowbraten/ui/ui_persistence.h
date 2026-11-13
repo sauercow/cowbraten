@@ -5,6 +5,9 @@ namespace cowui
 {
     bool loadpersistentstate();
     bool savepersistentstate();
+
+    bool isserverfavorite(const char *id);
+    bool setserverfavorite(const char *id, bool favorite);
 }
 
 #endif

@@ -244,10 +244,13 @@ The registered actions are explicit and typed:
 - `servers.refresh` invokes the existing master-list refresh path.
 - `servers.connect` resolves the selected identifier in the live Sauer list and
   uses the normal `cowui::close()` input-ownership path after connecting.
+- `toggle_favorite(server.id)` changes only the generated row's stable server
+  identity, persists it in `cowbraten-ui.cfg`, and rebuilds the presentation so
+  favorites stay ahead of the selected column ordering.
 
 There is no generic host command, ident lookup, or CubeScript evaluation in the
-model. Favorites and history are intentionally absent until their persistence
-and product semantics are designed.
+model. Favorites use stable `host:port` values; connection history remains
+absent until its persistence and product semantics are designed.
 
 ## Settings model
 

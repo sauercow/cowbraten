@@ -11,10 +11,47 @@ SVARP(profile_name_2, "");
 SVARP(profile_name_3, "");
 SVARP(profile_name_4, "");
 SVARP(profile_name_5, "");
+SVARP(serverfavorites, "");
 
 namespace cowui
 {
     static const char *persistentstatefile = "cowbraten-ui.cfg";
+
+    namespace
+    {
+        bool validfavoriteid(const char *id)
+        {
+            return id && id[0] &&
+                strlen(id) < 320 &&
+                !strchr(id, '\n') &&
+                !strchr(id, '\r');
+        }
+
+        void readserverfavorites(vector<char *> &result)
+        {
+            const char *begin = serverfavorites;
+
+            while(begin && *begin)
+            {
+                const char *end = strchr(begin, '\n');
+                if(!end)
+                    end = begin + strlen(begin);
+
+                if(end != begin)
+                    result.add(newstring(begin, size_t(end - begin)));
+
+                begin = *end ? end + 1 : end;
+            }
+
+            result.sort();
+            for(int i = result.length() - 1; i > 0; --i)
+            {
+                if(strcmp(result[i - 1], result[i]))
+                    continue;
+                delete[] result.remove(i);
+            }
+        }
+    }
 
     bool loadpersistentstate()
     {
@@ -37,8 +74,77 @@ namespace cowui
         f->printf("profile_name_3 %s\n", escapestring(profile_name_3));
         f->printf("profile_name_4 %s\n", escapestring(profile_name_4));
         f->printf("profile_name_5 %s\n", escapestring(profile_name_5));
+        f->printf("serverfavorites %s\n", escapestring(serverfavorites));
         delete f;
         return true;
+    }
+
+    bool isserverfavorite(const char *id)
+    {
+        if(!validfavoriteid(id))
+            return false;
+
+        vector<char *> favorites;
+        readserverfavorites(favorites);
+
+        bool result = false;
+        loopv(favorites)
+        {
+            if(!strcmp(favorites[i], id))
+            {
+                result = true;
+                break;
+            }
+        }
+
+        favorites.deletearrays();
+        return result;
+    }
+
+    bool setserverfavorite(const char *id, bool favorite)
+    {
+        if(!validfavoriteid(id))
+            return false;
+
+        vector<char *> favorites;
+        readserverfavorites(favorites);
+
+        int found = -1;
+        loopv(favorites)
+        {
+            if(!strcmp(favorites[i], id))
+            {
+                found = i;
+                break;
+            }
+        }
+
+        if(favorite)
+        {
+            if(found < 0)
+            {
+                favorites.add(newstring(id));
+                favorites.sort();
+            }
+        }
+        else if(found >= 0)
+        {
+            delete[] favorites.remove(found);
+        }
+
+        vector<char> serialized;
+        loopv(favorites)
+        {
+            if(i)
+                serialized.put('\n');
+            serialized.put(favorites[i], int(strlen(favorites[i])));
+        }
+        serialized.put('\0');
+
+        setsvar("serverfavorites", serialized.getbuf());
+        const bool saved = savepersistentstate();
+        favorites.deletearrays();
+        return saved;
     }
 }
 

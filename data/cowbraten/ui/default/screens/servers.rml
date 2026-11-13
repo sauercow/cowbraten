@@ -66,6 +66,9 @@
 
             <div class="servers-table">
                 <div class="server-grid servers-columns">
+                    <div class="server-heading-label server-cell-favorite">
+                        <span class="cb-ico cb-ico-star cb-ico--sm"></span>
+                    </div>
                     <div class="server-heading-cell server-cell-name">
                         <button class="server-heading-button"
                             data-class-is-selected="sort_name"
@@ -104,6 +107,14 @@
                             data-class-is-waiting="server.waiting"
                             data-class-is-incompatible="server.incompatible"
                             data-event-click="select_server(server.id)">
+                            <span class="server-cell-favorite">
+                                <button class="server-favorite"
+                                    title="Toggle favorite"
+                                    data-class-is-favorite="server.favorite"
+                                    data-event-click="toggle_favorite(server.id)">
+                                    <span class="cb-ico cb-ico-star cb-ico--sm"></span>
+                                </button>
+                            </span>
                             <span class="server-cell-name">
                                 <span class="server-name">{{ server.description }}</span>
                                 <span class="server-host">{{ server.host }}</span>

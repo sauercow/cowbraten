@@ -50,6 +50,7 @@ namespace cowui
             bool ping_good = false;
             bool ping_medium = false;
             bool ping_slow = false;
+            bool favorite = false;
         };
 
         enum class SortKey
@@ -70,6 +71,10 @@ namespace cowui
             const sauerservers::Entry &entry,
             void *);
         void selectaction(
+            Rml::DataModelHandle,
+            Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void togglefavoriteaction(
             Rml::DataModelHandle,
             Rml::Event &event,
             const Rml::VariantList &arguments);

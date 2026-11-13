@@ -368,10 +368,58 @@ body
 .server-cell-name
 {
     box-sizing: border-box;
-    flex: 0 0 42%;
+    flex: 0 0 38%;
     min-width: 0;
     padding: 0 var(--space-1);
     overflow: hidden;
+}
+
+.server-cell-favorite
+{
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 4%;
+    min-width: 40dp;
+    align-items: center;
+    justify-content: center;
+}
+
+.servers-columns .server-cell-favorite .cb-ico
+{
+    image-color: var(--color-disabled);
+}
+
+.server-favorite
+{
+    box-sizing: border-box;
+    display: flex;
+    width: 32dp;
+    height: 32dp;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border-width: 1dp;
+    border-color: transparent;
+}
+
+.server-favorite .cb-ico
+{
+    image-color: var(--color-disabled);
+}
+
+.server-favorite:hover,
+.server-favorite:focus-visible
+{
+    background-color: var(--color-background);
+    border-color: var(--color-warning);
+}
+
+.server-favorite:hover .cb-ico,
+.server-favorite:focus-visible .cb-ico,
+.server-favorite.is-favorite .cb-ico
+{
+    image-color: var(--color-warning);
 }
 
 .server-cell-mode
