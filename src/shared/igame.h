@@ -51,6 +51,8 @@ namespace game
     extern const char *defaultconfig();
     extern const char *modconfig();
     extern const char *autoexec();
+    extern void loadautoexecprofile();
+    extern void saveautoexecprofile();
     extern const char *savedservers();
     extern void loadconfigs();
     extern int writeembeddedcfgs();

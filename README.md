@@ -281,6 +281,10 @@ For an overview of compatible clients, run `/showgui cowbratenusage`.
 
 Client-side demos record the game as you experience it, and work independently of server-side demo recording. They also work locally, without being connected to any server. Your own position, movement and view is recorded at 125 frames per second.
 
+The RmlUi Autoexec settings select `original` (`autoexec.cfg`), `none`, or a named `autoexecs/<name>.cfg` profile for startup. The selection is saved in `autoexec-profile.cfg` in the user configuration directory, so an older client sharing that directory cannot erase it when rewriting `config.cfg`. Existing selections migrate from `config.cfg` on the first normal save. Startup and live profile loading clear the previous `mapstart` hook before executing the selected profile; an explicit `recordclientdemo 2` hook in that profile still records independently of `autorecordclientdemo`.
+
+The compatibility regression can be run from the repository root with `bash tests/autoexec_profile_integration.sh /path/to/sauerbraten /path/to/legacy/cowbraten_client`. It uses a temporary configuration directory and checks profile persistence across both clients, recording behavior across map changes, disabled profiles, and named configuration exports.
+
 #### Demo status and playback controls
 
 `huddemorecording` enables the blinking `REC` indicator while recording a client demo. `huddemoplayback` enables the playback HUD, and `huddemoplaybackscale` controls its size. The playback HUD shows the current position, accurate demo duration, playback state and speed. While paused or dragging the timeline, it displays millisecond precision.

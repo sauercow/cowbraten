@@ -2532,6 +2532,8 @@ void writecfg(const char *name)
     f->printf("\n");
     writecompletions(f);
     delete f;
+    // Exporting a named configuration must not replace the startup choice.
+    if(!name || !name[0]) game::saveautoexecprofile();
     f = openutf8file(path(game::modconfig(), true), "w");
     if(!f) return;
     f->printf("// automatically written on exit, DO NOT MODIFY\n\n");
@@ -3562,4 +3564,3 @@ void clearsleep_(int *clearoverrides)
 
 COMMANDN(clearsleep, clearsleep_, "i");
 #endif
-

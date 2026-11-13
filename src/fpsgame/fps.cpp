@@ -1765,6 +1765,29 @@ namespace game
     const char *modconfig() { return "cowbraten.cfg"; }
     SVARP(autoexecprofile, "original");
 
+    // Older clients sharing this home directory discard unknown variables
+    // when rewriting config.cfg. Keep the profile choice in a separate file,
+    // while accepting config.cfg as the migration source on the first run.
+    static const char *autoexecprofileconfig = "autoexec-profile.cfg";
+
+    void loadautoexecprofile()
+    {
+        execfile(autoexecprofileconfig, false);
+    }
+
+    void saveautoexecprofile()
+    {
+        stream *f = openutf8file(autoexecprofileconfig, "w");
+        if(!f)
+        {
+            conoutf(CON_ERROR, "could not save autoexec profile selection");
+            return;
+        }
+        f->printf("// Autoexec selection kept separately for compatibility with older clients.\n");
+        f->printf("autoexecprofile %s\n", escapestring(autoexecprofile));
+        delete f;
+    }
+
     static bool validautoexecprofile(const char *name)
     {
         if(!name || !name[0]) return false;

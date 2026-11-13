@@ -1571,6 +1571,7 @@ int main(int argc, char **argv)
         writecfg(game::restoreconfig());
     }
     execfile(game::modconfig(), false);
+    game::loadautoexecprofile();
     // Event hooks written by an older autoexec can survive in config.cfg.
     // Reset mapstart before loading the selected profile so removing it from
     // that profile actually removes the old behavior instead of inheriting it.
