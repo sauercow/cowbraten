@@ -27,6 +27,8 @@ int main()
     const std::string root = "../data/cowbraten/ui/default/";
     const std::string screen = readfile(root + "screens/game_menu.rml");
     const std::string style = readfile(root + "styles/game_menu.rcss");
+    const std::string implementation = readfile(
+        "../src/cowbraten/ui/rml_game_menu.cpp");
     const std::string input_bridge = readfile(
         "../src/cowbraten/ui/sauer_input_bridge.cpp");
 
@@ -46,9 +48,16 @@ int main()
           screen.find("cb-ico-settings") != std::string::npos &&
           screen.find("cb-ico-log-out") != std::string::npos,
         "match actions use semantic icons from the shared pack");
-    check(screen.find("game.spectator.toggle") != std::string::npos &&
+    const std::size_t spectator_toggle = screen.find("game.spectator.toggle");
+    check(spectator_toggle != std::string::npos &&
+          screen.find("game.spectator.toggle", spectator_toggle + 1) == std::string::npos &&
           screen.find("spectator ? 'ON' : 'OFF'") != std::string::npos,
-        "spectator action reflects the current player state");
+        "spectator action appears once and reflects the current player state");
+    check(screen.find("onclick=\"game.music.toggle\"") != std::string::npos &&
+          screen.find("data-class-is-on=\"music_enabled\"") != std::string::npos &&
+          screen.find("cb-ico-music-off") != std::string::npos &&
+          implementation.find("music_enabled ? 0 : 125") != std::string::npos,
+        "quick toggle switches native music volume between zero and 125");
     check(screen.find("data-if=\"team_mode\"") != std::string::npos &&
           screen.find("game.team.toggle") != std::string::npos &&
           screen.find("game.team.good") != std::string::npos &&

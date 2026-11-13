@@ -1,6 +1,7 @@
 #include "rml_game_menu.h"
 
 #include "rml_action.h"
+#include "settings_api.h"
 #include "ui.h"
 
 #include <RmlUi/Core/Context.h>
@@ -38,6 +39,7 @@ namespace cowui
             constructor.Bind("ping_label", &ping_label) &&
             constructor.Bind("state_label", &state_label) &&
             constructor.Bind("spectator", &spectator) &&
+            constructor.Bind("music_enabled", &music_enabled) &&
             constructor.Bind("team_mode", &team_mode) &&
             constructor.Bind("good_team", &good_team) &&
             constructor.Bind("evil_team", &evil_team) &&
@@ -47,6 +49,7 @@ namespace cowui
             router.registeraction("game.team.evil", evilteamaction) &&
             router.registeraction("game.team.toggle", toggleteamaction) &&
             router.registeraction("game.spectator.toggle", spectatoraction) &&
+            router.registeraction("game.music.toggle", musicvolumeaction) &&
             router.registeraction("game.more", moreaction) &&
             router.registeraction("game.disconnect", disconnectaction);
 
@@ -140,11 +143,26 @@ namespace cowui
         update();
     }
 
+    void RmlGameMenu::syncmusic()
+    {
+        settings::Audio audio = {};
+        if(!settings::readaudio(audio))
+            return;
+
+        const bool next_music_enabled = audio.music_volume > 0;
+        if(music_enabled != next_music_enabled)
+        {
+            music_enabled = next_music_enabled;
+            model.DirtyVariable("music_enabled");
+        }
+    }
+
     void RmlGameMenu::update()
     {
         gamemenu::State state;
         if(gamemenu::readstate(state))
             sync(state);
+        syncmusic();
     }
 
     void RmlGameMenu::resumeaction(Rml::Event &event)
@@ -180,6 +198,16 @@ namespace cowui
         event.StopPropagation();
         if(instance && gamemenu::setspectator(!instance->spectator))
             close();
+    }
+
+    void RmlGameMenu::musicvolumeaction(Rml::Event &event)
+    {
+        event.StopPropagation();
+        if(!instance)
+            return;
+
+        settings::writemusicvolume(instance->music_enabled ? 0 : 125);
+        instance->syncmusic();
     }
 
     void RmlGameMenu::moreaction(Rml::Event &event)

@@ -137,17 +137,17 @@
                             <div class="game-menu-card-title">Quick actions</div>
 
                             <div class="game-menu-quick-row">
-                                <span class="game-menu-quick-icon cb-ico cb-ico-spectator"></span>
+                                <span class="game-menu-quick-icon cb-ico cb-ico-music" data-if="music_enabled"></span>
+                                <span class="game-menu-quick-icon cb-ico cb-ico-music-off" data-if="!music_enabled"></span>
                                 <div class="game-menu-quick-copy">
-                                    <strong>Spectator mode</strong>
-                                    <small>Watch the match without playing.</small>
+                                    <strong>Music</strong>
+                                    <small>{{ music_enabled ? 'Background music volume 125.' : 'Background music muted at 0.' }}</small>
                                 </div>
                                 <button class="game-menu-toggle"
-                                    data-class-is-on="spectator"
-                                    data-attrif-disabled="!actions_available"
-                                    onclick="game.spectator.toggle">
+                                    data-class-is-on="music_enabled"
+                                    onclick="game.music.toggle">
                                     <span class="game-menu-toggle-knob"></span>
-                                    <strong>{{ spectator ? 'ON' : 'OFF' }}</strong>
+                                    <strong>{{ music_enabled ? 'ON' : 'OFF' }}</strong>
                                 </button>
                             </div>
 

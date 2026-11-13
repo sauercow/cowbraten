@@ -26,12 +26,14 @@ namespace cowui
 
     private:
         void sync(const gamemenu::State &state);
+        void syncmusic();
 
         static void resumeaction(Rml::Event &event);
         static void goodteamaction(Rml::Event &event);
         static void evilteamaction(Rml::Event &event);
         static void toggleteamaction(Rml::Event &event);
         static void spectatoraction(Rml::Event &event);
+        static void musicvolumeaction(Rml::Event &event);
         static void moreaction(Rml::Event &event);
         static void disconnectaction(Rml::Event &event);
 
@@ -49,6 +51,7 @@ namespace cowui
         Rml::String ping_label;
         Rml::String state_label;
         bool spectator = false;
+        bool music_enabled = false;
         bool team_mode = false;
         bool good_team = false;
         bool evil_team = false;
