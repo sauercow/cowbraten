@@ -507,6 +507,32 @@ namespace game
 
     vector<int> ignores;
 
+    static void applyautoignore();
+
+    VARFP(autoignoreenabled, 0, 0, 1, applyautoignore());
+    VARP(autoignoreconfigured, 0, 0, 1);
+    VARFP(autoignoreslotcount, 1, 5, 20, applyautoignore());
+    SVARFP(autoignorename1, "", applyautoignore());
+    SVARFP(autoignorename2, "", applyautoignore());
+    SVARFP(autoignorename3, "", applyautoignore());
+    SVARFP(autoignorename4, "", applyautoignore());
+    SVARFP(autoignorename5, "", applyautoignore());
+    SVARFP(autoignorename6, "", applyautoignore());
+    SVARFP(autoignorename7, "", applyautoignore());
+    SVARFP(autoignorename8, "", applyautoignore());
+    SVARFP(autoignorename9, "", applyautoignore());
+    SVARFP(autoignorename10, "", applyautoignore());
+    SVARFP(autoignorename11, "", applyautoignore());
+    SVARFP(autoignorename12, "", applyautoignore());
+    SVARFP(autoignorename13, "", applyautoignore());
+    SVARFP(autoignorename14, "", applyautoignore());
+    SVARFP(autoignorename15, "", applyautoignore());
+    SVARFP(autoignorename16, "", applyautoignore());
+    SVARFP(autoignorename17, "", applyautoignore());
+    SVARFP(autoignorename18, "", applyautoignore());
+    SVARFP(autoignorename19, "", applyautoignore());
+    SVARFP(autoignorename20, "", applyautoignore());
+
     void ignore(int cn)
     {
         fpsent *d = getclient(cn);
@@ -524,6 +550,56 @@ namespace game
     }
 
     bool isignored(int cn) { return ignores.find(cn) >= 0; }
+
+    static const char *autoignorename(int slot)
+    {
+        static char **names[] =
+        {
+            &autoignorename1, &autoignorename2, &autoignorename3,
+            &autoignorename4, &autoignorename5, &autoignorename6,
+            &autoignorename7, &autoignorename8, &autoignorename9,
+            &autoignorename10, &autoignorename11, &autoignorename12,
+            &autoignorename13, &autoignorename14, &autoignorename15,
+            &autoignorename16, &autoignorename17, &autoignorename18,
+            &autoignorename19, &autoignorename20
+        };
+        return slot >= 0 && slot < int(sizeof(names) / sizeof(names[0]))
+            ? *names[slot]
+            : "";
+    }
+
+    static bool shouldautoignore(const fpsent *d)
+    {
+        if(!autoignoreenabled || !d || d == player1 ||
+           d->aitype != AI_NONE || !d->name[0])
+        {
+            return false;
+        }
+
+        loopi(autoignoreslotcount)
+        {
+            const char *name = autoignorename(i);
+            if(name[0] && !strcmp(d->name, name))
+                return true;
+        }
+        return false;
+    }
+
+    static void checkautoignore(fpsent *d)
+    {
+        if(shouldautoignore(d) && !isignored(d->clientnum))
+            ignore(d->clientnum);
+    }
+
+    static void applyautoignore()
+    {
+        if(!autoignoreenabled)
+        {
+            while(ignores.length()) unignore(ignores.last());
+            return;
+        }
+        loopv(clients) checkautoignore(clients[i]);
+    }
 
     ICOMMAND(ignore, "s", (char *arg), ignore(parseplayer(arg)));
     ICOMMAND(unignore, "s", (char *arg), unignore(parseplayer(arg))); 
@@ -1579,6 +1655,7 @@ namespace game
                 getstring(text, p);
                 filtertext(d->team, text, false, false, MAXTEAMLEN);
                 d->playermodel = getint(p);
+                checkautoignore(d);
                 break;
             }
 
@@ -1594,6 +1671,7 @@ namespace game
                         copystring(d->name, text, MAXNAMELEN+1);
                         filternonalphanum(text, text, MAXNAMELEN);
                         copystring(d->alphanumname, text, MAXNAMELEN);
+                        checkautoignore(d);
                     }
                 }
                 break;

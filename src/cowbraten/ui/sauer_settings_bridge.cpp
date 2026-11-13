@@ -10,6 +10,7 @@
 #endif
 
 #include <cmath>
+#include <cctype>
 #include <cstdint>
 #include <cstring>
 
@@ -845,6 +846,40 @@ namespace cowui
             return id && id->type == ID_VAR
                 ? id
                 : nullptr;
+        }
+
+        static ident *autoignoreenabledident()
+        {
+            ident *id = getident("autoignoreenabled");
+            return id && id->type == ID_VAR ? id : nullptr;
+        }
+
+        static ident *autoignoreconfiguredident()
+        {
+            ident *id = getident("autoignoreconfigured");
+            return id && id->type == ID_VAR ? id : nullptr;
+        }
+
+        static ident *autoignoreslotcountident()
+        {
+            ident *id = getident("autoignoreslotcount");
+            return id && id->type == ID_VAR ? id : nullptr;
+        }
+
+        static ident *autoexecprofileident()
+        {
+            ident *id = getident("autoexecprofile");
+            return id && id->type == ID_SVAR ? id : nullptr;
+        }
+
+        static ident *autoignorenameident(int slot)
+        {
+            if(slot < 0 || slot >= Chat::AutoIgnoreSlotCount)
+                return nullptr;
+            string name;
+            formatstring(name, "autoignorename%d", slot + 1);
+            ident *id = getident(name);
+            return id && id->type == ID_SVAR ? id : nullptr;
         }
 
         static ident *fullconsolefilterident()
@@ -5151,14 +5186,68 @@ namespace cowui
                 result);
         }
 
+        static bool migratelegacyautoignore()
+        {
+            ident *configured_id = autoignoreconfiguredident();
+            ident *enabled_id = autoignoreenabledident();
+            if(!configured_id || !configured_id->storage.i ||
+               !enabled_id || !enabled_id->storage.i)
+            {
+                return false;
+            }
+            if(*configured_id->storage.i)
+                return true;
+
+            char imported[Chat::AutoIgnoreSlotCount][Chat::AutoIgnoreNameSize] = {};
+            bool found_legacy_name = false;
+            loopi(5)
+            {
+                string alias;
+                formatstring(alias, "ai_name_%d", i);
+                const char *legacy = getalias(alias);
+                if(!legacy[0])
+                    continue;
+                filtertext(imported[i], legacy, false, false, MAXNAMELEN);
+                found_legacy_name = found_legacy_name || imported[i][0];
+            }
+
+            // Do not claim migration until an old AutoIgnore list is present;
+            // autoexec.cfg may not have executed yet during early startup reads.
+            if(!found_legacy_name)
+                return true;
+
+            loopi(Chat::AutoIgnoreSlotCount)
+            {
+                ident *name_id = autoignorenameident(i);
+                if(!name_id || !name_id->storage.s)
+                    return false;
+                setsvarchecked(name_id, imported[i]);
+            }
+
+            const char *legacy_enabled = getalias("ai_enabled");
+            setvarchecked(enabled_id,
+                !legacy_enabled[0] || parseint(legacy_enabled) != 0 ? 1 : 0);
+            setvarchecked(configured_id, 1);
+            writecfg();
+            return true;
+        }
+
         bool readchat(Chat &result)
         {
+            std::memset(&result, 0, sizeof(result));
+            if(!migratelegacyautoignore())
+                return false;
+
             ident *top_id = consolefilterident();
             ident *bottom_id = miniconsolefilterident();
             ident *colors_id = teamcolorchatident();
+            ident *auto_ignore_id = autoignoreenabledident();
+            ident *slot_count_id = autoignoreslotcountident();
             if(!top_id || !top_id->storage.i ||
                !bottom_id || !bottom_id->storage.i ||
-               !colors_id || !colors_id->storage.i)
+               !colors_id || !colors_id->storage.i ||
+               !auto_ignore_id || !auto_ignore_id->storage.i ||
+               !slot_count_id || !slot_count_id->storage.i)
             {
                 return false;
             }
@@ -5172,6 +5261,16 @@ namespace cowui
             result.team_messages_in_bottom_box =
                 (*bottom_id->storage.i & CON_TEAMCHAT) != 0;
             result.team_colored_names = *colors_id->storage.i != 0;
+            result.auto_ignore_enabled = *auto_ignore_id->storage.i != 0;
+            result.auto_ignore_slot_count = *slot_count_id->storage.i;
+            loopi(Chat::AutoIgnoreSlotCount)
+            {
+                ident *name_id = autoignorenameident(i);
+                if(!name_id || !name_id->storage.s || !*name_id->storage.s)
+                    return false;
+                copystring(result.auto_ignore_names[i], *name_id->storage.s,
+                    Chat::AutoIgnoreNameSize);
+            }
             return true;
         }
 
@@ -5210,6 +5309,191 @@ namespace cowui
         bool writeteamcoloredchatnames(bool enabled)
         {
             return writeboolean(teamcolorchatident(), enabled);
+        }
+
+        bool writeautoignoreenabled(bool enabled, Chat &result)
+        {
+            ident *configured_id = autoignoreconfiguredident();
+            if(!configured_id || !configured_id->storage.i ||
+               !writeboolean(autoignoreenabledident(), enabled))
+            {
+                readchat(result);
+                return false;
+            }
+
+            setvarchecked(configured_id, 1);
+            writecfg();
+            return readchat(result) &&
+                result.auto_ignore_enabled == enabled;
+        }
+
+        bool writeautoignorename(int slot, const char *name, Chat &result)
+        {
+            ident *name_id = autoignorenameident(slot);
+            ident *configured_id = autoignoreconfiguredident();
+            if(!name || !name_id || !name_id->storage.s ||
+               !configured_id || !configured_id->storage.i)
+            {
+                readchat(result);
+                return false;
+            }
+
+            char filtered[Chat::AutoIgnoreNameSize] = "";
+            filtertext(filtered, name, false, false, MAXNAMELEN);
+            setsvarchecked(name_id, filtered);
+            setvarchecked(configured_id, 1);
+            writecfg();
+            if(!readchat(result))
+                return false;
+            return !std::strcmp(result.auto_ignore_names[slot], filtered);
+        }
+
+        bool writeautoignoreslotcount(int count, Chat &result)
+        {
+            ident *count_id = autoignoreslotcountident();
+            ident *configured_id = autoignoreconfiguredident();
+            if(!count_id || !count_id->storage.i ||
+               !configured_id || !configured_id->storage.i ||
+               count < count_id->minval || count > count_id->maxval)
+            {
+                readchat(result);
+                return false;
+            }
+
+            // A removed row should not remain active invisibly.
+            if(count < *count_id->storage.i)
+            {
+                loopi(Chat::AutoIgnoreSlotCount)
+                {
+                    if(i < count)
+                        continue;
+                    ident *name_id = autoignorenameident(i);
+                    if(name_id && name_id->storage.s)
+                        setsvarchecked(name_id, "");
+                }
+            }
+            setvarchecked(count_id, count);
+            setvarchecked(configured_id, 1);
+            writecfg();
+            return readchat(result) &&
+                result.auto_ignore_slot_count == count;
+        }
+
+        static bool validautoexecprofileid(const char *id)
+        {
+            if(!id || !id[0])
+                return false;
+            for(const char *c = id; *c; ++c)
+            {
+                const unsigned char value = static_cast<unsigned char>(*c);
+                if(!std::isalnum(value) && *c != '_' && *c != '-')
+                    return false;
+            }
+            return true;
+        }
+
+        static bool autoexecprofileexists(const char *id)
+        {
+            if(!validautoexecprofileid(id))
+                return false;
+            defformatstring(path, "autoexecs/%s.cfg", id);
+            stream *file = openfile(path, "rb");
+            if(!file)
+                return false;
+            delete file;
+            return true;
+        }
+
+        bool visitautoexecprofiles(
+            AutoexecChoiceVisitor visitor,
+            void *data)
+        {
+            ident *selected_id = autoexecprofileident();
+            if(!visitor || !selected_id || !selected_id->storage.s ||
+               !*selected_id->storage.s)
+            {
+                return false;
+            }
+            const char *selected = *selected_id->storage.s;
+
+            AutoexecChoice choice =
+            {
+                "original",
+                "Original / autoexec.cfg",
+                !std::strcmp(selected, "original")
+            };
+            visitor(choice, data);
+            choice.id = "none";
+            choice.display_name = "Disabled / load no autoexec";
+            choice.selected = !std::strcmp(selected, "none");
+            visitor(choice, data);
+
+            vector<char *> files;
+            listfiles("autoexecs", "cfg", files);
+            files.sort();
+            loopv(files)
+            {
+                const char *id = files[i];
+                if(!validautoexecprofileid(id) ||
+                   !std::strcmp(id, "original") ||
+                   !std::strcmp(id, "none") ||
+                   (i && !std::strcmp(id, files[i - 1])))
+                {
+                    continue;
+                }
+                choice.id = id;
+                choice.display_name = id;
+                choice.selected = !std::strcmp(selected, id);
+                visitor(choice, data);
+            }
+            files.deletearrays();
+            return true;
+        }
+
+        bool writeautoexecprofile(const char *id)
+        {
+            ident *profile_id = autoexecprofileident();
+            if(!profile_id || !profile_id->storage.s || !id ||
+               (std::strcmp(id, "original") &&
+                std::strcmp(id, "none") &&
+                !autoexecprofileexists(id)))
+            {
+                return false;
+            }
+            setsvarchecked(profile_id, id);
+            writecfg();
+            return *profile_id->storage.s &&
+                !std::strcmp(*profile_id->storage.s, id);
+        }
+
+        bool runautoexecprofile(const char *id)
+        {
+            if(!id)
+                return false;
+            const bool disabled = !std::strcmp(id, "none");
+            const bool original = !std::strcmp(id, "original");
+            if(!disabled && !original && !autoexecprofileexists(id))
+                return false;
+
+            // Autoexec event hooks are persistent aliases. Loading another
+            // profile on top of the current session must not inherit a hook
+            // removed from the newly selected file.
+            alias("mapstart", "");
+
+            bool loaded = false;
+            if(disabled)
+                loaded = true;
+            else if(original)
+                loaded = execfile("autoexec.cfg", false);
+            else
+            {
+                defformatstring(path, "autoexecs/%s.cfg", id);
+                loaded = execfile(path, false);
+            }
+
+            if(loaded)
+                writecfg();
+            return loaded;
         }
 
         // Native guibitfield "important information" uses 0x11.

@@ -598,12 +598,33 @@ namespace cowui
 
         struct Chat
         {
+            enum
+            {
+                AutoIgnoreSlotCount = 20,
+                AutoIgnoreNameSize = 16
+            };
+
             bool public_messages_in_top_feed;
             bool team_messages_in_top_feed;
             bool public_messages_in_bottom_box;
             bool team_messages_in_bottom_box;
             bool team_colored_names;
+            bool auto_ignore_enabled;
+            int auto_ignore_slot_count;
+            char auto_ignore_names[AutoIgnoreSlotCount][AutoIgnoreNameSize];
         };
+
+        struct AutoexecChoice
+        {
+            const char *id;
+            const char *display_name;
+            bool selected;
+        };
+
+        typedef void (*AutoexecChoiceVisitor)(
+            const AutoexecChoice &choice,
+            void *data
+        );
 
         // Native Settings console tab minus Chat-owned bits.
         // Top-left `confilter` omits CON_CHAT / CON_TEAMCHAT; Chat owns
@@ -927,6 +948,13 @@ namespace cowui
         bool writepublicchatinbottombox(bool enabled);
         bool writeteamchatinbottombox(bool enabled);
         bool writeteamcoloredchatnames(bool enabled);
+        bool writeautoignoreenabled(bool enabled, Chat &result);
+        bool writeautoignorename(int slot, const char *name, Chat &result);
+        bool writeautoignoreslotcount(int count, Chat &result);
+
+        bool visitautoexecprofiles(AutoexecChoiceVisitor visitor, void *data);
+        bool writeautoexecprofile(const char *id);
+        bool runautoexecprofile(const char *id);
 
         bool readconsole(Console &result);
         bool writeimportantintopfeed(bool enabled, Console &result);

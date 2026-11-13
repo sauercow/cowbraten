@@ -307,6 +307,19 @@ namespace cowui
         choices.push_back(row);
     }
 
+    void RmlSettings::appendautoexecchoice(
+        const settings::AutoexecChoice &choice,
+        void *data)
+    {
+        std::vector<RmlSettings::AutoexecChoice> &choices =
+            *static_cast<std::vector<RmlSettings::AutoexecChoice> *>(data);
+        RmlSettings::AutoexecChoice row;
+        row.id = choice.id;
+        row.label = choice.display_name;
+        row.selected = choice.selected;
+        choices.push_back(row);
+    }
+
     bool RmlSettings::init(
         Rml::Context *context,
         RmlActionRouter &router)
@@ -385,6 +398,25 @@ namespace cowui
         }
         else valid = false;
 
+        if(auto row = constructor.RegisterStruct<AutoIgnoreRow>())
+        {
+            valid = valid &&
+                row.RegisterMember("slot", &AutoIgnoreRow::slot) &&
+                row.RegisterMember("label", &AutoIgnoreRow::label) &&
+                row.RegisterMember("name", &AutoIgnoreRow::name);
+        }
+        else valid = false;
+
+        if(auto choice = constructor.RegisterStruct<AutoexecChoice>())
+        {
+            valid = valid &&
+                choice.RegisterMember("id", &AutoexecChoice::id) &&
+                choice.RegisterMember("label", &AutoexecChoice::label) &&
+                choice.RegisterMember(
+                    "selected", &AutoexecChoice::selected);
+        }
+        else valid = false;
+
         if(valid)
         {
             valid = settings::visitcrosshairs(
@@ -398,6 +430,8 @@ namespace cowui
             constructor.RegisterArray<std::vector<CrosshairChoice>>() &&
             constructor.RegisterArray<std::vector<SoundpackChoice>>() &&
             constructor.RegisterArray<std::vector<KeyBindingRow>>() &&
+            constructor.RegisterArray<std::vector<AutoIgnoreRow>>() &&
+            constructor.RegisterArray<std::vector<AutoexecChoice>>() &&
             constructor.Bind("resolutions", &resolutions) &&
             constructor.Bind("key_capture_id", &key_capture_id) &&
             constructor.Bind("key_capture_status", &key_capture_status) &&
@@ -1294,6 +1328,46 @@ namespace cowui
                 "team_colored_chat_names",
                 &team_colored_chat_names
             ) &&
+            constructor.Bind("auto_ignore_enabled", &auto_ignore_enabled) &&
+            constructor.Bind("auto_ignore_rows", &auto_ignore_rows) &&
+            constructor.Bind("auto_ignore_status", &auto_ignore_status) &&
+            constructor.Bind("autoexec_choices", &autoexec_choices) &&
+            constructor.Bind("autoexec_status", &autoexec_status) &&
+            constructor.BindEventCallback(
+                "select_auto_ignore_enabled",
+                &RmlSettings::selectautoignoreenabled,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "commit_auto_ignore_name",
+                &RmlSettings::commitautoignorename,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "add_auto_ignore_row",
+                &RmlSettings::addautoignorerow,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "remove_auto_ignore_row",
+                &RmlSettings::removeautoignorerow,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_autoexec_profile",
+                &RmlSettings::selectautoexecprofile,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "run_autoexec_profile",
+                &RmlSettings::runautoexecprofile,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "refresh_autoexec_profiles",
+                &RmlSettings::refreshautoexecprofiles,
+                this
+            ) &&
             constructor.Bind("console_available", &console_available) &&
             constructor.Bind(
                 "console_top_important",
@@ -1405,6 +1479,10 @@ namespace cowui
                 "category_console",
                 &category_console
             ) &&
+            constructor.Bind(
+                "category_autoexec",
+                &category_autoexec
+            ) &&
             constructor.BindEventCallback(
                 "select_resolution",
                 &RmlSettings::selectresolution,
@@ -1481,6 +1559,10 @@ namespace cowui
             router.registeraction(
                 "settings.category.console",
                 consolecategoryaction
+            ) &&
+            router.registeraction(
+                "settings.category.autoexec",
+                autoexeccategoryaction
             ) &&
             router.registeraction(
                 "settings.presentation.windowed",
@@ -2555,6 +2637,11 @@ namespace cowui
         public_chat_in_bottom_box = false;
         team_chat_in_bottom_box = false;
         team_colored_chat_names = true;
+        auto_ignore_enabled = false;
+        auto_ignore_rows.clear();
+        auto_ignore_status.clear();
+        autoexec_choices.clear();
+        autoexec_status.clear();
         console_available = false;
         console_top_important = true;
         console_top_warnings = true;
@@ -2589,6 +2676,7 @@ namespace cowui
         category_crosshair = false;
         category_chat = false;
         category_console = false;
+        category_autoexec = false;
     }
 
     void RmlSettings::activate()
@@ -2776,6 +2864,8 @@ namespace cowui
         if(!refreshchat())
             return false;
         if(!refreshconsole())
+            return false;
+        if(!refreshautoexec())
             return false;
         return refreshkeybindings();
     }
@@ -4345,7 +4435,171 @@ namespace cowui
             team_colored_chat_names = current.team_colored_names;
             model.DirtyVariable("team_colored_chat_names");
         }
+
+        if(auto_ignore_enabled != current.auto_ignore_enabled)
+        {
+            auto_ignore_enabled = current.auto_ignore_enabled;
+            model.DirtyVariable("auto_ignore_enabled");
+        }
+
+        std::vector<AutoIgnoreRow> rows;
+        for(int slot = 0; slot < current.auto_ignore_slot_count; ++slot)
+        {
+            AutoIgnoreRow row;
+            row.slot = slot;
+            char label[24];
+            std::snprintf(label, sizeof(label), "Player %d", slot + 1);
+            row.label = label;
+            row.name = current.auto_ignore_names[slot];
+            rows.push_back(row);
+        }
+        if(auto_ignore_rows != rows)
+        {
+            auto_ignore_rows.swap(rows);
+            model.DirtyVariable("auto_ignore_rows");
+        }
         return true;
+    }
+
+    void RmlSettings::selectautoignoreenabled(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1)
+            return;
+
+        settings::Chat state = {};
+        const bool enabled = arguments[0].Get<bool>();
+        const bool accepted =
+            settings::writeautoignoreenabled(enabled, state);
+        if(accepted || settings::readchat(state))
+            refreshchat();
+        auto_ignore_status = accepted
+            ? "Saved; matching players are ignored immediately"
+            : "Change not accepted; current engine state is shown";
+        model.DirtyVariable("auto_ignore_status");
+    }
+
+    void RmlSettings::commitautoignorename(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 2)
+            return;
+
+        const int slot = arguments[0].Get<int>(-1);
+        if(slot < 0 || slot >= settings::Chat::AutoIgnoreSlotCount)
+            return;
+
+        const Rml::String name = arguments[1].Get<Rml::String>();
+        settings::Chat state = {};
+        const bool accepted = settings::writeautoignorename(
+            slot, name.c_str(), state);
+        refreshchat();
+        auto_ignore_status = accepted
+            ? "Saved; names are matched exactly"
+            : "Name not accepted; current engine state is shown";
+        model.DirtyVariable("auto_ignore_status");
+    }
+
+    void RmlSettings::addautoignorerow(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &)
+    {
+        event.StopPropagation();
+        if(auto_ignore_rows.size() >=
+           std::size_t(settings::Chat::AutoIgnoreSlotCount))
+        {
+            return;
+        }
+
+        settings::Chat state = {};
+        const bool accepted = settings::writeautoignoreslotcount(
+            int(auto_ignore_rows.size()) + 1, state);
+        refreshchat();
+        auto_ignore_status = accepted
+            ? "Added another Auto Ignore field"
+            : "Unable to add another field";
+        model.DirtyVariable("auto_ignore_status");
+    }
+
+    void RmlSettings::removeautoignorerow(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &)
+    {
+        event.StopPropagation();
+        if(auto_ignore_rows.size() <= 1)
+            return;
+
+        settings::Chat state = {};
+        const bool accepted = settings::writeautoignoreslotcount(
+            int(auto_ignore_rows.size()) - 1, state);
+        refreshchat();
+        auto_ignore_status = accepted
+            ? "Removed the last Auto Ignore field"
+            : "Unable to remove the field";
+        model.DirtyVariable("auto_ignore_status");
+    }
+
+    bool RmlSettings::refreshautoexec()
+    {
+        std::vector<AutoexecChoice> choices;
+        if(!settings::visitautoexecprofiles(
+                appendautoexecchoice, &choices))
+        {
+            return false;
+        }
+        if(autoexec_choices != choices)
+        {
+            autoexec_choices.swap(choices);
+            model.DirtyVariable("autoexec_choices");
+        }
+        return true;
+    }
+
+    void RmlSettings::selectautoexecprofile(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1)
+            return;
+        const Rml::String id = arguments[0].Get<Rml::String>();
+        const bool accepted = settings::writeautoexecprofile(id.c_str());
+        refreshautoexec();
+        autoexec_status = accepted
+            ? "Default saved for the next startup"
+            : "Profile unavailable; selection was not changed";
+        model.DirtyVariable("autoexec_status");
+    }
+
+    void RmlSettings::runautoexecprofile(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1)
+            return;
+        const Rml::String id = arguments[0].Get<Rml::String>();
+        const bool accepted = settings::runautoexecprofile(id.c_str());
+        autoexec_status = accepted
+            ? "Profile loaded into the current session"
+            : "Could not load that profile";
+        model.DirtyVariable("autoexec_status");
+    }
+
+    void RmlSettings::refreshautoexecprofiles(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &)
+    {
+        event.StopPropagation();
+        const bool accepted = refreshautoexec();
+        autoexec_status = accepted
+            ? "Profile list refreshed"
+            : "Autoexec profiles are unavailable";
+        model.DirtyVariable("autoexec_status");
     }
 
     static Rml::String formatconsoleinteger(int value)
@@ -5333,6 +5587,7 @@ namespace cowui
         const bool crosshair = category == Category::Crosshair;
         const bool chat = category == Category::Chat;
         const bool console = category == Category::Console;
+        const bool autoexec = category == Category::Autoexec;
         if(category_game != game)
         {
             category_game = game;
@@ -5373,6 +5628,11 @@ namespace cowui
             category_console = console;
             model.DirtyVariable("category_console");
         }
+        if(category_autoexec != autoexec)
+        {
+            category_autoexec = autoexec;
+            model.DirtyVariable("category_autoexec");
+        }
 
         if(audio)
             refreshaudio();
@@ -5397,6 +5657,8 @@ namespace cowui
             refreshchat();
         else if(console)
             refreshconsole();
+        else if(autoexec)
+            refreshautoexec();
     }
 
     void RmlSettings::setpresentation(
@@ -7209,6 +7471,13 @@ namespace cowui
     {
         if(instance)
             instance->setcategory(Category::Console);
+        event.StopPropagation();
+    }
+
+    void RmlSettings::autoexeccategoryaction(Rml::Event &event)
+    {
+        if(instance)
+            instance->setcategory(Category::Autoexec);
         event.StopPropagation();
     }
 

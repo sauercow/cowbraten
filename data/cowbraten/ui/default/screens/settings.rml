@@ -76,9 +76,11 @@
                             <span class="settings-nav-index">08</span>
                             <span>Console</span>
                         </button>
-                        <button class="nav-item settings-nav-item" disabled="true">
+                        <button class="nav-item settings-nav-item"
+                            data-class-is-selected="category_autoexec"
+                            onclick="settings.category.autoexec">
                             <span class="settings-nav-index">09</span>
-                            <span>Advanced</span>
+                            <span>Autoexec</span>
                         </button>
                     </div>
 
@@ -128,6 +130,12 @@
                         <div class="settings-scope-kicker">Console Feeds</div>
                         <div class="settings-scope-copy">
                             Remaining top-left message types, the full-console history filter, and top-left size. Chat message routing stays on the Chat page.
+                        </div>
+                    </div>
+                    <div class="settings-scope-note" data-if="category_autoexec">
+                        <div class="settings-scope-kicker">Startup Script</div>
+                        <div class="settings-scope-copy">
+                            Choose one startup script. Alternative profiles are discovered from autoexecs/*.cfg.
                         </div>
                     </div>
                 </div>
@@ -4261,6 +4269,46 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Auto Ignore</div>
+                                    <div class="settings-control-description">
+                                        Ignore listed players as soon as they join or adopt a listed name. Matching is exact and case-sensitive; bots and your own client are excluded.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="auto_ignore_enabled"
+                                        data-event-change="select_auto_ignore_enabled(ev.checked)" />
+                                    <span data-if="auto_ignore_enabled">Enabled</span>
+                                    <span data-if="!auto_ignore_enabled">Disabled</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-display-row settings-control-divider"
+                                data-for="entry : auto_ignore_rows">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">{{ entry.label }}</div>
+                                </div>
+                                <input class="text-input settings-auto-ignore-name"
+                                    type="text" maxlength="15" placeholder="Empty slot"
+                                    data-value="entry.name"
+                                    data-event-change="commit_auto_ignore_name(entry.slot, ev.value)" />
+                            </div>
+                            <div class="settings-auto-ignore-actions">
+                                <button class="button settings-auto-ignore-button"
+                                    data-if="auto_ignore_rows.size < 20"
+                                    data-event-click="add_auto_ignore_row()">Add field</button>
+                                <button class="button settings-auto-ignore-button"
+                                    data-if="auto_ignore_rows.size > 1"
+                                    data-event-click="remove_auto_ignore_row()">Remove last</button>
+                                <span class="settings-control-description">Up to 20 players</span>
+                            </div>
+                            <div class="settings-control-description settings-auto-ignore-status"
+                                data-if="auto_ignore_status != ''">{{ auto_ignore_status }}</div>
+                        </div>
+
                         <div class="settings-info-row">
                             <div class="settings-info-block">
                                 <div class="settings-info-label">Application</div>
@@ -4586,6 +4634,63 @@
                         </div>
                     </div>
 
+                    <div class="settings-page" data-if="category_autoexec">
+                        <div class="settings-stage-header">
+                            <div class="eyebrow settings-eyebrow">Advanced / Startup</div>
+                            <div class="settings-stage-title">Autoexec</div>
+                            <div class="settings-stage-copy">
+                                Select the script loaded on the next launch. Original keeps autoexec.cfg, Disabled skips startup execution, and named profiles come from the autoexecs folder.
+                            </div>
+                        </div>
+
+                        <div class="settings-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Startup Profile</div>
+                                    <div class="settings-control-description">
+                                        Selecting a profile saves it as the default. Load now layers it onto the current session and does not undo commands already executed.
+                                    </div>
+                                </div>
+                                <button class="button settings-autoexec-refresh"
+                                    data-event-click="refresh_autoexec_profiles()">Refresh list</button>
+                            </div>
+
+                            <div class="settings-autoexec-list">
+                                <div class="settings-autoexec-row"
+                                    data-for="profile : autoexec_choices"
+                                    data-class-is-selected="profile.selected">
+                                    <button class="settings-autoexec-select"
+                                        data-event-click="select_autoexec_profile(profile.id)">
+                                        <span class="settings-autoexec-name">{{ profile.label }}</span>
+                                        <span class="settings-autoexec-path"
+                                            data-if="profile.id == 'original'">autoexec.cfg</span>
+                                        <span class="settings-autoexec-path"
+                                            data-if="profile.id != 'original' &amp;&amp; profile.id != 'none'">autoexecs/{{ profile.id }}.cfg</span>
+                                        <span class="settings-autoexec-path"
+                                            data-if="profile.id == 'none'">No startup script</span>
+                                    </button>
+                                    <span class="settings-autoexec-active"
+                                        data-if="profile.selected">Default</span>
+                                    <button class="button settings-autoexec-load"
+                                        data-if="profile.id != 'none'"
+                                        data-event-click="run_autoexec_profile(profile.id)">Load now</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
+                            <div class="settings-control-title">Adding profiles</div>
+                            <div class="settings-control-description">
+                                Create files such as autoexecs/duels.cfg or autoexecs/recording.cfg in your Cowbraten home directory, then refresh this list. Profile names may use letters, numbers, underscores, and hyphens.
+                            </div>
+                        </div>
+
+                        <div class="settings-control-footer settings-control-footer-compact"
+                            data-if="autoexec_status != ''">
+                            <span>{{ autoexec_status }}</span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -4599,6 +4704,7 @@
                     <span data-if="category_crosshair">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Crosshair</span>
                     <span data-if="category_chat">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Chat</span>
                     <span data-if="category_console">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Console</span>
+                    <span data-if="category_autoexec">Settings&nbsp;&nbsp;//&nbsp;&nbsp;Autoexec</span>
                 </div>
                 <div class="settings-footer-help">Escape returns to gameplay</div>
                 <div class="settings-footer-status">

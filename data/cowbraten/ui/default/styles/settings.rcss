@@ -1038,6 +1038,132 @@ body
     color: var(--color-error);
 }
 
+.settings-auto-ignore-name
+{
+    flex: none;
+    width: 320dp;
+    height: 36dp;
+    margin-left: var(--space-2);
+    background-color: var(--color-surface-2);
+    font-size: 13dp;
+    line-height: 34dp;
+}
+
+.settings-auto-ignore-status
+{
+    margin-top: var(--space-1);
+    padding-top: var(--space-1);
+    border-top-width: 1dp;
+    border-top-color: var(--color-border);
+    color: var(--color-primary);
+}
+
+.settings-auto-ignore-actions
+{
+    display: flex;
+    margin-top: var(--space-2);
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.settings-auto-ignore-button
+{
+    min-width: 128dp;
+    height: 34dp;
+    line-height: 32dp;
+}
+
+.settings-auto-ignore-actions .settings-control-description
+{
+    margin: 0 0 0 var(--space-1);
+}
+
+.settings-autoexec-refresh
+{
+    flex: none;
+    min-width: 136dp;
+    margin-left: var(--space-2);
+}
+
+.settings-autoexec-list
+{
+    display: flex;
+    margin-top: var(--space-2);
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.settings-autoexec-row
+{
+    box-sizing: border-box;
+    display: flex;
+    min-height: 58dp;
+    padding: var(--space-1);
+    align-items: center;
+    background-color: var(--color-surface-2);
+    border-width: 1dp;
+    border-color: var(--color-border);
+    border-left-width: 3dp;
+    border-left-color: var(--color-border);
+}
+
+.settings-autoexec-row.is-selected
+{
+    border-left-color: var(--color-primary);
+}
+
+.settings-autoexec-select
+{
+    display: block;
+    flex: 1;
+    min-width: 0;
+    padding: 4dp var(--space-1);
+    background-color: transparent;
+    border-width: 0;
+    color: var(--color-text);
+    font-family: Lato;
+    text-align: left;
+}
+
+.settings-autoexec-name,
+.settings-autoexec-path
+{
+    display: block;
+}
+
+.settings-autoexec-name
+{
+    font-size: 13dp;
+    line-height: 18dp;
+    letter-spacing: 1dp;
+    text-transform: uppercase;
+}
+
+.settings-autoexec-path
+{
+    color: var(--color-text-muted);
+    font-size: 10dp;
+    line-height: 15dp;
+}
+
+.settings-autoexec-active
+{
+    flex: none;
+    margin: 0 var(--space-2);
+    color: var(--color-primary);
+    font-size: 10dp;
+    letter-spacing: 1dp;
+    text-transform: uppercase;
+}
+
+.settings-autoexec-load
+{
+    flex: none;
+    min-width: 112dp;
+    height: 34dp;
+    line-height: 32dp;
+}
+
 .settings-unavailable-note
 {
     display: block;

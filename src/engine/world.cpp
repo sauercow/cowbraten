@@ -1,6 +1,7 @@
 // world.cpp: core map management stuff
 
 #include "engine.h"
+#include "ui/ui.h"
 
 VARR(mapversion, 1, MAPVERSION, 0);
 VARNR(mapscale, worldscale, 1, 0, 0);
@@ -1242,6 +1243,10 @@ void resetmap()
 
 void startmap(const char *name)
 {
+    // Map transitions always return input to gameplay. This also prevents a
+    // Settings/Profile document opened during loading from covering the map.
+    cowui::close();
+    cleargui();
     game::startmap(name);
 }
 
@@ -1392,4 +1397,3 @@ void mpeditent(int i, const vec &o, int type, int attr1, int attr2, int attr3, i
 
 int getworldsize() { return worldsize; }
 int getmapversion() { return mapversion; }
-

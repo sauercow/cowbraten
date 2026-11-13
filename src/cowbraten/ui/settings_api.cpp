@@ -2,6 +2,8 @@
 
 #include "sauer_settings_bridge.h"
 
+#include <cstring>
+
 namespace cowui
 {
     namespace settings
@@ -2724,21 +2726,39 @@ namespace cowui
             return accepted;
         }
 
+        static void copychat(
+            const sauersettings::Chat &source,
+            Chat &result)
+        {
+            result.public_messages_in_top_feed =
+                source.public_messages_in_top_feed;
+            result.team_messages_in_top_feed =
+                source.team_messages_in_top_feed;
+            result.public_messages_in_bottom_box =
+                source.public_messages_in_bottom_box;
+            result.team_messages_in_bottom_box =
+                source.team_messages_in_bottom_box;
+            result.team_colored_names = source.team_colored_names;
+            result.auto_ignore_enabled = source.auto_ignore_enabled;
+            result.auto_ignore_slot_count = source.auto_ignore_slot_count;
+            for(int slot = 0; slot < Chat::AutoIgnoreSlotCount; ++slot)
+            {
+                std::strncpy(
+                    result.auto_ignore_names[slot],
+                    source.auto_ignore_names[slot],
+                    Chat::AutoIgnoreNameSize - 1
+                );
+                result.auto_ignore_names[slot][Chat::AutoIgnoreNameSize - 1] = '\0';
+            }
+        }
+
         bool readchat(Chat &result)
         {
-            sauersettings::Chat legacy;
+            sauersettings::Chat legacy = {};
             if(!sauersettings::readchat(legacy))
                 return false;
 
-            result.public_messages_in_top_feed =
-                legacy.public_messages_in_top_feed;
-            result.team_messages_in_top_feed =
-                legacy.team_messages_in_top_feed;
-            result.public_messages_in_bottom_box =
-                legacy.public_messages_in_bottom_box;
-            result.team_messages_in_bottom_box =
-                legacy.team_messages_in_bottom_box;
-            result.team_colored_names = legacy.team_colored_names;
+            copychat(legacy, result);
             return true;
         }
 
@@ -2765,6 +2785,91 @@ namespace cowui
         bool writeteamcoloredchatnames(bool enabled)
         {
             return sauersettings::writeteamcoloredchatnames(enabled);
+        }
+
+        bool writeautoignoreenabled(bool enabled, Chat &result)
+        {
+            sauersettings::Chat legacy = {};
+            const bool accepted =
+                sauersettings::writeautoignoreenabled(enabled, legacy);
+            if(!accepted)
+            {
+                readchat(result);
+                return false;
+            }
+
+            copychat(legacy, result);
+            return true;
+        }
+
+        bool writeautoignorename(int slot, const char *name, Chat &result)
+        {
+            sauersettings::Chat legacy = {};
+            const bool accepted =
+                sauersettings::writeautoignorename(slot, name, legacy);
+            if(!accepted)
+            {
+                readchat(result);
+                return false;
+            }
+
+            copychat(legacy, result);
+            return true;
+        }
+
+        bool writeautoignoreslotcount(int count, Chat &result)
+        {
+            sauersettings::Chat legacy = {};
+            const bool accepted =
+                sauersettings::writeautoignoreslotcount(count, legacy);
+            if(!accepted)
+            {
+                readchat(result);
+                return false;
+            }
+
+            copychat(legacy, result);
+            return true;
+        }
+
+        struct AutoexecChoiceAdapter
+        {
+            AutoexecChoiceVisitor visitor;
+            void *data;
+        };
+
+        static void visitautoexecchoice(
+            const sauersettings::AutoexecChoice &legacy,
+            void *data)
+        {
+            AutoexecChoiceAdapter &adapter =
+                *static_cast<AutoexecChoiceAdapter *>(data);
+            AutoexecChoice choice;
+            choice.id = legacy.id;
+            choice.display_name = legacy.display_name;
+            choice.selected = legacy.selected;
+            adapter.visitor(choice, adapter.data);
+        }
+
+        bool visitautoexecprofiles(
+            AutoexecChoiceVisitor visitor,
+            void *data)
+        {
+            if(!visitor)
+                return false;
+            AutoexecChoiceAdapter adapter = { visitor, data };
+            return sauersettings::visitautoexecprofiles(
+                visitautoexecchoice, &adapter);
+        }
+
+        bool writeautoexecprofile(const char *id)
+        {
+            return sauersettings::writeautoexecprofile(id);
+        }
+
+        bool runautoexecprofile(const char *id)
+        {
+            return sauersettings::runautoexecprofile(id);
         }
 
         static void copyconsole(

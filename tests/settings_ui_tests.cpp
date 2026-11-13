@@ -30,6 +30,12 @@ int main()
         "../data/cowbraten/ui/default/screens/settings.rml");
     const std::string implementation = readfile(
         "../src/cowbraten/ui/rml_settings.cpp");
+    const std::string client = readfile("../src/fpsgame/client.cpp");
+    const std::string bridge = readfile(
+        "../src/cowbraten/ui/sauer_settings_bridge.cpp");
+    const std::string game = readfile("../src/fpsgame/fps.cpp");
+    const std::string engine = readfile("../src/engine/main.cpp");
+    const std::string world = readfile("../src/engine/world.cpp");
 
     check(!rml.empty(), "load Settings RML");
     check(!implementation.empty(), "load Settings action implementation");
@@ -78,6 +84,48 @@ int main()
     check(action_count > 80, "audit Settings action declarations");
     check(missing_actions.empty(),
         "every Settings RML action has a registered implementation");
+
+    check(rml.find("select_auto_ignore_enabled(ev.checked)") !=
+            std::string::npos &&
+          rml.find("commit_auto_ignore_name(entry.slot, ev.value)") !=
+            std::string::npos &&
+          rml.find("add_auto_ignore_row()") !=
+            std::string::npos,
+        "Chat settings expose expandable native Auto Ignore controls");
+    check(client.find("VARFP(autoignoreenabled") != std::string::npos &&
+          client.find("SVARFP(autoignorename5") != std::string::npos,
+        "Auto Ignore configuration is persistent and engine-native");
+    check(client.find("case N_INITCLIENT") != std::string::npos &&
+          client.find("case N_SWITCHNAME") != std::string::npos &&
+          client.find("checkautoignore(d);") != std::string::npos,
+        "Auto Ignore reacts to joins and name changes");
+    check(client.find("while(ignores.length()) unignore(ignores.last())") !=
+            std::string::npos,
+        "disabling Auto Ignore clears every ignored client");
+    check(bridge.find("migratelegacyautoignore") != std::string::npos &&
+          bridge.find("ai_name_%d") != std::string::npos,
+        "legacy AutoIgnore aliases migrate into native settings");
+    check(rml.find("settings.category.autoexec") != std::string::npos &&
+          rml.find("select_autoexec_profile(profile.id)") !=
+            std::string::npos &&
+          rml.find("run_autoexec_profile(profile.id)") !=
+            std::string::npos,
+        "Settings exposes Autoexec profile selection and live loading");
+    check(game.find("SVARP(autoexecprofile, \"original\")") !=
+            std::string::npos &&
+          game.find("autoexecs/%s.cfg") != std::string::npos &&
+          engine.find("autoexec && autoexec[0]") != std::string::npos,
+        "startup supports original, disabled, and named Autoexec profiles");
+    check(engine.find("alias(\"mapstart\", \"\")") !=
+            std::string::npos,
+        "selected Autoexec does not inherit a stale mapstart hook");
+    check(bridge.find("alias(\"mapstart\", \"\")") !=
+              std::string::npos &&
+          bridge.find("if(loaded)") != std::string::npos,
+        "live Autoexec loading clears stale persistent map hooks");
+    check(world.find("cowui::close();") != std::string::npos &&
+          world.find("cleargui();") != std::string::npos,
+        "loading a map closes native and legacy menus");
 
     std::cout << '\n' << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

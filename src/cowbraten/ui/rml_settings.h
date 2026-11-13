@@ -41,6 +41,7 @@ namespace cowui
         struct GameClock;
         struct HudScore;
         struct ScoreboardColumns;
+        struct AutoexecChoice;
         struct Hud;
         struct Console;
         struct GlassReflectionsState;
@@ -142,6 +143,32 @@ namespace cowui
             }
         };
 
+        struct AutoIgnoreRow
+        {
+            int slot = 0;
+            Rml::String label;
+            Rml::String name;
+
+            bool operator==(const AutoIgnoreRow &other) const
+            {
+                return slot == other.slot && label == other.label &&
+                    name == other.name;
+            }
+        };
+
+        struct AutoexecChoice
+        {
+            Rml::String id;
+            Rml::String label;
+            bool selected = false;
+
+            bool operator==(const AutoexecChoice &other) const
+            {
+                return id == other.id && label == other.label &&
+                    selected == other.selected;
+            }
+        };
+
         enum class Category
         {
             Game,
@@ -151,7 +178,8 @@ namespace cowui
             MouseKeyboard,
             Crosshair,
             Chat,
-            Console
+            Console,
+            Autoexec
         };
 
         bool refresh();
@@ -451,6 +479,23 @@ namespace cowui
         void commithudscorex();
         void commithudscorey();
         bool refreshchat();
+        void selectautoignoreenabled(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void commitautoignorename(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void addautoignorerow(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void removeautoignorerow(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        bool refreshautoexec();
+        void selectautoexecprofile(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void runautoexecprofile(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void refreshautoexecprofiles(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        static void appendautoexecchoice(
+            const settings::AutoexecChoice &choice, void *data);
         bool refreshconsole();
         void presentconsole(const settings::Console &state,
             bool available,
@@ -531,6 +576,7 @@ namespace cowui
         static void crosshaircategoryaction(Rml::Event &event);
         static void chatcategoryaction(Rml::Event &event);
         static void consolecategoryaction(Rml::Event &event);
+        static void autoexeccategoryaction(Rml::Event &event);
         static void windowedaction(Rml::Event &event);
         static void exclusivefullscreenaction(Rml::Event &event);
         static void desktopfullscreenaction(Rml::Event &event);
@@ -1143,6 +1189,11 @@ namespace cowui
         bool public_chat_in_bottom_box = false;
         bool team_chat_in_bottom_box = false;
         bool team_colored_chat_names = true;
+        bool auto_ignore_enabled = false;
+        std::vector<AutoIgnoreRow> auto_ignore_rows;
+        Rml::String auto_ignore_status;
+        std::vector<AutoexecChoice> autoexec_choices;
+        Rml::String autoexec_status;
         bool console_available = false;
         bool console_top_important = true;
         bool console_top_warnings = true;
@@ -1177,6 +1228,7 @@ namespace cowui
         bool category_crosshair = false;
         bool category_chat = false;
         bool category_console = false;
+        bool category_autoexec = false;
 
         static RmlSettings *instance;
     };

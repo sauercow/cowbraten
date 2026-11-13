@@ -1763,7 +1763,33 @@ namespace game
     const char *restoreconfig() { return "restore.cfg"; }
     const char *defaultconfig() { return "data/defaults.cfg"; }
     const char *modconfig() { return "cowbraten.cfg"; }
-    const char *autoexec() { return "autoexec.cfg"; }
+    SVARP(autoexecprofile, "original");
+
+    static bool validautoexecprofile(const char *name)
+    {
+        if(!name || !name[0]) return false;
+        for(const char *c = name; *c; ++c)
+        {
+            if(!isalnum(static_cast<unsigned char>(*c)) &&
+               *c != '_' && *c != '-')
+                return false;
+        }
+        return true;
+    }
+
+    const char *autoexec()
+    {
+        if(!strcmp(autoexecprofile, "none")) return "";
+        if(!strcmp(autoexecprofile, "original") ||
+           !validautoexecprofile(autoexecprofile))
+        {
+            return "autoexec.cfg";
+        }
+
+        static string selected;
+        formatstring(selected, "autoexecs/%s.cfg", autoexecprofile);
+        return selected;
+    }
     const char *savedservers() { return "servers.cfg"; }
 
     void loadconfigs()
