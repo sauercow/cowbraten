@@ -141,6 +141,29 @@ legacy no-op and does not disturb the active RmlUi screen. While RmlUi is
 visible, the legacy GUI stack is not rendered, which prevents two menu layers
 from competing while preserving legacy stack state for a later handoff.
 
+## Text utilities model
+
+The legacy `notepad`, `scratchpad`, and `pastebuffer` documents share one
+native Utilities screen with three explicit tabs. Their exact `showgui` names
+and `/ui_utilities`, `/ui_scratchpad`, and `/ui_pastebuffer` commands select the
+corresponding cached tab. The global application shell exposes the same screen
+through its Tools destination.
+
+The Rml-facing model owns the three editable buffers, filename, active tab,
+and operation status. File and clipboard behavior crosses `utility_api` into a
+narrow `sauer_utility_bridge`: the bridge uses the engine's package-aware
+`loadfile` and UTF-8 write stream, SDL clipboard functions, and explicit-buffer
+`execute`. It rejects absolute paths, parent traversal, drive prefixes,
+backslashes, and control characters. RML therefore cannot provide an ident
+name or choose an engine command; only the user's visible buffer can be run by
+the fixed Execute actions.
+
+RmlUi multiline controls synchronize their values through the typed data model,
+so file loads and clipboard mutations update cached documents and user edits
+flow back through explicit callbacks. The utility stylesheet uses the installed
+Lato face so editor text remains renderable without adding an unregistered
+monospace font dependency.
+
 Application behavior must not depend on element IDs. IDs remain acceptable for
 document-local relationships such as a label's `for` attribute. State reaches
 RML through event-driven data models and stable actions; documents are not

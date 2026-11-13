@@ -1,0 +1,60 @@
+<rml>
+<head>
+    <title>Cowbraten Utilities</title>
+    <link type="text/template" href="../templates/app_shell.rml" />
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/utilities.rcss" />
+</head>
+<body template="app-shell" class="app-page-utilities" data-model="utilities">
+    <div class="utilities-screen">
+        <div class="utilities-header">
+            <div class="eyebrow">Tools</div>
+            <div class="utilities-title">Text utilities</div>
+            <div class="utilities-copy">Edit a local text file or prepare and execute CubeScript buffers.</div>
+        </div>
+        <div class="utilities-tabs">
+            <button data-class-is-selected="section_notepad" onclick="utilities.section.notepad">Notepad</button>
+            <button data-class-is-selected="section_scratchpad" onclick="utilities.section.scratchpad">Scratchpad</button>
+            <button data-class-is-selected="section_pastebuffer" onclick="utilities.section.pastebuffer">Paste buffer</button>
+        </div>
+
+        <div class="utility-workspace panel" data-if="section_notepad">
+            <div class="utility-toolbar">
+                <input class="text-input utility-filename" type="text"
+                    data-value="filename" data-event-change="set_filename(ev.value)" />
+                <button class="button" onclick="utilities.notepad.load">Load</button>
+                <button class="button button-primary" onclick="utilities.notepad.save">Save</button>
+            </div>
+            <textarea class="utility-editor" data-value="notepad_text"
+                data-event-change="set_notepad(ev.value)"></textarea>
+        </div>
+
+        <div class="utility-workspace panel" data-if="section_scratchpad">
+            <div class="utility-toolbar">
+                <span>Persistent session scratchpad</span>
+                <button class="button button-primary" onclick="utilities.scratch.execute">Execute</button>
+                <button class="button" onclick="utilities.scratch.copy">Copy</button>
+                <button class="button" onclick="utilities.scratch.paste">Paste</button>
+                <button class="button utility-danger" onclick="utilities.scratch.clear">Clear</button>
+            </div>
+            <textarea class="utility-editor" data-value="scratchpad_text"
+                data-event-change="set_scratchpad(ev.value)"></textarea>
+        </div>
+
+        <div class="utility-workspace panel" data-if="section_pastebuffer">
+            <div class="utility-toolbar">
+                <span>Disposable command buffer</span>
+                <button class="button button-primary" onclick="utilities.paste.execute">Execute</button>
+                <button class="button" onclick="utilities.paste.copy">Copy</button>
+                <button class="button" onclick="utilities.paste.clipboard">Paste</button>
+                <button class="button utility-danger" onclick="utilities.paste.clear">Clear</button>
+            </div>
+            <textarea class="utility-editor" data-value="pastebuffer_text"
+                data-event-change="set_pastebuffer(ev.value)"></textarea>
+        </div>
+
+        <div class="utility-status">{{ status }}</div>
+    </div>
+</body>
+</rml>

@@ -16,6 +16,7 @@ namespace cowui
         GameMenu,
         Games,
         System,
+        Utilities,
         Servers,
         Demos,
         Settings,
@@ -57,6 +58,9 @@ namespace cowui
     void showgames();
     void showadmin();
     void showabout();
+    void showutilities();
+    void showscratchpad();
+    void showpastebuffer();
     void showservers();
     void showdemos();
     void showdemosrecording();

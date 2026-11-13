@@ -13,6 +13,7 @@
 #include "rml_profile.h"
 #include "rml_settings.h"
 #include "rml_system.h"
+#include "rml_utilities.h"
 #include "sauer_demo_bridge.h"
 #include "sauer_input_bridge.h"
 
@@ -49,6 +50,7 @@ namespace cowui
     static RmlGameMenu game_menu_model;
     static RmlGameSetup game_setup_model;
     static RmlSystem system_model;
+    static RmlUtilities utilities_model;
     static RmlProfile profile_model;
     static RmlSettings settings_model;
     static Rml::Context *context = nullptr;
@@ -80,6 +82,11 @@ namespace cowui
         {
             ScreenId::System,
             "data/cowbraten/ui/default/screens/system.rml",
+            nullptr
+        },
+        {
+            ScreenId::Utilities,
+            "data/cowbraten/ui/default/screens/utilities.rml",
             nullptr
         },
         {
@@ -325,6 +332,13 @@ namespace cowui
         event.StopPropagation();
         preservegamemenubackstack();
         if(show(ScreenId::System)) system_model.activate(0);
+    }
+
+    static void showutilitiesscreen(Rml::Event &event)
+    {
+        event.StopPropagation();
+        preservegamemenubackstack();
+        show(ScreenId::Utilities);
     }
 
     static void showdemoscreen(Rml::Event &event)
@@ -748,6 +762,9 @@ namespace cowui
                "navigation.admin",
                showadminscreen) ||
            !action_router.registeraction(
+               "navigation.utilities",
+               showutilitiesscreen) ||
+           !action_router.registeraction(
                "navigation.servers",
                showserverbrowser) ||
            !action_router.registeraction(
@@ -771,11 +788,13 @@ namespace cowui
            !game_menu_model.init(context, action_router) ||
            !game_setup_model.init(context, action_router) ||
            !system_model.init(context, action_router) ||
+           !utilities_model.init(context, action_router) ||
            !profile_model.init(context, action_router) ||
            !settings_model.init(context, action_router))
         {
             settings_model.shutdown(context);
             profile_model.shutdown(context);
+            utilities_model.shutdown(context);
             system_model.shutdown(context);
             game_setup_model.shutdown(context);
             game_menu_model.shutdown(context);
@@ -816,6 +835,7 @@ namespace cowui
         {
             settings_model.shutdown(context);
             profile_model.shutdown(context);
+            utilities_model.shutdown(context);
             system_model.shutdown(context);
             game_setup_model.shutdown(context);
             game_menu_model.shutdown(context);
@@ -1268,6 +1288,8 @@ namespace cowui
         {
             if(id == ScreenId::Settings)
                 settings_model.activate();
+            else if(id == ScreenId::Utilities)
+                utilities_model.activate();
 
             return true;
         }
@@ -1284,6 +1306,8 @@ namespace cowui
             game_setup_model.activate();
         else if(id == ScreenId::System)
             system_model.activate();
+        else if(id == ScreenId::Utilities)
+            utilities_model.activate();
         else if(id == ScreenId::GameMenu)
             game_menu_model.activate();
 
@@ -1373,6 +1397,24 @@ namespace cowui
             system_model.activate(1);
             return true;
         }
+        else if(!std::strcmp(name, "notepad"))
+        {
+            if(!show(ScreenId::Utilities)) return false;
+            utilities_model.activate(0);
+            return true;
+        }
+        else if(!std::strcmp(name, "scratchpad"))
+        {
+            if(!show(ScreenId::Utilities)) return false;
+            utilities_model.activate(1);
+            return true;
+        }
+        else if(!std::strcmp(name, "pastebuffer"))
+        {
+            if(!show(ScreenId::Utilities)) return false;
+            utilities_model.activate(2);
+            return true;
+        }
         else if(!std::strcmp(name, "gamemode") ||
                 !std::strcmp(name, "maps") ||
                 !std::strcmp(name, "capturemaps") ||
@@ -1438,6 +1480,21 @@ namespace cowui
     void showabout()
     {
         if(show(ScreenId::System)) system_model.activate(1);
+    }
+
+    void showutilities()
+    {
+        if(show(ScreenId::Utilities)) utilities_model.activate(0);
+    }
+
+    void showscratchpad()
+    {
+        if(show(ScreenId::Utilities)) utilities_model.activate(1);
+    }
+
+    void showpastebuffer()
+    {
+        if(show(ScreenId::Utilities)) utilities_model.activate(2);
     }
 
     void showdemos()

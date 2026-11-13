@@ -2,7 +2,7 @@ CXX ?= clang++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra
 
 .PHONY: all run clean rmlui
-all: demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
+all: demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests utilities_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
 
 RMLUI_BUILD ?= ../build/rmlui-x86_64-linux-Release
 
@@ -38,6 +38,9 @@ system_ui_tests: system_ui_tests.cpp ../data/cowbraten/ui/default/screens/system
 scoreboard_ui_tests: scoreboard_ui_tests.cpp ../data/cowbraten/ui/default/screens/scoreboard.rml ../data/cowbraten/ui/default/styles/scoreboard.rcss ../src/cowbraten/ui/rml_scoreboard.cpp ../src/cowbraten/ui/sauer_scoreboard_bridge.cpp
 	$(CXX) $(CXXFLAGS) -o $@ scoreboard_ui_tests.cpp
 
+utilities_ui_tests: utilities_ui_tests.cpp ../data/cowbraten/ui/default/screens/utilities.rml ../data/cowbraten/ui/default/styles/utilities.rcss ../src/cowbraten/ui/rml_utilities.cpp ../src/cowbraten/ui/sauer_utility_bridge.cpp
+	$(CXX) $(CXXFLAGS) -o $@ utilities_ui_tests.cpp
+
 chat_ui_tests: chat_ui_tests.cpp ../data/cowbraten/ui/default/screens/chat.rml ../data/cowbraten/ui/default/styles/chat.rcss ../src/cowbraten/ui/rml_chat.cpp ../src/cowbraten/ui/sauer_chat_bridge.cpp
 	$(CXX) $(CXXFLAGS) -o $@ chat_ui_tests.cpp
 
@@ -56,10 +59,11 @@ run: all
 	./game_setup_ui_tests
 	./system_ui_tests
 	./scoreboard_ui_tests
+	./utilities_ui_tests
 	./chat_ui_tests
 	./console_ui_tests
 	./console_text_tests
 	./ui_update_tests
 
 clean:
-	$(RM) demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
+	$(RM) demo_library_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests utilities_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests

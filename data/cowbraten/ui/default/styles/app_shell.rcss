@@ -173,7 +173,8 @@ body
 .app-page-demos .app-nav-demos,
 .app-page-profile .app-nav-profile,
 .app-page-settings .app-nav-settings,
-.app-page-system .app-nav-system
+.app-page-system .app-nav-system,
+.app-page-utilities .app-nav-utilities
 {
     background-color: var(--color-surface-2);
     border-left-color: var(--color-primary);
@@ -185,7 +186,8 @@ body
 .app-page-demos .app-nav-demos .app-nav-icon,
 .app-page-profile .app-nav-profile .app-nav-icon,
 .app-page-settings .app-nav-settings .app-nav-icon,
-.app-page-system .app-nav-system .app-nav-icon
+.app-page-system .app-nav-system .app-nav-icon,
+.app-page-utilities .app-nav-utilities .app-nav-icon
 {
     image-color: var(--color-primary);
 }

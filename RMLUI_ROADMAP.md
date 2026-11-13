@@ -27,6 +27,7 @@ This is the recommended shared development baseline. The `cow-v1.0.1-rc.3` tag r
 - Native game setup for installed maps and modes, server voting, local bot matches, and campaign missions.
 - Native Administration and About screens, including master mode and player moderation controls.
 - Native held-key gameplay scoreboard with team groups, spectators, configured columns, and safe legacy fallback.
+- Native Notepad, Scratchpad, and Paste Buffer utilities with guarded relative-file access, clipboard actions, and explicit-buffer execution.
 - Server browser backed by the existing master list, resolver, ping, and connection paths.
 - Server text filtering, empty-server and compatibility filters, sortable columns, stable selection, refresh, and connection.
 - In-game public and team chat presentation backed by Sauer's existing editor, completion, history, and network send paths.
@@ -105,7 +106,6 @@ The smoke test proves integration and basic rendering. It does not replace inter
 
 ### P2: migrate the remaining legacy surface
 
-- Notepad, scratchpad, paste buffer, and other utility screens according to actual user demand.
 - Editing menus and entity tools as a separate project. Their dynamic CubeScript behavior and large surface make them a poor first target for generalizing the player-facing API.
 
 Each migration should retain the existing legacy route until the replacement covers its semantic behavior and has passed an interactive handoff test.
