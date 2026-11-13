@@ -1,5 +1,6 @@
 // creation of scoreboard
 #include "game.h"
+#include "ui/ui.h"
 
 namespace game
 {
@@ -487,7 +488,8 @@ namespace game
         }
         extern int showscoreboard;
         showscoreboard = on ? 1 : 0;
-        scoreboard.show(on);
+        const bool native_scoreboard = cowui::setscoreboardvisible(on);
+        scoreboard.show(on && !native_scoreboard);
     }
     ICOMMAND(showscores, "D", (int *down), showscores(*down!=0));
     VARFN(scoreboard, showscoreboard, 0, 0, 1, showscores(showscoreboard!=0));
@@ -578,4 +580,3 @@ namespace game
         pophudmatrix();
     }
 }
-

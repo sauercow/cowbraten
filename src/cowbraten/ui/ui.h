@@ -79,6 +79,9 @@ namespace cowui
     // The fullscreen demo overlay draws the legacy cursor texture itself so
     // it remains visible above RmlUi without also drawing the engine copy.
     bool ownsplaybackcursor();
+    // Returns false when RmlUi is unavailable so gameplay can retain the
+    // legacy g3d scoreboard as a safe fallback.
+    bool setscoreboardvisible(bool value);
     void consoleline(int type, const char *text);
     void clearconsole();
     int filterconsole(int filter);

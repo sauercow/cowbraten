@@ -5,6 +5,7 @@
 #include "rml_render.h"
 #include "rml_file.h"
 #include "rml_server_browser.h"
+#include "rml_scoreboard.h"
 #include "rml_demo_manager.h"
 #include "rml_demo_player.h"
 #include "rml_game_menu.h"
@@ -42,6 +43,7 @@ namespace cowui
     static RmlChat chat_model;
     static RmlConsole console_model;
     static RmlServerBrowser server_browser;
+    static RmlScoreboard scoreboard_model;
     static RmlDemoManager demo_manager;
     static RmlDemoPlayer demo_player;
     static RmlGameMenu game_menu_model;
@@ -763,6 +765,7 @@ namespace cowui
            !chat_model.init(context) ||
            !console_model.init(context) ||
            !server_browser.init(context, action_router) ||
+           !scoreboard_model.init(context, action_router) ||
            !demo_manager.init(context, action_router) ||
            !demo_player.init(context, action_router) ||
            !game_menu_model.init(context, action_router) ||
@@ -778,6 +781,7 @@ namespace cowui
             game_menu_model.shutdown(context);
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
+            scoreboard_model.shutdown(context);
             server_browser.shutdown(context);
             console_model.shutdown(context);
             chat_model.shutdown(context);
@@ -817,6 +821,7 @@ namespace cowui
             game_menu_model.shutdown(context);
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
+            scoreboard_model.shutdown(context);
             server_browser.shutdown(context);
             console_model.shutdown(context);
             chat_model.shutdown(context);
@@ -1165,6 +1170,7 @@ namespace cowui
         if(active_screen)
             syncconsoleownership();
 
+        scoreboard_model.update(active_screen != nullptr);
         demo_player.update(active_screen != nullptr);
         chat_model.update(
             active_screen != nullptr,
@@ -1193,6 +1199,7 @@ namespace cowui
         }
 
         if(!demo_player.visible() &&
+           !scoreboard_model.visible() &&
            !chat_model.visible() &&
            !console_model.visible() &&
            (!active_screen || legacy_console_presentation))
@@ -1222,6 +1229,7 @@ namespace cowui
         if(!initialized ||
            !context ||
            (!active_screen &&
+            !scoreboard_model.visible() &&
             !demo_player.visible() &&
             !chat_model.visible() &&
             !console_model.visible()) ||
@@ -1524,6 +1532,13 @@ namespace cowui
     {
         return initialized && demo_player.visible() &&
             demo_player.receivesinput();
+    }
+
+    bool setscoreboardvisible(bool value)
+    {
+        if(!initialized || !context) return false;
+        scoreboard_model.request(value);
+        return true;
     }
 
     void consoleline(int type, const char *text)

@@ -537,6 +537,14 @@ selected. `scoreboard2d`, `showservinfo`, `showspectators`, `highlightscore`,
 and `trailcolors` names use the same category-and-anchor compatibility path,
 so existing binds reach the exact typed control group without a legacy GUI.
 
+The held gameplay scoreboard is also native RmlUi. `showscores()` first asks
+the UI overlay to present; if RmlUi is unavailable it retains the original
+`g3d_gui` scoreboard as a startup-safe fallback. The typed scoreboard bridge
+reuses `groupplayers()`, its sorted groups and spectator list, the effective
+column idents, and Cowbraten's weapon-stat helpers. Holding the key updates the
+overlay live without taking gameplay input. Opening a menu temporarily hides
+the overlay while preserving held-key state, and releasing the key closes it.
+
 The first Chat slice preserves Sauer's actual console-backed message model.
 Public and team chat enter the shared console buffer as the distinct
 `CON_CHAT` and `CON_TEAMCHAT` message types. Explicit typed writers toggle

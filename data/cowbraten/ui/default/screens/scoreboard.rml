@@ -1,0 +1,59 @@
+<rml>
+<head>
+    <title>Scoreboard</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/scoreboard.rcss" />
+</head>
+<body data-model="live_scoreboard">
+    <div class="scoreboard-overlay">
+        <div class="scoreboard-panel">
+            <div class="scoreboard-header">
+                <div class="scoreboard-identity">
+                    <div class="scoreboard-server">{{ server_name }}</div>
+                    <div class="scoreboard-match">{{ match_line }}</div>
+                </div>
+                <div class="scoreboard-time">{{ time_text }}</div>
+            </div>
+
+            <div class="scoreboard-scroll">
+                <div class="scoreboard-columns scoreboard-row">
+                    <span class="score-name"><strong>Player</strong></span>
+                    <span class="score-stat" data-if="show_flags">Flags</span>
+                    <span class="score-stat" data-if="show_frags">Frags</span>
+                    <span class="score-stat" data-if="show_deaths">Deaths</span>
+                    <span class="score-stat" data-if="show_suicides">Suis</span>
+                    <span class="score-stat" data-if="show_kpd">KPD</span>
+                    <span class="score-stat" data-if="show_accuracy">Acc</span>
+                    <span class="score-stat" data-if="show_damage">Dmg</span>
+                    <span class="score-stat" data-if="show_damage_received">DR</span>
+                    <span class="score-stat" data-if="show_ping">Ping</span>
+                    <span class="score-stat" data-if="show_pj">PJ</span>
+                    <span class="score-stat score-cn" data-if="show_client_num">CN</span>
+                </div>
+                <div class="scoreboard-repeat" data-for="player : rows">
+                    <div class="scoreboard-group" data-if="player.group_first">{{ player.group_title }}</div>
+                    <div class="scoreboard-row scoreboard-player"
+                        data-class-is-local="player.local"
+                        data-class-is-spectator="player.spectator"
+                        data-class-is-dead="player.dead">
+                        <span class="score-name"><strong>{{ player.name }}</strong><small data-if="player.role != ''">{{ player.role }}</small></span>
+                        <span class="score-stat" data-if="show_flags">{{ player.flags }}</span>
+                        <span class="score-stat" data-if="show_frags">{{ player.frags }}</span>
+                        <span class="score-stat" data-if="show_deaths">{{ player.deaths }}</span>
+                        <span class="score-stat" data-if="show_suicides">{{ player.suicides }}</span>
+                        <span class="score-stat" data-if="show_kpd">{{ player.kpd }}</span>
+                        <span class="score-stat" data-if="show_accuracy">{{ player.accuracy }}</span>
+                        <span class="score-stat" data-if="show_damage">{{ player.damage }}</span>
+                        <span class="score-stat" data-if="show_damage_received">{{ player.damage_received }}</span>
+                        <span class="score-stat" data-if="show_ping">{{ player.ping }}</span>
+                        <span class="score-stat" data-if="show_pj">{{ player.pj }}</span>
+                        <span class="score-stat score-cn" data-if="show_client_num">{{ player.client_num }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scoreboard-footer"><span>Hold scoreboard key</span><span>Release to return</span></div>
+        </div>
+    </div>
+</body>
+</rml>
