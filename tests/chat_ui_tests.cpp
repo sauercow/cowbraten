@@ -35,10 +35,15 @@ int main()
     const std::string console = readfile("../src/engine/console.cpp");
 
     check(rml.find("data-model=\"chat\"") != std::string::npos &&
-          rml.find("message : console_messages") != std::string::npos &&
-          rml.find("message : messages") != std::string::npos &&
+          rml.find("class=\"console-message-repeat\" data-for=\"message : console_messages\"") != std::string::npos &&
+          rml.find("class=\"chat-message-repeat\" data-for=\"message : messages\"") != std::string::npos &&
           rml.find("data-rml=\"message.rml\"") != std::string::npos,
         "chat overlay binds passive console and mini-console lists");
+    check(rml.find("class=\"console-message\" data-for=") == std::string::npos &&
+          rml.find("class=\"chat-message\" data-for=") == std::string::npos &&
+          style.find(".console-message-repeat,") != std::string::npos &&
+          style.find(".chat-message-repeat") != std::string::npos,
+        "repeat nodes isolate structural updates from indexed message bindings");
     check(rml.find("input_before") != std::string::npos &&
           rml.find("chat-composer-caret") != std::string::npos &&
           rml.find("input_after") != std::string::npos,

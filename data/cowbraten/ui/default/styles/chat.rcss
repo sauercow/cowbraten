@@ -28,6 +28,14 @@ body
     white-space: pre-wrap;
 }
 
+.console-message-repeat,
+.chat-message-repeat
+{
+    display: block;
+    flex: none;
+    width: 100%;
+}
+
 .console-message.is-warning { color: var(--color-warning); }
 .console-message.is-error { color: var(--color-error); }
 .console-message.is-echo { color: #B7C7D9; }
