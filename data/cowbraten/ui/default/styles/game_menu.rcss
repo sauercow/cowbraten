@@ -388,6 +388,7 @@ body
 .game-menu-quick-card
 {
     flex: 1;
+    overflow-y: auto;
 }
 
 .game-menu-card-title
@@ -612,7 +613,7 @@ body
     min-height: 67dp;
     margin: 0 14dp;
     padding: 10dp 0;
-    flex: 1;
+    flex: none;
     align-items: center;
     border-bottom-width: 1dp;
     border-bottom-color: #3A434D;
@@ -766,6 +767,74 @@ body
     text-align: center;
 }
 
+.game-menu-master-row
+{
+    display: block;
+    min-height: 82dp;
+    padding-top: 7dp;
+    padding-bottom: 7dp;
+    flex: none;
+}
+
+.game-menu-master-heading
+{
+    display: flex;
+    min-width: 0;
+    align-items: center;
+}
+
+.game-menu-master-modes
+{
+    display: flex;
+    height: 27dp;
+    margin-top: 5dp;
+    margin-left: 55dp;
+    gap: 5dp;
+}
+
+.game-menu-master-modes button
+{
+    box-sizing: border-box;
+    min-width: 0;
+    height: 27dp;
+    flex: 1;
+    background-color: #181F26;
+    border-width: 1dp;
+    border-color: #46515C;
+    border-radius: 3dp;
+    color: var(--color-text-muted);
+    font-family: Lato;
+    font-size: 8dp;
+    letter-spacing: 1dp;
+    text-transform: uppercase;
+    tab-index: auto;
+}
+
+.game-menu-master-modes button:hover,
+.game-menu-master-modes button:focus-visible
+{
+    border-color: var(--color-primary);
+    color: var(--color-text);
+}
+
+.game-menu-master-modes button.is-selected
+{
+    background-color: #0759D9;
+    border-color: #1685FF;
+    color: #FFFFFF;
+}
+
+.game-menu-master-modes button:disabled
+{
+    opacity: 0.72;
+}
+
+.game-menu-release-button:hover,
+.game-menu-release-button:focus-visible
+{
+    border-color: var(--color-warning);
+}
+
 .game-menu-footer
 {
     box-sizing: border-box;
@@ -887,5 +956,19 @@ body
     .game-menu-action
     {
         min-height: 47dp;
+    }
+
+    .game-menu-quick-row
+    {
+        min-height: 45dp;
+        padding-top: 5dp;
+        padding-bottom: 5dp;
+    }
+
+    .game-menu-master-row
+    {
+        min-height: 82dp;
+        padding-top: 7dp;
+        padding-bottom: 7dp;
     }
 }

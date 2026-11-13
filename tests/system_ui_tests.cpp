@@ -76,6 +76,12 @@ int main()
         "About retains engine, interface, contributor, and website credits");
     check(shell.find("onclick=\"navigation.about\"") != std::string::npos,
         "shared shell exposes About");
+    check(style.find(".system-tab") != std::string::npos &&
+          style.find("min-width: 160dp;") != std::string::npos &&
+          style.find("line-height: 32dp;") != std::string::npos &&
+          style.find("text-align: center;") != std::string::npos &&
+          style.find("background-color: #2F7CCB35;") != std::string::npos,
+        "System sections render as aligned segmented buttons");
 
     const char *routes[] = { "crosshair", "soundpacks", "trailcolors",
         "ammobar", "gameclock", "hudscore", "scoreboard",

@@ -1,5 +1,6 @@
 #include "rml_game_menu.h"
 
+#include "admin_api.h"
 #include "rml_action.h"
 #include "settings_api.h"
 #include "ui.h"
@@ -44,12 +45,19 @@ namespace cowui
             constructor.Bind("good_team", &good_team) &&
             constructor.Bind("evil_team", &evil_team) &&
             constructor.Bind("actions_available", &actions_available) &&
+            constructor.Bind("admin_connected", &admin_connected) &&
+            constructor.Bind("local_master", &local_master) &&
+            constructor.Bind("master_mode", &master_mode) &&
+            constructor.BindEventCallback("select_master_mode",
+                &RmlGameMenu::setmastermode, this) &&
             router.registeraction("game.resume", resumeaction) &&
             router.registeraction("game.team.good", goodteamaction) &&
             router.registeraction("game.team.evil", evilteamaction) &&
             router.registeraction("game.team.toggle", toggleteamaction) &&
             router.registeraction("game.spectator.toggle", spectatoraction) &&
             router.registeraction("game.music.toggle", musicvolumeaction) &&
+            router.registeraction("game.master.claim", claimmasteraction) &&
+            router.registeraction("game.master.relinquish", relinquishmasteraction) &&
             router.registeraction("game.more", moreaction) &&
             router.registeraction("game.disconnect", disconnectaction);
 
@@ -157,12 +165,29 @@ namespace cowui
         }
     }
 
+    void RmlGameMenu::syncadmin()
+    {
+        admin::State state;
+        if(!admin::readstate(state))
+            return;
+
+#define SYNC_ADMIN_VALUE(member, value) \
+        do { if(member != (value)) { member = (value); model.DirtyVariable(#member); } } while(0)
+
+        SYNC_ADMIN_VALUE(admin_connected, state.connected);
+        SYNC_ADMIN_VALUE(local_master, state.local_master);
+        SYNC_ADMIN_VALUE(master_mode, state.master_mode);
+
+#undef SYNC_ADMIN_VALUE
+    }
+
     void RmlGameMenu::update()
     {
         gamemenu::State state;
         if(gamemenu::readstate(state))
             sync(state);
         syncmusic();
+        syncadmin();
     }
 
     void RmlGameMenu::resumeaction(Rml::Event &event)
@@ -208,6 +233,35 @@ namespace cowui
 
         settings::writemusicvolume(instance->music_enabled ? 0 : 125);
         instance->syncmusic();
+    }
+
+    void RmlGameMenu::setmastermode(Rml::DataModelHandle,
+        Rml::Event &event, const Rml::VariantList &arguments)
+    {
+        if(arguments.size() == 1)
+            admin::setmastermode(arguments[0].Get<int>(0));
+        syncadmin();
+        event.StopPropagation();
+    }
+
+    void RmlGameMenu::claimmasteraction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            admin::setlocalmaster(true);
+            instance->syncadmin();
+        }
+        event.StopPropagation();
+    }
+
+    void RmlGameMenu::relinquishmasteraction(Rml::Event &event)
+    {
+        if(instance)
+        {
+            admin::setlocalmaster(false);
+            instance->syncadmin();
+        }
+        event.StopPropagation();
     }
 
     void RmlGameMenu::moreaction(Rml::Event &event)

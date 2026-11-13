@@ -64,10 +64,26 @@ int main()
           legacy.find("scoreboard.show(on && !native_scoreboard)") !=
               std::string::npos,
         "showscores uses RmlUi with a safe g3d fallback");
-    check(style.find("background-color: rgba(4, 7, 9, 165)") !=
+    check(style.find("background-color: rgba(4, 7, 9, 72)") !=
               std::string::npos &&
           style.find(".scoreboard-player.is-local") != std::string::npos,
-        "overlay preserves gameplay context and highlights the local player");
+        "light overlay preserves gameplay context and highlights the local player");
+    check(rml.find("scoreboard-kicker") != std::string::npos &&
+          rml.find("cb-ico-clock") != std::string::npos &&
+          rml.find("cb-ico-crosshair") != std::string::npos &&
+          rml.find("scoreboard-footer-hint") != std::string::npos &&
+          style.find(".scoreboard-header-rule") != std::string::npos,
+        "scoreboard matches the compact editorial overlay composition");
+    check(style.find(".score-column") != std::string::npos &&
+          style.find("justify-content: center") != std::string::npos &&
+          style.find(".scoreboard-columns .score-stat") != std::string::npos &&
+          style.find("text-align: center") != std::string::npos,
+        "scoreboard column labels center icons and text independently of values");
+    check(rml.find("score-column score-frags") != std::string::npos &&
+          rml.find("score-column score-deaths") != std::string::npos &&
+          style.find(".score-frags") != std::string::npos &&
+          style.find(".score-deaths") != std::string::npos,
+        "long Frags and Deaths labels receive dedicated wider columns");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

@@ -104,6 +104,12 @@ int main()
     check(style.find("slidertrack") != std::string::npos &&
           style.find("editor-card-full") != std::string::npos,
         "editor ranges and full-width catalogs have explicit layout");
+    check(style.find(".editor-tabs button") != std::string::npos &&
+          style.find("min-width: 104dp;") != std::string::npos &&
+          style.find("line-height: 32dp;") != std::string::npos &&
+          style.find("text-align: center;") != std::string::npos &&
+          style.find("background-color: #2F7CCB35;") != std::string::npos,
+        "editor sections render as aligned segmented buttons");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

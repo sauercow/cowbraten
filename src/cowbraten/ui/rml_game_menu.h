@@ -27,6 +27,9 @@ namespace cowui
     private:
         void sync(const gamemenu::State &state);
         void syncmusic();
+        void syncadmin();
+        void setmastermode(Rml::DataModelHandle, Rml::Event &,
+            const Rml::VariantList &);
 
         static void resumeaction(Rml::Event &event);
         static void goodteamaction(Rml::Event &event);
@@ -34,6 +37,8 @@ namespace cowui
         static void toggleteamaction(Rml::Event &event);
         static void spectatoraction(Rml::Event &event);
         static void musicvolumeaction(Rml::Event &event);
+        static void claimmasteraction(Rml::Event &event);
+        static void relinquishmasteraction(Rml::Event &event);
         static void moreaction(Rml::Event &event);
         static void disconnectaction(Rml::Event &event);
 
@@ -56,6 +61,9 @@ namespace cowui
         bool good_team = false;
         bool evil_team = false;
         bool actions_available = false;
+        bool admin_connected = false;
+        bool local_master = false;
+        int master_mode = 0;
 
         static RmlGameMenu *instance;
     };

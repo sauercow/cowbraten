@@ -16,25 +16,43 @@
 .utilities-tabs
 {
     display: flex;
-    height: 42dp;
+    height: 38dp;
     flex: none;
-    border-bottom-width: 1dp;
-    border-bottom-color: var(--color-border);
+    align-items: center;
+    gap: 8dp;
 }
 .utilities-tabs button
 {
-    height: 42dp;
-    padding: 0 22dp;
-    background-color: transparent;
-    border-width: 0;
-    border-bottom-width: 2dp;
-    border-bottom-color: transparent;
+    box-sizing: border-box;
+    display: block;
+    min-width: 136dp;
+    height: 34dp;
+    padding: 0 16dp;
+    background-color: var(--color-surface-2);
+    border-width: 1dp;
+    border-color: var(--color-border);
+    border-radius: var(--radius-control);
     color: var(--color-text-muted);
+    font-family: Lato;
     font-size: 10dp;
+    line-height: 32dp;
     letter-spacing: 1dp;
+    text-align: center;
     text-transform: uppercase;
 }
-.utilities-tabs button.is-selected { border-bottom-color: var(--color-primary); color: var(--color-primary); }
+.utilities-tabs button:hover,
+.utilities-tabs button:focus-visible
+{
+    background-color: var(--color-background);
+    border-color: var(--color-primary-hover);
+    color: var(--color-text);
+}
+.utilities-tabs button.is-selected
+{
+    background-color: #2F7CCB35;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
 .utility-workspace
 {
     display: flex;

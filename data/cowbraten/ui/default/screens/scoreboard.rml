@@ -2,6 +2,7 @@
 <head>
     <title>Scoreboard</title>
     <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../icons/icons.rcss" />
     <link type="text/rcss" href="../styles/scoreboard.rcss" />
 </head>
 <body data-model="live_scoreboard">
@@ -9,26 +10,31 @@
         <div class="scoreboard-panel">
             <div class="scoreboard-header">
                 <div class="scoreboard-identity">
+                    <div class="scoreboard-kicker">Match&nbsp;&nbsp;/&nbsp;&nbsp;Scoreboard</div>
                     <div class="scoreboard-server">{{ server_name }}</div>
                     <div class="scoreboard-match">{{ match_line }}</div>
                 </div>
-                <div class="scoreboard-time">{{ time_text }}</div>
+                <div class="scoreboard-time">
+                    <span class="cb-ico cb-ico-clock cb-ico--blue"></span>
+                    <strong>{{ time_text }}</strong>
+                </div>
+                <div class="scoreboard-header-rule"><span></span></div>
             </div>
 
             <div class="scoreboard-scroll">
                 <div class="scoreboard-columns scoreboard-row">
-                    <span class="score-name"><strong>Player</strong></span>
-                    <span class="score-stat" data-if="show_flags">Flags</span>
-                    <span class="score-stat" data-if="show_frags">Frags</span>
-                    <span class="score-stat" data-if="show_deaths">Deaths</span>
-                    <span class="score-stat" data-if="show_suicides">Suis</span>
-                    <span class="score-stat" data-if="show_kpd">KPD</span>
-                    <span class="score-stat" data-if="show_accuracy">Acc</span>
-                    <span class="score-stat" data-if="show_damage">Dmg</span>
-                    <span class="score-stat" data-if="show_damage_received">DR</span>
-                    <span class="score-stat" data-if="show_ping">Ping</span>
-                    <span class="score-stat" data-if="show_pj">PJ</span>
-                    <span class="score-stat score-cn" data-if="show_client_num">CN</span>
+                    <span class="score-name score-column-name"><i class="cb-ico cb-ico-user cb-ico--md"></i><strong>Player</strong></span>
+                    <span class="score-stat score-column" data-if="show_flags"><i class="cb-ico cb-ico-flag cb-ico--sm"></i><b>Flags</b></span>
+                    <span class="score-stat score-column score-frags" data-if="show_frags"><i class="cb-ico cb-ico-crosshair cb-ico--sm"></i><b>Frags</b></span>
+                    <span class="score-stat score-column score-deaths" data-if="show_deaths"><i class="cb-ico cb-ico-skull cb-ico--sm"></i><b>Deaths</b></span>
+                    <span class="score-stat score-column" data-if="show_suicides"><i class="cb-ico cb-ico-ghost cb-ico--sm"></i><b>Suis</b></span>
+                    <span class="score-stat score-column" data-if="show_kpd"><i class="cb-ico cb-ico-activity cb-ico--sm"></i><b>KPD</b></span>
+                    <span class="score-stat score-column" data-if="show_accuracy"><i class="cb-ico cb-ico-target cb-ico--sm"></i><b>Acc</b></span>
+                    <span class="score-stat score-column" data-if="show_damage"><i class="cb-ico cb-ico-zap cb-ico--sm"></i><b>Dmg</b></span>
+                    <span class="score-stat score-column" data-if="show_damage_received"><i class="cb-ico cb-ico-shield cb-ico--sm"></i><b>DR</b></span>
+                    <span class="score-stat score-column" data-if="show_ping"><i class="cb-ico cb-ico-signal cb-ico--sm"></i><b>Ping</b></span>
+                    <span class="score-stat score-column" data-if="show_pj"><i class="cb-ico cb-ico-activity cb-ico--sm"></i><b>PJ</b></span>
+                    <span class="score-stat score-column score-cn" data-if="show_client_num"><i class="cb-ico cb-ico-network cb-ico--sm"></i><b>CN</b></span>
                 </div>
                 <div class="scoreboard-repeat" data-for="player : rows">
                     <div class="scoreboard-group" data-if="player.group_first">{{ player.group_title }}</div>
@@ -36,10 +42,15 @@
                         data-class-is-local="player.local"
                         data-class-is-spectator="player.spectator"
                         data-class-is-dead="player.dead">
-                        <span class="score-name"><strong>{{ player.name }}</strong><small data-if="player.role != ''">{{ player.role }}</small></span>
+                        <span class="score-name">
+                            <i class="score-player-icon cb-ico cb-ico-user-round cb-ico--lg"></i>
+                            <i class="score-local-dot" data-if="player.local"></i>
+                            <strong>{{ player.name }}</strong>
+                            <small data-if="player.role != ''">{{ player.role }}</small>
+                        </span>
                         <span class="score-stat" data-if="show_flags">{{ player.flags }}</span>
-                        <span class="score-stat" data-if="show_frags">{{ player.frags }}</span>
-                        <span class="score-stat" data-if="show_deaths">{{ player.deaths }}</span>
+                        <span class="score-stat score-frags" data-if="show_frags">{{ player.frags }}</span>
+                        <span class="score-stat score-deaths" data-if="show_deaths">{{ player.deaths }}</span>
                         <span class="score-stat" data-if="show_suicides">{{ player.suicides }}</span>
                         <span class="score-stat" data-if="show_kpd">{{ player.kpd }}</span>
                         <span class="score-stat" data-if="show_accuracy">{{ player.accuracy }}</span>
@@ -52,7 +63,10 @@
                 </div>
             </div>
 
-            <div class="scoreboard-footer"><span>Hold scoreboard key</span><span>Release to return</span></div>
+            <div class="scoreboard-footer">
+                <span class="scoreboard-footer-hint"><b>TAB</b><strong>Hold scoreboard key</strong></span>
+                <span class="scoreboard-footer-hint"><i class="cb-ico cb-ico-arrow-left cb-ico--md"></i><strong>Release to return</strong></span>
+            </div>
         </div>
     </div>
 </body>

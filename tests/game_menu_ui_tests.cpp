@@ -63,6 +63,17 @@ int main()
           screen.find("game.team.good") != std::string::npos &&
           screen.find("game.team.evil") != std::string::npos,
         "team controls only appear for supported team matches");
+    check(screen.find("onclick=\"game.master.claim\"") != std::string::npos &&
+          screen.find("onclick=\"game.master.relinquish\"") != std::string::npos &&
+          screen.find("select_master_mode(0)") != std::string::npos &&
+          screen.find("select_master_mode(3)") != std::string::npos &&
+          screen.find("data-class-is-selected=\"master_mode == 0\"") != std::string::npos,
+        "in-game quick actions expose master ownership and server access modes");
+    check(implementation.find("admin::readstate") != std::string::npos &&
+          implementation.find("admin::setlocalmaster(true)") != std::string::npos &&
+          implementation.find("admin::setlocalmaster(false)") != std::string::npos &&
+          implementation.find("admin::setmastermode") != std::string::npos,
+        "master quick actions use the typed native administration API");
     check(screen.find("map_image") != std::string::npos &&
           screen.find("server_address") != std::string::npos &&
           screen.find("time_remaining") != std::string::npos &&
@@ -76,6 +87,10 @@ int main()
     check(style.find("@media (max-width: 1040dp)") != std::string::npos &&
           style.find("overflow-y: auto") != std::string::npos,
         "dashboard stacks and scrolls on compact resolutions");
+    check(style.find(".game-menu-master-modes") != std::string::npos &&
+          style.find(".game-menu-quick-card") != std::string::npos &&
+          style.find("overflow-y: auto") != std::string::npos,
+        "compact master controls remain reachable when quick actions overflow");
     check(style.find(":focus-visible") != std::string::npos,
         "match controls expose keyboard focus states");
     check(input_bridge.find("isconnected(true, true)") != std::string::npos,

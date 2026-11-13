@@ -92,7 +92,7 @@
                         <button class="game-menu-action" onclick="navigation.admin">
                             <span class="game-menu-action-index">08</span>
                             <span class="game-menu-action-icon cb-ico cb-ico-shield"></span>
-                            <strong>Administration / about</strong>
+                            <strong>Players / about</strong>
                             <span class="game-menu-action-key">A</span>
                         </button>
 
@@ -192,13 +192,34 @@
                                 <button class="game-menu-inline-button" onclick="navigation.profile">Change</button>
                             </div>
 
-                            <div class="game-menu-quick-row">
-                                <span class="game-menu-quick-icon cb-ico cb-ico-settings"></span>
-                                <div class="game-menu-quick-copy">
-                                    <strong>Match settings</strong>
-                                    <small>Adjust video, audio, controls and HUD.</small>
+                            <div class="game-menu-quick-row game-menu-master-row" data-if="admin_connected">
+                                <div class="game-menu-master-heading">
+                                    <span class="game-menu-quick-icon cb-ico cb-ico-shield"></span>
+                                    <div class="game-menu-quick-copy">
+                                        <strong>Server access</strong>
+                                        <small>{{ local_master ? 'Master privileges active.' : 'Claim master to change access.' }}</small>
+                                    </div>
+                                    <button class="game-menu-inline-button"
+                                        data-if="!local_master"
+                                        onclick="game.master.claim">Claim</button>
+                                    <button class="game-menu-inline-button game-menu-release-button"
+                                        data-if="local_master"
+                                        onclick="game.master.relinquish">Release</button>
                                 </div>
-                                <button class="game-menu-inline-button" onclick="navigation.settings">Open</button>
+                                <div class="game-menu-master-modes">
+                                    <button data-class-is-selected="master_mode == 0"
+                                        data-attrif-disabled="!local_master"
+                                        data-event-click="select_master_mode(0)">Open</button>
+                                    <button data-class-is-selected="master_mode == 1"
+                                        data-attrif-disabled="!local_master"
+                                        data-event-click="select_master_mode(1)">Veto</button>
+                                    <button data-class-is-selected="master_mode == 2"
+                                        data-attrif-disabled="!local_master"
+                                        data-event-click="select_master_mode(2)">Locked</button>
+                                    <button data-class-is-selected="master_mode == 3"
+                                        data-attrif-disabled="!local_master"
+                                        data-event-click="select_master_mode(3)">Private</button>
+                                </div>
                             </div>
                         </div>
                     </div>

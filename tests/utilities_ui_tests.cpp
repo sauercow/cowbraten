@@ -83,6 +83,12 @@ int main()
         "all legacy utility routes select their exact native tab");
     check(shell.find("onclick=\"navigation.utilities\"") != std::string::npos,
         "shared shell exposes text utilities");
+    check(style.find(".utilities-tabs button") != std::string::npos &&
+          style.find("min-width: 136dp;") != std::string::npos &&
+          style.find("line-height: 32dp;") != std::string::npos &&
+          style.find("text-align: center;") != std::string::npos &&
+          style.find("background-color: #2F7CCB35;") != std::string::npos,
+        "utility sections render as aligned segmented buttons");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

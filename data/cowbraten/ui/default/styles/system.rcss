@@ -20,24 +20,41 @@
 {
     display: flex;
     flex: none;
-    height: 42dp;
-    border-bottom-width: 1dp;
-    border-bottom-color: var(--color-border);
+    height: 38dp;
+    align-items: center;
+    gap: 8dp;
 }
 .system-tab
 {
-    height: 42dp;
-    padding: 0 22dp;
-    background-color: transparent;
-    border-width: 0;
-    border-bottom-width: 2dp;
-    border-bottom-color: transparent;
+    box-sizing: border-box;
+    display: block;
+    min-width: 160dp;
+    height: 34dp;
+    padding: 0 16dp;
+    background-color: var(--color-surface-2);
+    border-width: 1dp;
+    border-color: var(--color-border);
+    border-radius: var(--radius-control);
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-family: Lato;
+    font-size: 10dp;
+    line-height: 32dp;
     letter-spacing: 1dp;
+    text-align: center;
     text-transform: uppercase;
 }
-.system-tab.is-selected { border-bottom-color: var(--color-primary); color: var(--color-primary); }
+.system-tab:hover,.system-tab:focus-visible
+{
+    background-color: var(--color-background);
+    border-color: var(--color-primary-hover);
+    color: var(--color-text);
+}
+.system-tab.is-selected
+{
+    background-color: #2F7CCB35;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
 
 .system-admin, .system-about
 {
