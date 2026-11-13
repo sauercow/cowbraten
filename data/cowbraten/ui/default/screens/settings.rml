@@ -302,7 +302,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section settings-subsection-panel settings-trail-colors panel">
+                        <div id="settings-trailcolors" class="settings-section settings-compact-section settings-subsection-panel settings-trail-colors panel">
                             <div class="settings-display-row settings-color-weapon settings-color-weapon-first">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Shotgun</div>
@@ -1163,7 +1163,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section panel">
+                        <div id="settings-hudscore" class="settings-section settings-compact-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Score Overlay</div>
@@ -1339,7 +1339,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section panel">
+                        <div id="settings-gameclock" class="settings-section settings-compact-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Game Clock</div>
@@ -1489,7 +1489,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section panel">
+                        <div id="settings-scoreboard" class="settings-section settings-compact-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">HUD / Scoreboard</div>
@@ -1705,7 +1705,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section panel">
+                        <div id="settings-ammobar" class="settings-section settings-compact-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Ammobar</div>
@@ -1969,7 +1969,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section panel">
+                        <div id="settings-fragmessages" class="settings-section settings-compact-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Frag &amp; Streak Messages</div>
@@ -3632,7 +3632,7 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-audio-section panel">
+                        <div id="settings-soundpacks" class="settings-section settings-audio-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Sound Pack</div>
@@ -4013,7 +4013,7 @@
                         </div>
                     </div>
 
-                    <div class="settings-page" data-if="category_crosshair">
+                    <div id="settings-crosshair" class="settings-page" data-if="category_crosshair">
                         <div class="settings-stage-header">
                             <div class="eyebrow settings-eyebrow">HUD / Reticle</div>
                             <div class="settings-stage-title">Crosshair</div>

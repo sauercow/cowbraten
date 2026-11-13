@@ -47,6 +47,10 @@
                 <div class="app-sidebar-spacer"></div>
 
                 <div class="app-navigation app-navigation-utility">
+                    <button class="nav-item app-nav-item app-nav-system" onclick="navigation.about">
+                        <span class="cb-ico cb-ico-info cb-ico--md app-nav-icon"></span>
+                        <span class="app-nav-label">About</span>
+                    </button>
                     <button class="nav-item app-nav-item" onclick="navigation.close">
                         <span class="cb-ico cb-ico-play cb-ico--md app-nav-icon"></span>
                         <span class="app-nav-label">Return to Game</span>

@@ -289,8 +289,8 @@ assignment, then write the packed integer through `setvarchecked()`. Range
 change handlers ignore a requested value that already matches the model or a
 range element that is not yet parented, matching the gamma rewrite guard.
 There is no hardcoded RML value default. The document never supplies ident
-names or the `settrailcolor` command. No `showgui trailcolors` alias is
-added; the standalone legacy document remains reachable by that exact name.
+names or the `settrailcolor` command. `showgui trailcolors` now routes to the
+Game category and scrolls directly to this native section.
 
 The same activation and console-resume refresh updates presentation, current
 resolution, the supported-mode snapshot, VSync, FPS limit, and effective MSAA.
@@ -445,8 +445,8 @@ exact ident values `-1`, `0`, and `1`. All six writes go through
 `setvarchecked` / `setfvarchecked` and read back into the snapshot.
 Opening Settings does not rewrite these idents. `gameclockcolour` and
 `gameclocklowcolour` are not on the native Settings GUI and stay
-unexposed. No `showgui gameclock` alias is added; the standalone legacy
-document remains reachable by that exact name.
+unexposed. `showgui gameclock` now routes to the HUD category and scrolls
+directly to this native section.
 
 HUD score overlay inlines the native HUD-tab `hudscore` master toggle and the
 `hudscore` adjust document. The migrated persistent idents are `hudscore`,
@@ -495,8 +495,7 @@ programmatic range change during document construct or when the enabled
 edit/commit/readback policy as streak scale. Stack radios write only on user
 select and select only on an exact `-1/0/1` match.
 `hudfragmessageforcecolors` is not in the native Settings GUI and is not
-exposed. `showgui "hudfragmessages"` remains the legacy standalone document;
-Settings no longer needs that nested GUI.
+exposed. `showgui "hudfragmessages"` routes to this native Settings section.
 
 HUD ammo bar inlines the legacy `ammobar` adjust document onto the Settings HUD
 page. The typed snapshot owns Sauer's persistent `ammobar` master switch plus
@@ -514,8 +513,7 @@ min/max from the idents, omit a hardcoded RML `value`, and ignore programmatic
 range change during document construct. Float fields use the same local
 edit/commit/readback policy as streak scale, with native `0.01` steps.
 Anchor radios write only on user select and select only on an exact `-1/0/1`
-match. `showgui "ammobar"` remains the legacy standalone document; Settings no
-longer needs that nested GUI.
+match. `showgui "ammobar"` routes to this native Settings section.
 
 HUD scoreboard columns inline the native `newgui scoreboard` column checkboxes
 onto Settings HUD. They are always presented; native `guibutton "adjust
@@ -534,13 +532,10 @@ presents the checkbox on without rewriting until the user toggles; enabling from
 (net) only, skip-if-equal, and leave an unmatched non-zero value with no radio
 selected. `scoreboard2d`, `showservinfo`, `showspectators`, `highlightscore`,
 `tiesort`, and related non-column scoreboard options stay unexposed.
-`showgui "scoreboard"` remains the legacy document.
-
-Native `showgui gameclock`, `showgui hudscore`, and `showgui scoreboard` remain
-on the legacy path because those slices inline Settings HUD rather than mapping
-the adjust document names. No HUD or Crosshair compatibility alias is added
-until the corresponding RmlUi surface is a sufficiently complete semantic
-replacement.
+`showgui "scoreboard"` routes to this native Settings section. The direct
+`gameclock`, `hudscore`, `ammobar`, `hudfragmessages`, `crosshair`, `soundpacks`,
+and `trailcolors` names use the same category-and-anchor compatibility path,
+so existing binds reach the exact typed control group without a legacy GUI.
 
 The first Chat slice preserves Sauer's actual console-backed message model.
 Public and team chat enter the shared console buffer as the distinct

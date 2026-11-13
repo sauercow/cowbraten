@@ -1,0 +1,95 @@
+<rml>
+<head>
+    <title>Cowbraten System</title>
+    <link type="text/template" href="../templates/app_shell.rml" />
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/system.rcss" />
+</head>
+<body template="app-shell" class="app-page-system" data-model="system_admin">
+    <div class="system-screen">
+        <div class="system-header">
+            <div class="eyebrow">System</div>
+            <div class="system-title">Cowbraten control center</div>
+            <div class="system-copy">Moderate the current match or inspect project information.</div>
+        </div>
+
+        <div class="system-tabs">
+            <button class="system-tab" data-class-is-selected="section_admin"
+                onclick="system.section.admin">Administration</button>
+            <button class="system-tab" data-class-is-selected="section_about"
+                onclick="system.section.about">About</button>
+        </div>
+
+        <div class="system-admin" data-if="section_admin">
+            <div class="admin-overview panel">
+                <div class="admin-kicker">Current server</div>
+                <div class="admin-server">{{ connected ? server_name : 'Not connected' }}</div>
+                <div class="admin-copy" data-if="connected">Claim master to change access mode and moderate players.</div>
+                <div class="admin-copy" data-if="!connected">Administration becomes available after joining or starting a match.</div>
+                <button class="button button-primary admin-master-button"
+                    data-if="connected &amp;&amp; !local_master" onclick="admin.claim">Claim master</button>
+                <button class="button admin-master-button"
+                    data-if="connected &amp;&amp; local_master" onclick="admin.relinquish">Relinquish master</button>
+
+                <div class="admin-mode-title">Server access</div>
+                <div class="admin-modes">
+                    <button data-class-is-selected="master_mode == 0"
+                        data-attrif-disabled="!local_master"
+                        data-event-click="select_master_mode(0)">Open</button>
+                    <button data-class-is-selected="master_mode == 1"
+                        data-attrif-disabled="!local_master"
+                        data-event-click="select_master_mode(1)">Veto</button>
+                    <button data-class-is-selected="master_mode == 2"
+                        data-attrif-disabled="!local_master"
+                        data-event-click="select_master_mode(2)">Locked</button>
+                    <button data-class-is-selected="master_mode == 3"
+                        data-attrif-disabled="!local_master"
+                        data-event-click="select_master_mode(3)">Private</button>
+                </div>
+                <div class="admin-status">{{ status }}</div>
+            </div>
+
+            <div class="admin-clients panel">
+                <div class="admin-clients-heading">
+                    <span>Players</span><small>{{ client_count }} connected</small>
+                </div>
+                <div class="admin-client-list">
+                    <div class="admin-client" data-for="client : clients">
+                        <div class="admin-client-identity">
+                            <strong>{{ client.name }}{{ client.local ? ' (you)' : '' }}</strong>
+                            <span>CN {{ client.client_num }} // {{ client.team }} // {{ client.role }}</span>
+                        </div>
+                        <div class="admin-client-actions" data-if="!client.local">
+                            <button data-event-click="toggle_spectator(client.client_num)">
+                                {{ client.spectator ? 'Unspectate' : 'Spectate' }}</button>
+                            <button data-if="team_mode" data-event-click="switch_team(client.client_num)">Team</button>
+                            <button data-event-click="toggle_master(client.client_num)">
+                                {{ client.master ? 'Take master' : 'Give master' }}</button>
+                            <button class="admin-danger" data-event-click="kick_client(client.client_num)">Kick</button>
+                        </div>
+                    </div>
+                    <div class="admin-empty" data-if="client_count == 0">No players are available.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="system-about" data-if="section_about">
+            <div class="about-hero panel">
+                <div class="about-mark">C</div>
+                <div class="about-hero-copy">
+                    <div class="eyebrow">Native Cube 2 client</div>
+                    <div class="about-title">Cowbraten</div>
+                    <div class="about-copy">A performance-focused Sauerbraten client with a native RmlUi interface.</div>
+                </div>
+            </div>
+            <div class="about-grid">
+                <div class="about-card panel"><small>Engine</small><strong>Cube 2: Sauerbraten</strong><span>Original game and rendering technology.</span></div>
+                <div class="about-card panel"><small>Interface</small><strong>RmlUi</strong><span>Retained, typed, and resolution-aware menus.</span></div>
+                <div class="about-card panel"><small>Credits</small><strong>Community project</strong><span>Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, John Siar, Quinton Reeves, and contributors.</span></div>
+                <div class="about-card panel"><small>Website</small><strong>sauerbraten.org</strong><span>Maps, documentation, source, and community resources.</span></div>
+            </div>
+        </div>
+    </div>
+</body>
+</rml>

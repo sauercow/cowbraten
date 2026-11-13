@@ -56,4 +56,6 @@ ICOMMAND(ui_demos_playselected, "", (), intret(cowui::playselecteddemo() ? 1 : 0
 ICOMMAND(ui_settings, "", (), cowui::showsettings());
 ICOMMAND(ui_profile, "", (), cowui::showprofile());
 ICOMMAND(ui_games, "", (), cowui::showgames());
+ICOMMAND(ui_admin, "", (), cowui::showadmin());
+ICOMMAND(ui_about, "", (), cowui::showabout());
 ICOMMAND(ui_close, "", (), cowui::close());

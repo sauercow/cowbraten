@@ -18,12 +18,14 @@ This is the recommended shared development baseline. The `cow-v1.0.1-rc.3` tag r
 - SDL input translation, text input, cursor ownership, logical-window and drawable-size synchronization, and GL reset recovery.
 - Cached screen documents, shared RCSS controls, font assets, and a typed data-model boundary.
 - Whitelisted action routing. RML cannot evaluate CubeScript or submit arbitrary ident names.
-- Legacy console handoff and exact-name compatibility routing for `main`, `servers`, and `options`.
+- Legacy console handoff and exact-name compatibility routing for migrated screens and standalone Settings documents.
 - Legacy fallback for every non-migrated `showgui` document.
 
 ### Production screens
 
-- Main menu with working Return to Game, Servers, and Settings routes.
+- Main and in-game menus with working Play, Profile, Servers, Demos, Settings, Administration, About, Return, Disconnect, and Exit routes.
+- Native game setup for installed maps and modes, server voting, local bot matches, and campaign missions.
+- Native Administration and About screens, including master mode and player moderation controls.
 - Server browser backed by the existing master list, resolver, ping, and connection paths.
 - Server text filtering, empty-server and compatibility filters, sortable columns, stable selection, refresh, and connection.
 - In-game public and team chat presentation backed by Sauer's existing editor, completion, history, and network send paths.
@@ -81,16 +83,16 @@ The smoke test proves integration and basic rendering. It does not replace inter
 1. Complete the interactive release-gate matrix and fix any input, focus, reset, persistence, or handoff regressions it exposes.
 2. Add a small repeatable runtime smoke harness that opens each migrated screen, captures renderer or document-load errors, and exits with a useful status.
 3. Audit all user-visible RmlUi copy and the architecture document whenever a Settings slice changes so implemented behavior and documentation remain aligned.
-4. Decide whether Exit must be enabled for 1.1.0 stable. If enabled, route it through one explicit native action with a confirmation policy appropriate to active editing or unsaved state.
+4. Define an unsaved-edit confirmation policy for the already enabled native Exit action.
 
 ### P1: complete the normal player menu flow
 
 1. Add C++ navigation history and a modal stack, with predictable Escape behavior for focused controls, modals, previous screens, and gameplay return.
-2. Implement Demos using the existing standard and HD demo discovery and playback paths.
-3. Implement Profile around player name, model, team, and persistent identity settings.
-4. Implement About/Credits and an enabled Exit action.
+2. Continue hardening the migrated Demos library and playback paths.
+3. Continue hardening the migrated Profile identity and preview paths.
+4. Continue hardening the migrated About/Credits and Exit actions.
 5. Validate the full RmlUi Console interactively across command, chat, completion, history, clipboard, and scrollback flows.
-6. Migrate game mode and map selection so joining, voting, bot matches, and campaigns no longer depend on a legacy detour during the common player flow.
+6. Add focused multiplayer and bot-match interaction coverage to the migrated game setup screen.
 
 ### P1: close high-value Settings and server gaps
 
@@ -102,9 +104,8 @@ The smoke test proves integration and basic rendering. It does not replace inter
 
 ### P2: migrate the remaining legacy surface
 
-- Game setup, maps, modes, master controls, player model selection, bot matches, and campaigns.
-- Crosshair, soundpack, HUD, scoreboard, gameclock, ammobar, and frag-message standalone adjust documents where direct legacy entry points still matter.
 - Notepad, scratchpad, paste buffer, and other utility screens according to actual user demand.
+- The live gameplay scoreboard renderer.
 - Editing menus and entity tools as a separate project. Their dynamic CubeScript behavior and large surface make them a poor first target for generalizing the player-facing API.
 
 Each migration should retain the existing legacy route until the replacement covers its semantic behavior and has passed an interactive handoff test.

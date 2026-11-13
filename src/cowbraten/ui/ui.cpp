@@ -11,6 +11,7 @@
 #include "rml_game_setup.h"
 #include "rml_profile.h"
 #include "rml_settings.h"
+#include "rml_system.h"
 #include "sauer_demo_bridge.h"
 #include "sauer_input_bridge.h"
 
@@ -45,6 +46,7 @@ namespace cowui
     static RmlDemoPlayer demo_player;
     static RmlGameMenu game_menu_model;
     static RmlGameSetup game_setup_model;
+    static RmlSystem system_model;
     static RmlProfile profile_model;
     static RmlSettings settings_model;
     static Rml::Context *context = nullptr;
@@ -71,6 +73,11 @@ namespace cowui
         {
             ScreenId::Games,
             "data/cowbraten/ui/default/screens/games.rml",
+            nullptr
+        },
+        {
+            ScreenId::System,
+            "data/cowbraten/ui/default/screens/system.rml",
             nullptr
         },
         {
@@ -302,6 +309,20 @@ namespace cowui
         event.StopPropagation();
         preservegamemenubackstack();
         show(ScreenId::Games);
+    }
+
+    static void showaboutscreen(Rml::Event &event)
+    {
+        event.StopPropagation();
+        preservegamemenubackstack();
+        if(show(ScreenId::System)) system_model.activate(1);
+    }
+
+    static void showadminscreen(Rml::Event &event)
+    {
+        event.StopPropagation();
+        preservegamemenubackstack();
+        if(show(ScreenId::System)) system_model.activate(0);
     }
 
     static void showdemoscreen(Rml::Event &event)
@@ -719,6 +740,12 @@ namespace cowui
                "navigation.games",
                showgamescreen) ||
            !action_router.registeraction(
+               "navigation.about",
+               showaboutscreen) ||
+           !action_router.registeraction(
+               "navigation.admin",
+               showadminscreen) ||
+           !action_router.registeraction(
                "navigation.servers",
                showserverbrowser) ||
            !action_router.registeraction(
@@ -740,11 +767,13 @@ namespace cowui
            !demo_player.init(context, action_router) ||
            !game_menu_model.init(context, action_router) ||
            !game_setup_model.init(context, action_router) ||
+           !system_model.init(context, action_router) ||
            !profile_model.init(context, action_router) ||
            !settings_model.init(context, action_router))
         {
             settings_model.shutdown(context);
             profile_model.shutdown(context);
+            system_model.shutdown(context);
             game_setup_model.shutdown(context);
             game_menu_model.shutdown(context);
             demo_player.shutdown(context);
@@ -783,6 +812,7 @@ namespace cowui
         {
             settings_model.shutdown(context);
             profile_model.shutdown(context);
+            system_model.shutdown(context);
             game_setup_model.shutdown(context);
             game_menu_model.shutdown(context);
             demo_player.shutdown(context);
@@ -1156,6 +1186,8 @@ namespace cowui
                 profile_model.update();
             else if(active_screen->id == ScreenId::Games)
                 game_setup_model.update();
+            else if(active_screen->id == ScreenId::System)
+                system_model.update();
             else if(active_screen->id == ScreenId::GameMenu)
                 game_menu_model.update();
         }
@@ -1181,6 +1213,8 @@ namespace cowui
         // Updating a chat message must not walk every menu opened this session.
         // Show() refreshes a hidden document before it receives focus again.
         context->Update(false);
+        if(active_screen && active_screen->id == ScreenId::Settings)
+            settings_model.scrollpendinglegacyroute(active_screen->document);
     }
 
     void render()
@@ -1240,6 +1274,8 @@ namespace cowui
             profile_model.activate();
         else if(id == ScreenId::Games)
             game_setup_model.activate();
+        else if(id == ScreenId::System)
+            system_model.activate();
         else if(id == ScreenId::GameMenu)
             game_menu_model.activate();
 
@@ -1305,6 +1341,30 @@ namespace cowui
             screen = ScreenId::Settings;
         else if(!std::strcmp(name, "playermodel"))
             screen = ScreenId::Profile;
+        else if(!std::strcmp(name, "crosshair") ||
+                !std::strcmp(name, "soundpacks") ||
+                !std::strcmp(name, "trailcolors") ||
+                !std::strcmp(name, "ammobar") ||
+                !std::strcmp(name, "gameclock") ||
+                !std::strcmp(name, "hudscore") ||
+                !std::strcmp(name, "scoreboard") ||
+                !std::strcmp(name, "hudfragmessages"))
+        {
+            if(!show(ScreenId::Settings)) return false;
+            return settings_model.activatelegacyroute(name);
+        }
+        else if(!std::strcmp(name, "master"))
+        {
+            if(!show(ScreenId::System)) return false;
+            system_model.activate(0);
+            return true;
+        }
+        else if(!std::strcmp(name, "about"))
+        {
+            if(!show(ScreenId::System)) return false;
+            system_model.activate(1);
+            return true;
+        }
         else if(!std::strcmp(name, "gamemode") ||
                 !std::strcmp(name, "maps") ||
                 !std::strcmp(name, "capturemaps") ||
@@ -1360,6 +1420,16 @@ namespace cowui
     void showgames()
     {
         show(ScreenId::Games);
+    }
+
+    void showadmin()
+    {
+        if(show(ScreenId::System)) system_model.activate(0);
+    }
+
+    void showabout()
+    {
+        if(show(ScreenId::System)) system_model.activate(1);
     }
 
     void showdemos()

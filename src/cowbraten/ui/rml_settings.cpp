@@ -2710,6 +2710,52 @@ namespace cowui
         refresh();
     }
 
+    bool RmlSettings::activatelegacyroute(const char *name)
+    {
+        if(!name) return false;
+        if(!std::strcmp(name, "crosshair"))
+        {
+            setcategory(Category::Crosshair);
+            pending_legacy_anchor = "settings-crosshair";
+        }
+        else if(!std::strcmp(name, "soundpacks"))
+        {
+            setcategory(Category::Audio);
+            pending_legacy_anchor = "settings-soundpacks";
+        }
+        else if(!std::strcmp(name, "trailcolors"))
+        {
+            setcategory(Category::Game);
+            pending_legacy_anchor = "settings-trailcolors";
+        }
+        else if(!std::strcmp(name, "ammobar") ||
+                !std::strcmp(name, "gameclock") ||
+                !std::strcmp(name, "hudscore") ||
+                !std::strcmp(name, "scoreboard") ||
+                !std::strcmp(name, "hudfragmessages"))
+        {
+            setcategory(Category::Hud);
+            pending_legacy_anchor = !std::strcmp(name, "ammobar")
+                ? "settings-ammobar" :
+                (!std::strcmp(name, "gameclock") ? "settings-gameclock" :
+                (!std::strcmp(name, "hudscore") ? "settings-hudscore" :
+                (!std::strcmp(name, "scoreboard") ? "settings-scoreboard" :
+                    "settings-fragmessages")));
+        }
+        else return false;
+        return true;
+    }
+
+    void RmlSettings::scrollpendinglegacyroute(
+        Rml::ElementDocument *document)
+    {
+        if(!document || pending_legacy_anchor.empty()) return;
+        if(Rml::Element *anchor = document->GetElementById(
+            pending_legacy_anchor))
+            anchor->ScrollIntoView(true);
+        pending_legacy_anchor.clear();
+    }
+
     void RmlSettings::videochanged()
     {
         refreshvideo();

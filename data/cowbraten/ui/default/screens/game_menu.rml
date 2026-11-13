@@ -89,8 +89,15 @@
                             <span class="game-menu-action-key">P</span>
                         </button>
 
-                        <button class="game-menu-action game-menu-action-danger" onclick="game.disconnect">
+                        <button class="game-menu-action" onclick="navigation.admin">
                             <span class="game-menu-action-index">08</span>
+                            <span class="game-menu-action-icon cb-ico cb-ico-shield"></span>
+                            <strong>Administration / about</strong>
+                            <span class="game-menu-action-key">A</span>
+                        </button>
+
+                        <button class="game-menu-action game-menu-action-danger" onclick="game.disconnect">
+                            <span class="game-menu-action-index">09</span>
                             <span class="game-menu-action-icon cb-ico cb-ico-log-out"></span>
                             <strong>Disconnect</strong>
                             <span class="game-menu-action-key">F4</span>

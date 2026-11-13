@@ -15,6 +15,7 @@ namespace cowui
         Test,
         GameMenu,
         Games,
+        System,
         Servers,
         Demos,
         Settings,
@@ -54,6 +55,8 @@ namespace cowui
     void showmain();
     void showfullmenu();
     void showgames();
+    void showadmin();
+    void showabout();
     void showservers();
     void showdemos();
     void showdemosrecording();

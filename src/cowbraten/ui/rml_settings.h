@@ -12,6 +12,7 @@ namespace Rml
 {
     class Context;
     class Event;
+    class ElementDocument;
 }
 
 namespace cowui
@@ -74,6 +75,8 @@ namespace cowui
         void shutdown(Rml::Context *context);
 
         void activate();
+        bool activatelegacyroute(const char *name);
+        void scrollpendinglegacyroute(Rml::ElementDocument *document);
         void videochanged();
         void applypending();
         bool capturingkey() const { return key_capture_active; }
@@ -742,6 +745,7 @@ namespace cowui
         static void commitconsolesizeaction(Rml::Event &event);
 
         Rml::DataModelHandle model;
+        Rml::String pending_legacy_anchor;
         std::vector<Resolution> resolutions;
         std::vector<CrosshairChoice> crosshair_choices;
         std::vector<SoundpackChoice> soundpack_choices;
