@@ -1,7 +1,10 @@
 #include "engine.h"
 #include "ui.h"
 
-SVARFP(uitheme, "default", cowui::settheme(uitheme));
+SVARFP(uitheme, "default", {
+    cowui::settheme(uitheme);
+    if(initing == NOT_INITING) writecfg();
+});
 SVARP(profile_name_1, "");
 SVARP(profile_name_2, "");
 SVARP(profile_name_3, "");

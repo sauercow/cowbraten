@@ -156,14 +156,22 @@ namespace cowui
                 if(readslot(slot, existing, sizeof(existing)))
                 {
                     if(!strcmp(existing, result))
+                    {
+                        writecfg();
                         return true;
+                    }
                 }
                 else if(first_empty < 0)
                     first_empty = slot;
             }
 
             if(first_empty >= 0)
-                return writeslot(first_empty, result);
+            {
+                if(!writeslot(first_empty, result))
+                    return false;
+                writecfg();
+                return true;
+            }
 
             for(int slot = 0; slot < slot_count - 1; ++slot)
             {
@@ -171,7 +179,10 @@ namespace cowui
                 if(!readslot(slot + 1, next, sizeof(next)) || !writeslot(slot, next))
                     return false;
             }
-            return writeslot(slot_count - 1, result);
+            if(!writeslot(slot_count - 1, result))
+                return false;
+            writecfg();
+            return true;
         }
 
         bool deletename(const char *value)
@@ -209,6 +220,7 @@ namespace cowui
                        slot < retained_count ? retained[slot] : ""))
                     return false;
 
+            writecfg();
             return true;
         }
 

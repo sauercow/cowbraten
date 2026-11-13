@@ -113,8 +113,12 @@ int main()
           bridge.find("profile_name_1") != std::string::npos &&
           bridge.find("bool deletename(const char *value)") !=
               std::string::npos &&
-          bridge.find("retained_count") != std::string::npos,
-        "name application, removal, and compacted presets stay behind the bridge");
+          bridge.find("retained_count") != std::string::npos &&
+          bridge.find("writecfg();") != std::string::npos,
+        "saved names persist immediately through the legacy bridge");
+    check(commands.find("if(initing == NOT_INITING) writecfg();") !=
+              std::string::npos,
+        "theme changes persist immediately outside startup");
     check(bridge.find("?cowbraten-resource:packages/icons/") != std::string::npos &&
           renderer.find("?cowbraten-resource:") != std::string::npos,
         "character portraits resolve through the engine resource root");
