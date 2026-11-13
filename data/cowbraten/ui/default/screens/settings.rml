@@ -20,7 +20,7 @@
                 </div>
 
                 <button class="button settings-back" onclick="navigation.main">
-                    Back&nbsp;&nbsp;/&nbsp;&nbsp;Main Menu
+                    <span class="cb-ico cb-ico-arrow-left cb-ico--sm"></span>Back&nbsp;&nbsp;/&nbsp;&nbsp;Main Menu
                 </button>
             </div>
 
@@ -31,61 +31,61 @@
                         <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_game"
                             onclick="settings.category.game">
-                            <span class="settings-nav-index">01</span>
+                            <span class="cb-ico cb-ico-gamepad cb-ico--md settings-nav-icon"></span>
                             <span>Game</span>
                         </button>
                         <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_hud"
                             onclick="settings.category.hud">
-                            <span class="settings-nav-index">02</span>
+                            <span class="cb-ico cb-ico-monitor-check cb-ico--md settings-nav-icon"></span>
                             <span>HUD</span>
                         </button>
                         <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_graphics"
                             onclick="settings.category.graphics">
-                            <span class="settings-nav-index">03</span>
+                            <span class="cb-ico cb-ico-monitor cb-ico--md settings-nav-icon"></span>
                             <span>Graphics</span>
                         </button>
                         <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_audio"
                             onclick="settings.category.audio">
-                            <span class="settings-nav-index">04</span>
+                            <span class="cb-ico cb-ico-volume-2 cb-ico--md settings-nav-icon"></span>
                             <span>Audio</span>
                         </button>
                         <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_mouse_keyboard"
                             onclick="settings.category.mouse-keyboard">
-                            <span class="settings-nav-index">05</span>
+                            <span class="cb-ico cb-ico-mouse cb-ico--md settings-nav-icon"></span>
                             <span>Mouse / Keyboard</span>
                         </button>
                         <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_crosshair"
                             onclick="settings.category.crosshair">
-                            <span class="settings-nav-index">06</span>
+                            <span class="cb-ico cb-ico-crosshair cb-ico--md settings-nav-icon"></span>
                             <span>Crosshair</span>
                         </button>
                         <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_chat"
                             onclick="settings.category.chat">
-                            <span class="settings-nav-index">07</span>
+                            <span class="cb-ico cb-ico-users cb-ico--md settings-nav-icon"></span>
                             <span>Chat</span>
                         </button>
                         <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_console"
                             onclick="settings.category.console">
-                            <span class="settings-nav-index">08</span>
+                            <span class="cb-ico cb-ico-terminal cb-ico--md settings-nav-icon"></span>
                             <span>Console</span>
                         </button>
                         <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_interface"
                             onclick="settings.category.interface">
-                            <span class="settings-nav-index">09</span>
+                            <span class="cb-ico cb-ico-palette cb-ico--md settings-nav-icon"></span>
                             <span>Interface</span>
                         </button>
                         <button class="nav-item settings-nav-item"
                             data-class-is-selected="category_autoexec"
                             onclick="settings.category.autoexec">
-                            <span class="settings-nav-index">10</span>
+                            <span class="cb-ico cb-ico-code cb-ico--md settings-nav-icon"></span>
                             <span>Autoexec</span>
                         </button>
                     </div>

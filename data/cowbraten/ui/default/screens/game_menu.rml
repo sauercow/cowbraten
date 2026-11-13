@@ -2,6 +2,7 @@
 <head>
     <title>Cowbraten In-Game Menu</title>
     <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../icons/icons.rcss" />
     <link type="text/rcss" href="../styles/controls.rcss" />
     <link type="text/rcss" href="../styles/game_menu.rcss" />
 </head>
@@ -35,7 +36,7 @@
                     <div class="game-menu-navigation game-menu-card">
                         <button class="game-menu-action game-menu-action-primary" onclick="game.resume">
                             <span class="game-menu-action-index">01</span>
-                            <span class="game-menu-action-icon">&gt;</span>
+                            <span class="game-menu-action-icon cb-ico cb-ico-play"></span>
                             <strong>Return to game</strong>
                             <span class="game-menu-action-key">ESC</span>
                         </button>
@@ -45,7 +46,7 @@
                             data-attrif-disabled="!actions_available"
                             onclick="game.spectator.toggle">
                             <span class="game-menu-action-index">02</span>
-                            <span class="game-menu-action-icon">O</span>
+                            <span class="game-menu-action-icon cb-ico cb-ico-spectator"></span>
                             <strong>Toggle spectator</strong>
                             <span class="game-menu-action-key">{{ spectator ? 'ON' : 'OFF' }}</span>
                         </button>
@@ -55,35 +56,35 @@
                             data-attrif-disabled="!actions_available"
                             onclick="game.team.toggle">
                             <span class="game-menu-action-index">03</span>
-                            <span class="game-menu-action-icon">T</span>
+                            <span class="game-menu-action-icon cb-ico cb-ico-team-switch"></span>
                             <strong>Switch team</strong>
                             <span class="game-menu-action-key" data-class-is-red="evil_team">{{ team_label }}</span>
                         </button>
 
                         <button class="game-menu-action" onclick="navigation.servers">
                             <span class="game-menu-action-index">04</span>
-                            <span class="game-menu-action-icon">S</span>
+                            <span class="game-menu-action-icon cb-ico cb-ico-server"></span>
                             <strong>Server browser</strong>
                             <span class="game-menu-action-key">B</span>
                         </button>
 
                         <button class="game-menu-action" onclick="navigation.settings">
                             <span class="game-menu-action-index">05</span>
-                            <span class="game-menu-action-icon">*</span>
+                            <span class="game-menu-action-icon cb-ico cb-ico-settings"></span>
                             <strong>Settings</strong>
                             <span class="game-menu-action-key">F10</span>
                         </button>
 
                         <button class="game-menu-action" onclick="navigation.profile">
                             <span class="game-menu-action-index">06</span>
-                            <span class="game-menu-action-icon">P</span>
+                            <span class="game-menu-action-icon cb-ico cb-ico-user-cog"></span>
                             <strong>Player / character</strong>
                             <span class="game-menu-action-key">P</span>
                         </button>
 
                         <button class="game-menu-action game-menu-action-danger" onclick="game.disconnect">
                             <span class="game-menu-action-index">07</span>
-                            <span class="game-menu-action-icon">X</span>
+                            <span class="game-menu-action-icon cb-ico cb-ico-log-out"></span>
                             <strong>Disconnect</strong>
                             <span class="game-menu-action-key">F4</span>
                         </button>
@@ -97,7 +98,7 @@
                                     <div class="game-menu-map-fallback"><span>MAP</span></div>
                                     <img data-if="map_image != ''" data-attr-src="map_image" />
                                     <div class="game-menu-map-caption">
-                                        <span class="game-menu-map-symbol">M</span>
+                                        <span class="game-menu-map-symbol cb-ico cb-ico-map-pin cb-ico--sm"></span>
                                         <strong>{{ map_name }}</strong>
                                     </div>
                                 </div>
@@ -136,7 +137,7 @@
                             <div class="game-menu-card-title">Quick actions</div>
 
                             <div class="game-menu-quick-row">
-                                <span class="game-menu-quick-icon">O</span>
+                                <span class="game-menu-quick-icon cb-ico cb-ico-spectator"></span>
                                 <div class="game-menu-quick-copy">
                                     <strong>Spectator mode</strong>
                                     <small>Watch the match without playing.</small>
@@ -151,7 +152,7 @@
                             </div>
 
                             <div class="game-menu-quick-row" data-if="team_mode">
-                                <span class="game-menu-quick-icon">T</span>
+                                <span class="game-menu-quick-icon cb-ico cb-ico-team-switch"></span>
                                 <div class="game-menu-quick-copy">
                                     <strong>Team selection</strong>
                                     <small>Choose which team to join.</small>
@@ -169,7 +170,7 @@
                             </div>
 
                             <div class="game-menu-quick-row">
-                                <span class="game-menu-quick-icon">P</span>
+                                <span class="game-menu-quick-icon cb-ico cb-ico-user"></span>
                                 <div class="game-menu-quick-copy">
                                     <strong>{{ player_name }}</strong>
                                     <small>{{ state_label }}{{ team_mode ? ' / ' + team_label : '' }}</small>
@@ -178,7 +179,7 @@
                             </div>
 
                             <div class="game-menu-quick-row">
-                                <span class="game-menu-quick-icon">*</span>
+                                <span class="game-menu-quick-icon cb-ico cb-ico-settings"></span>
                                 <div class="game-menu-quick-copy">
                                     <strong>Match settings</strong>
                                     <small>Adjust video, audio, controls and HUD.</small>

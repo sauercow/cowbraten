@@ -489,6 +489,13 @@ body
     border-left-color: var(--color-primary);
 }
 
+.servers-empty-icon
+{
+    display: block;
+    margin-bottom: var(--space-2);
+    image-color: var(--color-primary);
+}
+
 .servers-empty-title
 {
     color: var(--color-text);

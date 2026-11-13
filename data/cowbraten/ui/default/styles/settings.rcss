@@ -141,19 +141,19 @@ body
     line-height: 42dp;
 }
 
-.settings-nav-index
+.settings-nav-icon
 {
     display: block;
     flex: none;
-    width: 32dp;
-    color: var(--color-disabled);
-    font-size: 10dp;
-    letter-spacing: 1dp;
+    margin-right: 12dp;
+    image-color: var(--color-disabled);
 }
 
-.settings-nav-item.is-selected .settings-nav-index
+.settings-nav-item.is-selected .settings-nav-icon,
+.settings-nav-item:hover .settings-nav-icon,
+.settings-nav-item:focus-visible .settings-nav-icon
 {
-    color: var(--color-primary);
+    image-color: var(--color-primary);
 }
 
 .settings-scope-note

@@ -147,14 +147,12 @@ body
     line-height: 46dp;
 }
 
-.main-nav-index
+.main-nav-icon
 {
     display: block;
     flex: none;
-    width: 32dp;
-    color: var(--color-disabled);
-    font-size: 10dp;
-    letter-spacing: 1dp;
+    margin-right: 14dp;
+    image-color: var(--color-disabled);
 }
 
 .main-nav-label
@@ -174,10 +172,27 @@ body
     text-align: right;
 }
 
-.main-nav-item.is-selected .main-nav-index,
 .main-nav-item.is-selected .main-nav-state
 {
     color: var(--color-primary);
+}
+
+.main-nav-item.is-selected .main-nav-icon,
+.main-nav-item:hover .main-nav-icon,
+.main-nav-item:focus-visible .main-nav-icon
+{
+    image-color: var(--color-primary);
+}
+
+.main-nav-item:disabled .main-nav-icon
+{
+    image-color: var(--color-disabled);
+}
+
+.main-nav-exit:hover .main-nav-icon,
+.main-nav-exit:focus-visible .main-nav-icon
+{
+    image-color: var(--color-error);
 }
 
 .main-nav-exit

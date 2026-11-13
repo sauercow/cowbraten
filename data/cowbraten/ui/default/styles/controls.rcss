@@ -101,6 +101,47 @@
     color: var(--color-text);
 }
 
+.button .cb-ico
+{
+    margin-right: 7dp;
+    image-color: var(--color-text);
+}
+
+.button:hover .cb-ico,
+.button:focus-visible .cb-ico
+{
+    image-color: var(--color-primary-hover);
+}
+
+.button-primary .cb-ico,
+.button-primary:hover .cb-ico,
+.button-primary:focus-visible .cb-ico
+{
+    image-color: var(--color-background);
+}
+
+.button-secondary .cb-ico
+{
+    image-color: var(--color-secondary);
+}
+
+.button-destructive .cb-ico
+{
+    image-color: var(--color-error);
+}
+
+.button-destructive:hover .cb-ico,
+.button-destructive:focus-visible .cb-ico
+{
+    image-color: var(--color-text);
+}
+
+.button:disabled .cb-ico,
+.button.is-disabled .cb-ico
+{
+    image-color: var(--color-disabled);
+}
+
 .text-input
 {
     box-sizing: border-box;

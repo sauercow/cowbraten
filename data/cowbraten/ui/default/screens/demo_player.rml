@@ -2,6 +2,7 @@
 <head>
     <title>Cowbraten Demo Player</title>
     <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../icons/icons.rcss" />
     <link type="text/rcss" href="../styles/controls.rcss" />
     <link type="text/rcss" href="../styles/demo_player.rcss" />
 </head>
@@ -26,15 +27,15 @@
             </button>
 
             <div class="demo-player-button-row">
-                <button class="demo-player-button demo-player-step" onclick="demo-player.step-back">Frame -</button>
-                <button class="demo-player-button" onclick="demo-player.rewind">-5 sec</button>
-                <button class="demo-player-button demo-player-primary" onclick="demo-player.toggle">{{ paused ? 'Play' : 'Pause' }}</button>
-                <button class="demo-player-button" onclick="demo-player.forward">+5 sec</button>
-                <button class="demo-player-button demo-player-step" onclick="demo-player.step-forward">Frame +</button>
-                <button class="demo-player-button demo-player-speed" onclick="demo-player.speed">Speed&nbsp;&nbsp;{{ speed_text }}</button>
+                <button class="demo-player-button demo-player-step" onclick="demo-player.step-back"><span class="cb-ico cb-ico-skip-back cb-ico--sm"></span>Frame -</button>
+                <button class="demo-player-button" onclick="demo-player.rewind"><span class="cb-ico cb-ico-rewind cb-ico--sm"></span>-5 sec</button>
+                <button class="demo-player-button demo-player-primary" onclick="demo-player.toggle"><span class="cb-ico cb-ico-play cb-ico--sm" data-if="paused"></span><span class="cb-ico cb-ico-pause cb-ico--sm" data-if="!paused"></span>{{ paused ? 'Play' : 'Pause' }}</button>
+                <button class="demo-player-button" onclick="demo-player.forward"><span class="cb-ico cb-ico-fast-forward cb-ico--sm"></span>+5 sec</button>
+                <button class="demo-player-button demo-player-step" onclick="demo-player.step-forward"><span class="cb-ico cb-ico-skip-forward cb-ico--sm"></span>Frame +</button>
+                <button class="demo-player-button demo-player-speed" onclick="demo-player.speed"><span class="cb-ico cb-ico-gauge cb-ico--sm"></span>Speed&nbsp;&nbsp;{{ speed_text }}</button>
                 <div class="demo-player-spacer"></div>
-                <button class="demo-player-button" onclick="demo-player.library">Library</button>
-                <button class="demo-player-button demo-player-stop" onclick="demo-player.stop">End demo</button>
+                <button class="demo-player-button" onclick="demo-player.library"><span class="cb-ico cb-ico-film cb-ico--sm"></span>Library</button>
+                <button class="demo-player-button demo-player-stop" onclick="demo-player.stop"><span class="cb-ico cb-ico-stop cb-ico--sm"></span>End demo</button>
             </div>
         </div>
 

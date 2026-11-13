@@ -83,6 +83,11 @@ body
     min-width: 184dp;
 }
 
+.app-return .cb-ico
+{
+    margin-right: 9dp;
+}
+
 .app-frame
 {
     display: flex;
@@ -137,14 +142,12 @@ body
     line-height: 46dp;
 }
 
-.app-nav-index
+.app-nav-icon
 {
     display: block;
-    width: 36dp;
     flex: none;
-    color: var(--color-disabled);
-    font-size: 10dp;
-    letter-spacing: 1dp;
+    margin-right: 16dp;
+    image-color: var(--color-disabled);
 }
 
 .app-nav-label
@@ -175,12 +178,24 @@ body
     color: var(--color-primary);
 }
 
-.app-page-servers .app-nav-servers .app-nav-index,
-.app-page-demos .app-nav-demos .app-nav-index,
-.app-page-profile .app-nav-profile .app-nav-index,
-.app-page-settings .app-nav-settings .app-nav-index
+.app-page-servers .app-nav-servers .app-nav-icon,
+.app-page-demos .app-nav-demos .app-nav-icon,
+.app-page-profile .app-nav-profile .app-nav-icon,
+.app-page-settings .app-nav-settings .app-nav-icon
 {
-    color: var(--color-primary);
+    image-color: var(--color-primary);
+}
+
+.app-sidebar .app-nav-item:hover .app-nav-icon,
+.app-sidebar .app-nav-item:focus-visible .app-nav-icon
+{
+    image-color: var(--color-primary-hover);
+}
+
+.app-sidebar .app-nav-exit:hover .app-nav-icon,
+.app-sidebar .app-nav-exit:focus-visible .app-nav-icon
+{
+    image-color: var(--color-error);
 }
 
 .app-sidebar-spacer

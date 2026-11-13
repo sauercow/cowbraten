@@ -14,13 +14,13 @@
                     <div class="demos-mark">C</div>
                     <div><div class="demos-product">Cowbraten</div><div class="demos-title">Demo Manager</div></div>
                 </div>
-                <button class="button" onclick="navigation.main">Back&nbsp;&nbsp;/&nbsp;&nbsp;Main Menu</button>
+                <button class="button" onclick="navigation.main"><span class="cb-ico cb-ico-arrow-left cb-ico--sm"></span>Back&nbsp;&nbsp;/&nbsp;&nbsp;Main Menu</button>
             </div>
 
             <div class="demos-tabs">
-                <button class="demo-tab" data-class-is-selected="tab_library" onclick="demos.tab.library">Library</button>
-                <button class="demo-tab" data-class-is-selected="tab_recording" onclick="demos.tab.recording">Recording</button>
-                <button class="demo-tab" data-class-is-selected="tab_trash" onclick="demos.tab.trash">Trash</button>
+                <button class="demo-tab" data-class-is-selected="tab_library" onclick="demos.tab.library"><span class="cb-ico cb-ico-film cb-ico--sm"></span>Library</button>
+                <button class="demo-tab" data-class-is-selected="tab_recording" onclick="demos.tab.recording"><span class="cb-ico cb-ico-record cb-ico--sm"></span>Recording</button>
+                <button class="demo-tab" data-class-is-selected="tab_trash" onclick="demos.tab.trash"><span class="cb-ico cb-ico-trash cb-ico--sm"></span>Trash</button>
                 <div class="demos-tabs-spacer"></div>
                 <div class="demos-count">{{ result_count }}</div>
             </div>
@@ -29,11 +29,11 @@
                 <div class="demo-toolbar">
                     <input class="text-input demo-global-search" type="text" placeholder="Search all metadata"
                         data-value="search_value" onchange="demos.filter.search" />
-                    <button class="button" onclick="demos.refresh">Reindex</button>
+                    <button class="button" onclick="demos.refresh"><span class="cb-ico cb-ico-refresh cb-ico--sm"></span>Reindex</button>
                     <button class="button" onclick="demos.select-filtered">Select Results</button>
                     <button class="button" onclick="demos.filters.save">Save View</button>
                     <button class="button" data-class-is-disabled="!saved_filter_available" data-attrif-disabled="!saved_filter_available" onclick="demos.filters.load">Load View</button>
-                    <button class="button" onclick="demos.filters.clear">Clear Filters</button>
+                    <button class="button" onclick="demos.filters.clear"><span class="cb-ico cb-ico-filter cb-ico--sm"></span>Clear Filters</button>
                 </div>
                 <div class="demo-filters">
                     <div class="demo-filter"><span>Mode</span><input class="text-input" type="text" placeholder="instagib" data-value="mode_value" onchange="demos.filter.mode" /></div>
@@ -77,7 +77,7 @@
                             <div class="demo-grid demo-row" data-class-is-selected="demo.selected">
                                 <span class="demo-cell-check"><button class="demo-check" data-class-is-selected="demo.selected" data-event-click="toggle_demo(demo.id)">{{ demo.selected ? 'X' : '' }}</button></span>
                                 <button class="demo-row-select" data-event-click="select_demo(demo.id)">
-                                    <span class="demo-cell-name"><span class="demo-name">{{ demo.favorite ? '* ' : '' }}{{ demo.name }}</span><span class="demo-subline">{{ demo.format }} // {{ demo.status }}</span></span>
+                                    <span class="demo-cell-name"><span class="demo-name"><span class="cb-ico cb-ico-star cb-ico--sm demo-favorite-icon" data-if="demo.favorite"></span>{{ demo.name }}</span><span class="demo-subline">{{ demo.format }} // {{ demo.status }}</span></span>
                                     <span class="demo-cell-mode">{{ demo.mode }}</span><span class="demo-cell-map">{{ demo.map }}</span>
                                     <span class="demo-cell-duration">{{ demo.duration }}</span><span class="demo-cell-date">{{ demo.date }}</span>
                                     <span class="demo-cell-size">{{ demo.size }}</span><span class="demo-cell-class">{{ demo.category }}</span>
@@ -90,15 +90,15 @@
                 <div class="demo-selection">
                     <div class="demo-selection-info"><div class="demo-selection-label">Selection</div><div class="demo-selection-name">{{ selected_name }}</div><div class="demo-selection-details">{{ selected_details }}</div><div class="demo-selection-people">{{ selected_participants }}</div></div>
                     <div class="demo-actions">
-                        <button class="button button-primary" data-class-is-disabled="!can_play" data-attrif-disabled="!can_play" onclick="demos.play">Play</button>
-                        <button class="button" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.favorite">Favorite</button>
-                        <button class="button" data-class-is-disabled="!single_selection" data-attrif-disabled="!single_selection" onclick="demos.open-location">Open Folder</button>
-                        <button class="button" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.organize.request">Organize</button>
-                        <button class="button button-destructive" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.trash.request">Trash</button>
+                        <button class="button button-primary" data-class-is-disabled="!can_play" data-attrif-disabled="!can_play" onclick="demos.play"><span class="cb-ico cb-ico-play cb-ico--sm"></span>Play</button>
+                        <button class="button" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.favorite"><span class="cb-ico cb-ico-star cb-ico--sm"></span>Favorite</button>
+                        <button class="button" data-class-is-disabled="!single_selection" data-attrif-disabled="!single_selection" onclick="demos.open-location"><span class="cb-ico cb-ico-folder-open cb-ico--sm"></span>Open Folder</button>
+                        <button class="button" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.organize.request"><span class="cb-ico cb-ico-archive cb-ico--sm"></span>Organize</button>
+                        <button class="button button-destructive" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.trash.request"><span class="cb-ico cb-ico-trash cb-ico--sm"></span>Trash</button>
                     </div>
                     <div class="demo-edit-row" data-if="single_selection">
-                        <input class="text-input" type="text" data-value="rename_value" onchange="demos.rename.input" /><button class="button" onclick="demos.rename">Rename</button>
-                        <input class="text-input" type="text" data-value="move_value" placeholder="relative folder" onchange="demos.move.input" /><button class="button" onclick="demos.move">Move</button>
+                        <input class="text-input" type="text" data-value="rename_value" onchange="demos.rename.input" /><button class="button" onclick="demos.rename"><span class="cb-ico cb-ico-pencil cb-ico--sm"></span>Rename</button>
+                        <input class="text-input" type="text" data-value="move_value" placeholder="relative folder" onchange="demos.move.input" /><button class="button" onclick="demos.move"><span class="cb-ico cb-ico-arrows-left-right cb-ico--sm"></span>Move</button>
                     </div>
                     <div class="demo-classify" data-if="has_selection"><span>Manual class:</span><button onclick="demos.classify.duel">Duel</button><button onclick="demos.classify.match">Match</button><button onclick="demos.classify.unknown">Unknown</button></div>
                 </div>
@@ -111,24 +111,24 @@
                     <label class="demo-setting-card"><input class="checkbox" type="checkbox" data-checked="hd_recording" onchange="demos.settings.hd-recording" /><span><strong>Enable HD Demo Recording</strong><small>Writes compatible .dmohd sidecars. Default: enabled.</small></span></label>
                     <label class="demo-setting-card"><input class="checkbox" type="checkbox" data-checked="automatic_recording" onchange="demos.settings.auto-recording" /><span><strong>Automatically Record on Map Load</strong><small>Starts recordclientdemo 2 semantics once per real map load. Default: disabled.</small></span></label>
                 </div>
-                <div class="demo-record-status"><span data-if="recording_active" class="is-recording">REC&nbsp;&nbsp;Client demo recording is active</span><span data-if="!recording_active">No client demo is currently being written.</span></div>
+                <div class="demo-record-status"><span data-if="recording_active" class="is-recording"><span class="cb-ico cb-ico-record cb-ico--sm"></span>REC&nbsp;&nbsp;Client demo recording is active</span><span data-if="!recording_active">No client demo is currently being written.</span></div>
                 <div class="demo-note"><strong>Legacy autoexec migration</strong><span>If autoexec already runs recordclientdemo 2 on mapstart, remove that line only after enabling this option. Duplicate starts are guarded, and autoexec is never modified automatically.</span></div>
             </div>
 
             <div class="demos-page demos-library" data-if="tab_trash">
-                <div class="demo-toolbar"><div class="trash-title"><strong>Trash</strong><span>{{ trash_usage }}</span></div><label class="trash-retention"><span>Retention</span><select data-value="retention_value" onchange="demos.trash.retention"><option value="never">Never</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option></select></label><button class="button" onclick="demos.refresh">Refresh</button><button class="button button-destructive" onclick="demos.empty.request">Empty Trash</button></div>
+                <div class="demo-toolbar"><div class="trash-title"><strong>Trash</strong><span>{{ trash_usage }}</span></div><label class="trash-retention"><span>Retention</span><select data-value="retention_value" onchange="demos.trash.retention"><option value="never">Never</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option></select></label><button class="button" onclick="demos.refresh"><span class="cb-ico cb-ico-refresh cb-ico--sm"></span>Refresh</button><button class="button button-destructive" onclick="demos.empty.request"><span class="cb-ico cb-ico-trash cb-ico--sm"></span>Empty Trash</button></div>
                 <div class="demo-table trash-table">
                     <div class="demo-grid demo-columns"><div class="demo-cell-check"></div><div class="demo-heading-label demo-cell-name">Name</div><div class="demo-heading-label demo-cell-mode">Mode</div><div class="demo-heading-label demo-cell-map">Map</div><div class="demo-heading-label demo-cell-duration">Duration</div><div class="demo-heading-label demo-cell-date">Deleted / Indexed</div><div class="demo-heading-label demo-cell-size">Size</div><div class="demo-heading-label demo-cell-class">Category</div></div>
                     <div class="demo-rows"><div class="demo-row-repeat" data-for="demo : demos"><div class="demo-grid demo-row" data-class-is-selected="demo.selected"><span class="demo-cell-check"><button class="demo-check" data-class-is-selected="demo.selected" data-event-click="toggle_demo(demo.id)">{{ demo.selected ? 'X' : '' }}</button></span><button class="demo-row-select" data-event-click="select_demo(demo.id)"><span class="demo-cell-name"><span class="demo-name">{{ demo.name }}</span><span class="demo-subline">{{ demo.format }}</span></span><span class="demo-cell-mode">{{ demo.mode }}</span><span class="demo-cell-map">{{ demo.map }}</span><span class="demo-cell-duration">{{ demo.duration }}</span><span class="demo-cell-date">{{ demo.date }}</span><span class="demo-cell-size">{{ demo.size }}</span><span class="demo-cell-class">{{ demo.category }}</span></button></div></div><div class="demo-empty" data-if="visible_count == 0"><div>Trash is empty</div><span>Deleted demos are moved here and remain restorable.</span></div></div>
                 </div>
-                <div class="trash-actions"><div><strong>{{ selected_name }}</strong><span>{{ selected_details }}</span></div><button class="button button-primary" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.restore">Restore</button><button class="button button-destructive" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.erase.request">Delete Permanently</button></div>
+                <div class="trash-actions"><div><strong>{{ selected_name }}</strong><span>{{ selected_details }}</span></div><button class="button button-primary" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.restore"><span class="cb-ico cb-ico-trash-restore cb-ico--sm"></span>Restore</button><button class="button button-destructive" data-class-is-disabled="!has_selection" data-attrif-disabled="!has_selection" onclick="demos.erase.request"><span class="cb-ico cb-ico-trash cb-ico--sm"></span>Delete Permanently</button></div>
             </div>
 
             <div class="demos-footer"><span data-class-is-error="status_error">{{ status }}</span><span>Sort&nbsp;&nbsp;//&nbsp;&nbsp;{{ sort_ascending ? 'Ascending' : 'Descending' }}</span><span>Escape returns to gameplay</span></div>
         </div>
 
         <div class="demo-modal-layer" data-if="confirm_visible">
-            <div class="demo-modal panel"><div class="eyebrow">Confirmation</div><div class="demo-modal-text">{{ confirm_text }}</div><div class="demo-modal-actions"><button class="button" onclick="demos.confirm.cancel">Cancel</button><button class="button button-destructive" onclick="demos.confirm">Confirm</button></div></div>
+            <div class="demo-modal panel"><div class="eyebrow">Confirmation</div><div class="demo-modal-text">{{ confirm_text }}</div><div class="demo-modal-actions"><button class="button" onclick="demos.confirm.cancel"><span class="cb-ico cb-ico-x cb-ico--sm"></span>Cancel</button><button class="button button-destructive" onclick="demos.confirm"><span class="cb-ico cb-ico-alert-triangle cb-ico--sm"></span>Confirm</button></div></div>
         </div>
     </div>
 </body>

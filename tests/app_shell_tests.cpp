@@ -27,9 +27,22 @@ int main()
     const std::string root = "../data/cowbraten/ui/default/";
     const std::string shell = readfile(root + "templates/app_shell.rml");
     const std::string style = readfile(root + "styles/app_shell.rcss");
+    const std::string icons = readfile(root + "icons/icons.rcss");
+    const std::string atlas_1x = readfile(root + "icons/atlas/cowbraten-icons-24.png");
+    const std::string atlas_2x = readfile(root + "icons/atlas/cowbraten-icons-48.png");
     const char *screen_names[] = { "servers", "demos", "profile", "settings" };
 
     check(!shell.empty() && !style.empty(), "load shared application shell");
+    check(!icons.empty() && !atlas_1x.empty() && !atlas_2x.empty(),
+        "load shared icon stylesheet and both sprite atlases");
+    check(shell.find("href=\"../icons/icons.rcss\"") != std::string::npos &&
+          icons.find("@spritesheet cowbraten-icons-1x") != std::string::npos &&
+          icons.find("@media (min-resolution: 2x)") != std::string::npos,
+        "shell loads the resolution-aware icon pack");
+    check(icons.find(".cb-ico-play") != std::string::npos &&
+          icons.find(".cb-ico-server") != std::string::npos &&
+          icons.find(".cb-ico-settings") != std::string::npos,
+        "icon pack exposes core production navigation glyphs");
     check(shell.find("<template name=\"app-shell\" content=\"app-content\">") != std::string::npos &&
           shell.find("id=\"app-content\"") != std::string::npos,
         "shell exposes one reusable content slot");
@@ -78,6 +91,23 @@ int main()
     for(const char *action : global_actions)
         all_global_actions = all_global_actions && shell.find(action) != std::string::npos;
     check(all_global_actions, "shell owns all global navigation actions");
+    check(shell.find("cb-ico-user") != std::string::npos &&
+          shell.find("cb-ico-server") != std::string::npos &&
+          shell.find("cb-ico-film") != std::string::npos &&
+          shell.find("cb-ico-settings") != std::string::npos &&
+          shell.find("cb-ico-power") != std::string::npos,
+        "global navigation uses semantic icons instead of numeric markers");
+
+    const char *standalone_screens[] = { "main", "game_menu", "demo_player" };
+    bool standalone_screens_load_icons = true;
+    for(const char *name : standalone_screens)
+    {
+        const std::string screen = readfile(root + "screens/" + name + ".rml");
+        standalone_screens_load_icons = standalone_screens_load_icons &&
+            screen.find("href=\"../icons/icons.rcss\"") != std::string::npos;
+    }
+    check(standalone_screens_load_icons,
+        "standalone production screens load the shared icon pack");
 
     std::cout << '\n' << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

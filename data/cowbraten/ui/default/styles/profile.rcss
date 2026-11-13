@@ -281,13 +281,24 @@ body
 
 .profile-name-action
 {
-    width: 96dp;
+    width: 116dp;
     height: 34dp;
     margin-top: 17dp;
     flex: none;
     padding: 0 10dp;
     font-size: 10dp;
     line-height: 32dp;
+}
+
+.profile-name-action .cb-ico
+{
+    margin-right: 5dp;
+}
+
+.profile-saved-icon
+{
+    margin-right: 7dp;
+    image-color: var(--color-text-muted);
 }
 
 .profile-name-menu
@@ -754,6 +765,24 @@ body
     background-color: var(--color-primary-pressed);
     border-color: var(--color-primary-hover);
     color: var(--color-text);
+}
+
+.profile-animation-button .cb-ico
+{
+    margin-right: 10dp;
+    image-color: var(--color-text-muted);
+}
+
+.profile-animation-button:hover .cb-ico,
+.profile-animation-button:focus-visible .cb-ico,
+.profile-animation-button.is-selected .cb-ico
+{
+    image-color: var(--color-primary-hover);
+}
+
+.profile-name-remove .cb-ico
+{
+    image-color: var(--color-error);
 }
 
 .profile-scale-panel

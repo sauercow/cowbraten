@@ -204,12 +204,29 @@ body
     color: var(--color-background);
 }
 
+.demo-player-button .cb-ico
+{
+    margin-right: 7dp;
+    image-color: var(--color-text-muted);
+}
+
+.demo-player-button:hover .cb-ico,
+.demo-player-button:focus-visible .cb-ico
+{
+    image-color: var(--color-text);
+}
+
 .demo-player-primary
 {
     min-width: 92dp;
     background-color: var(--color-primary);
     border-color: var(--color-primary);
     color: var(--color-background);
+}
+
+.demo-player-primary .cb-ico
+{
+    image-color: var(--color-background);
 }
 
 .demo-player-speed
@@ -226,6 +243,11 @@ body
 {
     border-color: #F06464AA;
     color: var(--color-error);
+}
+
+.demo-player-stop .cb-ico
+{
+    image-color: var(--color-error);
 }
 
 @media (max-width: 900dp)

@@ -20,7 +20,7 @@
                 </div>
 
                 <button class="button servers-back" onclick="navigation.main">
-                    Back&nbsp;&nbsp;/&nbsp;&nbsp;Main Menu
+                    <span class="cb-ico cb-ico-arrow-left cb-ico--sm"></span>Back&nbsp;&nbsp;/&nbsp;&nbsp;Main Menu
                 </button>
             </div>
 
@@ -40,7 +40,7 @@
 
                 <button class="button button-secondary servers-refresh"
                     onclick="servers.refresh">
-                    Refresh List
+                    <span class="cb-ico cb-ico-refresh cb-ico--sm"></span>Refresh List
                 </button>
             </div>
 
@@ -122,6 +122,7 @@
                     </div>
 
                     <div class="servers-empty" data-if="visible_count == 0">
+                        <span class="cb-ico cb-ico-server-off cb-ico--lg servers-empty-icon"></span>
                         <div class="servers-empty-title">No servers to display</div>
                         <div class="servers-empty-copy">{{ list_status }}</div>
                     </div>
@@ -139,7 +140,7 @@
                     data-attrif-disabled="!can_connect"
                     data-class-is-disabled="!can_connect"
                     onclick="servers.connect">
-                    Connect
+                    <span class="cb-ico cb-ico-log-in cb-ico--sm"></span>Connect
                 </button>
             </div>
 

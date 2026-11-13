@@ -39,6 +39,13 @@ int main()
           screen.find("navigation.profile") != std::string::npos &&
           screen.find("game.disconnect") != std::string::npos,
         "match menu exposes primary navigation actions");
+    check(screen.find("cb-ico-play") != std::string::npos &&
+          screen.find("cb-ico-spectator") != std::string::npos &&
+          screen.find("cb-ico-team-switch") != std::string::npos &&
+          screen.find("cb-ico-server") != std::string::npos &&
+          screen.find("cb-ico-settings") != std::string::npos &&
+          screen.find("cb-ico-log-out") != std::string::npos,
+        "match actions use semantic icons from the shared pack");
     check(screen.find("game.spectator.toggle") != std::string::npos &&
           screen.find("spectator ? 'ON' : 'OFF'") != std::string::npos,
         "spectator action reflects the current player state");

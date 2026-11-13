@@ -2,6 +2,7 @@
 <head>
     <title>Cowbraten Main Menu</title>
     <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../icons/icons.rcss" />
     <link type="text/rcss" href="../styles/controls.rcss" />
     <link type="text/rcss" href="../styles/main_menu.rcss" />
 </head>
@@ -19,7 +20,7 @@
                 </div>
 
                 <button class="button main-close" onclick="navigation.close">
-                    Esc&nbsp;&nbsp;/&nbsp;&nbsp;Return
+                    <span class="cb-ico cb-ico-arrow-left cb-ico--sm"></span>Esc&nbsp;&nbsp;/&nbsp;&nbsp;Return
                 </button>
             </div>
 
@@ -28,42 +29,42 @@
                     <div class="main-section-label">Main Menu</div>
                     <div class="main-nav-list">
                         <button class="nav-item main-nav-item is-selected" onclick="navigation.close">
-                            <span class="main-nav-index">01</span>
+                            <span class="cb-ico cb-ico-play cb-ico--md main-nav-icon"></span>
                             <span class="main-nav-label">Return to Game</span>
                             <span class="main-nav-state">Ready</span>
                         </button>
                         <button class="nav-item main-nav-item" onclick="navigation.servers">
-                            <span class="main-nav-index">02</span>
+                            <span class="cb-ico cb-ico-server cb-ico--md main-nav-icon"></span>
                             <span class="main-nav-label">Servers</span>
                             <span class="main-nav-state">Browse</span>
                         </button>
                         <button class="nav-item main-nav-item" onclick="navigation.demos">
-                            <span class="main-nav-index">03</span>
+                            <span class="cb-ico cb-ico-film cb-ico--md main-nav-icon"></span>
                             <span class="main-nav-label">Demos</span>
                             <span class="main-nav-state">Manage</span>
                         </button>
                         <button class="nav-item main-nav-item" onclick="navigation.profile">
-                            <span class="main-nav-index">04</span>
+                            <span class="cb-ico cb-ico-user cb-ico--md main-nav-icon"></span>
                             <span class="main-nav-label">Profile</span>
                             <span class="main-nav-state">Character</span>
                         </button>
                         <button class="nav-item main-nav-item" onclick="navigation.settings">
-                            <span class="main-nav-index">05</span>
+                            <span class="cb-ico cb-ico-settings cb-ico--md main-nav-icon"></span>
                             <span class="main-nav-label">Settings</span>
                             <span class="main-nav-state">Configure</span>
                         </button>
                         <button class="nav-item main-nav-item" disabled="true">
-                            <span class="main-nav-index">06</span>
+                            <span class="cb-ico cb-ico-terminal cb-ico--md main-nav-icon"></span>
                             <span class="main-nav-label">Console</span>
                             <span class="main-nav-state">Planned</span>
                         </button>
                         <button class="nav-item main-nav-item" disabled="true">
-                            <span class="main-nav-index">07</span>
+                            <span class="cb-ico cb-ico-info cb-ico--md main-nav-icon"></span>
                             <span class="main-nav-label">Credits / About</span>
                             <span class="main-nav-state">Planned</span>
                         </button>
                         <button class="nav-item main-nav-item main-nav-exit" onclick="navigation.exit">
-                            <span class="main-nav-index">08</span>
+                            <span class="cb-ico cb-ico-power cb-ico--md main-nav-icon"></span>
                             <span class="main-nav-label">Exit</span>
                             <span class="main-nav-state">Quit</span>
                         </button>
