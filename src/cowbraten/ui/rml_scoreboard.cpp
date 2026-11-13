@@ -5,13 +5,31 @@
 #include "ui.h"
 
 #include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/ElementDocument.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 
 namespace cowui
 {
+    static Rml::String plain_cube_text(const std::string &text)
+    {
+        Rml::String result;
+        result.reserve(text.size());
+        for(std::size_t i = 0; i < text.size(); ++i)
+        {
+            if(text[i] == '\f' && i + 1 < text.size())
+            {
+                ++i;
+                continue;
+            }
+            result.push_back(text[i]);
+        }
+        return result;
+    }
+
     bool RmlScoreboard::Row::operator==(const Row &other) const
     {
         return group_index == other.group_index &&
@@ -61,9 +79,16 @@ namespace cowui
         else valid = false;
         valid = valid && constructor.RegisterArray<std::vector<Row>>() &&
             constructor.Bind("rows", &rows) &&
+            constructor.Bind("evil_rows", &evil_rows) &&
+            constructor.Bind("good_rows", &good_rows) &&
+            constructor.Bind("spectator_rows", &spectator_rows) &&
             constructor.Bind("server_name", &server_name) &&
             constructor.Bind("match_line", &match_line) &&
             constructor.Bind("time_text", &time_text) &&
+            constructor.Bind("evil_title", &evil_title) &&
+            constructor.Bind("good_title", &good_title) &&
+            constructor.Bind("team_mode", &team_mode) &&
+            constructor.Bind("has_spectators", &has_spectators) &&
             constructor.Bind("show_flags", &show_flags) &&
             constructor.Bind("show_frags", &show_frags) &&
             constructor.Bind("show_deaths", &show_deaths) &&
@@ -94,6 +119,9 @@ namespace cowui
         model = Rml::DataModelHandle();
         context = nullptr;
         rows.clear();
+        evil_rows.clear();
+        good_rows.clear();
+        spectator_rows.clear();
     }
 
     bool RmlScoreboard::loaddocument()
@@ -142,8 +170,9 @@ namespace cowui
     {
         scoreboard::State state;
         scoreboard::readstate(state);
-        server_name = state.server_name;
-        match_line = state.mode_name + "  //  " + state.map_name;
+        server_name = plain_cube_text(state.server_name);
+        match_line = plain_cube_text(state.mode_name) + "  //  " +
+            plain_cube_text(state.map_name);
         time_text = state.intermission ? "INTERMISSION" :
             (state.paused ? "PAUSED" :
                 (state.seconds_remaining >= 0
@@ -164,7 +193,15 @@ namespace cowui
 
         std::vector<scoreboard::Player> players;
         scoreboard::readplayers(players);
-        std::vector<Row> next;
+        const bool next_team_mode = std::any_of(players.begin(), players.end(),
+            [](const scoreboard::Player &player)
+            {
+                return !player.spectator &&
+                    (player.group_name == "good" || player.team == "good" ||
+                     player.group_name == "evil" || player.team == "evil");
+            });
+        std::vector<Row> next, next_evil, next_good, next_spectators;
+        Rml::String next_evil_title = "EVIL", next_good_title = "GOOD";
         for(const scoreboard::Player &player : players)
         {
             Row row;
@@ -182,7 +219,7 @@ namespace cowui
                 player.team == "good";
             row.evil_team = player.group_name == "evil" ||
                 player.team == "evil";
-            row.name = player.name;
+            row.name = plain_cube_text(player.name);
             row.role = player.privilege >= 2 ? "ADMIN" :
                 (player.privilege ? "MASTER" :
                     (player.spectator ? "SPECTATOR" : ""));
@@ -197,12 +234,69 @@ namespace cowui
             row.ping = player.ping < 0 ? "LAG" : Rml::CreateString("%d", player.ping);
             row.pj = player.pj < 0 ? "LAG" : Rml::CreateString("%d", player.pj);
             row.client_num = Rml::CreateString("%d", player.client_num);
-            next.push_back(row);
+            if(player.spectator)
+                next_spectators.push_back(row);
+            else if(next_team_mode && row.good_team)
+            {
+                if(player.group_first) next_good_title = row.group_title;
+                row.group_first = false;
+                next_good.push_back(row);
+            }
+            else if(next_team_mode && row.evil_team)
+            {
+                if(player.group_first) next_evil_title = row.group_title;
+                row.group_first = false;
+                next_evil.push_back(row);
+            }
+            else if(next_team_mode)
+            {
+                row.group_first = false;
+                std::vector<Row> &shorter = next_evil.size() <= next_good.size()
+                    ? next_evil : next_good;
+                shorter.push_back(row);
+            }
+            else next.push_back(row);
         }
         if(next != rows)
         {
             rows.swap(next);
             model.DirtyVariable("rows");
+        }
+        if(next_evil != evil_rows)
+        {
+            evil_rows.swap(next_evil);
+            model.DirtyVariable("evil_rows");
+        }
+        if(next_good != good_rows)
+        {
+            good_rows.swap(next_good);
+            model.DirtyVariable("good_rows");
+        }
+        if(next_spectators != spectator_rows)
+        {
+            spectator_rows.swap(next_spectators);
+            model.DirtyVariable("spectator_rows");
+        }
+        const bool next_has_spectators = !spectator_rows.empty();
+        if(has_spectators != next_has_spectators)
+        {
+            has_spectators = next_has_spectators;
+            model.DirtyVariable("has_spectators");
+        }
+        if(team_mode != next_team_mode)
+        {
+            team_mode = next_team_mode;
+            model.DirtyVariable("team_mode");
+        }
+        if(evil_title != next_evil_title)
+        {
+            evil_title = next_evil_title;
+            model.DirtyVariable("evil_title");
+        }
+        if(good_title != next_good_title)
+        {
+            good_title = next_good_title;
+            model.DirtyVariable("good_title");
         }
         const char *variables[] = { "server_name", "match_line", "time_text",
             "show_flags", "show_frags", "show_deaths", "show_suicides",
@@ -217,5 +311,12 @@ namespace cowui
         const bool should_show = requested && !menu_active;
         if(should_show) sync();
         setvisible(should_show);
+    }
+
+    void RmlScoreboard::scroll(float wheel_delta)
+    {
+        if(!document_visible || !document || wheel_delta == 0.0f) return;
+        if(Rml::Element *list = document->GetElementById("scoreboard-scroll"))
+            list->SetScrollTop(list->GetScrollTop() - wheel_delta * 64.0f);
     }
 }

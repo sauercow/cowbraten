@@ -1045,6 +1045,13 @@ namespace cowui
             return true;
         }
 
+        if(!active_screen && scoreboard_model.visible() &&
+           event.type == SDL_MOUSEWHEEL && event.wheel.y)
+        {
+            scoreboard_model.scroll(float(event.wheel.y));
+            return true;
+        }
+
         if(!active_screen)
             return false;
 

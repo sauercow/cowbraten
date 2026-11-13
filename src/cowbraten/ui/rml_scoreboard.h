@@ -19,6 +19,7 @@ namespace cowui
         void shutdown(Rml::Context *context);
         void request(bool value);
         void update(bool menu_active);
+        void scroll(float wheel_delta);
         bool visible() const { return document_visible; }
 
     private:
@@ -42,8 +43,10 @@ namespace cowui
         Rml::Context *context = nullptr;
         Rml::ElementDocument *document = nullptr;
         Rml::DataModelHandle model;
-        std::vector<Row> rows;
+        std::vector<Row> rows, evil_rows, good_rows, spectator_rows;
         Rml::String server_name, match_line, time_text;
+        Rml::String evil_title = "EVIL", good_title = "GOOD";
+        bool team_mode = false, has_spectators = false;
         bool requested = false, document_visible = false, load_attempted = false;
         bool show_flags = false, show_frags = true, show_deaths = false;
         bool show_suicides = false, show_kpd = false, show_accuracy = false;

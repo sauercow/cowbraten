@@ -95,8 +95,26 @@ int main()
         "long Frags and Deaths labels receive dedicated wider columns");
     check(style.find(".scoreboard-scroll") != std::string::npos &&
           style.find("flex-shrink: 1") != std::string::npos &&
-          style.find("overflow-y: auto") != std::string::npos,
+          style.find("overflow-y: auto") != std::string::npos &&
+          rml.find("id=\"scoreboard-scroll\"") != std::string::npos &&
+          model.find("SetScrollTop") != std::string::npos &&
+          ui.find("scoreboard_model.scroll") != std::string::npos,
         "large player and spectator lists scroll between fixed chrome");
+    check(model.find("plain_cube_text(state.server_name)") != std::string::npos,
+        "server color controls are removed before RmlUi renders the title");
+    check(style.find("min-height: 37dp") != std::string::npos &&
+          style.find("max-height: 90%") != std::string::npos,
+        "dense rows and taller panel keep more players visible at once");
+    check(rml.find("scoreboard-teams") != std::string::npos &&
+          rml.find("player : evil_rows") != std::string::npos &&
+          rml.find("player : good_rows") != std::string::npos &&
+          model.find("Bind(\"evil_rows\"") != std::string::npos &&
+          model.find("Bind(\"good_rows\"") != std::string::npos &&
+          style.find(".scoreboard-team") != std::string::npos,
+        "team matches present red and blue rosters side by side");
+    check(rml.find("player : spectator_rows") != std::string::npos &&
+          style.find(".scoreboard-spectator-grid") != std::string::npos,
+        "spectators use a compact grid below both team columns");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;
