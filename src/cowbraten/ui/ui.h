@@ -72,6 +72,11 @@ namespace cowui
     // The fullscreen demo overlay draws the legacy cursor texture itself so
     // it remains visible above RmlUi without also drawing the engine copy.
     bool ownsplaybackcursor();
+    void consoleline(int type, const char *text);
+    void clearconsole();
+    int filterconsole(int filter);
+    bool chatinputvisible();
+    bool fullconsolevisible();
     bool visible();
 }
 

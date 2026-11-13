@@ -26,6 +26,8 @@ This is the recommended shared development baseline. The `cow-v1.0.1-rc.3` tag r
 - Main menu with working Return to Game, Servers, and Settings routes.
 - Server browser backed by the existing master list, resolver, ping, and connection paths.
 - Server text filtering, empty-server and compatibility filters, sortable columns, stable selection, refresh, and connection.
+- In-game public and team chat presentation backed by Sauer's existing editor, completion, history, and network send paths.
+- Full Console presentation with filtered scrollback, native scrolling, and the existing command editor and execution paths.
 - Settings categories for Game, HUD, Graphics, Audio, Mouse and Keyboard, Crosshair, Chat, and Console.
 
 ### Settings coverage
@@ -87,7 +89,7 @@ The smoke test proves integration and basic rendering. It does not replace inter
 2. Implement Demos using the existing standard and HD demo discovery and playback paths.
 3. Implement Profile around player name, model, team, and persistent identity settings.
 4. Implement About/Credits and an enabled Exit action.
-5. Decide whether Console should be a full RmlUi screen or a deliberate handoff to the existing command line and scrollback UI.
+5. Validate the full RmlUi Console interactively across command, chat, completion, history, clipboard, and scrollback flows.
 6. Migrate game mode and map selection so joining, voting, bot matches, and campaigns no longer depend on a legacy detour during the common player flow.
 
 ### P1: close high-value Settings and server gaps

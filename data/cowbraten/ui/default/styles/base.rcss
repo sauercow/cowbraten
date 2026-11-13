@@ -48,6 +48,17 @@ body
     line-height: 1.35;
 }
 
+.cube-color-0 { color: #40FF80; }
+.cube-color-1 { color: #1A76FF; }
+.cube-color-2 { color: #FFC040; }
+.cube-color-3 { color: #ED2B2C; }
+.cube-color-4 { color: #A0A0A0; }
+.cube-color-5 { color: #C040C0; }
+.cube-color-6 { color: #FF8000; }
+.cube-color-7 { color: #FFFFFF; }
+.cube-color-8 { color: #60F0FF; }
+.cube-color-9 { color: #B5B5B5; }
+
 .screen
 {
     box-sizing: border-box;

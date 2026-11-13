@@ -1,5 +1,7 @@
 #include "ui.h"
 #include "rml_action.h"
+#include "rml_chat.h"
+#include "rml_console.h"
 #include "rml_render.h"
 #include "rml_file.h"
 #include "rml_server_browser.h"
@@ -34,6 +36,8 @@ namespace cowui
     static RmlRenderInterface render_interface;
     static RmlFileInterface file_interface;
     static RmlActionRouter action_router;
+    static RmlChat chat_model;
+    static RmlConsole console_model;
     static RmlServerBrowser server_browser;
     static RmlDemoManager demo_manager;
     static RmlDemoPlayer demo_player;
@@ -681,6 +685,8 @@ namespace cowui
            !action_router.registeraction(
                "navigation.exit",
                quitapplication) ||
+           !chat_model.init(context) ||
+           !console_model.init(context) ||
            !server_browser.init(context, action_router) ||
            !demo_manager.init(context, action_router) ||
            !demo_player.init(context, action_router) ||
@@ -692,6 +698,8 @@ namespace cowui
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
             server_browser.shutdown(context);
+            console_model.shutdown(context);
+            chat_model.shutdown(context);
             action_router.clear();
             theme_style_sheet.reset();
             Rml::Shutdown();
@@ -726,6 +734,8 @@ namespace cowui
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
             server_browser.shutdown(context);
+            console_model.shutdown(context);
+            chat_model.shutdown(context);
             theme_style_sheet.reset();
             Rml::Shutdown();
             context = nullptr;
@@ -899,6 +909,13 @@ namespace cowui
             }
         }
 
+        if(!active_screen && console_model.visible() &&
+           event.type == SDL_MOUSEWHEEL && event.wheel.y)
+        {
+            console_model.scroll(event.wheel.y * 3);
+            return true;
+        }
+
         if(!active_screen)
             return false;
 
@@ -1061,6 +1078,10 @@ namespace cowui
             syncconsoleownership();
 
         demo_player.update(active_screen != nullptr);
+        chat_model.update(
+            active_screen != nullptr,
+            sauerinput::fullconsoleactive());
+        console_model.update();
 
         const bool player_input = demo_player.receivesinput();
         if(demo_player_input_active && !player_input)
@@ -1078,6 +1099,8 @@ namespace cowui
         }
 
         if(!demo_player.visible() &&
+           !chat_model.visible() &&
+           !console_model.visible() &&
            (!active_screen || legacy_console_presentation))
             return;
 
@@ -1099,8 +1122,12 @@ namespace cowui
     {
         if(!initialized ||
            !context ||
-           (!active_screen && !demo_player.visible()) ||
-           (active_screen && legacy_console_presentation) ||
+           (!active_screen &&
+            !demo_player.visible() &&
+            !chat_model.visible() &&
+            !console_model.visible()) ||
+           (active_screen && legacy_console_presentation &&
+            !console_model.visible()) ||
            !render_interface.ready())
         {
             return;
@@ -1110,7 +1137,9 @@ namespace cowui
         context->Render();
         render_interface.endframe();
 
-        if(active_screen && active_screen->id == ScreenId::Profile)
+        if(active_screen &&
+           !legacy_console_presentation &&
+           active_screen->id == ScreenId::Profile)
         {
             profile_model.renderpreview(
                 active_screen->document,
@@ -1317,6 +1346,33 @@ namespace cowui
     {
         return initialized && demo_player.visible() &&
             demo_player.receivesinput();
+    }
+
+    void consoleline(int type, const char *text)
+    {
+        chat_model.pushline(type, text);
+        console_model.pushline(type, text);
+    }
+
+    void clearconsole()
+    {
+        chat_model.clear();
+        console_model.clear();
+    }
+
+    int filterconsole(int filter)
+    {
+        return chat_model.filterlegacyconsole(filter);
+    }
+
+    bool chatinputvisible()
+    {
+        return initialized && !active_screen && chat_model.inputvisible();
+    }
+
+    bool fullconsolevisible()
+    {
+        return initialized && console_model.visible();
     }
 
     bool visible()

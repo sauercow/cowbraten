@@ -448,9 +448,14 @@ extern void processkey(int code, bool isdown, int modstate = 0);
 // Release through normal bind semantics without synthesizing new presses.
 extern void releasepressedbinds();
 extern bool commandlineactive();
+extern int chatcommandmode();
+extern const char *commandlinetext();
+extern int commandlineposition();
+extern const char *commandlineprompt();
 extern bool processconsolebind(int code);
 extern int rendercommand(int x, int y, int w);
 extern int renderconsole(int w, int h, int abovehud);
+extern void scrollconsolelines(int lines);
 extern void conoutf(const char *s, ...) PRINTFARGS(1, 2);
 extern void conoutf(int type, const char *s, ...) PRINTFARGS(2, 3);
 extern void resetcomplete();

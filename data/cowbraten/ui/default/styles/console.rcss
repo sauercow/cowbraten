@@ -1,0 +1,145 @@
+body
+{
+    background-color: transparent;
+    pointer-events: none;
+}
+
+.console-overlay
+{
+    position: absolute;
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    padding: 18dp 24dp 14dp;
+    flex-direction: column;
+    background-color: #090C10F5;
+    pointer-events: none;
+}
+
+.console-header
+{
+    display: flex;
+    height: 38dp;
+    padding-bottom: 10dp;
+    align-items: center;
+    border-bottom-width: 1dp;
+    border-bottom-color: var(--color-border);
+}
+
+.console-brand-mark
+{
+    display: block;
+    width: 28dp;
+    height: 28dp;
+    margin-right: 10dp;
+    padding-top: 4dp;
+    background-color: var(--color-primary);
+    color: #0B0E12;
+    font-size: 14dp;
+    text-align: center;
+}
+
+.console-title
+{
+    flex: 1;
+    color: var(--color-text);
+    font-size: 15dp;
+    letter-spacing: 2dp;
+    text-transform: uppercase;
+}
+
+.console-position
+{
+    color: var(--color-primary);
+    font-size: 12dp;
+    letter-spacing: 2dp;
+}
+
+.console-scrollback
+{
+    display: flex;
+    flex: 1;
+    padding: 12dp 2dp;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+}
+
+.console-line
+{
+    flex: none;
+    min-height: 21dp;
+    color: #C6CDD5;
+    font-size: 16dp;
+    line-height: 21dp;
+    font-effect: shadow(1dp 1dp #000000);
+    white-space: pre-wrap;
+}
+
+.console-line:last-child
+{
+    margin-bottom: 18dp;
+}
+
+.console-line.is-warning { color: var(--color-warning); }
+.console-line.is-error { color: var(--color-error); }
+.console-line.is-echo { color: #B7C7D9; }
+.console-line.is-game { color: var(--color-success); }
+.console-line.is-chat { color: var(--color-text); }
+.console-line.is-team { color: var(--color-secondary); }
+
+.console-command
+{
+    display: flex;
+    min-height: 54dp;
+    padding: 13dp 14dp;
+    align-items: center;
+    background-color: #111820;
+    border-width: 1dp;
+    border-color: var(--color-primary);
+    color: var(--color-text);
+    font-size: 18dp;
+}
+
+.console-command-label
+{
+    flex: none;
+    min-width: 72dp;
+    max-width: 180dp;
+    margin-right: 10dp;
+    overflow: hidden;
+    color: var(--color-primary);
+    font-size: 12dp;
+    letter-spacing: 1dp;
+    text-transform: uppercase;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.console-command-text { white-space: pre; }
+
+.console-command-caret
+{
+    display: inline-block;
+    width: 1dp;
+    height: 22dp;
+    margin: 0 1dp;
+    background-color: var(--color-text);
+}
+
+.console-footer
+{
+    box-sizing: border-box;
+    display: flex;
+    flex: none;
+    height: 30dp;
+    padding-top: 8dp;
+    justify-content: space-between;
+    color: var(--color-text-muted);
+    font-size: 11dp;
+    letter-spacing: 1dp;
+    text-transform: uppercase;
+}

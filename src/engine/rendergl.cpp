@@ -2472,7 +2472,8 @@ void gl_drawhud()
         drawdamagecompass(w, h);
     }
 
-    if(fullconsole) drawfullconsoleshade(w, h);
+    if(fullconsole && !cowui::fullconsolevisible())
+        drawfullconsoleshade(w, h);
 
     hudshader->set();
 
@@ -2624,12 +2625,15 @@ void gl_drawhud()
     pushhudmatrix();
     hudmatrix.scale(conscale, conscale, 1);
     flushhudmatrix();
-    const bool defercommand = cowui::modalactive() && !fullconsole;
+    const bool defercommand = cowui::fullconsolevisible() ||
+        ((cowui::modalactive() || cowui::chatinputvisible()) &&
+         !fullconsole);
     int commandheight = defercommand
         ? 0
         : rendercommand(FONTH/2, abovehud - FONTH/2, conw-FONTH);
     abovehud -= max(fullconsole ? FONTH : 0, commandheight);
-    if(!hidehud || fullconsole) renderconsole(conw, conh, abovehud - FONTH/2);
+    if((!hidehud || fullconsole) && !cowui::fullconsolevisible())
+        renderconsole(conw, conh, abovehud - FONTH/2);
     pophudmatrix();
 
     drawcrosshair(w, h);

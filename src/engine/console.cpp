@@ -1,6 +1,7 @@
 // console.cpp: the console buffer, its display, and command line control
 
 #include "engine.h"
+#include "ui/ui.h"
 
 #define MAXCONLINES 1000
 struct cline { char *line; int type, outtime; };
@@ -11,6 +12,7 @@ string commandbuf;
 char *commandaction = NULL, *commandprompt = NULL;
 enum { CF_COMPLETE = 1<<0, CF_EXECUTE = 1<<1, CF_GAMECOMPLETE = 1<<2 };
 int commandflags = 0, commandpos = -1;
+static int commandchatmode = 0;
 
 VARFP(maxcon, 10, 200, MAXCONLINES, { while(conlines.length() > maxcon) delete[] conlines.pop().line; });
 
@@ -37,6 +39,7 @@ void conline(int type, const char *sf)        // add a line to the console buffe
     cl.type = type;
     cl.outtime = totalmillis;                // for how long to keep line on screen
     copystring(cl.line, sf, CONSTRLEN);
+    cowui::consoleline(type, sf);
 }
 
 void conoutfv(int type, const char *fmt, va_list args)
@@ -94,10 +97,18 @@ void setconskip(int &skip, int filter, int n)
     }
 }
 
+void scrollconsolelines(int lines)
+{
+    if(lines) setconskip(conskip, fullconfilter, lines);
+}
+
 ICOMMAND(conskip, "i", (int *n), setconskip(conskip, fullconsole ? fullconfilter : confilter, *n));
 ICOMMAND(miniconskip, "i", (int *n), setconskip(miniconskip, miniconfilter, *n));
 
-ICOMMAND(clearconsole, "", (), { while(conlines.length()) delete[] conlines.pop().line; });
+ICOMMAND(clearconsole, "", (), {
+    while(conlines.length()) delete[] conlines.pop().line;
+    cowui::clearconsole();
+});
 
 int drawconlines(int conskip, int confade, int conwidth, int conheight, int conoff, int filter, int y = 0, int dir = 1)
 {
@@ -154,8 +165,8 @@ int renderconsole(int w, int h, int abovehud)                   // render buffer
     }
     
     int conheight = min(FONTH*consize, h - 2*(conpad + conoff));
-    int y = drawconlines(conskip, confade, conwidth, conheight, conpad+conoff, confilter);
-    if(miniconsize && miniconwidth) drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*(conpad + conoff)))/100, min(FONTH*miniconsize, abovehud - y), conpad+conoff, miniconfilter, abovehud, -1);
+    int y = drawconlines(conskip, confade, conwidth, conheight, conpad+conoff, cowui::filterconsole(confilter));
+    if(miniconsize && miniconwidth) drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*(conpad + conoff)))/100, min(FONTH*miniconsize, abovehud - y), conpad+conoff, cowui::filterconsole(miniconfilter), abovehud, -1);
     return y;
 }
 
@@ -307,6 +318,7 @@ bool cleardefaultkeybind(const char *key, const char *action)
 void inputcommand(char *init, char *action = NULL, char *prompt = NULL, const char *flags = NULL) // turns input to the command line on or off
 {
     commandmillis = init ? totalmillis : -1;
+    commandchatmode = init && action && strstr(action, "sayteam") ? 2 : 0;
     textinput(commandmillis >= 0, TI_CONSOLE);
     keyrepeat(commandmillis >= 0, KR_CONSOLE);
     copystring(commandbuf, init ? init : "");
@@ -326,7 +338,10 @@ void inputcommand(char *init, char *action = NULL, char *prompt = NULL, const ch
     if(init && init[0] == '/') commandflags |= CF_COMPLETE|CF_EXECUTE;
 }
 
-ICOMMAND(saycommand, "C", (char *init), inputcommand(init, NULL, NULL, "g"));
+ICOMMAND(saycommand, "C", (char *init), {
+    inputcommand(init, NULL, NULL, "g");
+    if(commandlineactive()) commandchatmode = 1;
+});
 COMMAND(inputcommand, "ssss");
 
 struct hline
@@ -510,6 +525,26 @@ bool commandlineactive()
     return commandmillis >= 0;
 }
 
+int chatcommandmode()
+{
+    return commandlineactive() ? commandchatmode : 0;
+}
+
+const char *commandlinetext()
+{
+    return commandlineactive() ? commandbuf : "";
+}
+
+int commandlineposition()
+{
+    return commandlineactive() ? commandpos : -1;
+}
+
+const char *commandlineprompt()
+{
+    return commandlineactive() && commandprompt ? commandprompt : "";
+}
+
 static bool isconsolebind(const char *action)
 {
     while(iscubespace(*action)) ++action;
@@ -559,7 +594,19 @@ bool processconsolebind(int code)
     if(!isconsolebind(action))
         return false;
 
+    int requestedchat = 0;
+    while(iscubespace(*action)) ++action;
+    if(!strncmp(action, "saycommand", 10) &&
+       (!action[10] || iscubespace(action[10])))
+        requestedchat = 1;
+    else if(!strncmp(action, "sayteamcommand", 14) &&
+            (!action[14] || iscubespace(action[14])))
+        requestedchat = 2;
+
     execbind(*key, true);
+
+    if(commandlineactive() && requestedchat)
+        commandchatmode = requestedchat;
 
     if(!commandlineactive())
         execbind(*key, false);

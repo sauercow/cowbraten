@@ -1,0 +1,41 @@
+<rml>
+<head>
+    <title>Cowbraten Chat</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/chat.rcss" />
+</head>
+<body data-model="chat">
+    <div class="console-feed">
+        <div class="console-message" data-for="message : console_messages"
+            data-rml="message.rml"
+            data-style-opacity="message.opacity"
+            data-class-is-warning="message.warning"
+            data-class-is-error="message.error"
+            data-class-is-echo="message.echo"
+            data-class-is-game="message.game"
+            data-class-is-chat="message.chat"
+            data-class-is-team="message.team"></div>
+    </div>
+    <div class="chat-overlay" data-class-is-composing="input_active">
+        <div class="chat-message-list">
+            <div class="chat-message" data-for="message : messages"
+                data-style-opacity="message.opacity"
+                data-class-is-warning="message.warning"
+                data-class-is-error="message.error"
+                data-class-is-echo="message.echo"
+                data-class-is-game="message.game"
+                data-class-is-chat="message.chat"
+                data-class-is-team="message.team">
+                <span class="chat-message-channel">{{ message.label }}</span>
+                <span class="chat-message-text" data-rml="message.rml"></span>
+            </div>
+        </div>
+        <div class="chat-composer" data-if="input_active"
+            data-class-is-team="input_team">
+            <span class="chat-composer-channel">{{ input_label }}</span>
+            <span class="chat-composer-text">{{ input_before }}</span><span class="chat-composer-caret"></span><span class="chat-composer-text">{{ input_after }}</span>
+            <span class="chat-composer-hint">Enter to send&nbsp;&nbsp;//&nbsp;&nbsp;Esc to cancel</span>
+        </div>
+    </div>
+</body>
+</rml>

@@ -1,0 +1,37 @@
+<rml>
+<head>
+    <title>Cowbraten Console</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/console.rcss" />
+</head>
+<body data-model="console">
+    <div class="console-overlay">
+        <div class="console-header">
+            <span class="console-brand-mark">C</span>
+            <span class="console-title">Cowbraten Console</span>
+            <span class="console-position">{{ position_label }}</span>
+        </div>
+
+        <div class="console-scrollback">
+            <div class="console-line" data-for="line : lines"
+                data-rml="line.rml"
+                data-class-is-warning="line.warning"
+                data-class-is-error="line.error"
+                data-class-is-chat="line.chat"
+                data-class-is-team="line.team"
+                data-class-is-echo="line.echo"
+                data-class-is-game="line.game"></div>
+        </div>
+
+        <div class="console-command" data-if="input_active">
+            <span class="console-command-label">{{ input_label }}</span>
+            <span class="console-command-text">{{ input_before }}</span><span class="console-command-caret"></span><span class="console-command-text">{{ input_after }}</span>
+        </div>
+
+        <div class="console-footer">
+            <span>Mouse wheel / KP- / KP+ scroll</span>
+            <span>Toggle console to close</span>
+        </div>
+    </div>
+</body>
+</rml>

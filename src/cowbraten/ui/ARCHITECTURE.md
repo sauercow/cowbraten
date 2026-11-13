@@ -110,13 +110,12 @@ closing or hiding the active RmlUi screen. Its normal `saycommand`,
 `sayteamcommand`, and `inputcommand` key bindings are recognized by the legacy
 input layer only when no RmlUi text input is active. While an editable control
 has focus, RmlUi owns every keyboard and text event so printable bind keys are
-inserted rather than opening the legacy command line. RmlUi releases control
-focus when a legacy command line legitimately opens, remains visible, and the
-engine defers that command line to a post-RmlUi render pass. Passive console
-messages remain below modal RmlUi documents. The full legacy console has
-exclusive presentation ownership instead: `toggleconsole` hides the cached
-RmlUi document until the console closes, then restores the same screen while
-retaining the menu's existing cursor/grab session.
+inserted rather than opening the command line. RmlUi releases control focus
+when a command line legitimately opens, while the engine keeps ownership of
+editing, completion, history, and bind processing. Public and team input use
+the gameplay Chat overlay. `toggleconsole` hides the cached screen and shows
+the full RmlUi Console overlay, then restores the same screen when it closes
+while retaining the menu's existing cursor/grab session.
 
 Legacy `showgui` calls pass through an exact-name compatibility router before
 the legacy menu table. The currently migrated names are `main` -> Main,
@@ -542,8 +541,33 @@ custom filter bit. `teamcolorchat` remains a separate persistent boolean that
 controls player-name coloring when chat lines are formatted. All five values
 apply immediately and are read back from their fixed legacy idents after each
 write, on Chat activation, on Settings activation, and after legacy-console
-handoff. Message delivery, `saycommand`, `sayteamcommand`, input ownership,
-and scrollback are unchanged.
+handoff. Message delivery, completion, history, and scrollback remain owned by
+Sauer. The gameplay presentation is now an RmlUi overlay. The complete
+filtered top-left feed and bottom-left mini-console are mirrored into separate
+typed message lists with their native capacities and fade times; public and
+team command-line state is read through a narrow bridge and rendered with a
+channel label and caret. The legacy editor still processes text and keys and
+performs the actual send, so protocol behavior is unchanged. Once the RmlUi
+document is available, both passive legacy render masks are suppressed to
+avoid duplicate lines. If it cannot load, those masks remain untouched as a
+fallback. The full Console overlay retains the complete filtered scrollback,
+reflects native `conskip`, and uses the same command editor for generic
+`inputcommand`.
+
+The Console overlay mirrors every engine console line into a bounded typed
+archive, including tagged-line replacement semantics. Its visible window is
+rebuilt from `fullconfilter` and `conskip`; `clearconsole` clears both the
+engine queue and the mirror. Warning, error, echo, game, public-chat, and
+team-chat types receive semantic presentation without changing log output.
+Embedded Cube color controls are converted to escaped RmlUi spans, including
+the save/restore stack used by player names, so native team and duplicate-name
+colors survive without allowing player text to inject markup. The full-console
+mouse wheel advances the same native `conskip` value in three-line steps; the
+existing keyboard and bind paths remain available.
+RmlUi only owns rendering: the engine remains authoritative for toggling,
+scrolling, cursor movement, clipboard, completion, history, execution, and
+chat delivery. If the Console document cannot load, the legacy renderer
+remains available.
 
 `confade` affects the complete top-left console feed, while `miniconfade`,
 `miniconsize`, and `miniconwidth` affect every message type a user may route
