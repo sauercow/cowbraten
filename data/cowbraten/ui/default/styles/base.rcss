@@ -3,6 +3,7 @@ body
     --color-background: #0E1012;
     --color-surface: #171A1D;
     --color-surface-2: #202428;
+    --color-overlay-panel: #0B1015ED;
     --color-border: #30343A;
     --color-text: #E6E7EA;
     --color-text-muted: #A8ADB3;
@@ -32,6 +33,25 @@ body
     --radius-control: 2dp;
     --radius-panel: 4dp;
 
+    /*
+     * Semantic typography tokens. Screens should consume these instead of
+     * naming a typeface or repeating the common text sizes directly. This
+     * keeps theme and future accessibility presets small and predictable.
+     */
+    --font-interface: Lato;
+    --font-size-caption: 8dp;
+    --font-size-label: 9dp;
+    --font-size-control: 10dp;
+    --font-size-metadata: 11dp;
+    --font-size-small: 12dp;
+    --font-size-body: 13dp;
+    --font-size-body-large: 14dp;
+    --font-size-subtitle: 16dp;
+    --font-size-title: 20dp;
+    --font-size-display: 32dp;
+    --letter-spacing-label: 1dp;
+    --letter-spacing-title: 2dp;
+
     margin: 0;
     display: block;
     width: 100%;
@@ -41,10 +61,10 @@ body
     background-color: var(--color-background);
     color: var(--color-text);
 
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-style: normal;
     font-weight: normal;
-    font-size: 16dp;
+    font-size: var(--font-size-subtitle);
     line-height: 1.35;
 }
 
@@ -184,17 +204,17 @@ scrollbarhorizontal sliderarrowinc
     display: block;
     margin-bottom: var(--space-1);
     color: var(--color-primary);
-    font-size: 12dp;
-    letter-spacing: 2dp;
+    font-size: var(--font-size-small);
+    letter-spacing: var(--letter-spacing-title);
     text-transform: uppercase;
 }
 
 .display-title
 {
     display: block;
-    font-size: 32dp;
+    font-size: var(--font-size-display);
     line-height: 1;
-    letter-spacing: 2dp;
+    letter-spacing: var(--letter-spacing-title);
     text-transform: uppercase;
 }
 
@@ -203,8 +223,8 @@ scrollbarhorizontal sliderarrowinc
     display: block;
     margin-bottom: var(--space-2);
     color: var(--color-primary);
-    font-size: 16dp;
-    letter-spacing: 1dp;
+    font-size: var(--font-size-subtitle);
+    letter-spacing: var(--letter-spacing-label);
     text-transform: uppercase;
 }
 
@@ -212,15 +232,15 @@ scrollbarhorizontal sliderarrowinc
 {
     display: block;
     color: var(--color-text-muted);
-    font-size: 14dp;
+    font-size: var(--font-size-body-large);
 }
 
 .data-text
 {
     display: block;
     color: var(--color-text-muted);
-    font-size: 12dp;
-    letter-spacing: 1dp;
+    font-size: var(--font-size-small);
+    letter-spacing: var(--letter-spacing-label);
 }
 
 .component-grid

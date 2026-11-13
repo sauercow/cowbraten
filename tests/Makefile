@@ -17,7 +17,7 @@ $(RMLUI_BUILD)/librmlui.a: rmlui
 demo_library_tests: demo_library_tests.cpp ../src/cowbraten/ui/demo_library.cpp ../src/cowbraten/ui/demo_library.h
 	$(CXX) $(CXXFLAGS) -I../src/cowbraten/ui -o $@ demo_library_tests.cpp ../src/cowbraten/ui/demo_library.cpp -lz
 
-demo_visualization_tests: demo_visualization_tests.cpp ../src/fpsgame/render.cpp ../src/cowbraten/demohd.cpp ../src/engine/rendergl.cpp ../src/engine/rendermodel.cpp ../data/cowbraten/demoxray.cfg ../data/cowbraten/ui/default/screens/demo_player.rml ../src/cowbraten/ui/rml_demo_player.cpp
+demo_visualization_tests: demo_visualization_tests.cpp ../src/fpsgame/render.cpp ../src/cowbraten/demohd.cpp ../src/engine/rendergl.cpp ../src/engine/rendermodel.cpp ../data/cowbraten/demoxray.cfg ../data/cowbraten/ui/default/screens/demo_player.rml ../data/cowbraten/ui/default/styles/base.rcss ../data/cowbraten/ui/default/styles/demo_player.rcss ../src/cowbraten/ui/rml_demo_player.cpp
 	$(CXX) $(CXXFLAGS) -o $@ demo_visualization_tests.cpp
 
 settings_ui_tests: settings_ui_tests.cpp ../data/cowbraten/ui/default/screens/settings.rml ../src/cowbraten/ui/rml_settings.cpp

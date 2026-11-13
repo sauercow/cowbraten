@@ -9,15 +9,24 @@
 <body data-model="demo_player">
     <div class="demo-player" data-class-is-interactive="interactive">
         <div class="demo-player-controls">
-            <div class="demo-player-status-row">
+            <div class="demo-player-header">
+                <div class="demo-player-heading-icon"><span class="cb-ico cb-ico-film"></span></div>
+                <div class="demo-player-heading-copy">
+                    <strong>Demo playback</strong>
+                    <span>{{ map_name }}&nbsp;&nbsp;//&nbsp;&nbsp;{{ mode_name }}&nbsp;&nbsp;//&nbsp;&nbsp;{{ camera_name }}</span>
+                </div>
+                <div class="demo-player-header-spacer"></div>
+                <div class="demo-player-hint">{{ interactive ? 'Release Alt' : 'Hold Alt' }}</div>
                 <div class="demo-player-status" data-class-is-paused="paused">
-                    <span class="demo-player-status-dot"></span>
+                    <span class="cb-ico cb-ico-play" data-if="!paused"></span>
+                    <span class="cb-ico cb-ico-pause" data-if="paused"></span>
                     <strong>{{ paused ? 'Paused' : 'Playing' }}</strong>
                 </div>
+                <div class="demo-player-header-divider"></div>
                 <div class="demo-player-clock">{{ position_text }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ duration_text }}</div>
-                <div class="demo-player-metadata">{{ map_name }}&nbsp;&nbsp;//&nbsp;&nbsp;{{ mode_name }}&nbsp;&nbsp;//&nbsp;&nbsp;{{ camera_name }}</div>
-                <div class="demo-player-hint">{{ interactive ? 'Release Alt to return to camera' : 'Hold Alt to interact' }}</div>
             </div>
+
+            <div class="demo-player-rule"><span></span></div>
 
             <button class="demo-player-timeline" onclick="demo-player.seek">
                 <span class="demo-player-track">
@@ -27,15 +36,21 @@
             </button>
 
             <div class="demo-player-button-row">
-                <button class="demo-player-button demo-player-step" onclick="demo-player.step-back"><span class="cb-ico cb-ico-skip-back cb-ico--sm"></span>Frame -</button>
-                <button class="demo-player-button" onclick="demo-player.rewind"><span class="cb-ico cb-ico-rewind cb-ico--sm"></span>-5 sec</button>
-                <button class="demo-player-button demo-player-primary" onclick="demo-player.toggle"><span class="cb-ico cb-ico-play cb-ico--sm" data-if="paused"></span><span class="cb-ico cb-ico-pause cb-ico--sm" data-if="!paused"></span>{{ paused ? 'Play' : 'Pause' }}</button>
-                <button class="demo-player-button" onclick="demo-player.forward"><span class="cb-ico cb-ico-fast-forward cb-ico--sm"></span>+5 sec</button>
-                <button class="demo-player-button demo-player-step" onclick="demo-player.step-forward"><span class="cb-ico cb-ico-skip-forward cb-ico--sm"></span>Frame +</button>
-                <button class="demo-player-button demo-player-speed" onclick="demo-player.speed"><span class="cb-ico cb-ico-gauge cb-ico--sm"></span>Speed&nbsp;&nbsp;{{ speed_text }}</button>
-                <button class="demo-player-button demo-player-analysis" data-class-is-active="xray_enabled" onclick="demo-player.xray"><span class="cb-ico cb-ico-eye cb-ico--sm"></span>X-RAY</button>
-                <button class="demo-player-button demo-player-analysis" data-class-is-active="hitbox_enabled" onclick="demo-player.hitbox"><span class="cb-ico cb-ico-crosshair cb-ico--sm"></span>Hitbox</button>
+                <div class="demo-player-transport">
+                    <button class="demo-player-button demo-player-step" onclick="demo-player.step-back"><span class="cb-ico cb-ico-skip-back cb-ico--sm"></span>Frame -</button>
+                    <button class="demo-player-button" onclick="demo-player.rewind"><span class="cb-ico cb-ico-rewind cb-ico--sm"></span>-5 sec</button>
+                    <button class="demo-player-button demo-player-primary" onclick="demo-player.toggle"><span class="cb-ico cb-ico-play cb-ico--sm" data-if="paused"></span><span class="cb-ico cb-ico-pause cb-ico--sm" data-if="!paused"></span>{{ paused ? 'Play' : 'Pause' }}</button>
+                    <button class="demo-player-button" onclick="demo-player.forward"><span class="cb-ico cb-ico-fast-forward cb-ico--sm"></span>+5 sec</button>
+                    <button class="demo-player-button demo-player-step" onclick="demo-player.step-forward"><span class="cb-ico cb-ico-skip-forward cb-ico--sm"></span>Frame +</button>
+                    <button class="demo-player-button demo-player-speed" onclick="demo-player.speed"><span class="cb-ico cb-ico-gauge cb-ico--sm"></span>{{ speed_text }}<span class="cb-ico cb-ico-chevron-down demo-player-chevron"></span></button>
+                </div>
+                <div class="demo-player-divider"></div>
+                <div class="demo-player-analysis-group">
+                    <button class="demo-player-button demo-player-analysis" data-class-is-active="xray_enabled" onclick="demo-player.xray"><span class="cb-ico cb-ico-eye cb-ico--sm"></span>X-RAY</button>
+                    <button class="demo-player-button demo-player-analysis" data-class-is-active="hitbox_enabled" onclick="demo-player.hitbox"><span class="cb-ico cb-ico-crosshair cb-ico--sm"></span>Hitbox</button>
+                </div>
                 <div class="demo-player-spacer"></div>
+                <div class="demo-player-divider demo-player-utility-divider"></div>
                 <button class="demo-player-button" onclick="demo-player.library"><span class="cb-ico cb-ico-film cb-ico--sm"></span>Library</button>
                 <button class="demo-player-button demo-player-stop" onclick="demo-player.stop"><span class="cb-ico cb-ico-stop cb-ico--sm"></span>End demo</button>
             </div>

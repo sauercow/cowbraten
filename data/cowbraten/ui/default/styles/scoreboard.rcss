@@ -22,7 +22,7 @@ body
     max-height: 90%;
     flex-direction: column;
     overflow: hidden;
-    background-color: #0B1015ED;
+    background-color: var(--color-overlay-panel);
     border-width: 1dp;
     border-color: #52606D;
     border-radius: 5dp;

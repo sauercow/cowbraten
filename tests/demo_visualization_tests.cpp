@@ -31,6 +31,10 @@ int main()
     const std::string shader = readfile("../data/cowbraten/demoxray.cfg");
     const std::string screen = readfile(
         "../data/cowbraten/ui/default/screens/demo_player.rml");
+    const std::string base_style = readfile(
+        "../data/cowbraten/ui/default/styles/base.rcss");
+    const std::string player_style = readfile(
+        "../data/cowbraten/ui/default/styles/demo_player.rcss");
     const std::string player = readfile(
         "../src/cowbraten/ui/rml_demo_player.cpp");
 
@@ -63,6 +67,14 @@ int main()
     check(render.find("demoxrayreset();") == std::string::npos &&
           demohd.find("demoxrayreset();") != std::string::npos,
         "a new or closed demo resets visualization state");
+    check(base_style.find("--font-interface: Lato;") != std::string::npos &&
+          base_style.find("--font-size-control:") != std::string::npos &&
+          player_style.find("--demo-control-height:") != std::string::npos &&
+          player_style.find("font-family: var(--font-interface);") !=
+              std::string::npos &&
+          player_style.find("font-size: var(--demo-control-size);") !=
+              std::string::npos,
+        "demo player consumes global typography and local density tokens");
 
     std::cout << '\n' << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;
