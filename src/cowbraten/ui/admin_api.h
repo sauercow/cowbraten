@@ -23,6 +23,7 @@ namespace cowui
             int client_num = -1;
             std::string name;
             std::string team;
+            std::string version;
             bool spectator = false;
             int privilege = 0;
             bool local = false;

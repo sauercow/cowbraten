@@ -87,6 +87,7 @@ UI_OBJS= \
 	cowbraten/ui/demo_library.o \
 	cowbraten/ui/rml_demo_manager.o \
 	cowbraten/ui/rml_demo_player.o \
+	cowbraten/ui/rml_editor.o \
 	cowbraten/ui/rml_game_menu.o \
 	cowbraten/ui/rml_game_setup.o \
 	cowbraten/ui/rml_system.o \
@@ -111,6 +112,8 @@ UI_OBJS= \
 	cowbraten/ui/sauer_admin_bridge.o \
 	cowbraten/ui/utility_api.o \
 	cowbraten/ui/sauer_utility_bridge.o \
+	cowbraten/ui/editor_api.o \
+	cowbraten/ui/sauer_editor_bridge.o \
 	cowbraten/ui/sauer_profile_bridge.o \
 	cowbraten/ui/sauer_server_bridge.o \
 	cowbraten/ui/scoreboard_api.o \
@@ -223,7 +226,7 @@ clean:
 
 $(CLIENT_OBJS): CXXFLAGS += $(INCLUDES) $(CLIENT_INCLUDES) -MMD -MP
 
-cowbraten/ui/ui.o cowbraten/ui/rml_action.o cowbraten/ui/rml_chat.o cowbraten/ui/rml_console.o cowbraten/ui/rml_render.o cowbraten/ui/rml_file.o cowbraten/ui/rml_server_browser.o cowbraten/ui/rml_scoreboard.o cowbraten/ui/rml_demo_manager.o cowbraten/ui/rml_demo_player.o cowbraten/ui/rml_game_menu.o cowbraten/ui/rml_game_setup.o cowbraten/ui/rml_system.o cowbraten/ui/rml_utilities.o cowbraten/ui/rml_profile.o cowbraten/ui/rml_settings.o: CXXFLAGS += -Ithird_party/RmlUi/Include -DRMLUI_STATIC_LIB -fexceptions -frtti
+cowbraten/ui/ui.o cowbraten/ui/rml_action.o cowbraten/ui/rml_chat.o cowbraten/ui/rml_console.o cowbraten/ui/rml_render.o cowbraten/ui/rml_file.o cowbraten/ui/rml_server_browser.o cowbraten/ui/rml_scoreboard.o cowbraten/ui/rml_demo_manager.o cowbraten/ui/rml_demo_player.o cowbraten/ui/rml_editor.o cowbraten/ui/rml_game_menu.o cowbraten/ui/rml_game_setup.o cowbraten/ui/rml_system.o cowbraten/ui/rml_utilities.o cowbraten/ui/rml_profile.o cowbraten/ui/rml_settings.o: CXXFLAGS += -Ithird_party/RmlUi/Include -DRMLUI_STATIC_LIB -fexceptions -frtti
 
 $(SERVER_OBJS): CXXFLAGS += $(INCLUDES) -DSTANDALONE -MMD -MP
 

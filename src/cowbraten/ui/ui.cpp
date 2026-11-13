@@ -8,6 +8,7 @@
 #include "rml_scoreboard.h"
 #include "rml_demo_manager.h"
 #include "rml_demo_player.h"
+#include "rml_editor.h"
 #include "rml_game_menu.h"
 #include "rml_game_setup.h"
 #include "rml_profile.h"
@@ -51,6 +52,7 @@ namespace cowui
     static RmlGameSetup game_setup_model;
     static RmlSystem system_model;
     static RmlUtilities utilities_model;
+    static RmlEditor editor_model;
     static RmlProfile profile_model;
     static RmlSettings settings_model;
     static Rml::Context *context = nullptr;
@@ -87,6 +89,11 @@ namespace cowui
         {
             ScreenId::Utilities,
             "data/cowbraten/ui/default/screens/utilities.rml",
+            nullptr
+        },
+        {
+            ScreenId::Editor,
+            "data/cowbraten/ui/default/screens/editor.rml",
             nullptr
         },
         {
@@ -339,6 +346,13 @@ namespace cowui
         event.StopPropagation();
         preservegamemenubackstack();
         show(ScreenId::Utilities);
+    }
+
+    static void showeditorscreen(Rml::Event &event)
+    {
+        event.StopPropagation();
+        preservegamemenubackstack();
+        show(ScreenId::Editor);
     }
 
     static void showdemoscreen(Rml::Event &event)
@@ -765,6 +779,9 @@ namespace cowui
                "navigation.utilities",
                showutilitiesscreen) ||
            !action_router.registeraction(
+               "navigation.editor",
+               showeditorscreen) ||
+           !action_router.registeraction(
                "navigation.servers",
                showserverbrowser) ||
            !action_router.registeraction(
@@ -789,11 +806,13 @@ namespace cowui
            !game_setup_model.init(context, action_router) ||
            !system_model.init(context, action_router) ||
            !utilities_model.init(context, action_router) ||
+           !editor_model.init(context, action_router) ||
            !profile_model.init(context, action_router) ||
            !settings_model.init(context, action_router))
         {
             settings_model.shutdown(context);
             profile_model.shutdown(context);
+            editor_model.shutdown(context);
             utilities_model.shutdown(context);
             system_model.shutdown(context);
             game_setup_model.shutdown(context);
@@ -835,6 +854,7 @@ namespace cowui
         {
             settings_model.shutdown(context);
             profile_model.shutdown(context);
+            editor_model.shutdown(context);
             utilities_model.shutdown(context);
             system_model.shutdown(context);
             game_setup_model.shutdown(context);
@@ -1290,6 +1310,8 @@ namespace cowui
                 settings_model.activate();
             else if(id == ScreenId::Utilities)
                 utilities_model.activate();
+            else if(id == ScreenId::Editor)
+                editor_model.activate();
 
             return true;
         }
@@ -1308,6 +1330,8 @@ namespace cowui
             system_model.activate();
         else if(id == ScreenId::Utilities)
             utilities_model.activate();
+        else if(id == ScreenId::Editor)
+            editor_model.activate();
         else if(id == ScreenId::GameMenu)
             game_menu_model.activate();
 
@@ -1385,7 +1409,8 @@ namespace cowui
             if(!show(ScreenId::Settings)) return false;
             return settings_model.activatelegacyroute(name);
         }
-        else if(!std::strcmp(name, "master"))
+        else if(!std::strcmp(name, "master") ||
+                !std::strcmp(name, "cowbratenusage"))
         {
             if(!show(ScreenId::System)) return false;
             system_model.activate(0);
@@ -1413,6 +1438,75 @@ namespace cowui
         {
             if(!show(ScreenId::Utilities)) return false;
             utilities_model.activate(2);
+            return true;
+        }
+        else if(!std::strcmp(name, "editing") ||
+                !std::strcmp(name, "quickedit") ||
+                !std::strcmp(name, "brushes"))
+        {
+            if(!show(ScreenId::Editor)) return false;
+            editor_model.activate(0);
+            return true;
+        }
+        else if(!std::strcmp(name, "maplighting"))
+        {
+            if(!show(ScreenId::Editor)) return false;
+            editor_model.activate(2);
+            return true;
+        }
+        else if(!std::strcmp(name, "materials") ||
+                !std::strcmp(name, "postfx") ||
+                !std::strcmp(name, "seltexinfo"))
+        {
+            if(!show(ScreenId::Editor)) return false;
+            editor_model.activate(3);
+            return true;
+        }
+        else if(!std::strcmp(name, "triggers") ||
+                !std::strcmp(name, "trigger2") ||
+                !std::strcmp(name, "trigger3") ||
+                !std::strcmp(name, "newlight") ||
+                !std::strcmp(name, "newteleport") ||
+                !std::strcmp(name, "mapmodels") ||
+                !std::strcmp(name, "monsters"))
+        {
+            if(!show(ScreenId::Editor)) return false;
+            editor_model.activate(1);
+            return true;
+        }
+        else if(!std::strcmp(name, "light") ||
+                !std::strcmp(name, "spotlight") ||
+                !std::strcmp(name, "playerstart") ||
+                !std::strcmp(name, "teleport") ||
+                !std::strcmp(name, "teledest") ||
+                !std::strcmp(name, "monster") ||
+                !std::strcmp(name, "mapmodel") ||
+                !std::strcmp(name, "envmap") ||
+                !std::strcmp(name, "jumppad") ||
+                !std::strcmp(name, "sound") ||
+                !std::strcmp(name, "particles") ||
+                !std::strcmp(name, "shells") ||
+                !std::strcmp(name, "bullets") ||
+                !std::strcmp(name, "rockets") ||
+                !std::strcmp(name, "riflerounds") ||
+                !std::strcmp(name, "grenades") ||
+                !std::strcmp(name, "cartridges") ||
+                !std::strcmp(name, "health") ||
+                !std::strcmp(name, "healthboost") ||
+                !std::strcmp(name, "greenarmour") ||
+                !std::strcmp(name, "yellowarmour") ||
+                !std::strcmp(name, "quaddamage") ||
+                !std::strcmp(name, "carrot") ||
+                !std::strcmp(name, "base") ||
+                !std::strcmp(name, "respawnpoint") ||
+                !std::strcmp(name, "box") ||
+                !std::strcmp(name, "barrel") ||
+                !std::strcmp(name, "platform") ||
+                !std::strcmp(name, "elevator") ||
+                !std::strcmp(name, "flag"))
+        {
+            if(!show(ScreenId::Editor)) return false;
+            editor_model.activate(5);
             return true;
         }
         else if(!std::strcmp(name, "gamemode") ||
@@ -1495,6 +1589,11 @@ namespace cowui
     void showpastebuffer()
     {
         if(show(ScreenId::Utilities)) utilities_model.activate(2);
+    }
+
+    void showeditor()
+    {
+        show(ScreenId::Editor);
     }
 
     void showdemos()

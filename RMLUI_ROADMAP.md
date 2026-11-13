@@ -28,6 +28,8 @@ This is the recommended shared development baseline. The `cow-v1.0.1-rc.3` tag r
 - Native Administration and About screens, including master mode and player moderation controls.
 - Native held-key gameplay scoreboard with team groups, spectators, configured columns, and safe legacy fallback.
 - Native Notepad, Scratchpad, and Paste Buffer utilities with guarded relative-file access, clipboard actions, and explicit-buffer execution.
+- Native map editing control center for geometry, brushes, entities, lights, triggers, mapmodels, materials, post-processing, map files, and selected-entity attributes.
+- Native compatible-client version reporting inside Administration, replacing `cowbratenusage`.
 - Server browser backed by the existing master list, resolver, ping, and connection paths.
 - Server text filtering, empty-server and compatibility filters, sortable columns, stable selection, refresh, and connection.
 - In-game public and team chat presentation backed by Sauer's existing editor, completion, history, and network send paths.
@@ -68,7 +70,7 @@ The smoke test proves integration and basic rendering. It does not replace inter
 - Verify windowed, desktop fullscreen, and exclusive fullscreen transitions on single-monitor and multi-monitor systems, including HiDPI and fractional scaling where available.
 - Verify Settings readback and persistence after restart, especially GL-reset options, audio reset and device fallback, soundpack fallback, custom resolutions, and custom configuration values.
 - Exercise server refresh, filtering, sorting, selection retention, connection, disconnect, and return to the menu against live and unreachable servers.
-- Verify every RmlUi-to-legacy handoff used by normal play, including game mode and map selection, player model selection, master controls, bot match, campaign, and editing.
+- Verify native game setup, player model selection, master controls, bot matches, campaigns, and map editing against their engine-side effects.
 - Run the client on Linux, Windows, and macOS builds when those environments are available. Record platform-specific limitations instead of assuming parity from the Linux smoke test.
 - Confirm that the disabled main-menu entries cannot trap input and that every available route returns cleanly to gameplay.
 
@@ -104,11 +106,12 @@ The smoke test proves integration and basic rendering. It does not replace inter
 4. Add server favorites and history only after defining their storage, identity, expiration, and unavailable-server behavior.
 5. Add focused compatibility routes for standalone adjust screens only when their RmlUi equivalents preserve the complete semantics of those screens.
 
-### P2: migrate the remaining legacy surface
+### Completed: migrate the remaining legacy surface
 
-- Editing menus and entity tools as a separate project. Their dynamic CubeScript behavior and large surface make them a poor first target for generalizing the player-facing API.
-
-Each migration should retain the existing legacy route until the replacement covers its semantic behavior and has passed an interactive handoff test.
+- Text utilities now share a typed native editor with guarded file and clipboard operations.
+- Named editing menus and generated entity GUIs now route to the typed native Map Editor.
+- The specialized engine 3D texture palette remains engine-owned; it is not a CubeScript `newgui` document.
+- Unknown third-party `showgui` names retain the safe legacy fallback.
 
 ### P3: reduce maintenance cost
 

@@ -61,4 +61,5 @@ ICOMMAND(ui_about, "", (), cowui::showabout());
 ICOMMAND(ui_utilities, "", (), cowui::showutilities());
 ICOMMAND(ui_scratchpad, "", (), cowui::showscratchpad());
 ICOMMAND(ui_pastebuffer, "", (), cowui::showpastebuffer());
+ICOMMAND(ui_editor, "", (), cowui::showeditor());
 ICOMMAND(ui_close, "", (), cowui::close());

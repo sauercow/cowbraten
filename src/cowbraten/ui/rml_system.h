@@ -26,13 +26,13 @@ namespace cowui
         struct ClientRow
         {
             int client_num = -1;
-            Rml::String name, team, role;
+            Rml::String name, team, role, version;
             bool spectator = false, master = false, local = false;
 
             bool operator==(const ClientRow &other) const
             {
                 return client_num == other.client_num && name == other.name &&
-                    team == other.team && role == other.role &&
+                    team == other.team && role == other.role && version == other.version &&
                     spectator == other.spectator && master == other.master &&
                     local == other.local;
             }

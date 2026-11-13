@@ -66,6 +66,10 @@ int main()
           ui.find("!std::strcmp(name, \"about\")") != std::string::npos &&
           ui.find("system_model.activate(1)") != std::string::npos,
         "master and about legacy routes select native tabs");
+    check(ui.find("!std::strcmp(name, \"cowbratenusage\")") != std::string::npos &&
+          rml.find("client.version") != std::string::npos &&
+          bridge.find("getclientp1xbratenversion") != std::string::npos,
+        "compatible-client versions route into native Administration");
     check(rml.find("Cube 2: Sauerbraten") != std::string::npos &&
           rml.find("RmlUi") != std::string::npos &&
           rml.find("sauerbraten.org") != std::string::npos,

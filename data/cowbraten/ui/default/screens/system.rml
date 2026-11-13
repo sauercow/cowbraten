@@ -58,7 +58,7 @@
                     <div class="admin-client" data-for="client : clients">
                         <div class="admin-client-identity">
                             <strong>{{ client.name }}{{ client.local ? ' (you)' : '' }}</strong>
-                            <span>CN {{ client.client_num }} // {{ client.team }} // {{ client.role }}</span>
+                            <span>CN {{ client.client_num }} // {{ client.team }} // {{ client.role }} // {{ client.version }}</span>
                         </div>
                         <div class="admin-client-actions" data-if="!client.local">
                             <button data-event-click="toggle_spectator(client.client_num)">

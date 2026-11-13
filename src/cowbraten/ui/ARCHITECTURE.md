@@ -164,6 +164,41 @@ flow back through explicit callbacks. The utility stylesheet uses the installed
 Lato face so editor text remains renderable without adding an unregistered
 monospace font dependency.
 
+## Map editor model
+
+The native Map Editor replaces the named CubeScript GUI surface for `editing`,
+`maplighting`, `materials`, `triggers`, `trigger2`, `trigger3`, `newlight`,
+`newteleport`, `mapmodels`, `monsters`, `postfx`, `brushes`, `quickedit`, and
+`seltexinfo`. The entity GUIs generated from `enttypelist` also route to the
+native Selection section, so context editing no longer falls through to a
+dynamically generated legacy document. Exact routes select Edit, Entities,
+Lighting, Materials, or Selection rather than opening a generic landing page.
+
+The call path retains the normal boundary:
+
+    screens/editor.rml -> RmlEditor -> editor_api -> sauer_editor_bridge
+
+Geometry, brush, entity, material, and post-processing actions use integer IDs
+validated against fixed command tables in the bridge. RML cannot supply a
+command string or ident name. Mapmodel rows are enumerated through a visitor
+over the engine's configured model list, and a click can create only an ID
+present in that list. Custom lights and triggers clamp every numeric attribute
+and validate the legacy trigger model, behavior, and tag domains. Map save and
+load names allow only safe relative package names. Selected entity attributes
+are read from Sauer's current entity group and applied through the established
+`entset` path, retaining undo and cooperative-edit behavior.
+
+Opening Lighting reads existing map variables into the model. Initial range
+binding is guarded against same-value writes, so opening the document does not
+dirty a map or replay map-variable callbacks. In-world mouse and keyboard edit
+bindings remain authoritative. The engine-owned texture palette invoked by
+`showtexgui` is not a CubeScript `newgui` document and remains the specialized
+3D texture browser; all named legacy GUI documents route through RmlUi.
+
+The former `cowbratenusage` document is folded into Administration. Each typed
+client row includes the compatibility version reported by the same engine
+source as `getclientp1xbratenversion`, alongside team and privilege state.
+
 Application behavior must not depend on element IDs. IDs remain acceptable for
 document-local relationships such as a label's `for` attribute. State reaches
 RML through event-driven data models and stable actions; documents are not

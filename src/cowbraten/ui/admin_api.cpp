@@ -23,10 +23,12 @@ namespace cowui
             result.clear();
             saueradmin::visitclients(
                 [](int client_num, const char *name, const char *team,
-                    bool spectator, int privilege, bool local, void *data)
+                    const char *version, bool spectator, int privilege,
+                    bool local, void *data)
                 {
                     static_cast<std::vector<Client> *>(data)->push_back({
                         client_num, name ? name : "", team ? team : "",
+                        version ? version : "",
                         spectator, privilege, local
                     });
                 }, &result);

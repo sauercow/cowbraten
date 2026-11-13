@@ -30,7 +30,8 @@ int main()
     const std::string icons = readfile(root + "icons/icons.rcss");
     const std::string atlas_1x = readfile(root + "icons/atlas/cowbraten-icons-24.png");
     const std::string atlas_2x = readfile(root + "icons/atlas/cowbraten-icons-48.png");
-    const char *screen_names[] = { "servers", "demos", "profile", "settings" };
+    const char *screen_names[] = { "games", "servers", "demos", "profile",
+        "settings", "system", "utilities", "editor" };
 
     check(!shell.empty() && !style.empty(), "load shared application shell");
     check(!icons.empty() && !atlas_1x.empty() && !atlas_2x.empty(),
@@ -69,7 +70,9 @@ int main()
           style.find(".app-sidebar .app-nav-item:focus-visible") != std::string::npos,
         "global navigation defines hover and keyboard focus states");
     check(style.find(".app-page-profile .app-nav-profile") != std::string::npos &&
-          style.find(".app-page-settings .app-nav-settings") != std::string::npos,
+          style.find(".app-page-settings .app-nav-settings") != std::string::npos &&
+          style.find(".app-page-editor .app-nav-editor") != std::string::npos &&
+          style.find(".app-page-utilities .app-nav-utilities") != std::string::npos,
         "global navigation exposes per-screen active states");
 
     const std::string profile = readfile(root + "screens/profile.rml");
@@ -83,9 +86,10 @@ int main()
 
     const char *global_actions[] =
     {
-        "navigation.servers", "navigation.demos", "navigation.profile",
-        "navigation.settings", "navigation.close", "navigation.back",
-        "navigation.exit"
+        "navigation.games", "navigation.servers", "navigation.demos",
+        "navigation.profile", "navigation.settings", "navigation.about",
+        "navigation.utilities", "navigation.editor", "navigation.close",
+        "navigation.back", "navigation.exit"
     };
     bool all_global_actions = true;
     for(const char *action : global_actions)
@@ -95,6 +99,8 @@ int main()
           shell.find("cb-ico-server") != std::string::npos &&
           shell.find("cb-ico-film") != std::string::npos &&
           shell.find("cb-ico-settings") != std::string::npos &&
+          shell.find("cb-ico-hammer") != std::string::npos &&
+          shell.find("cb-ico-code") != std::string::npos &&
           shell.find("cb-ico-power") != std::string::npos,
         "global navigation uses semantic icons instead of numeric markers");
 

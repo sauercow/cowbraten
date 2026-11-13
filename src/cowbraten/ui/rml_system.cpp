@@ -22,6 +22,7 @@ namespace cowui
                 row.RegisterMember("name", &ClientRow::name) &&
                 row.RegisterMember("team", &ClientRow::team) &&
                 row.RegisterMember("role", &ClientRow::role) &&
+                row.RegisterMember("version", &ClientRow::version) &&
                 row.RegisterMember("spectator", &ClientRow::spectator) &&
                 row.RegisterMember("master", &ClientRow::master) &&
                 row.RegisterMember("local", &ClientRow::local);
@@ -102,6 +103,7 @@ namespace cowui
             row.client_num = client.client_num;
             row.name = client.name;
             row.team = client.team.empty() ? "No team" : client.team;
+            row.version = client.version.empty() ? "Vanilla / unknown" : client.version;
             row.spectator = client.spectator;
             row.master = client.privilege != 0;
             row.local = client.local;

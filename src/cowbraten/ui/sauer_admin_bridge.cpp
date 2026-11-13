@@ -2,6 +2,8 @@
 #include "game.h"
 #include "sauer_admin_bridge.h"
 
+namespace game { const char *getclientp1xbratenversion(int client_num); }
+
 namespace cowui
 {
     namespace saueradmin
@@ -25,6 +27,7 @@ namespace cowui
                 fpsent *client = game::players[i];
                 if(!client || client->aitype != AI_NONE) continue;
                 visitor(client->clientnum, client->name, client->team,
+                    game::getclientp1xbratenversion(client->clientnum),
                     client->state == CS_SPECTATOR, client->privilege,
                     client == game::player1, data);
             }

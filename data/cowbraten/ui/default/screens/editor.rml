@@ -1,0 +1,134 @@
+<rml>
+<head>
+    <title>Cowbraten Map Editor</title>
+    <link type="text/template" href="../templates/app_shell.rml" />
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/editor.rcss" />
+</head>
+<body template="app-shell" class="app-page-editor" data-model="editor">
+    <div class="editor-screen">
+        <div class="editor-header">
+            <div><div class="eyebrow">World tools</div><div class="editor-title">Map editor</div>
+                <div class="editor-copy">Geometry, entities, lighting and map operations behind a typed native boundary.</div></div>
+            <div class="editor-mode" data-class-is-active="editing"><small>Mode</small><strong>{{ editing ? 'EDITING' : 'PLAY' }}</strong></div>
+        </div>
+        <div class="editor-tabs">
+            <button data-class-is-selected="section_overview" onclick="editor.section.overview">Edit</button>
+            <button data-class-is-selected="section_entities" onclick="editor.section.entities">Entities</button>
+            <button data-class-is-selected="section_lighting" onclick="editor.section.lighting">Lighting</button>
+            <button data-class-is-selected="section_materials" onclick="editor.section.materials">Materials</button>
+            <button data-class-is-selected="section_map" onclick="editor.section.map">Map</button>
+            <button data-class-is-selected="section_selection" onclick="editor.section.selection">Selection</button>
+        </div>
+        <div class="editor-scroll">
+            <div class="editor-section" data-if="section_overview">
+                <div class="editor-grid editor-grid-wide">
+                    <div class="editor-card panel"><div class="editor-card-title">Core actions</div>
+                        <button class="editor-action" data-for="item : edit_actions" data-event-click="run_action(item.id)"><strong>{{ item.label }}</strong><small>{{ item.detail }}</small></button>
+                    </div>
+                    <div class="editor-card panel"><div class="editor-card-title">View &amp; selection</div>
+                        <label class="editor-toggle"><span>Texture all faces</span><input class="checkbox" type="checkbox" data-attrif-checked="all_faces" data-event-change="set_toggle(0, ev.checked)" /></label>
+                        <label class="editor-toggle"><span>Selection outline</span><input class="checkbox" type="checkbox" data-attrif-checked="outline" data-event-change="set_toggle(1, ev.checked)" /></label>
+                        <label class="editor-toggle"><span>Wireframe</span><input class="checkbox" type="checkbox" data-attrif-checked="wireframe" data-event-change="set_toggle(2, ev.checked)" /></label>
+                        <label class="editor-toggle"><span>Entity snap to grid</span><input class="checkbox" type="checkbox" data-attrif-checked="entity_snap" data-event-change="set_toggle(3, ev.checked)" /></label>
+                        <label class="editor-toggle"><span>Entity selection</span><input class="checkbox" type="checkbox" data-attrif-checked="entity_editing" data-event-change="set_toggle(4, ev.checked)" /></label>
+                        <label class="editor-toggle"><span>Fullbright preview</span><input class="checkbox" type="checkbox" data-attrif-checked="fullbright" data-event-change="set_toggle(5, ev.checked)" /></label>
+                    </div>
+                </div>
+                <div class="editor-card panel editor-card-full"><div class="editor-card-title">Heightmap &amp; blend brushes</div>
+                    <div class="editor-button-grid"><button class="editor-tile" data-for="item : brush_actions" data-event-click="run_action(item.id)"><strong>{{ item.label }}</strong><small>{{ item.detail }}</small></button></div>
+                    <div class="editor-inline-actions"><button class="button" data-event-click="run_action(13)">Next blend brush</button><button class="button" data-event-click="run_action(14)">Rotate brush</button><button class="button" data-event-click="run_action(12)">Clear selection blend</button><button class="button editor-danger" data-event-click="run_action(11)">Clear entire blendmap</button></div>
+                </div>
+                <div class="editor-help panel"><strong>Native edit bindings remain active</strong><span>Mouse selection, wheel transforms, grid sizing, face pushing, rotation and texture palette retain their normal in-world bindings while this control center is closed.</span></div>
+            </div>
+
+            <div class="editor-section" data-if="section_entities">
+                <div class="editor-card panel editor-card-full"><div class="editor-card-heading"><div><div class="editor-card-title">Entity presets</div><div class="editor-copy">Creates at the current entity drop position.</div></div></div>
+                    <div class="editor-button-grid entity-grid"><button class="editor-tile" data-for="item : entity_presets" data-event-click="create_entity(item.id)"><strong>{{ item.label }}</strong><small>{{ item.detail }}</small></button></div>
+                </div>
+                <div class="editor-grid">
+                    <div class="editor-card panel"><div class="editor-card-title">Custom light</div>
+                        <label class="editor-range"><span>Radius <b>{{ light_radius }}</b></span><input type="range" min="0" max="512" data-value="light_radius" data-event-change="set_light_value(0, ev.value)" /></label>
+                        <label class="editor-range"><span>Red <b>{{ light_r }}</b></span><input type="range" min="0" max="255" data-value="light_r" data-event-change="set_light_value(1, ev.value)" /></label>
+                        <label class="editor-range"><span>Green <b>{{ light_g }}</b></span><input type="range" min="0" max="255" data-value="light_g" data-event-change="set_light_value(2, ev.value)" /></label>
+                        <label class="editor-range"><span>Blue <b>{{ light_b }}</b></span><input type="range" min="0" max="255" data-value="light_b" data-event-change="set_light_value(3, ev.value)" /></label>
+                        <button class="button button-primary" onclick="editor.light.create">Create light</button>
+                    </div>
+                    <div class="editor-card panel"><div class="editor-card-title">Mapmodel trigger</div>
+                        <div class="editor-choice-list compact"><button data-for="choice : trigger_models" data-class-is-selected="choice.selected" data-event-click="select_trigger_model(choice.value)">{{ choice.label }}</button></div>
+                        <div class="editor-choice-list compact behaviors"><button data-for="choice : trigger_behaviors" data-class-is-selected="choice.selected" data-event-click="select_trigger_behavior(choice.value)">{{ choice.label }}</button></div>
+                        <div class="editor-choice-list compact tags"><button data-for="choice : trigger_tags" data-class-is-selected="choice.selected" data-event-click="select_trigger_tag(choice.value)">{{ choice.label }}</button></div>
+                        <button class="button button-primary" onclick="editor.trigger.create">Create trigger</button>
+                    </div>
+                </div>
+                <div class="editor-card panel editor-card-full"><div class="editor-card-heading"><div class="editor-card-title">Map models</div><span>{{ visible_model_count }} models</span></div>
+                    <input class="text-input editor-filter" type="text" placeholder="Filter configured map models" data-value="model_filter" data-event-change="set_model_filter(ev.value)" />
+                    <div class="model-list"><button data-for="entry : mapmodels" data-event-click="create_mapmodel(entry.id)"><small>#{{ entry.id }}</small><strong>{{ entry.name }}</strong></button><div class="editor-empty" data-if="visible_model_count == 0">No map model matches this filter.</div></div>
+                </div>
+            </div>
+
+            <div class="editor-section" data-if="section_lighting">
+                <div class="editor-grid editor-grid-three">
+                    <div class="editor-card panel"><div class="editor-card-title">Sunlight</div>
+                        <label class="editor-range"><span>Red <b>{{ sun_r }}</b></span><input type="range" min="0" max="255" data-value="sun_r" data-event-change="set_color(0, 0, ev.value)" /></label>
+                        <label class="editor-range"><span>Green <b>{{ sun_g }}</b></span><input type="range" min="0" max="255" data-value="sun_g" data-event-change="set_color(0, 1, ev.value)" /></label>
+                        <label class="editor-range"><span>Blue <b>{{ sun_b }}</b></span><input type="range" min="0" max="255" data-value="sun_b" data-event-change="set_color(0, 2, ev.value)" /></label>
+                        <label class="editor-range"><span>Pitch <b>{{ sunlight_pitch }}</b></span><input type="range" min="-90" max="90" data-value="sunlight_pitch" data-event-change="set_numeric(3, ev.value)" /></label>
+                        <label class="editor-range"><span>Yaw <b>{{ sunlight_yaw }}</b></span><input type="range" min="0" max="360" data-value="sunlight_yaw" data-event-change="set_numeric(4, ev.value)" /></label>
+                        <button class="button" data-event-click="run_action(10)">Direction from camera</button>
+                    </div>
+                    <div class="editor-card panel"><div class="editor-card-title">Sky &amp; ambient</div>
+                        <div class="editor-subtitle">Skylight</div>
+                        <label class="editor-range"><span>Red <b>{{ sky_r }}</b></span><input type="range" min="0" max="255" data-value="sky_r" data-event-change="set_color(1, 0, ev.value)" /></label>
+                        <label class="editor-range"><span>Green <b>{{ sky_g }}</b></span><input type="range" min="0" max="255" data-value="sky_g" data-event-change="set_color(1, 1, ev.value)" /></label>
+                        <label class="editor-range"><span>Blue <b>{{ sky_b }}</b></span><input type="range" min="0" max="255" data-value="sky_b" data-event-change="set_color(1, 2, ev.value)" /></label>
+                        <div class="editor-subtitle">Ambient</div>
+                        <label class="editor-range"><span>Red <b>{{ ambient_r }}</b></span><input type="range" min="0" max="255" data-value="ambient_r" data-event-change="set_color(2, 0, ev.value)" /></label>
+                        <label class="editor-range"><span>Green <b>{{ ambient_g }}</b></span><input type="range" min="0" max="255" data-value="ambient_g" data-event-change="set_color(2, 1, ev.value)" /></label>
+                        <label class="editor-range"><span>Blue <b>{{ ambient_b }}</b></span><input type="range" min="0" max="255" data-value="ambient_b" data-event-change="set_color(2, 2, ev.value)" /></label>
+                    </div>
+                    <div class="editor-card panel"><div class="editor-card-title">Fog</div>
+                        <label class="editor-range"><span>Distance <b>{{ fog_distance }}</b></span><input type="range" min="128" max="8192" data-value="fog_distance" data-event-change="set_numeric(5, ev.value)" /></label>
+                        <label class="editor-range"><span>Red <b>{{ fog_r }}</b></span><input type="range" min="0" max="255" data-value="fog_r" data-event-change="set_color(3, 0, ev.value)" /></label>
+                        <label class="editor-range"><span>Green <b>{{ fog_g }}</b></span><input type="range" min="0" max="255" data-value="fog_g" data-event-change="set_color(3, 1, ev.value)" /></label>
+                        <label class="editor-range"><span>Blue <b>{{ fog_b }}</b></span><input type="range" min="0" max="255" data-value="fog_b" data-event-change="set_color(3, 2, ev.value)" /></label>
+                        <div class="editor-inline-actions"><button class="button" data-event-click="run_action(8)">Quick light</button><button class="button button-primary" data-event-click="run_action(9)">Full light</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-section" data-if="section_materials">
+                <div class="editor-grid">
+                    <div class="editor-card panel"><div class="editor-card-title">Selection material</div><div class="editor-button-grid"><button class="editor-tile" data-for="item : materials" data-event-click="apply_material(item.id)"><strong>{{ item.label }}</strong><small>{{ item.detail }}</small></button></div>
+                        <label class="editor-toggle"><span>Show material volumes</span><input class="checkbox" type="checkbox" data-attrif-checked="show_materials" data-event-change="set_toggle(6, ev.checked)" /></label></div>
+                    <div class="editor-card panel"><div class="editor-card-title">Post-processing preview</div><div class="editor-button-grid"><button class="editor-tile" data-for="item : postfx" data-event-click="apply_postfx(item.id)"><strong>{{ item.label }}</strong><small>{{ item.detail }}</small></button></div></div>
+                </div>
+            </div>
+
+            <div class="editor-section" data-if="section_map">
+                <div class="editor-grid">
+                    <div class="editor-card panel"><div class="editor-card-title">Map file</div><label class="editor-field"><span>Relative map name</span><input class="text-input" type="text" data-value="map_name" data-event-change="set_map_name(ev.value)" /></label>
+                        <div class="editor-inline-actions"><button class="button button-primary" onclick="editor.map.save">Save</button><button class="button" onclick="editor.map.load">Load</button></div><div class="editor-copy">Names accept letters, numbers, underscore, dash and package subfolders.</div></div>
+                    <div class="editor-card panel"><div class="editor-card-title">World geometry</div><label class="editor-range"><span>New map size <b>{{ new_map_size }}</b></span><input type="range" min="10" max="16" data-value="new_map_size" data-event-change="set_map_size(ev.value)" /></label>
+                        <button class="button button-primary" onclick="editor.map.new">Create new map</button><button class="button" data-event-click="run_action(7)">Enlarge current map ×2</button><button class="button" data-event-click="run_action(6)">Optimize geometry</button></div>
+                </div>
+            </div>
+
+            <div class="editor-section" data-if="section_selection">
+                <div class="editor-card panel selection-editor"><div class="editor-card-heading"><div><div class="editor-card-title">Selected entity</div><strong class="selection-type">{{ selection_type }}</strong></div><button class="button" onclick="editor.selection.refresh">Refresh selection</button></div>
+                    <div data-if="selection_available"><div class="selection-attrs">
+                        <label><span>Attribute 1</span><input class="text-input" type="number" data-value="selection_attr0" data-event-change="set_selection_attr(0, ev.value)" /></label>
+                        <label><span>Attribute 2</span><input class="text-input" type="number" data-value="selection_attr1" data-event-change="set_selection_attr(1, ev.value)" /></label>
+                        <label><span>Attribute 3</span><input class="text-input" type="number" data-value="selection_attr2" data-event-change="set_selection_attr(2, ev.value)" /></label>
+                        <label><span>Attribute 4</span><input class="text-input" type="number" data-value="selection_attr3" data-event-change="set_selection_attr(3, ev.value)" /></label>
+                        <label><span>Attribute 5</span><input class="text-input" type="number" data-value="selection_attr4" data-event-change="set_selection_attr(4, ev.value)" /></label>
+                    </div><button class="button button-primary" onclick="editor.selection.apply">Apply attributes</button></div>
+                    <div class="editor-empty" data-if="!selection_available">Select an entity in the world, then reopen this tab or press Refresh selection.</div>
+                </div>
+            </div>
+        </div>
+        <div class="editor-status">{{ status }}</div>
+    </div>
+</body>
+</rml>

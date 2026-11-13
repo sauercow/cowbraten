@@ -16,7 +16,7 @@ namespace cowui
         };
 
         typedef void (*ClientVisitor)(int client_num, const char *name,
-            const char *team, bool spectator, int privilege,
+            const char *team, const char *version, bool spectator, int privilege,
             bool local, void *data);
 
         bool readstate(State &result);
