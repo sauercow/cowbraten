@@ -1,0 +1,201 @@
+<rml>
+<head>
+    <title>Cowbraten In-Game Menu</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/game_menu.rcss" />
+</head>
+
+<body data-model="game_menu">
+    <div class="game-menu-screen">
+        <div class="game-menu-scrim" onclick="game.resume"></div>
+
+        <div class="game-menu-panel">
+            <div class="game-menu-brandbar">
+                <div class="game-menu-brandmark">C</div>
+                <div class="game-menu-brandcopy">
+                    <strong>Cowbraten</strong>
+                    <small>In-game menu</small>
+                </div>
+                <div class="game-menu-player">
+                    <span>{{ player_name }}</span>
+                    <small>{{ state_label }}</small>
+                </div>
+                <div class="game-menu-stripes"><i></i><i></i><i></i></div>
+            </div>
+
+            <div class="game-menu-content">
+                <div class="game-menu-intro">
+                    <div class="game-menu-kicker">Match&nbsp;&nbsp;/&nbsp;&nbsp;Quick menu</div>
+                    <div class="game-menu-title">In-game menu</div>
+                    <div class="game-menu-subtitle">Quick actions while the match is in progress.</div>
+                </div>
+
+                <div class="game-menu-main">
+                    <div class="game-menu-navigation game-menu-card">
+                        <button class="game-menu-action game-menu-action-primary" onclick="game.resume">
+                            <span class="game-menu-action-index">01</span>
+                            <span class="game-menu-action-icon">&gt;</span>
+                            <strong>Return to game</strong>
+                            <span class="game-menu-action-key">ESC</span>
+                        </button>
+
+                        <button class="game-menu-action"
+                            data-class-is-active="spectator"
+                            data-attrif-disabled="!actions_available"
+                            onclick="game.spectator.toggle">
+                            <span class="game-menu-action-index">02</span>
+                            <span class="game-menu-action-icon">O</span>
+                            <strong>Toggle spectator</strong>
+                            <span class="game-menu-action-key">{{ spectator ? 'ON' : 'OFF' }}</span>
+                        </button>
+
+                        <button class="game-menu-action"
+                            data-if="team_mode"
+                            data-attrif-disabled="!actions_available"
+                            onclick="game.team.toggle">
+                            <span class="game-menu-action-index">03</span>
+                            <span class="game-menu-action-icon">T</span>
+                            <strong>Switch team</strong>
+                            <span class="game-menu-action-key" data-class-is-red="evil_team">{{ team_label }}</span>
+                        </button>
+
+                        <button class="game-menu-action" onclick="navigation.servers">
+                            <span class="game-menu-action-index">04</span>
+                            <span class="game-menu-action-icon">S</span>
+                            <strong>Server browser</strong>
+                            <span class="game-menu-action-key">B</span>
+                        </button>
+
+                        <button class="game-menu-action" onclick="navigation.settings">
+                            <span class="game-menu-action-index">05</span>
+                            <span class="game-menu-action-icon">*</span>
+                            <strong>Settings</strong>
+                            <span class="game-menu-action-key">F10</span>
+                        </button>
+
+                        <button class="game-menu-action" onclick="navigation.profile">
+                            <span class="game-menu-action-index">06</span>
+                            <span class="game-menu-action-icon">P</span>
+                            <strong>Player / character</strong>
+                            <span class="game-menu-action-key">P</span>
+                        </button>
+
+                        <button class="game-menu-action game-menu-action-danger" onclick="game.disconnect">
+                            <span class="game-menu-action-index">07</span>
+                            <span class="game-menu-action-icon">X</span>
+                            <strong>Disconnect</strong>
+                            <span class="game-menu-action-key">F4</span>
+                        </button>
+                    </div>
+
+                    <div class="game-menu-dashboard">
+                        <div class="game-menu-card game-menu-status-card">
+                            <div class="game-menu-card-title">Match status</div>
+                            <div class="game-menu-status-body">
+                                <div class="game-menu-map-preview">
+                                    <div class="game-menu-map-fallback"><span>MAP</span></div>
+                                    <img data-if="map_image != ''" data-attr-src="map_image" />
+                                    <div class="game-menu-map-caption">
+                                        <span class="game-menu-map-symbol">M</span>
+                                        <strong>{{ map_name }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="game-menu-match-details">
+                                    <div class="game-menu-server-row">
+                                        <span class="game-menu-online-dot"></span>
+                                        <div>
+                                            <strong>{{ server_name }}</strong>
+                                            <small>{{ server_address }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="game-menu-match-grid">
+                                        <div class="game-menu-stat game-menu-stat-wide">
+                                            <small>Mode</small>
+                                            <strong>{{ mode_name }}</strong>
+                                        </div>
+                                        <div class="game-menu-stat">
+                                            <small>Time</small>
+                                            <strong>{{ time_remaining }}</strong>
+                                        </div>
+                                        <div class="game-menu-stat">
+                                            <small>Players</small>
+                                            <strong>{{ player_count_label }}</strong>
+                                        </div>
+                                        <div class="game-menu-stat">
+                                            <small>Ping</small>
+                                            <strong class="game-menu-ping">{{ ping_label }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="game-menu-card game-menu-quick-card">
+                            <div class="game-menu-card-title">Quick actions</div>
+
+                            <div class="game-menu-quick-row">
+                                <span class="game-menu-quick-icon">O</span>
+                                <div class="game-menu-quick-copy">
+                                    <strong>Spectator mode</strong>
+                                    <small>Watch the match without playing.</small>
+                                </div>
+                                <button class="game-menu-toggle"
+                                    data-class-is-on="spectator"
+                                    data-attrif-disabled="!actions_available"
+                                    onclick="game.spectator.toggle">
+                                    <span class="game-menu-toggle-knob"></span>
+                                    <strong>{{ spectator ? 'ON' : 'OFF' }}</strong>
+                                </button>
+                            </div>
+
+                            <div class="game-menu-quick-row" data-if="team_mode">
+                                <span class="game-menu-quick-icon">T</span>
+                                <div class="game-menu-quick-copy">
+                                    <strong>Team selection</strong>
+                                    <small>Choose which team to join.</small>
+                                </div>
+                                <div class="game-menu-team-buttons">
+                                    <button class="game-menu-team-blue"
+                                        data-class-is-selected="good_team &amp;&amp; !spectator"
+                                        data-attrif-disabled="!actions_available"
+                                        onclick="game.team.good">Blue</button>
+                                    <button class="game-menu-team-red"
+                                        data-class-is-selected="evil_team &amp;&amp; !spectator"
+                                        data-attrif-disabled="!actions_available"
+                                        onclick="game.team.evil">Red</button>
+                                </div>
+                            </div>
+
+                            <div class="game-menu-quick-row">
+                                <span class="game-menu-quick-icon">P</span>
+                                <div class="game-menu-quick-copy">
+                                    <strong>{{ player_name }}</strong>
+                                    <small>{{ state_label }}{{ team_mode ? ' / ' + team_label : '' }}</small>
+                                </div>
+                                <button class="game-menu-inline-button" onclick="navigation.profile">Change</button>
+                            </div>
+
+                            <div class="game-menu-quick-row">
+                                <span class="game-menu-quick-icon">*</span>
+                                <div class="game-menu-quick-copy">
+                                    <strong>Match settings</strong>
+                                    <small>Adjust video, audio, controls and HUD.</small>
+                                </div>
+                                <button class="game-menu-inline-button" onclick="navigation.settings">Open</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-menu-footer">
+                <div class="game-menu-footer-hint"><span>ESC</span> Returns to gameplay</div>
+                <div class="game-menu-footer-hint game-menu-footer-center">Click to apply changes immediately</div>
+                <div class="game-menu-connected"><span></span> Match connected</div>
+            </div>
+        </div>
+    </div>
+</body>
+</rml>

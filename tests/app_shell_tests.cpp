@@ -71,7 +71,8 @@ int main()
     const char *global_actions[] =
     {
         "navigation.servers", "navigation.demos", "navigation.profile",
-        "navigation.settings", "navigation.close", "navigation.exit"
+        "navigation.settings", "navigation.close", "navigation.back",
+        "navigation.exit"
     };
     bool all_global_actions = true;
     for(const char *action : global_actions)

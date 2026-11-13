@@ -7,6 +7,7 @@
 #include "rml_server_browser.h"
 #include "rml_demo_manager.h"
 #include "rml_demo_player.h"
+#include "rml_game_menu.h"
 #include "rml_profile.h"
 #include "rml_settings.h"
 #include "sauer_demo_bridge.h"
@@ -41,6 +42,7 @@ namespace cowui
     static RmlServerBrowser server_browser;
     static RmlDemoManager demo_manager;
     static RmlDemoPlayer demo_player;
+    static RmlGameMenu game_menu_model;
     static RmlProfile profile_model;
     static RmlSettings settings_model;
     static Rml::Context *context = nullptr;
@@ -57,6 +59,11 @@ namespace cowui
         {
             ScreenId::Test,
             "data/cowbraten/ui/default/screens/test.rml",
+            nullptr
+        },
+        {
+            ScreenId::GameMenu,
+            "data/cowbraten/ui/default/screens/game_menu.rml",
             nullptr
         },
         {
@@ -82,6 +89,7 @@ namespace cowui
     };
 
     static Screen *active_screen = nullptr;
+    static bool full_menu_from_game = false;
 
     static bool initialized = false;
     static bool legacy_console_input = false;
@@ -253,33 +261,53 @@ namespace cowui
         close();
     }
 
+    static void backui(Rml::Event &event)
+    {
+        event.StopPropagation();
+        if(full_menu_from_game && sauerinput::canclosemenu())
+            show(ScreenId::GameMenu);
+        else
+            close();
+    }
+
     static void showmainmenu(Rml::Event &event)
     {
         event.StopPropagation();
-        show(ScreenId::Profile);
+        showmain();
+    }
+
+    static void preservegamemenubackstack()
+    {
+        if(active_screen && active_screen->id == ScreenId::GameMenu &&
+           sauerinput::canclosemenu())
+            full_menu_from_game = true;
     }
 
     static void showserverbrowser(Rml::Event &event)
     {
         event.StopPropagation();
+        preservegamemenubackstack();
         show(ScreenId::Servers);
     }
 
     static void showdemoscreen(Rml::Event &event)
     {
         event.StopPropagation();
+        preservegamemenubackstack();
         show(ScreenId::Demos);
     }
 
     static void showsettingsscreen(Rml::Event &event)
     {
         event.StopPropagation();
+        preservegamemenubackstack();
         show(ScreenId::Settings);
     }
 
     static void showprofilescreen(Rml::Event &event)
     {
         event.StopPropagation();
+        preservegamemenubackstack();
         show(ScreenId::Profile);
     }
 
@@ -668,6 +696,9 @@ namespace cowui
                "navigation.close",
                closeui) ||
            !action_router.registeraction(
+               "navigation.back",
+               backui) ||
+           !action_router.registeraction(
                "navigation.main",
                showmainmenu) ||
            !action_router.registeraction(
@@ -690,11 +721,13 @@ namespace cowui
            !server_browser.init(context, action_router) ||
            !demo_manager.init(context, action_router) ||
            !demo_player.init(context, action_router) ||
+           !game_menu_model.init(context, action_router) ||
            !profile_model.init(context, action_router) ||
            !settings_model.init(context, action_router))
         {
             settings_model.shutdown(context);
             profile_model.shutdown(context);
+            game_menu_model.shutdown(context);
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
             server_browser.shutdown(context);
@@ -731,6 +764,7 @@ namespace cowui
         {
             settings_model.shutdown(context);
             profile_model.shutdown(context);
+            game_menu_model.shutdown(context);
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
             server_browser.shutdown(context);
@@ -1019,7 +1053,11 @@ namespace cowui
                     if(!event.key.repeat)
                     {
                         const bool can_close = sauerinput::canclosemenu();
-                        if(active_screen->id != ScreenId::Profile &&
+                        if(active_screen->id == ScreenId::GameMenu)
+                            close();
+                        else if(full_menu_from_game && can_close)
+                            show(ScreenId::GameMenu);
+                        else if(active_screen->id != ScreenId::Profile &&
                            !can_close)
                             show(ScreenId::Profile);
                         else if(can_close)
@@ -1096,6 +1134,8 @@ namespace cowui
                 demo_manager.update();
             else if(active_screen->id == ScreenId::Profile)
                 profile_model.update();
+            else if(active_screen->id == ScreenId::GameMenu)
+                game_menu_model.update();
         }
 
         if(!demo_player.visible() &&
@@ -1173,6 +1213,8 @@ namespace cowui
             settings_model.activate();
         else if(id == ScreenId::Profile)
             profile_model.activate();
+        else if(id == ScreenId::GameMenu)
+            game_menu_model.activate();
 
         if(!screen->document)
         {
@@ -1225,7 +1267,9 @@ namespace cowui
 
         ScreenId screen;
         if(!std::strcmp(name, "main"))
-            screen = ScreenId::Profile;
+            screen = sauerinput::canclosemenu()
+                ? ScreenId::GameMenu
+                : ScreenId::Profile;
         else if(!std::strcmp(name, "servers"))
             screen = ScreenId::Servers;
         else if(!std::strcmp(name, "demos"))
@@ -1247,6 +1291,17 @@ namespace cowui
 
     void showmain()
     {
+        full_menu_from_game = false;
+        show(sauerinput::canclosemenu()
+            ? ScreenId::GameMenu
+            : ScreenId::Profile);
+    }
+
+    void showfullmenu()
+    {
+        if(!sauerinput::canclosemenu())
+            return;
+        full_menu_from_game = true;
         show(ScreenId::Profile);
     }
 
@@ -1326,6 +1381,7 @@ namespace cowui
 
         hidedocument(*active_screen);
         active_screen = nullptr;
+        full_menu_from_game = false;
         legacy_console_input = false;
         legacy_console_presentation = false;
 

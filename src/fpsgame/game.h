@@ -790,6 +790,7 @@ namespace game
     extern bool addmsg(int type, const char *fmt = NULL, ...);
     extern void switchname(const char *name);
     extern void switchteam(const char *name);
+    extern void togglespectator(int val, const char *who);
     extern void switchplayermodel(int playermodel);
     extern int reportedplayermodel();
     extern void sendmapinfo();

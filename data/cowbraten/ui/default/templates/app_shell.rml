@@ -12,8 +12,8 @@
                     <div class="app-product-subtitle">Native Cube 2 client</div>
                 </div>
             </div>
-            <button class="button app-return" onclick="navigation.close">
-                Esc&nbsp;&nbsp;/&nbsp;&nbsp;Return
+            <button class="button app-return" onclick="navigation.back">
+                Esc&nbsp;&nbsp;/&nbsp;&nbsp;Back
             </button>
         </div>
 
@@ -58,7 +58,7 @@
 
         <div class="app-footer">
             <div>Cowbraten</div>
-            <div>Escape returns to gameplay</div>
+            <div>Escape returns to the previous menu</div>
             <div class="app-footer-status"><span></span> Interface active</div>
         </div>
     </div>

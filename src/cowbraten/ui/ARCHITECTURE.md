@@ -68,14 +68,15 @@ while `modern-metallic` overrides semantic tokens and component presentation in
 changes a model, action name, or legacy setting. A new theme therefore adds an
 RCSS sheet and any licensed font/assets, not engine-side UI behavior.
 
-Only implemented screens receive identifiers. Profile, Servers, Demos, and
-Settings are production identifiers, while Test remains a developer-only
-identifier. The former branding-only Main document is not a navigation target:
-`/ui_main` and legacy `showgui main` open Profile / Identity directly. Later
-screens are added to the table when their documents and actions exist.
+Only implemented screens receive identifiers. Game Menu, Profile, Servers,
+Demos, and Settings are production identifiers, while Test remains a
+developer-only identifier. The former branding-only Main document is not a
+navigation target: `/ui_main` and legacy `showgui main` open the compact Game
+Menu during a match and Profile / Identity while disconnected. Later screens
+are added to the table when their documents and actions exist.
 
-Profile / Identity is the first screen built against the themed component
-contract and is the default menu destination. Its RML owns player-name editing,
+Profile / Identity is the first full screen built against the themed component
+contract and is the disconnected menu destination. Its RML owns player-name editing,
 saved-name selection, the character roster, controls, selection states,
 responsive layout, and preview interaction. `RmlProfile` owns presentation
 state and calls the typed `profile_api`; only `sauer_profile_bridge` knows
@@ -90,15 +91,17 @@ version-detection model packet also restores the reported model so it cannot
 leak or overwrite the local choice on peers.
 The 3D model is rendered into the content rectangle calculated by RmlUi after
 the normal RML pass, so viewport coordinates are not duplicated in C++.
-Legacy `showgui main` and `showgui playermodel` route to this native screen.
+Legacy `showgui playermodel` routes to this native screen. The in-match Game
+Menu exposes resume, team, spectator, expanded-menu, and disconnect actions
+through a typed Sauer bridge without evaluating CubeScript.
 
 At most one normal screen is active. Switching screens hides the previous
 document without releasing menu input ownership, while closing the active
-screen returns directly to gameplay. Navigation history and a modal stack will
-belong to C++ when a production screen first needs them; they are intentionally
-not generalized ahead of that requirement. Escape should eventually allow a
-focused control to handle a local action, then close the top modal, then
-navigate back or close the UI to gameplay.
+screen returns directly to gameplay. Opening the full application shell from
+the Game Menu records that single origin so Escape and the shell Back action
+return to the compact menu; Return to Game still closes the UI directly. A
+general navigation history and modal stack remain deferred until another
+production flow needs them.
 
 Closing the UI hides the active document and all modals, releases RmlUi focus,
 and returns cursor/grab ownership through the existing input bridge. Cached

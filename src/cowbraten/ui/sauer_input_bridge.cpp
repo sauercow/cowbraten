@@ -22,7 +22,7 @@ namespace cowui
 
         bool canclosemenu()
         {
-            return isconnected(true);
+            return isconnected(true, true);
         }
 
         void keyrepeat(bool enabled)

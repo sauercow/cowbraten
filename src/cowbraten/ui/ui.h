@@ -13,6 +13,7 @@ namespace cowui
     enum class ScreenId
     {
         Test,
+        GameMenu,
         Servers,
         Demos,
         Settings,
@@ -50,6 +51,7 @@ namespace cowui
     bool show(ScreenId screen);
     bool tryroutelegacygui(const char *name);
     void showmain();
+    void showfullmenu();
     void showservers();
     void showdemos();
     void showdemosrecording();
