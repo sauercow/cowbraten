@@ -234,6 +234,23 @@ body
     min-width: 122dp;
 }
 
+.demo-player-analysis
+{
+    min-width: 98dp;
+}
+
+.demo-player-analysis.is-active
+{
+    background-color: #163C62;
+    border-color: var(--color-primary);
+    color: var(--color-text);
+}
+
+.demo-player-analysis.is-active .cb-ico
+{
+    image-color: var(--color-primary-hover);
+}
+
 .demo-player-spacer
 {
     flex: 1;

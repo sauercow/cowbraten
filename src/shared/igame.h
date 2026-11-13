@@ -86,6 +86,8 @@ namespace game
     extern int numdynents();
     extern void rendergame(bool mainpass);
     extern void renderavatar();
+    extern bool demoxrayactive();
+    extern void renderdemoxray();
     extern void renderplayerpreview(int model, int team, int weap);
     extern void renderplayerpreview(
         int model,

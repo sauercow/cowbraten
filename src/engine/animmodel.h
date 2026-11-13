@@ -221,7 +221,8 @@ struct animmodel : model
             if(as->cur.anim&ANIM_NOSKIN)
             {
                 if(enablealphablend) { glDisable(GL_BLEND); enablealphablend = false; }
-                if(shadowmapping) SETMODELSHADER(b, shadowmapcaster);
+                if(demoxraypass) SETMODELSHADER(b, demoxraymodel);
+                else if(shadowmapping) SETMODELSHADER(b, shadowmapcaster);
                 else /*if(as->cur.anim&ANIM_SHADOW)*/ SETMODELSHADER(b, notexturemodel);
                 return;
             }
@@ -1614,4 +1615,3 @@ template<class MDL, class MESH> struct modelcommands
         if(MDL::multiparted()) modelcommand(setlink, "link", "iisfff");
     }
 };
-

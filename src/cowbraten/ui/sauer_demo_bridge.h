@@ -29,6 +29,10 @@ namespace cowui
         const char *playback_map();
         const char *playback_mode();
         const char *playback_camera();
+        bool xray_enabled();
+        bool hitbox_enabled();
+        void toggle_xray();
+        void toggle_hitbox();
         void move_playback_cursor(int x, int y);
         void playback_cursor(float &x, float &y);
         float playback_cursor_size();

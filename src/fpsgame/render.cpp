@@ -609,4 +609,82 @@ namespace game
         if(m_sp) preloadmonsters();
     }
 
+    VARP(demoxraystart, 0, 0, 1);
+    static bool demoxrayon = false;
+    static int demoxraygeneration = 0, demoxrayapplied = -1;
+
+    bool demoxrayallowed()
+    {
+        return connected && demoplayback && !remote;
+    }
+
+    bool demoxrayactive()
+    {
+        if(!demoxrayallowed())
+        {
+            demoxrayon = false;
+            return false;
+        }
+        if(demoxrayapplied != demoxraygeneration)
+        {
+            demoxrayapplied = demoxraygeneration;
+            demoxrayon = demoxraystart != 0;
+        }
+        return demoxrayon;
+    }
+
+    void demoxrayreset()
+    {
+        demoxrayon = false;
+        ++demoxraygeneration;
+    }
+
+    void toggledemoxray()
+    {
+        if(!demoplayback)
+        {
+            conoutf("X-RAY is only available while watching a demo");
+            return;
+        }
+        if(!demoxrayallowed())
+        {
+            conoutf("X-RAY is only available for demos played on this computer");
+            return;
+        }
+        demoxrayactive();
+        demoxrayon = !demoxrayon;
+        conoutf("X-RAY %s", demoxrayon ? "on" : "off");
+    }
+
+    ICOMMAND(toggledemoxray, "", (), toggledemoxray());
+    ICOMMAND(demoxrayshown, "", (), intret(demoxrayactive() ? 1 : 0));
+
+    static int demoplayercolor(fpsent *d)
+    {
+        if(teamskins || m_teammode)
+            return isteam(player1->team, d->team) ? 0x6496FF : 0xFF4B19;
+        return 0x1EC850;
+    }
+
+    int demohitboxcolor(fpsent *d)
+    {
+        return demoplayercolor(d);
+    }
+
+    void renderdemoxray()
+    {
+        if(!demoxrayactive()) return;
+        fpsent *exclude = isthirdperson() ? NULL : followingplayer();
+        loopv(players)
+        {
+            fpsent *d = players[i];
+            if(!d || d == player1 || d == exclude || d->lifesequence < 0) continue;
+            if(d->state != CS_ALIVE && d->state != CS_LAGGED && d->state != CS_EDITING) continue;
+            int team = 0;
+            if(teamskins || m_teammode) team = isteam(player1->team, d->team) ? 1 : 2;
+            demoxraycolour(demoplayercolor(d));
+            renderplayer(d, getplayermodelinfo(d), team, 1, false);
+        }
+    }
+
 }

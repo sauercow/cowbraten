@@ -33,6 +33,8 @@
                 <button class="demo-player-button" onclick="demo-player.forward"><span class="cb-ico cb-ico-fast-forward cb-ico--sm"></span>+5 sec</button>
                 <button class="demo-player-button demo-player-step" onclick="demo-player.step-forward"><span class="cb-ico cb-ico-skip-forward cb-ico--sm"></span>Frame +</button>
                 <button class="demo-player-button demo-player-speed" onclick="demo-player.speed"><span class="cb-ico cb-ico-gauge cb-ico--sm"></span>Speed&nbsp;&nbsp;{{ speed_text }}</button>
+                <button class="demo-player-button demo-player-analysis" data-class-is-active="xray_enabled" onclick="demo-player.xray"><span class="cb-ico cb-ico-eye cb-ico--sm"></span>X-RAY</button>
+                <button class="demo-player-button demo-player-analysis" data-class-is-active="hitbox_enabled" onclick="demo-player.hitbox"><span class="cb-ico cb-ico-crosshair cb-ico--sm"></span>Hitbox</button>
                 <div class="demo-player-spacer"></div>
                 <button class="demo-player-button" onclick="demo-player.library"><span class="cb-ico cb-ico-film cb-ico--sm"></span>Library</button>
                 <button class="demo-player-button demo-player-stop" onclick="demo-player.stop"><span class="cb-ico cb-ico-stop cb-ico--sm"></span>End demo</button>

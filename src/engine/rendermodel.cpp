@@ -803,8 +803,36 @@ static inline int cullmodel(model *m, const vec &center, float radius, int flags
     return 0;
 }
 
+static void renderdemoxraymodel(const char *mdl, int anim, const vec &o,
+    float yaw, float pitch, dynent *d, modelattach *attachments,
+    int basetime, int basetime2)
+{
+    if(anim&ANIM_RAGDOLL) return;
+    model *m = loadmodel(mdl);
+    if(!m) return;
+    modelattach weapon[2];
+    int count = 0;
+    if(attachments) for(int i = 0; attachments[i].tag; ++i)
+        if(attachments[i].name && !strcmp(attachments[i].tag, "tag_weapon"))
+        {
+            weapon[0] = attachments[i];
+            weapon[0].m = loadmodel(attachments[i].name);
+            if(weapon[0].m) count = 1;
+            break;
+        }
+    m->startrender();
+    m->render(anim|ANIM_NOSKIN, basetime, basetime2, o, yaw, pitch, d,
+        count ? weapon : NULL, vec(1, 1, 1), vec(0, 0, 1), 1);
+    m->endrender();
+}
+
 void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, float yaw, float pitch, int flags, dynent *d, modelattach *a, int basetime, int basetime2, float trans)
 {
+    if(demoxraypass)
+    {
+        renderdemoxraymodel(mdl, anim, o, yaw, pitch, d, a, basetime, basetime2);
+        return;
+    }
     if(shadowmapping && !(flags&(MDL_SHADOW|MDL_DYNSHADOW))) return;
     model *m = loadmodel(mdl); 
     if(!m) return;
@@ -1139,4 +1167,3 @@ void setbbfrommodel(dynent *d, const char *mdl)
         d->eyeheight += zrad;
     }
 }
-

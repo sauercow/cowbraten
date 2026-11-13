@@ -72,6 +72,10 @@ namespace cowui
             fpsent *target = game::followingplayer();
             return target && target->name[0] ? target->name : "Free camera";
         }
+        bool xray_enabled() { return game::demoxrayactive(); }
+        bool hitbox_enabled() { return game::demohitboxactive(); }
+        void toggle_xray() { game::toggledemoxray(); }
+        void toggle_hitbox() { game::toggledemohitbox(); }
         void move_playback_cursor(int x, int y) { g3d_movecursor(x, y); }
         void playback_cursor(float &x, float &y) { g3d_cursorpos(x, y); }
         float playback_cursor_size()

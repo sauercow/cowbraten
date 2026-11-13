@@ -10,6 +10,7 @@
 VARP(demohdrecord, 0, 1, 1);
 VARP(demohdplay, 0, 1, 1);
 VARP(hdcurve, 0, 1, 1);
+VARP(demohitbox, 0, 0, 1);
 
 namespace game
 {
@@ -180,6 +181,7 @@ namespace game
 
     void clearhdplayback()
     {
+        demoxrayreset();
         loopi(256) hdtracks[i].setsize(0);
         hdloaded = false;
         hdrecordedcn = -1;
@@ -547,12 +549,78 @@ namespace game
         hdsidecar->putlil<float>(camera1->o.y);
         hdsidecar->putlil<float>(camera1->o.z);
     }
+
+    bool demohitboxactive()
+    {
+        return demohitbox && demoxrayallowed();
+    }
+
+    void toggledemohitbox()
+    {
+        if(!demoplayback)
+        {
+            conoutf("Hitboxes are only available while watching a demo");
+            return;
+        }
+        if(!demoxrayallowed())
+        {
+            conoutf("Hitboxes are only available for demos played on this computer");
+            return;
+        }
+        demohitbox = demohitbox ? 0 : 1;
+        conoutf("Hitboxes %s", demohitbox ? "on" : "off");
+    }
+
+    static void addhitboxcylinder(vector<vec> &lines, const fpsent *d)
+    {
+        static const int sides = 24;
+        const float bottom = d->o.z - d->eyeheight;
+        const float top = d->o.z + d->aboveeye;
+        loopi(sides)
+        {
+            const float a0 = 2*PI*i/sides, a1 = 2*PI*(i + 1)/sides;
+            const vec p0(d->o.x + cosf(a0)*d->radius, d->o.y + sinf(a0)*d->radius, 0);
+            const vec p1(d->o.x + cosf(a1)*d->radius, d->o.y + sinf(a1)*d->radius, 0);
+            lines.add(vec(p0.x, p0.y, bottom)); lines.add(vec(p1.x, p1.y, bottom));
+            lines.add(vec(p0.x, p0.y, top)); lines.add(vec(p1.x, p1.y, top));
+        }
+        vec side(d->o.y - camera1->o.y, camera1->o.x - d->o.x, 0);
+        const float length = side.magnitude();
+        if(length < 1e-3f) return;
+        side.mul(d->radius/length);
+        loopk(2)
+        {
+            const vec edge = k ? vec(d->o).add(side) : vec(d->o).sub(side);
+            lines.add(vec(edge.x, edge.y, bottom));
+            lines.add(vec(edge.x, edge.y, top));
+        }
+    }
+
+    void drawdemohitboxes(int w, int h)
+    {
+        if(!demohitboxactive() || !camera1) return;
+        fpsent *exclude = isthirdperson() ? NULL : followingplayer();
+        vector<vec> lines;
+        const float thickness = max(1.0f, h/720.0f);
+        loopv(players)
+        {
+            fpsent *d = players[i];
+            if(!d || d == player1 || d == exclude || d->lifesequence < 0) continue;
+            if(d->state != CS_ALIVE && d->state != CS_LAGGED) continue;
+            lines.setsize(0);
+            addhitboxcylinder(lines, d);
+            hudworldlines(lines.getbuf(), lines.length(), w, h,
+                demohitboxcolor(d), 210, thickness);
+        }
+    }
 }
 
 // Runtime playback controls; default is on only when a matching .dmohd exists.
 ICOMMAND(demohdloaded, "", (), intret(game::hdplaybackloaded() ? 1 : 0));
 ICOMMAND(demohdrecorder, "", (), intret(game::hdplaybackrecorder()));
 ICOMMAND(demohdstatus, "", (), result(game::hdplaybackstatus()));
+ICOMMAND(toggledemohitbox, "", (), game::toggledemohitbox());
+ICOMMAND(demohitboxshown, "", (), intret(game::demohitboxactive() ? 1 : 0));
 ICOMMAND(toggledemohd, "", (),
 {
     demohdplay = demohdplay ? 0 : 1;

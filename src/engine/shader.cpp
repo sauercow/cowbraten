@@ -23,6 +23,7 @@ void loadshaders()
 {
     standardshaders = true;
     execfile("data/glsl.cfg");
+    execfile("data/cowbraten/demoxray.cfg");
     standardshaders = false;
 
     nullshader = lookupshaderbyname("null");
@@ -1549,4 +1550,3 @@ void setblurshader(int pass, int size, int radius, float *weights, float *offset
     loopk(8) scaledoffsets[k] = offsets[k]/size;
     LOCALPARAMV(offsets, scaledoffsets, 8);
 }
-

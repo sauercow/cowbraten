@@ -1545,6 +1545,8 @@ namespace game
 
         pophudmatrix();
 
+        drawdemohitboxes(w, h);
+
         if(d->state!=CS_EDITING && d->state!=CS_SPECTATOR && d->state!=CS_DEAD)
         {
             if(ammobar) drawammobar(w, h, d);

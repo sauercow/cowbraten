@@ -35,6 +35,8 @@ namespace cowui
         static void stepback(Rml::Event &);
         static void stepforward(Rml::Event &);
         static void cyclespeed(Rml::Event &);
+        static void togglexray(Rml::Event &);
+        static void togglehitbox(Rml::Event &);
         static void seek(Rml::Event &);
         static void stop(Rml::Event &);
         static void openlibrary(Rml::Event &);
@@ -57,6 +59,8 @@ namespace cowui
         bool active = false;
         bool interactive = false;
         bool paused = false;
+        bool xray_enabled = false;
+        bool hitbox_enabled = false;
         bool document_visible = false;
         bool load_attempted = false;
         static RmlDemoPlayer *instance;

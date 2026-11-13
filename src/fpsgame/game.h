@@ -903,6 +903,12 @@ namespace game
     extern int chooserandomplayermodel(int seed);
     extern void swayhudgun(int curtime);
     extern vec hudgunorigin(int gun, const vec &from, const vec &to, fpsent *d);
+    extern bool demoxrayallowed();
+    extern bool demoxrayactive();
+    extern void demoxrayreset();
+    extern void toggledemoxray();
+    extern void renderdemoxray();
+    extern int demohitboxcolor(fpsent *d);
 
     // clientdemo
     extern stream *demorecord;
@@ -912,6 +918,9 @@ namespace game
     extern void stophddemorecord();
     extern void loadhdplayback(const char *file);
     extern void clearhdplayback();
+    extern bool demohitboxactive();
+    extern void toggledemohitbox();
+    extern void drawdemohitboxes(int w, int h);
     extern bool hdplaybackloaded();
     extern int hdplaybackrecorder();
     extern const char *hdplaybackstatus();

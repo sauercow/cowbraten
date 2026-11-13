@@ -42,6 +42,8 @@ namespace cowui
         bool valid = constructor.Bind("active", &active) &&
             constructor.Bind("interactive", &interactive) &&
             constructor.Bind("paused", &paused) &&
+            constructor.Bind("xray_enabled", &xray_enabled) &&
+            constructor.Bind("hitbox_enabled", &hitbox_enabled) &&
             constructor.Bind("map_name", &map_name) &&
             constructor.Bind("mode_name", &mode_name) &&
             constructor.Bind("camera_name", &camera_name) &&
@@ -58,6 +60,8 @@ namespace cowui
             router.registeraction("demo-player.step-back", stepback) &&
             router.registeraction("demo-player.step-forward", stepforward) &&
             router.registeraction("demo-player.speed", cyclespeed) &&
+            router.registeraction("demo-player.xray", togglexray) &&
+            router.registeraction("demo-player.hitbox", togglehitbox) &&
             router.registeraction("demo-player.seek", seek) &&
             router.registeraction("demo-player.stop", stop) &&
             router.registeraction("demo-player.library", openlibrary);
@@ -121,6 +125,8 @@ namespace cowui
         if(!active)
             return;
         SYNC(paused, sauerdemo::paused());
+        SYNC(xray_enabled, sauerdemo::xray_enabled());
+        SYNC(hitbox_enabled, sauerdemo::hitbox_enabled());
         SYNC(position, sauerdemo::playback_position());
         SYNC(duration, std::max(sauerdemo::playback_duration(), 1));
         SYNC(map_name, Rml::String(sauerdemo::playback_map()));
@@ -156,6 +162,8 @@ namespace cowui
     void RmlDemoPlayer::stepback(Rml::Event &event) { sauerdemo::step(-1); stop_event(event); }
     void RmlDemoPlayer::stepforward(Rml::Event &event) { sauerdemo::step(1); stop_event(event); }
     void RmlDemoPlayer::cyclespeed(Rml::Event &event) { sauerdemo::cycle_speed(); stop_event(event); }
+    void RmlDemoPlayer::togglexray(Rml::Event &event) { sauerdemo::toggle_xray(); stop_event(event); }
+    void RmlDemoPlayer::togglehitbox(Rml::Event &event) { sauerdemo::toggle_hitbox(); stop_event(event); }
     void RmlDemoPlayer::seek(Rml::Event &event)
     {
         Rml::Element *element = event.GetCurrentElement();

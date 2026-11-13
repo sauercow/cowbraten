@@ -2106,6 +2106,8 @@ void gl_drawframe()
 
     renderparticles(true);
 
+    demoxraysnapdepth();
+
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
 
@@ -2114,6 +2116,7 @@ void gl_drawframe()
     if(isliquid(fogmat&MATF_VOLUME)) drawfogoverlay(fogmat, fogblend, abovemat);
     renderpostfx();
 
+    demoxraydraw();
     gl_drawhud();
 
     renderedgame = false;
@@ -2694,9 +2697,254 @@ void cleanupgl()
 {
     cleanupmotionblur();
 
+    cleanupdemoxray();
+
     clearminimap();
 
     cleanupscreenquad();
 
     gle::cleanup();
+}
+
+// Demo X-RAY framebuffer pass adapted from L4ZY-source by Lazy-Apathy and
+// contributors (zlib license), integrated with Cowbraten's render pipeline.
+bool demoxraypass = false;
+VARP(demoxraystyle, 0, 0, 1);
+
+static GLuint xraydepthtex = 0, xraymaskfb = 0, xraymasktex = 0,
+    xraymaskdepth = 0, xrayedgefb = 0, xrayedgetex = 0;
+static int xraydepthw = 0, xraydepthh = 0, xraymaskw = 0, xraymaskh = 0;
+static bool xraysnapped = false;
+
+static void releasedemoxraytargets()
+{
+    if(xraymaskfb) { glDeleteFramebuffers_(1, &xraymaskfb); xraymaskfb = 0; }
+    if(xrayedgefb) { glDeleteFramebuffers_(1, &xrayedgefb); xrayedgefb = 0; }
+    if(xraymaskdepth) { glDeleteRenderbuffers_(1, &xraymaskdepth); xraymaskdepth = 0; }
+    if(xraymasktex) { glDeleteTextures(1, &xraymasktex); xraymasktex = 0; }
+    if(xrayedgetex) { glDeleteTextures(1, &xrayedgetex); xrayedgetex = 0; }
+    xraymaskw = xraymaskh = 0;
+}
+
+void cleanupdemoxray()
+{
+    releasedemoxraytargets();
+    if(xraydepthtex) { glDeleteTextures(1, &xraydepthtex); xraydepthtex = 0; }
+    xraydepthw = xraydepthh = 0;
+    xraysnapped = false;
+}
+
+void demoxraycolour(int rgb)
+{
+    GLOBALPARAMF(demoxraycolor, ((rgb>>16)&0xFF)/255.0f,
+        ((rgb>>8)&0xFF)/255.0f, (rgb&0xFF)/255.0f, 1.0f);
+}
+
+static void demoxraytexparams()
+{
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+void demoxraysnapdepth()
+{
+    xraysnapped = false;
+    if(!game::demoxrayactive() || !hasFBO) return;
+    GLint viewport[4] = { 0, 0, 0, 0 }, oldtexture = 0;
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    const int w = viewport[2], h = viewport[3];
+    if(w < 1 || h < 1) return;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &oldtexture);
+    if(!xraydepthtex) glGenTextures(1, &xraydepthtex);
+    glBindTexture(GL_TEXTURE_2D, xraydepthtex);
+    if(w != xraydepthw || h != xraydepthh)
+    {
+        xraydepthw = w;
+        xraydepthh = h;
+        demoxraytexparams();
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, w, h, 0,
+            GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+    }
+    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+        viewport[0], viewport[1], w, h);
+    glBindTexture(GL_TEXTURE_2D, oldtexture);
+    xraysnapped = true;
+}
+
+static bool demoxraytargets(int w, int h)
+{
+    if(xraymaskfb && xrayedgefb && xraymaskw == w && xraymaskh == h) return true;
+    releasedemoxraytargets();
+    GLuint *textures[2] = { &xraymasktex, &xrayedgetex };
+    loopi(2)
+    {
+        glGenTextures(1, textures[i]);
+        glBindTexture(GL_TEXTURE_2D, *textures[i]);
+        demoxraytexparams();
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    }
+    glGenRenderbuffers_(1, &xraymaskdepth);
+    glBindRenderbuffer_(GL_RENDERBUFFER, xraymaskdepth);
+    glRenderbufferStorage_(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
+    glBindRenderbuffer_(GL_RENDERBUFFER, 0);
+    glGenFramebuffers_(1, &xraymaskfb);
+    glBindFramebuffer_(GL_FRAMEBUFFER, xraymaskfb);
+    glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D, xraymasktex, 0);
+    glFramebufferRenderbuffer_(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+        GL_RENDERBUFFER, xraymaskdepth);
+    bool valid = glCheckFramebufferStatus_(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    glGenFramebuffers_(1, &xrayedgefb);
+    glBindFramebuffer_(GL_FRAMEBUFFER, xrayedgefb);
+    glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D, xrayedgetex, 0);
+    valid = valid && glCheckFramebufferStatus_(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    if(!valid)
+    {
+        releasedemoxraytargets();
+        return false;
+    }
+    xraymaskw = w;
+    xraymaskh = h;
+    return true;
+}
+
+void demoxraydraw()
+{
+    if(!xraysnapped) return;
+    xraysnapped = false;
+    const int w = screenw, h = screenh;
+    if(!game::demoxrayactive() || w < 1 || h < 1) return;
+    Shader *edge = useshaderbyname("demoxrayedge");
+    Shader *modelshader = useshaderbyname("demoxraymodel");
+    if(!edge || edge->invalid() || !modelshader || modelshader->invalid()) return;
+
+    GLint oldfb = 0, oldviewport[4] = { 0, 0, w, h }, oldactive = GL_TEXTURE0,
+        oldtexture0 = 0, oldtexture7 = 0, olddepthfunc = GL_LESS,
+        oldsrc = GL_SRC_ALPHA, olddst = GL_ONE_MINUS_SRC_ALPHA;
+    GLfloat oldclear[4] = { 0, 0, 0, 0 };
+    GLboolean olddepthmask = GL_TRUE;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldfb);
+    glGetIntegerv(GL_VIEWPORT, oldviewport);
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, oldclear);
+    glGetIntegerv(GL_DEPTH_FUNC, &olddepthfunc);
+    glGetBooleanv(GL_DEPTH_WRITEMASK, &olddepthmask);
+    glGetIntegerv(GL_BLEND_SRC_RGB, &oldsrc);
+    glGetIntegerv(GL_BLEND_DST_RGB, &olddst);
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &oldactive);
+    glActiveTexture_(GL_TEXTURE7); glGetIntegerv(GL_TEXTURE_BINDING_2D, &oldtexture7);
+    glActiveTexture_(GL_TEXTURE0); glGetIntegerv(GL_TEXTURE_BINDING_2D, &oldtexture0);
+    const bool olddepth = glIsEnabled(GL_DEPTH_TEST) != 0;
+    const bool oldcull = glIsEnabled(GL_CULL_FACE) != 0;
+    const bool oldblend = glIsEnabled(GL_BLEND) != 0;
+    const bool oldstencil = glIsEnabled(GL_STENCIL_TEST) != 0;
+    const bool oldscissor = glIsEnabled(GL_SCISSOR_TEST) != 0;
+
+    if(demoxraytargets(w, h))
+    {
+        glDisable(GL_BLEND); glDisable(GL_STENCIL_TEST); glDisable(GL_SCISSOR_TEST);
+        glBindFramebuffer_(GL_FRAMEBUFFER, xraymaskfb);
+        glViewport(0, 0, w, h);
+        glClearColor(0, 0, 0, 0);
+        glDepthMask(GL_TRUE);
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST); glDepthFunc(GL_LESS); glEnable(GL_CULL_FACE);
+        glActiveTexture_(GL_TEXTURE7); glBindTexture(GL_TEXTURE_2D, xraydepthtex);
+        glActiveTexture_(GL_TEXTURE0);
+        matrix4 oldprojection = projmatrix, oldcamprojection = camprojmatrix;
+        projmatrix.perspective(fovy, aspect, nearplane, farplane);
+        setcamprojmatrix(false);
+        GLOBALPARAMF(demoxraydepth, 1.0f/w, 1.0f/h, nearplane, farplane);
+        demoxraypass = true;
+        game::renderdemoxray();
+        demoxraypass = false;
+        projmatrix = oldprojection;
+        camprojmatrix = oldcamprojection;
+        GLOBALPARAM(camprojmatrix, camprojmatrix);
+
+        glDisable(GL_DEPTH_TEST); glDisable(GL_CULL_FACE); glDepthMask(GL_FALSE);
+        glBindFramebuffer_(GL_FRAMEBUFFER, xrayedgefb);
+        glClear(GL_COLOR_BUFFER_BIT);
+        edge->set();
+        LOCALPARAMF(demoxrayedge, 1.0f/w, 1.0f/h,
+            demoxraystyle ? 0.3f : 0.0f, float(clamp((h + 270)/540, 1, 3)));
+        glBindTexture(GL_TEXTURE_2D, xraymasktex);
+        screenquad(1, 1);
+
+        glBindFramebuffer_(GL_FRAMEBUFFER, oldfb);
+        glViewport(oldviewport[0], oldviewport[1], oldviewport[2], oldviewport[3]);
+        glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        hudmatrix.ortho(0, w, h, 0, -1, 1);
+        resethudmatrix();
+        hudshader->set();
+        gle::colorf(1, 1, 1, 1);
+        glBindTexture(GL_TEXTURE_2D, xrayedgetex);
+        hudquad(0, 0, w, h, 0, 1, 1, -1);
+    }
+    else
+    {
+        glBindFramebuffer_(GL_FRAMEBUFFER, oldfb);
+        glViewport(oldviewport[0], oldviewport[1], oldviewport[2], oldviewport[3]);
+    }
+
+    glClearColor(oldclear[0], oldclear[1], oldclear[2], oldclear[3]);
+    glDepthFunc(GLenum(olddepthfunc)); glDepthMask(olddepthmask);
+    glBlendFunc(GLenum(oldsrc), GLenum(olddst));
+    if(olddepth) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
+    if(oldcull) glEnable(GL_CULL_FACE); else glDisable(GL_CULL_FACE);
+    if(oldblend) glEnable(GL_BLEND); else glDisable(GL_BLEND);
+    if(oldstencil) glEnable(GL_STENCIL_TEST); else glDisable(GL_STENCIL_TEST);
+    if(oldscissor) glEnable(GL_SCISSOR_TEST); else glDisable(GL_SCISSOR_TEST);
+    glActiveTexture_(GL_TEXTURE7); glBindTexture(GL_TEXTURE_2D, oldtexture7);
+    glActiveTexture_(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, oldtexture0);
+    glActiveTexture_(GLenum(oldactive));
+}
+
+void hudworldlines(const vec *points, int count, int w, int h,
+    int color, int alpha, float thickness)
+{
+    if(count < 2 || w < 1 || h < 1 || alpha <= 0) return;
+    matrix4 projection, cameraProjection;
+    projection.perspective(fovy, aspect, nearplane, farplane);
+    cameraProjection.muld(projection, cammatrix);
+    const float half = max(thickness, 0.5f)*0.5f;
+    hudnotextureshader->set();
+    gle::colorub((color>>16)&0xFF, (color>>8)&0xFF, color&0xFF,
+        uchar(min(alpha, 255)));
+    gle::defvertex(2);
+    gle::begin(GL_TRIANGLES);
+    for(int i = 0; i + 1 < count; i += 2)
+    {
+        vec4 a, b;
+        cameraProjection.transform(points[i], a);
+        cameraProjection.transform(points[i + 1], b);
+        if(a.w < nearplane && b.w < nearplane) continue;
+        if(a.w < nearplane)
+        {
+            const float k = (nearplane - a.w)/(b.w - a.w);
+            a = vec4(a.x + (b.x-a.x)*k, a.y + (b.y-a.y)*k,
+                a.z + (b.z-a.z)*k, nearplane);
+        }
+        else if(b.w < nearplane)
+        {
+            const float k = (nearplane - b.w)/(a.w - b.w);
+            b = vec4(b.x + (a.x-b.x)*k, b.y + (a.y-b.y)*k,
+                b.z + (a.z-b.z)*k, nearplane);
+        }
+        const float ax = (a.x/a.w*0.5f + 0.5f)*w;
+        const float ay = (0.5f - a.y/a.w*0.5f)*h;
+        const float bx = (b.x/b.w*0.5f + 0.5f)*w;
+        const float by = (0.5f - b.y/b.w*0.5f)*h;
+        const float dx = bx - ax, dy = by - ay;
+        const float length = sqrtf(dx*dx + dy*dy);
+        if(length < 1e-3f) continue;
+        const float nx = -dy/length*half, ny = dx/length*half;
+        gle::attribf(ax + nx, ay + ny); gle::attribf(ax - nx, ay - ny); gle::attribf(bx + nx, by + ny);
+        gle::attribf(bx + nx, by + ny); gle::attribf(ax - nx, ay - ny); gle::attribf(bx - nx, by - ny);
+    }
+    gle::end();
+    hudshader->set();
 }
