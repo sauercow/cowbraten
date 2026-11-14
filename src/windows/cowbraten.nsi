@@ -35,6 +35,8 @@ Section "cowbraten (required)"
   File "..\..\bin64\cowbraten_x86_64_client.exe"
   SetOutPath $INSTDIR
   File "..\..\cowbraten.bat"
+  SetOutPath $INSTDIR\data
+  File /r "..\..\data\cowbraten"
 
   WriteRegStr HKLM SOFTWARE\cowbraten "Install_Dir" "$INSTDIR"
 
@@ -67,6 +69,7 @@ Section "Uninstall"
   Delete "$INSTDIR\cowbraten.lnk"
   Delete "$INSTDIR\cowbraten.bat"
   Delete "$INSTDIR\bin64\cowbraten_x86_64_client.exe"
+  RMDir /r "$INSTDIR\data\cowbraten"
   Delete "$INSTDIR\uninstall_cowbraten.exe"
 
 SectionEnd

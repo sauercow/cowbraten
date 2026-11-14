@@ -3,6 +3,7 @@
 #include "sauer_admin_bridge.h"
 
 namespace game { const char *getclientp1xbratenversion(int client_num); }
+extern char *cowbratenversion;
 
 namespace cowui
 {
@@ -17,6 +18,11 @@ namespace cowui
             result.master_mode = game::mastermode;
             result.server_name = game::servdesc[0] ? game::servdesc : "Local server";
             return true;
+        }
+
+        const char *clientversion()
+        {
+            return cowbratenversion ? cowbratenversion : "";
         }
 
         void visitclients(ClientVisitor visitor, void *data)

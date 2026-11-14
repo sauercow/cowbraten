@@ -30,6 +30,7 @@ function pack() {
     local files=(
         "bin_unix"
         "cowbraten.sh"
+        "data/cowbraten"
     )
     case "$platform" in
         windows)
@@ -37,6 +38,20 @@ function pack() {
             rm -f dist/cowbraten_setup*
             makensis -DVERSION="$version" src/windows/cowbraten.nsi
             mv cowbraten_setup_* dist/
+            ;;
+        linux)
+            mkdir -p dist
+            rm -f dist/cowbraten_linux_"$version".zip \
+                dist/cowbraten_setup_linux_"$version".run
+            zip -r dist/cowbraten_linux_"$version".zip "${files[@]}"
+
+            local payload
+            payload=$(mktemp)
+            tar -czf "$payload" "${files[@]}"
+            cp tools/linux-installer.sh dist/cowbraten_setup_linux_"$version".run
+            cat "$payload" >> dist/cowbraten_setup_linux_"$version".run
+            rm -f "$payload"
+            chmod +x dist/cowbraten_setup_linux_"$version".run
             ;;
         macos)
             files=(
@@ -59,12 +74,16 @@ case "$platform" in
         pack "$platform"
         ;;
     windows | macos)
+        if [[ "$platform" == "windows" ]]; then
+            tools/build-windows-freetype.sh || exit
+        fi
         build "$platform"
         pack "$platform"
         ;;
     all)
         build "linux" "debian"
         pack "linux"
+        tools/build-windows-freetype.sh || exit
         build "windows"
         pack "windows"
         build "macos"

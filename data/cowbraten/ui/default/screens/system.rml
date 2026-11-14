@@ -92,6 +92,7 @@
                 <div class="about-hero-copy">
                     <div class="eyebrow">Native Cube 2 client</div>
                     <div class="about-title">Cowbraten</div>
+                    <div class="about-version">Version {{ cowbraten_version }}</div>
                     <div class="about-copy">A performance-focused Sauerbraten client with a native RmlUi interface.</div>
                 </div>
             </div>

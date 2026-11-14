@@ -65,6 +65,7 @@ namespace cowui
         Rml::String input_label = "ALL";
         bool input_active = false;
         bool input_team = false;
+        bool console_minimap_clipped = false;
         bool document_visible = false;
         bool load_attempted = false;
     };

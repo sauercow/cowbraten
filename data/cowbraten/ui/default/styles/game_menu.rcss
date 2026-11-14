@@ -235,7 +235,7 @@ body
     border-color: #3C454F;
     border-radius: 5dp;
     color: var(--color-text);
-    font-family: Lato;
+    font-family: var(--font-interface);
     tab-index: auto;
 }
 
@@ -680,7 +680,7 @@ body
     border-color: #46515C;
     border-radius: 17dp;
     color: var(--color-text);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: 0.625rem;
     tab-index: auto;
 }
@@ -727,7 +727,7 @@ body
     border-width: 1dp;
     border-color: #46515C;
     color: var(--color-text);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: var(--font-size-control);
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -839,7 +839,7 @@ body
     border-color: #46515C;
     border-radius: 3dp;
     color: var(--color-text-muted);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: var(--font-size-control);
     letter-spacing: 1dp;
     text-transform: uppercase;

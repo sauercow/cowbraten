@@ -65,5 +65,6 @@ namespace cowui
         int minifade() { return miniconfade; }
         int topcapacity() { return consize; }
         int minicapacity() { return miniconsize; }
+        bool topfeedminimapclipped() { return game::clipconsole(100, 100) > 0; }
     }
 }

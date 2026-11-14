@@ -62,7 +62,7 @@ namespace cowui
         bool section_admin = true, section_about = false;
         bool connected = false, local_master = false, team_mode = false;
         int master_mode = 0, update_frame = 0, client_count = 0;
-        Rml::String server_name, status;
+        Rml::String server_name, status, cowbraten_version;
     };
 }
 

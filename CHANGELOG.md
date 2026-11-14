@@ -1,13 +1,14 @@
 # Changelog
 
-## cowbraten 1.1.0-rc.1 — 2026-11-11
+## cowbraten 1.1.0-rc.2 — 2026-11-13
 
-This release candidate combines the 1.0.1 maintenance line with the first production RmlUi interface.
+The second RmlUi release candidate. It expands the initial production slice into the normal player flow, adds responsive presentation and customization, and carries the complete 1.0.1 maintenance line. Final 1.1.0 remains gated on migrating or deliberately classifying every interface path that still draws through the legacy GUI.
 
 ### RmlUi
 
 - Add the native RmlUi runtime, renderer, input integration, Sauer-backed file loading, shared theme, and typed action routing.
-- Replace the main menu, server browser, and Settings entry points while retaining the legacy GUI for screens that have not been migrated.
+- Migrate Profile, game setup, Servers, Demos, Settings, Administration, About, text utilities, map editing, the in-game menu, chat, full console, and gameplay scoreboard.
+- Keep the specialized 3D texture palette engine-owned and retain a safe legacy fallback for unknown third-party `showgui` documents.
 - Add server filtering, sorting, selection, refresh, and connection through snapshots of the existing Sauer server list.
 - Add typed Settings pages for gameplay, HUD, graphics, audio, mouse and keyboard, crosshair, chat, and console options.
 - Add key binding capture with multiple bindings, exact removal, readable key names, conflict detection, and explicit replacement.
@@ -16,6 +17,23 @@ This release candidate combines the 1.0.1 maintenance line with the first produc
 - Preserve logical interface size on HiDPI displays with density-independent styling and drawable-resolution rendering.
 - Improve responsive layouts at 800x600 and other compact viewports, raise microtext legibility, and simplify user-facing Settings descriptions.
 - Normalize every Settings category with compact headings, values, toggles, sliders, and spacing, plus clear weapon grouping for trail-color controls.
+- Add independent interface and text scaling, responsive desktop scaling, and selectable Legacy/Lato typography. Legacy loads Sauerbraten's `packages/fonts/default.ttf`, the same face used by classic console and FPS text.
+- Let the top-left gameplay feed use the available screen width instead of an arbitrary 40–44% cap, while retaining minimap clearance.
+
+### Player and demo tools
+
+- Add profile name presets, player-model preview, and separate local/reported model controls.
+- Add server favorites and a richer server browser with filtering, sorting, stable selection, compatibility status, and refresh/connect actions.
+- Rebuild the demo library with metadata, search, classification, favorites, recoverable trash, and playback integration.
+- Add demo transport controls and local playback visualization options, including X-RAY and hitbox rendering.
+- Add safe autoexec profiles, automatic ignore rules, and typed utilities for Notepad, Scratchpad, and Paste Buffer.
+- Add native game setup, campaign and bot-match flows, administration controls, and the map editing control center.
+
+### HUD and presentation
+
+- Add responsive chat, console, HUD, status dock, and scoreboard layouts for compact through ultrawide viewports.
+- Add a semantic CC0 icon set and the optional Modern Metallic theme.
+- Preserve existing Sauer configuration and bind semantics while applying interface changes live.
 
 ### Integrated maintenance work
 
@@ -25,14 +43,16 @@ This release candidate combines the 1.0.1 maintenance line with the first produc
 ### Validation
 
 - Build the Linux client and standalone server from the combined branch.
-- Start the client with SDL's offscreen video driver, load the Settings document at 800x600, render a screenshot, and exit cleanly.
+- Produce a Windows NSIS installer, Linux portable ZIP, and self-extracting Linux installer with the required RmlUi assets and SHA-256 checksums.
+- Pass the interface regression suite, including app shell, settings, chat, console, demos, editor, game setup, HUD, scoreboard, server browser, and utilities coverage.
+- Start the client with SDL dummy audio/offscreen video, initialize both Legacy and Lato faces, render migrated documents, and exit cleanly.
 
-### Known scope
+### Compatibility and remaining scope
 
-- Demos, profile, console, about, and exit actions on the new main menu are still placeholders.
-- Game setup, map selection, player model selection, master controls, campaigns, bot matches, and editing tools continue to use the legacy GUI.
-- Server favorites and history, navigation history, modal stacking, and a complete interactive platform matrix remain future work.
-- See [RMLUI_ROADMAP.md](./RMLUI_ROADMAP.md) for priorities and release gates.
+- Retain p1xbraten 9.0.0 detection and the existing Sauer network and standard demo format versions.
+- HD demos remain optional companion `.dmohd` files; normal `.dmo` playback remains supported.
+- Cross-platform interactive validation remains ongoing; the documented release validation was performed on Linux.
+- Audit runtime and compatibility routes for remaining legacy-drawn elements before the stable promotion. The engine-owned 3D texture palette and unknown third-party `showgui` fallback are intentional boundaries; any other legacy surface must be migrated or documented before 1.1.0 final.
 
 ## cowbraten 1.0.1-rc.3 — 2026-10-23
 

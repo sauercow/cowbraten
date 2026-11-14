@@ -39,6 +39,7 @@
 extern char *uitheme;
 extern int uiscale;
 extern int uitextscale;
+extern char *uifont;
 
 namespace cowui
 {
@@ -189,6 +190,11 @@ namespace cowui
             "font-size",
             Rml::CreateString("%.3fdp", 16.0f * float(uitextscale) / 100.0f)
         );
+        const char *font = uifont && !std::strcmp(uifont, "legacy")
+            ? "Legacy"
+            : "Lato";
+        document->SetProperty("--font-interface", font);
+        document->SetProperty("font-family", font);
     }
 
     struct UiDimensions
@@ -755,6 +761,17 @@ namespace cowui
         if(!Rml::LoadFontFace(
             "data/cowbraten/ui/default/fonts/LatoLatin-Regular.ttf",
             "Lato",
+            Rml::Style::FontStyle::Normal,
+            Rml::Style::FontWeight::Normal))
+        {
+            Rml::Shutdown();
+            render_interface.shutdowngl();
+            return false;
+        }
+
+        if(!Rml::LoadFontFace(
+            "packages/fonts/default.ttf",
+            "Legacy",
             Rml::Style::FontStyle::Normal,
             Rml::Style::FontWeight::Normal))
         {

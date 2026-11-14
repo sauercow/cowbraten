@@ -30,6 +30,7 @@ namespace cowui
         };
 
         bool readstate(State &result);
+        const char *clientversion();
         void readclients(std::vector<Client> &result);
         bool setlocalmaster(bool enabled);
         bool setmastermode(int mode);

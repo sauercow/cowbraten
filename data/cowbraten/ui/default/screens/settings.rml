@@ -4777,6 +4777,19 @@
                                     </div>
                                 </div>
 
+                                <div class="settings-font-choices">
+                                    <div class="settings-control-title">Typeface</div>
+                                    <div class="settings-control-description">Choose between the Cowbraten 1.0.1 console typeface and the modern interface typeface.</div>
+                                    <div class="settings-font-choice-row">
+                                        <button class="button settings-font-choice settings-font-choice-legacy"
+                                            data-class-is-selected="interface_font_legacy"
+                                            data-event-click="select_interface_font(0)">Legacy</button>
+                                        <button class="button settings-font-choice settings-font-choice-lato"
+                                            data-class-is-selected="interface_font_lato"
+                                            data-event-click="select_interface_font(1)">Lato</button>
+                                    </div>
+                                </div>
+
                                 <div class="settings-appearance-actions">
                                     <span class="settings-control-description">QHD uses a subtle automatic boost; stronger scaling is reserved for 4K. Manual values are applied on top.</span>
                                     <button class="button" data-event-click="reset_interface_appearance()">Restore defaults</button>

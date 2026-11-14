@@ -23,6 +23,7 @@ namespace cowui
         int minifade();
         int topcapacity();
         int minicapacity();
+        bool topfeedminimapclipped();
     }
 }
 

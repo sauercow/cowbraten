@@ -951,11 +951,52 @@ body
     line-height: 38dp;
 }
 
+.settings-font-choices
+{
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    max-width: 1120dp;
+    margin-top: var(--space-3);
+    padding: 20dp var(--space-2) var(--space-2);
+    background-color: var(--color-background);
+    border-width: 1dp;
+    border-color: var(--color-border);
+}
+
+.settings-font-choice-row
+{
+    display: flex;
+    margin-top: var(--space-2);
+    gap: var(--space-1);
+}
+
+.settings-font-choice
+{
+    display: block;
+    min-width: 0;
+    height: 48dp;
+    padding: 0 var(--space-2);
+    flex: 1;
+    line-height: 46dp;
+    text-align: left;
+}
+
+.settings-font-choice.is-selected
+{
+    background-color: #2F7CCB35;
+    border-color: var(--color-primary);
+}
+
+.settings-font-choice-legacy { font-family: Legacy; }
+.settings-font-choice-lato { font-family: Lato; }
+
 /* Typography scaling changes the usable component width independently from
  * viewport media queries. Reflow the appearance editor before large rem text
  * can collide with fixed-density controls. */
 .ui-text-large .settings-appearance-presets,
-.ui-text-large .settings-appearance-controls
+.ui-text-large .settings-appearance-controls,
+.ui-text-large .settings-font-choice-row
 {
     flex-direction: column;
 }
@@ -1329,7 +1370,7 @@ body
     background-color: transparent;
     border-width: 0;
     color: var(--color-text);
-    font-family: Lato;
+    font-family: var(--font-interface);
     text-align: left;
 }
 

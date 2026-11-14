@@ -2,6 +2,9 @@
 #include "sauer_demo_bridge.h"
 
 #include <SDL.h>
+#ifdef WIN32
+#include <shellapi.h>
+#endif
 
 extern int screenw;
 
@@ -119,9 +122,14 @@ namespace cowui
         bool open_location(const char *absolute_path)
         {
             if(!absolute_path || !absolute_path[0]) return false;
+#ifdef WIN32
+            return reinterpret_cast<intptr_t>(ShellExecuteA(nullptr, "open",
+                parentdir(absolute_path), nullptr, nullptr, SW_SHOWNORMAL)) > 32;
+#else
             string uri;
             formatstring(uri, "file://%s", parentdir(absolute_path));
             return SDL_OpenURL(uri) == 0;
+#endif
         }
     }
 }

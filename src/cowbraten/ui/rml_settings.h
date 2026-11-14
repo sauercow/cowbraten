@@ -210,6 +210,8 @@ namespace cowui
             const Rml::VariantList &arguments);
         void selectuitextscale(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
+        void selectinterfacefont(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
         void selectinterfacepreset(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void resetinterfaceappearance(Rml::DataModelHandle,
@@ -1227,6 +1229,8 @@ namespace cowui
         int interface_text_scale = 100;
         int interface_text_scale_minimum = 75;
         int interface_text_scale_maximum = 150;
+        bool interface_font_legacy = false;
+        bool interface_font_lato = true;
         Rml::String interface_appearance_status;
         bool console_available = false;
         bool console_top_important = true;

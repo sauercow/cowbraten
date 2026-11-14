@@ -5,7 +5,7 @@
     <link type="text/rcss" href="../styles/chat.rcss" />
 </head>
 <body data-model="chat">
-    <div class="console-feed">
+    <div class="console-feed" data-class-is-minimap-clipped="console_minimap_clipped">
         <div class="console-message-repeat" data-for="message : console_messages">
             <div class="console-message"
                 data-rml="message.rml"

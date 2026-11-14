@@ -18,6 +18,11 @@ namespace cowui
             return true;
         }
 
+        const char *clientversion()
+        {
+            return saueradmin::clientversion();
+        }
+
         void readclients(std::vector<Client> &result)
         {
             result.clear();

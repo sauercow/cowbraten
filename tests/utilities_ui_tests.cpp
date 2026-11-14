@@ -66,7 +66,7 @@ int main()
           rml.find("set_scratchpad(ev.value)") != std::string::npos &&
           rml.find("set_pastebuffer(ev.value)") != std::string::npos,
         "multiline controls synchronize loaded and edited text through the model");
-    check(style.find("font-family: Lato") != std::string::npos &&
+    check(style.find("font-family: var(--font-interface)") != std::string::npos &&
           style.find("font-family: mono") == std::string::npos,
         "editors use an installed font face");
 

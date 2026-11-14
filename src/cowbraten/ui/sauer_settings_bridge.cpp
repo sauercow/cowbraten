@@ -885,6 +885,12 @@ namespace cowui
             return id && id->type == ID_VAR ? id : nullptr;
         }
 
+        static ident *interfacefontident()
+        {
+            ident *id = getident("uifont");
+            return id && id->type == ID_SVAR ? id : nullptr;
+        }
+
         static ident *autoignorenameident(int slot)
         {
             if(slot < 0 || slot >= Chat::AutoIgnoreSlotCount)
@@ -5538,8 +5544,10 @@ namespace cowui
         {
             ident *ui_scale = interfaceappearanceident("uiscale");
             ident *text_scale = interfaceappearanceident("uitextscale");
+            ident *font = interfacefontident();
             if(!ui_scale || !ui_scale->storage.i ||
-               !text_scale || !text_scale->storage.i)
+               !text_scale || !text_scale->storage.i ||
+               !font || !font->storage.s || !*font->storage.s)
                 return false;
 
             result.ui_scale = *ui_scale->storage.i;
@@ -5548,6 +5556,9 @@ namespace cowui
             result.text_scale = *text_scale->storage.i;
             result.text_scale_minimum = text_scale->minval;
             result.text_scale_maximum = text_scale->maxval;
+            result.font = !std::strcmp(*font->storage.s, "legacy")
+                ? InterfaceFont::Legacy
+                : InterfaceFont::Lato;
             return true;
         }
 
@@ -5574,15 +5585,33 @@ namespace cowui
                 "uitextscale", value, result);
         }
 
+        bool writeinterfacefont(
+            InterfaceFont requested, InterfaceAppearance &result)
+        {
+            ident *font = interfacefontident();
+            if(!font || !font->storage.s)
+                return false;
+            setsvarchecked(
+                font,
+                requested == InterfaceFont::Legacy ? "legacy" : "lato"
+            );
+            return readinterfaceappearance(result) &&
+                result.font == requested &&
+                cowui::savepersistentstate();
+        }
+
         bool resetinterfaceappearance(InterfaceAppearance &result)
         {
             ident *ui_scale = interfaceappearanceident("uiscale");
             ident *text_scale = interfaceappearanceident("uitextscale");
+            ident *font = interfacefontident();
             if(!ui_scale || !ui_scale->storage.i ||
-               !text_scale || !text_scale->storage.i)
+               !text_scale || !text_scale->storage.i ||
+               !font || !font->storage.s)
                 return false;
             setvarchecked(ui_scale, 100);
             setvarchecked(text_scale, 100);
+            setsvarchecked(font, "lato");
             return readinterfaceappearance(result) &&
                 cowui::savepersistentstate();
         }

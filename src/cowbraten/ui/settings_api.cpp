@@ -2924,6 +2924,9 @@ namespace cowui
             result.text_scale = source.text_scale;
             result.text_scale_minimum = source.text_scale_minimum;
             result.text_scale_maximum = source.text_scale_maximum;
+            result.font = source.font == sauersettings::InterfaceFont::Legacy
+                ? InterfaceFont::Legacy
+                : InterfaceFont::Lato;
         }
 
         bool readinterfaceappearance(InterfaceAppearance &result)
@@ -2949,6 +2952,21 @@ namespace cowui
             sauersettings::InterfaceAppearance current;
             const bool accepted = sauersettings::writeuitextscale(
                 value, current);
+            if(accepted || sauersettings::readinterfaceappearance(current))
+                copyinterfaceappearance(current, result);
+            return accepted;
+        }
+
+        bool writeinterfacefont(
+            InterfaceFont requested, InterfaceAppearance &result)
+        {
+            sauersettings::InterfaceAppearance current;
+            const sauersettings::InterfaceFont font =
+                requested == InterfaceFont::Legacy
+                    ? sauersettings::InterfaceFont::Legacy
+                    : sauersettings::InterfaceFont::Lato;
+            const bool accepted =
+                sauersettings::writeinterfacefont(font, current);
             if(accepted || sauersettings::readinterfaceappearance(current))
                 copyinterfaceappearance(current, result);
             return accepted;

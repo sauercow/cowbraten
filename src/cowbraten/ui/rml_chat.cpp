@@ -45,6 +45,7 @@ namespace cowui
             constructor.RegisterArray<std::vector<Message>>() &&
             constructor.Bind("console_messages", &console_messages) &&
             constructor.Bind("messages", &messages) &&
+            constructor.Bind("console_minimap_clipped", &console_minimap_clipped) &&
             constructor.Bind("input_active", &input_active) &&
             constructor.Bind("input_team", &input_team) &&
             constructor.Bind("input_label", &input_label) &&
@@ -75,6 +76,7 @@ namespace cowui
         console_messages.clear();
         messages.clear();
         input_active = false;
+        console_minimap_clipped = false;
     }
 
     std::string RmlChat::plain(const char *text)
@@ -240,6 +242,13 @@ namespace cowui
            sauerchat::inputmode() == sauerchat::InputMode::None)
             return;
         syncinput();
+        const bool next_console_minimap_clipped =
+            sauerchat::topfeedminimapclipped();
+        if(console_minimap_clipped != next_console_minimap_clipped)
+        {
+            console_minimap_clipped = next_console_minimap_clipped;
+            model.DirtyVariable("console_minimap_clipped");
+        }
         const int current = sauerchat::now();
         const auto updateopacity = [current](std::vector<Message> &target)
         {

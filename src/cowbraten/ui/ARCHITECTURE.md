@@ -68,9 +68,10 @@ while `modern-metallic` overrides semantic tokens and component presentation in
 changes a model, action name, or legacy setting. A new theme therefore adds an
 RCSS sheet and any licensed font/assets, not engine-side UI behavior.
 
-Only implemented screens receive identifiers. Game Menu, Profile, Servers,
-Demos, and Settings are production identifiers, while Test remains a
-developer-only identifier. The former branding-only Main document is not a
+Only implemented screens receive identifiers. Game Menu, Profile, Game Setup,
+Servers, Demos, Settings, Administration, About, Utilities, Editor, Console,
+and Scoreboard are production identifiers, while Test remains a developer-only
+identifier. The former branding-only Main document is not a
 navigation target: `/ui_main` and legacy `showgui main` open the compact Game
 Menu during a match and Profile / Identity while disconnected. Later screens
 are added to the table when their documents and actions exist.
@@ -99,9 +100,9 @@ At most one normal screen is active. Switching screens hides the previous
 document without releasing menu input ownership, while closing the active
 screen returns directly to gameplay. Opening the full application shell from
 the Game Menu records that single origin so Escape and the shell Back action
-return to the compact menu; Return to Game still closes the UI directly. A
-general navigation history and modal stack remain deferred until another
-production flow needs them.
+return to the compact menu; Return to Game still closes the UI directly. This
+small origin/return policy covers the current production flows; a general
+navigation history and modal stack can be added if deeper nesting is needed.
 
 Closing the UI hides the active document and all modals, releases RmlUi focus,
 and returns cursor/grab ownership through the existing input bridge. Cached
@@ -130,11 +131,11 @@ the full RmlUi Console overlay, then restores the same screen when it closes
 while retaining the menu's existing cursor/grab session.
 
 Legacy `showgui` calls pass through an exact-name compatibility router before
-the legacy menu table. The currently migrated names are `main` -> Main,
-`servers` -> Servers, and `options` -> Settings. A match uses the same cached
-`ScreenId` navigation path as the direct `/ui_*` commands; there is no command
-parsing, partial matching, or DOM-based routing. More names are added only when
-their production screen exists.
+the legacy menu table. Migrated names cover the main/profile flow, servers,
+options, demos, administration, utilities, and named editor documents. A match
+uses the same cached `ScreenId` navigation path as the direct `/ui_*` commands;
+there is no command parsing, partial matching, or DOM-based routing. New names
+are added only when their production screen exists.
 
 An existing, non-migrated legacy GUI keeps the original `showgui` path. If it
 is requested while RmlUi owns the menu, RmlUi closes through its normal input
@@ -162,9 +163,12 @@ the fixed Execute actions.
 
 RmlUi multiline controls synchronize their values through the typed data model,
 so file loads and clipboard mutations update cached documents and user edits
-flow back through explicit callbacks. The utility stylesheet uses the installed
-Lato face so editor text remains renderable without adding an unregistered
-monospace font dependency.
+flow back through explicit callbacks. The utility stylesheet inherits the
+selected interface face. `uifont` chooses between the bundled Lato family and
+the Sauerbraten content package's `packages/fonts/default.ttf` Legacy face,
+matching the classic console/FPS typography. The root font variable is updated
+across cached documents so the choice applies live and persists with the other
+interface preferences.
 
 ## Map editor model
 

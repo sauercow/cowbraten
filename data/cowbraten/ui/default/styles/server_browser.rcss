@@ -240,7 +240,7 @@ body
     border-width: 0 0 2dp 0;
     border-color: transparent;
     color: var(--color-text-muted);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: 0.625rem;
     line-height: 37dp;
     letter-spacing: 1dp;
@@ -333,7 +333,7 @@ body
     border-width: 0 0 1dp 3dp;
     border-color: var(--color-border) var(--color-border) var(--color-border) transparent;
     color: var(--color-text-muted);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: 0.75rem;
     line-height: 16dp;
     text-align: left;

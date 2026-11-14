@@ -74,6 +74,12 @@ int main()
           rml.find("RmlUi") != std::string::npos &&
           rml.find("sauerbraten.org") != std::string::npos,
         "About retains engine, interface, contributor, and website credits");
+    check(rml.find("Version {{ cowbraten_version }}") != std::string::npos &&
+          model.find("Bind(\"cowbraten_version\"") != std::string::npos &&
+          model.find("admin::clientversion()") != std::string::npos &&
+          model.find("DirtyVariable(\"cowbraten_version\")") != std::string::npos &&
+          bridge.find("cowbratenversion") != std::string::npos,
+        "About refreshes the engine-owned Cowbraten release version");
     check(shell.find("onclick=\"navigation.about\"") != std::string::npos,
         "shared shell exposes About");
     check(style.find(".system-tab") != std::string::npos &&

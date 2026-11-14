@@ -325,7 +325,7 @@ body
     border-color: var(--color-border);
     border-radius: var(--radius-control);
     color: var(--color-text-muted);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: 0.625rem;
     line-height: 32dp;
     letter-spacing: 1dp;
@@ -420,7 +420,7 @@ body
     border-width: 0 0 0 3dp;
     border-left-color: transparent;
     color: var(--color-text-muted);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: 0.625rem;
     line-height: 33dp;
     letter-spacing: 1dp;
@@ -463,7 +463,7 @@ body
     border-width: 0 0 0 1dp;
     border-left-color: var(--color-border);
     color: var(--color-error);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: 0.6875rem;
     line-height: 33dp;
     text-align: center;
@@ -565,7 +565,7 @@ body
     border-width: 1dp;
     border-color: var(--color-border);
     color: var(--color-text-muted);
-    font-family: Lato;
+    font-family: var(--font-interface);
     text-align: left;
 }
 
@@ -747,7 +747,7 @@ body
     border-width: 1dp;
     border-color: var(--color-border);
     color: var(--color-text-muted);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: 0.6875rem;
     line-height: 34dp;
     letter-spacing: 1dp;
@@ -991,7 +991,7 @@ body
     border-width: 1dp;
     border-color: var(--color-border);
     color: var(--color-text);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: 0.6875rem;
     line-height: 32dp;
     letter-spacing: 1dp;

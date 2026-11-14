@@ -58,6 +58,10 @@ int main()
               std::string::npos &&
           ui.find("context->GetNumDocuments()") != std::string::npos,
         "live text scaling updates rem and exposes a large-type layout breakpoint");
+    check(ui.find("packages/fonts/default.ttf") != std::string::npos &&
+          ui.find("RobotoMono-Regular.ttf") == std::string::npos &&
+          ui.find("\"Legacy\"") != std::string::npos,
+        "Legacy selection loads the Cowbraten 1.0.1 console typeface");
     check(!icons.empty() && !atlas_1x.empty() && !atlas_2x.empty(),
         "load shared icon stylesheet and both sprite atlases");
     check(shell.find("href=\"../icons/icons.rcss\"") != std::string::npos &&

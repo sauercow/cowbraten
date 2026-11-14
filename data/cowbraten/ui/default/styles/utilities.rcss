@@ -33,7 +33,7 @@
     border-color: var(--color-border);
     border-radius: var(--radius-control);
     color: var(--color-text-muted);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: 0.625rem;
     line-height: 32dp;
     letter-spacing: 1dp;
@@ -92,7 +92,7 @@
     background-color: var(--color-background);
     border-width: 0;
     color: var(--color-text);
-    font-family: Lato;
+    font-family: var(--font-interface);
     font-size: 0.75rem;
     line-height: 18dp;
 }

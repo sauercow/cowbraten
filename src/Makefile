@@ -46,13 +46,22 @@ RMLUI_DIR=third_party/RmlUi
 RMLUI_BUILD=../build/rmlui-$(TARGET)-$(RMLUI_BUILD_TYPE)
 RMLUI_LIB=$(RMLUI_BUILD)/librmlui.a
 RMLUI_LINK=
+RMLUI_CMAKE_ARGS= \
+	-DCMAKE_C_COMPILER=clang \
+	-DCMAKE_CXX_COMPILER=clang++
 
 ifneq (,$(findstring windows,$(TARGET)))
 	INCLUDES+= -Iwindows/include/zlib
-	LIBS+= -L../bin64 -Lwindows/lib64 -lzlib1 -lws2_32 -lwinmm
+	LIBS+= -L../bin64 -Lwindows/lib64 -lzlib1 -lws2_32 -lwinmm -lshell32
 	CLIENT_INCLUDES= -Iwindows/include/SDL2
 	CLIENT_LIBS= -lSDL2 -lSDL2_image -lSDL2_mixer -lopengl32
 	CLIENT_RESOURCES= windows/cowbraten.manifest
+	RMLUI_ENABLED=1
+	FREETYPE_WINDOWS_ROOT?=../build/freetype-x86_64-windows
+	RMLUI_CMAKE_ARGS= \
+		-DCMAKE_TOOLCHAIN_FILE=$(CURDIR)/windows/zig-windows-toolchain.cmake \
+		-DCMAKE_PREFIX_PATH=$(abspath $(FREETYPE_WINDOWS_ROOT))
+	RMLUI_LINK=$(RMLUI_LIB) $(FREETYPE_WINDOWS_ROOT)/lib/libfreetype.a
 endif
 
 ifneq (,$(findstring macos,$(TARGET)))
@@ -238,8 +247,7 @@ ifdef RMLUI_ENABLED
 rmlui:
 	@if [ ! -f "$(RMLUI_BUILD)/CMakeCache.txt" ]; then \
 		cmake -S $(RMLUI_DIR) -B $(RMLUI_BUILD) \
-			-DCMAKE_C_COMPILER=clang \
-			-DCMAKE_CXX_COMPILER=clang++ \
+			$(RMLUI_CMAKE_ARGS) \
 			-DBUILD_SHARED_LIBS=OFF \
 			-DBUILD_TESTING=OFF \
 			-DRMLUI_SAMPLES=OFF \

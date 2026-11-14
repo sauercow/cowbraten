@@ -140,20 +140,33 @@ int main()
     check(rml.find("select_interface_scale(ev.value)") != std::string::npos &&
           rml.find("select_interface_text_scale(ev.value)") !=
               std::string::npos &&
+          rml.find("select_interface_font(0)") != std::string::npos &&
+          rml.find("select_interface_font(1)") != std::string::npos &&
           rml.find("reset_interface_appearance()") != std::string::npos &&
           rml.find("select_interface_preset(0)") != std::string::npos &&
           rml.find("select_interface_preset(3)") != std::string::npos &&
           implementation.find("settings::writeuiscale") !=
               std::string::npos &&
           implementation.find("settings::writeuitextscale") !=
+              std::string::npos &&
+          implementation.find("settings::writeinterfacefont") !=
               std::string::npos,
-        "Interface exposes presets plus live overall and rem typography scaling");
+        "Interface exposes presets, scaling, and live typeface selection");
+    check(rml.find("Classic monospaced style") == std::string::npos &&
+          rml.find("Cowbraten 1.0.1 console typeface") !=
+              std::string::npos &&
+          rml.find("data-event-click=\"select_interface_font(0)\">Legacy</button>") !=
+              std::string::npos,
+        "Typeface choices use aligned single-line buttons and the real legacy option");
     check(commands.find("VARFP(uiscale, 75, 100, 150") !=
               std::string::npos &&
           commands.find("VARFP(uitextscale, 75, 100, 150") !=
               std::string::npos &&
+          commands.find("SVARFP(uifont, \"lato\"") !=
+              std::string::npos &&
           commands.find("f->printf(\"uiscale %d") != std::string::npos &&
           commands.find("f->printf(\"uitextscale %d") != std::string::npos &&
+          commands.find("f->printf(\"uifont %s") != std::string::npos &&
           bridge.find("savepersistentstate()") != std::string::npos,
         "Interface appearance has bounded Cowbraten-only persistence");
     const std::string settings_style = readfile(

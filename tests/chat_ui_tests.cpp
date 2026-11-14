@@ -52,6 +52,14 @@ int main()
           style.find(".console-message.is-error") != std::string::npos &&
           style.find(".chat-message.is-team") != std::string::npos,
         "passive overlays are non-modal and style semantic messages");
+    check(rml.find("data-class-is-minimap-clipped=\"console_minimap_clipped\"") !=
+              std::string::npos &&
+          style.find(".console-feed.is-minimap-clipped") != std::string::npos &&
+          style.find("right: 30vh;") != std::string::npos &&
+          style.find("width: 44%;") == std::string::npos &&
+          model.find("sauerchat::topfeedminimapclipped()") != std::string::npos &&
+          bridge.find("game::clipconsole(100, 100) > 0") != std::string::npos,
+        "top feed uses the legacy full width with minimap clearance");
     check(style.find("width: 100%;") != std::string::npos &&
           style.find("left: 0;") != std::string::npos &&
           style.find("bottom: 0;") != std::string::npos &&

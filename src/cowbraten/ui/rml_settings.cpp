@@ -1365,6 +1365,8 @@ namespace cowui
                 "interface_text_scale_maximum",
                 &interface_text_scale_maximum
             ) &&
+            constructor.Bind("interface_font_legacy", &interface_font_legacy) &&
+            constructor.Bind("interface_font_lato", &interface_font_lato) &&
             constructor.Bind(
                 "interface_appearance_status",
                 &interface_appearance_status
@@ -1382,6 +1384,11 @@ namespace cowui
             constructor.BindEventCallback(
                 "select_interface_text_scale",
                 &RmlSettings::selectuitextscale,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_interface_font",
+                &RmlSettings::selectinterfacefont,
                 this
             ) &&
             constructor.BindEventCallback(
@@ -4767,6 +4774,17 @@ namespace cowui
         PRESENT_INTERFACE_VALUE(
             interface_text_scale_maximum, state.text_scale_maximum);
 #undef PRESENT_INTERFACE_VALUE
+        const bool legacy = state.font == settings::InterfaceFont::Legacy;
+        if(interface_font_legacy != legacy)
+        {
+            interface_font_legacy = legacy;
+            model.DirtyVariable("interface_font_legacy");
+        }
+        if(interface_font_lato == legacy)
+        {
+            interface_font_lato = !legacy;
+            model.DirtyVariable("interface_font_lato");
+        }
     }
 
     void RmlSettings::selectuiscale(
@@ -4819,6 +4837,30 @@ namespace cowui
         model.DirtyVariable("interface_appearance_status");
     }
 
+    void RmlSettings::selectinterfacefont(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !interface_appearance_available)
+            return;
+        const int value = arguments[0].Get<int>(-1);
+        if(value != 0 && value != 1)
+            return;
+        const settings::InterfaceFont requested = value == 0
+            ? settings::InterfaceFont::Legacy
+            : settings::InterfaceFont::Lato;
+        settings::InterfaceAppearance state = {};
+        const bool accepted = settings::writeinterfacefont(requested, state);
+        const bool available = accepted ||
+            settings::readinterfaceappearance(state);
+        presentinterfaceappearance(state, available);
+        interface_appearance_status = accepted
+            ? "Typeface applied and saved"
+            : "Typeface change was not accepted";
+        model.DirtyVariable("interface_appearance_status");
+    }
+
     void RmlSettings::resetinterfaceappearance(
         Rml::DataModelHandle, Rml::Event &event,
         const Rml::VariantList &arguments)
@@ -4832,7 +4874,7 @@ namespace cowui
             settings::readinterfaceappearance(state);
         presentinterfaceappearance(state, available);
         interface_appearance_status = accepted
-            ? "Default interface size restored"
+            ? "Default interface appearance restored"
             : "Interface defaults could not be restored";
         model.DirtyVariable("interface_appearance_status");
     }

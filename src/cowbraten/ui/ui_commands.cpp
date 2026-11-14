@@ -8,6 +8,7 @@ SVARFP(uitheme, "default", {
 });
 VARFP(uiscale, 75, 100, 150, cowui::interfacepreferenceschanged());
 VARFP(uitextscale, 75, 100, 150, cowui::interfacepreferenceschanged());
+SVARFP(uifont, "lato", cowui::interfacepreferenceschanged());
 SVARP(profile_name_1, "");
 SVARP(profile_name_2, "");
 SVARP(profile_name_3, "");
@@ -73,6 +74,7 @@ namespace cowui
         f->printf("uitheme %s\n", escapestring(uitheme));
         f->printf("uiscale %d\n", uiscale);
         f->printf("uitextscale %d\n", uitextscale);
+        f->printf("uifont %s\n", escapestring(uifont));
         f->printf("profile_name_1 %s\n", escapestring(profile_name_1));
         f->printf("profile_name_2 %s\n", escapestring(profile_name_2));
         f->printf("profile_name_3 %s\n", escapestring(profile_name_3));

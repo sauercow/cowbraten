@@ -39,6 +39,7 @@ namespace cowui
             constructor.Bind("master_mode", &master_mode) &&
             constructor.Bind("client_count", &client_count) &&
             constructor.Bind("server_name", &server_name) &&
+            constructor.Bind("cowbraten_version", &cowbraten_version) &&
             constructor.Bind("status", &status) &&
             constructor.BindEventCallback("select_master_mode",
                 &RmlSystem::setmastermode, this) &&
@@ -57,6 +58,7 @@ namespace cowui
             return false;
         }
         model = constructor.GetModelHandle();
+        cowbraten_version = admin::clientversion();
         instance = this;
         return true;
     }
@@ -87,6 +89,12 @@ namespace cowui
 
     void RmlSystem::refresh()
     {
+        const Rml::String current_version = admin::clientversion();
+        if(current_version != cowbraten_version)
+        {
+            cowbraten_version = current_version;
+            model.DirtyVariable("cowbraten_version");
+        }
         admin::State state;
         admin::readstate(state);
         connected = state.connected;

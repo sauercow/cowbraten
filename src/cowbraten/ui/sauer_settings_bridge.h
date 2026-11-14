@@ -18,6 +18,12 @@ namespace cowui
             ModernMetallic
         };
 
+        enum class InterfaceFont
+        {
+            Legacy,
+            Lato
+        };
+
         struct InterfaceAppearance
         {
             int ui_scale;
@@ -26,6 +32,7 @@ namespace cowui
             int text_scale;
             int text_scale_minimum;
             int text_scale_maximum;
+            InterfaceFont font;
         };
 
         struct Fov
@@ -977,6 +984,8 @@ namespace cowui
         bool readinterfaceappearance(InterfaceAppearance &result);
         bool writeuiscale(int value, InterfaceAppearance &result);
         bool writeuitextscale(int value, InterfaceAppearance &result);
+        bool writeinterfacefont(InterfaceFont font,
+            InterfaceAppearance &result);
         bool resetinterfaceappearance(InterfaceAppearance &result);
 
         bool readconsole(Console &result);

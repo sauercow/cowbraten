@@ -2,6 +2,40 @@
 
 namespace server {
 
+    static bool parseipv4(const char *text, uint &ip)
+    {
+        if(!text || !text[0]) return false;
+        uchar bytes[4];
+        const char *cursor = text;
+        loopi(4)
+        {
+            if(*cursor < '0' || *cursor > '9') return false;
+            int value = 0, digits = 0;
+            while(*cursor >= '0' && *cursor <= '9')
+            {
+                value = value*10 + (*cursor++ - '0');
+                if(++digits > 3 || value > 255) return false;
+            }
+            bytes[i] = uchar(value);
+            if(i < 3)
+            {
+                if(*cursor++ != '.') return false;
+            }
+            else if(*cursor) return false;
+        }
+        memcpy(&ip, bytes, sizeof(ip));
+        return true;
+    }
+
+    static const char *formatipv4(uint ip, char *buffer, size_t size)
+    {
+        const uchar *bytes = reinterpret_cast<const uchar *>(&ip);
+        if(!buffer || size < 16) return nullptr;
+        snprintf(buffer, size, "%u.%u.%u.%u",
+            bytes[0], bytes[1], bytes[2], bytes[3]);
+        return buffer;
+    }
+
     void getip(clientinfo *sender, int cn)
     {
         if(sender->privilege<PRIV_ADMIN) return;
@@ -18,7 +52,7 @@ namespace server {
     bool addban(const char *ipstring, int expire)
     {
         uint ip;
-        if(!expire || inet_pton(AF_INET, ipstring, &ip) < 0) return false;
+        if(!expire || !parseipv4(ipstring, ip)) return false;
         addban(ip, expire);
         return true;
     }
@@ -36,7 +70,7 @@ namespace server {
     void delban(const char *ipstring)
     {
         uint ip;
-        if(inet_pton(AF_INET, ipstring, &ip) < 0) return;
+        if(!parseipv4(ipstring, ip)) return;
         loopv(bannedips) if(bannedips[i].ip==ip) { bannedips.remove(i); }
     }
 
@@ -56,8 +90,8 @@ namespace server {
         vector<char> buf;
         loopv(bannedips)
         {
-            static char ip[INET_ADDRSTRLEN];
-            if(inet_ntop(AF_INET, &bannedips[i].ip, ip, INET_ADDRSTRLEN) == NULL) continue;
+            static char ip[16];
+            if(!formatipv4(bannedips[i].ip, ip, sizeof(ip))) continue;
             int expsecs = (bannedips[i].expire - totalmillis) / 1000;
             defformatstring(line, "%s (%dh %dm %ds)", ip, expsecs/(60*60), (expsecs%(60*60))/60, (expsecs%(60*60))%60);
             if(i) buf.put('\n');

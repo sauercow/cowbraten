@@ -1,8 +1,24 @@
 # cowbraten
 
-This repository contains **cowbraten**, a standalone-branded fork of [p1xbraten](https://github.com/sauerbraten/p1xbraten) with additional demo playback, HUD, crosshair, and sound features. It retains p1xbraten network detection compatibility while versioning and packaging cowbraten separately.
+This repository contains **cowbraten**, a standalone-branded fork of [p1xbraten](https://github.com/sauerbraten/p1xbraten) with a native RmlUi interface and additional demo playback, HUD, crosshair, sound, and quality-of-life features. It retains p1xbraten network detection compatibility while versioning and packaging cowbraten separately.
 
-Current fork version: **1.1.0-rc.1**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights and the [RmlUi roadmap](./RMLUI_ROADMAP.md) for the current migration scope and remaining work.
+Current fork version: **1.1.0-rc.2**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights and the [RmlUi status document](./RMLUI_ROADMAP.md) for implementation details and remaining release work.
+
+## Release plan
+
+- **1.0.1-rc.3** remains the current classic-interface release candidate. The plan is to promote that exact code to **1.0.1** stable after final release verification.
+- **1.1.0-rc.2** is the current RmlUi release candidate. It includes the complete 1.0.1 line plus the new interface, demo library and playback tools, responsive HUD and scoreboard work, and the other features described below.
+- **1.1.0** stable is reserved for the point at which the remaining legacy-drawn interface paths have been migrated or explicitly classified as intentional engine surfaces.
+- All of these lines continue to report p1xbraten 9.0.0 compatibility and keep the existing Sauerbraten network protocol and standard demo format.
+
+## 1.1.0-rc.2 highlights
+
+- A native, responsive RmlUi interface for the normal player flow: identity, game setup, servers, demos, settings, administration, utilities, map editing, in-game menus, chat, console, and scoreboard.
+- A shared application shell, semantic icon set, alternate visual theme, independent interface/text scaling, and selectable **Legacy** or **Lato** interface typography. Legacy uses Sauerbraten's own `packages/fonts/default.ttf`, matching the console and FPS text from the classic client.
+- A rebuilt demo library with metadata, search and classification, favorites, recoverable trash, playback transport controls, and local demo visualization options including X-RAY and hitboxes.
+- Server favorites, profile presets and model-spoofing controls, safe autoexec profiles, automatic chat ignore rules, and typed administration actions.
+- Responsive gameplay overlays and scoreboard, including compact-screen behavior and a top-left feed that uses the available width while preserving minimap clearance.
+- A typed C++ boundary between documents and engine behavior: interface markup cannot execute arbitrary CubeScript or select arbitrary engine identifiers.
 
 - [Installation](#installation)
   - [Windows](#windows)
@@ -61,7 +77,7 @@ Packages from https://github.com/sauerbraten/p1xbraten/releases/latest contain u
 
 ### Windows
 
-The Windows target can be cross-compiled on Linux with Zig. The recommended Zig version is specified in `.zig-version`. With Zig and NSIS installed, run `./package.sh windows` to build `cowbraten_x86_64_client.exe` and create `dist/cowbraten_setup_<version>.exe`. The installer adds cowbraten alongside an existing Sauerbraten installation so the original game content remains available.
+The Windows target can be cross-compiled on Linux with Zig. The recommended Zig version is specified in `.zig-version`. With Zig, CMake, curl, and NSIS installed, run `./package.sh windows` to build `cowbraten_x86_64_client.exe` and create `dist/cowbraten_setup_<version>.exe`. The packaging script downloads and verifies the pinned FreeType source needed by the static RmlUi build. The installer adds the Cowbraten binary, launcher, and `data/cowbraten` interface resources alongside an existing Sauerbraten installation so the original game content remains available.
 
 ### macOS
 
@@ -69,14 +85,16 @@ Install the normal Sauerbraten application/content, install the build dependenci
 
 ### Linux
 
-Install the normal Sauerbraten runtime/content and the build dependencies, then follow [Building your own binary](#building-your-own-binary). From this repository, `make install` places the client in `bin_unix/`, and `./start.sh` launches it using the configured Sauerbraten content directory.
+Install the normal Sauerbraten runtime/content and the build dependencies, then follow [Building your own binary](#building-your-own-binary). From this repository, `make install` places the client in `bin_unix/`, and `./start.sh` launches it using the configured Sauerbraten content directory. Binary distributions include `bin_unix/`, the launcher, and the required `data/cowbraten` interface resources; keep that relative directory structure when extracting or updating manually.
+
+Release builds provide both a portable ZIP and an executable `cowbraten_setup_linux_<version>.run` installer. Run the installer and select the root of an existing Sauerbraten installation; it copies the executable, launcher, and Cowbraten interface assets into the correct relative paths. It does not duplicate or replace Sauerbraten's original game content.
 
 
 ## Menu
 
-Cowbraten uses a native RmlUi layer for the main menu, server browser, and Settings. These screens use typed C++ APIs for engine state, preserve the existing Sauer configuration format, and hand non-migrated screens back to the legacy GUI.
+Cowbraten 1.1 uses a native RmlUi layer for the normal player interface: Profile, Play and game setup, Servers, Demos, Settings, Administration and About, text utilities, map editing, the in-game menu, chat, console, and scoreboard. These screens use typed C++ APIs for engine state and preserve the existing Sauer configuration format.
 
-The updated `menus.cfg` remains installed on first start for legacy screens and compatibility. It includes UI options for Cowbraten features and cleanups of the vanilla GUI.
+The specialized in-engine 3D texture palette remains engine-owned, and unknown third-party `showgui` documents retain a compatibility fallback to the legacy GUI. The updated `menus.cfg` is still installed for that compatibility path.
 
 If you do not want to use the cowbraten menus, run `/usecowbratenmenus 0`.
 
@@ -453,15 +471,22 @@ All of these commands are admin-only. You can use these from cubescript or as a 
 
 ## Credits
 
-cowbraten is derived from [p1xbraten](https://github.com/sauerbraten/p1xbraten), created and maintained by **p1x**. The p1xbraten project provides the core client and server improvements on which cowbraten is built. cowbraten also depends on [Cube 2: Sauerbraten](http://sauerbraten.org/) for the engine and game content. All credit for those upstream projects remains with their respective authors and contributors.
+Cowbraten is derived from [p1xbraten](https://github.com/sauerbraten/p1xbraten), created and maintained by **p1x**, and from [Cube 2: Sauerbraten](http://sauerbraten.org/). The engine, game, content, and the substantial upstream history remain the work of their respective authors and contributors. Cowbraten development also includes contributions present in this repository from **sauercow**, **Lazy-Apathy**, and **27thLiz**.
+
+The 1.1 interface is built with [RmlUi](https://github.com/mikke89/RmlUi) 6.3 and includes its upstream license in `src/third_party/RmlUi/LICENSE.txt`. Its Lato faces were designed by **Łukasz Dziedzic** and are distributed under the SIL Open Font License 1.1. The Legacy option uses the existing Sauerbraten `packages/fonts/default.ttf` asset (DejaVu Sans Condensed) rather than redistributing another copy. Cowbraten's semantic UI icons are original project assets released under CC0 1.0.
+
+Thank you to the players and testers who exercised the new interface, demo paths, display modes, and multiplayer behavior during the release-candidate cycle.
 
 
 ## Project Structure
 
 - `patches/` contains the patches that build cowbraten on top of vanilla Sauerbraten
 - `src/` contains the cowbraten source tree
+- `src/cowbraten/ui/` contains the typed RmlUi integration and its engine bridges
+- `src/third_party/RmlUi/` contains the pinned RmlUi 6.3 source and upstream license
 - `Makefile` has commands to work with the patches and an SVN checkout of vanilla
-- `data/` contains cowbraten-specific CubeScript files; each file exists as plain text and as gzipped, xxd-generated data for embedding during compilation
+- `data/` contains cowbraten-specific CubeScript and RmlUi documents, styles, fonts, icons, themes, and their licenses
+- `tests/` contains focused interface and behavior regression tests
 - `bin_unix/`, `bin64/`, and `sauerbraten.app/` contain OS-specific runtime dependencies
 - `cowbraten.bat` and `cowbraten.sh` are launch scripts for Windows/Linux
 - `server.sh` and `start.sh` are custom launch scripts that use content from a separate Sauerbraten installation
@@ -472,7 +497,8 @@ cowbraten is derived from [p1xbraten](https://github.com/sauerbraten/p1xbraten),
 
 ### Build dependencies
 
-- development headers for the usual Sauerbraten build dependencies, including zlib and SDL2, SDL2_image, and SDL2_mixer
+- development headers for the usual Sauerbraten build dependencies, including zlib, FreeType, SDL2, SDL2_image, and SDL2_mixer
+- CMake (used to configure and build the vendored RmlUi dependency)
 - libarchive-zip-perl / perl-Archive-Zip
 - development headers of libcurl (when checkupdate.patch is included and you're building targets other than linux64)
 - Zig for cross-compiling Windows or macOS targets; the recommended version is specified in `.zig-version`.

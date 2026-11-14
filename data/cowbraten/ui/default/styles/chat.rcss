@@ -8,13 +8,18 @@ body
 {
     position: absolute;
     display: flex;
-    width: 44%;
-    max-width: 900dp;
+    width: auto;
     left: 8dp;
+    right: 8dp;
     top: 8dp;
     flex-direction: column;
     background-color: transparent;
     pointer-events: none;
+}
+
+.console-feed.is-minimap-clipped
+{
+    right: 30vh;
 }
 
 .console-message

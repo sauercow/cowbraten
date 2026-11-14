@@ -20,6 +20,7 @@ namespace cowui
             bool local, void *data);
 
         bool readstate(State &result);
+        const char *clientversion();
         void visitclients(ClientVisitor visitor, void *data);
         bool setlocalmaster(bool enabled);
         bool setmastermode(int mode);
