@@ -95,7 +95,7 @@ body
 .game-menu-brandcopy small
 {
     color: var(--color-primary);
-    font-size: 0.5625rem;
+    font-size: var(--font-size-control);
     line-height: 13dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -123,7 +123,7 @@ body
 .game-menu-player small
 {
     color: var(--color-text-muted);
-    font-size: 0.5rem;
+    font-size: var(--font-size-control);
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -284,7 +284,7 @@ body
     width: 34dp;
     flex: none;
     color: #AAB4BF;
-    font-size: 0.5625rem;
+    font-size: var(--font-size-control);
     letter-spacing: 1dp;
 }
 
@@ -346,7 +346,7 @@ body
     border-color: #485462;
     border-radius: 4dp;
     color: #E8EDF2;
-    font-size: 0.5625rem;
+    font-size: var(--font-size-control);
     line-height: 26dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -546,7 +546,7 @@ body
 .game-menu-server-row small
 {
     color: var(--color-text-muted);
-    font-size: 0.5625rem;
+    font-size: var(--font-size-control);
 }
 
 .game-menu-match-grid
@@ -592,14 +592,14 @@ body
 .game-menu-stat small
 {
     color: var(--color-text-muted);
-    font-size: 0.5rem;
+    font-size: var(--font-size-control);
     letter-spacing: 1dp;
 }
 
 .game-menu-stat strong
 {
     color: var(--color-text);
-    font-size: 0.625rem;
+    font-size: var(--font-size-metadata);
     letter-spacing: 1dp;
 }
 
@@ -662,7 +662,7 @@ body
 .game-menu-quick-copy small
 {
     color: var(--color-text-muted);
-    font-size: 0.5625rem;
+    font-size: var(--font-size-control);
 }
 
 .game-menu-toggle
@@ -728,7 +728,7 @@ body
     border-color: #46515C;
     color: var(--color-text);
     font-family: Lato;
-    font-size: 0.5625rem;
+    font-size: var(--font-size-control);
     letter-spacing: 1dp;
     text-transform: uppercase;
     tab-index: auto;
@@ -746,7 +746,7 @@ body
 .game-menu-team-buttons button strong
 {
     display: block;
-    font-size: 0.5625rem;
+    font-size: var(--font-size-control);
     font-weight: normal;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -794,7 +794,7 @@ body
 .game-menu-inline-button strong
 {
     display: block;
-    font-size: 0.5625rem;
+    font-size: var(--font-size-control);
     font-weight: normal;
     letter-spacing: 1dp;
 }
@@ -840,7 +840,7 @@ body
     border-radius: 3dp;
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 0.5rem;
+    font-size: var(--font-size-control);
     letter-spacing: 1dp;
     text-transform: uppercase;
     tab-index: auto;
@@ -857,7 +857,7 @@ body
 .game-menu-master-modes button strong
 {
     display: block;
-    font-size: 0.5rem;
+    font-size: var(--font-size-control);
     font-weight: normal;
     letter-spacing: 1dp;
 }
@@ -909,7 +909,7 @@ body
 .game-menu-connected
 {
     color: var(--color-text-muted);
-    font-size: 0.5625rem;
+    font-size: var(--font-size-control);
     letter-spacing: 1dp;
     text-transform: uppercase;
 }

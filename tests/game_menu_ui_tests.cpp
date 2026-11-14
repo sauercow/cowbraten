@@ -113,6 +113,13 @@ int main()
           style.find(".game-menu-quick-card") != std::string::npos &&
           style.find("overflow-y: auto") != std::string::npos,
         "compact master controls remain reachable when quick actions overflow");
+    check(style.find("font-size: 0.5rem") == std::string::npos &&
+          style.find("font-size: 0.5625rem") == std::string::npos &&
+          style.find(".game-menu-quick-copy small") != std::string::npos &&
+          style.find(".game-menu-stat small") != std::string::npos &&
+          style.find("font-size: var(--font-size-control)") !=
+              std::string::npos,
+        "secondary match text keeps a readable ten-pixel baseline");
     check(style.find(":focus-visible") != std::string::npos,
         "match controls expose keyboard focus states");
     check(input_bridge.find("isconnected(true, true)") != std::string::npos,
