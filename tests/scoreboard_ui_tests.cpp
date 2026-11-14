@@ -69,6 +69,10 @@ int main()
           ui.find("scoreboard_model.update(active_screen != nullptr)") !=
               std::string::npos,
         "menus suspend the gameplay overlay without losing key state");
+    check(model.find("if(document) applyinterfacepreferences(document);") !=
+              std::string::npos &&
+          ui.find("void applyinterfacepreferences(") != std::string::npos,
+        "scoreboard applies text scale and typeface on its first lazy load");
     check(legacy.find("cowui::setscoreboardvisible(on)") != std::string::npos &&
           legacy.find("scoreboard.show(on && !native_scoreboard)") !=
               std::string::npos,

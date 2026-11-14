@@ -181,7 +181,7 @@ namespace cowui
         return true;
     }
 
-    static void applyinterfacepreferences(Rml::ElementDocument *document)
+    void applyinterfacepreferences(Rml::ElementDocument *document)
     {
         if(!document)
             return;

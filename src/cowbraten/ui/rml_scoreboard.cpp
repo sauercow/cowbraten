@@ -121,6 +121,7 @@ namespace cowui
             document->Close();
             document = nullptr;
         }
+        if(document) applyinterfacepreferences(document);
         if(!document)
             std::fprintf(stderr, "Cowbraten UI: failed to load scoreboard overlay\n");
         return document != nullptr;

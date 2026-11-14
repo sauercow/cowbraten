@@ -100,6 +100,7 @@ namespace cowui
     void showtest();
     void settheme(const char *name);
     bool applytheme(Rml::ElementDocument *document);
+    void applyinterfacepreferences(Rml::ElementDocument *document);
     void interfacepreferenceschanged();
     void close();
     // The modal session survives temporary console/chat ownership.
