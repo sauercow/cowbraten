@@ -192,10 +192,13 @@ int main()
           settings_style.find(
               ".ui-text-large .settings-appearance-actions") !=
               std::string::npos &&
+          settings_style.find(
+              ".ui-text-large .settings-font-choice-row") ==
+              std::string::npos &&
           settings_style.find("min-height: 136dp;") !=
               std::string::npos &&
           settings_style.find("flex: none;") != std::string::npos,
-        "large typography reflows appearance controls without collisions");
+        "large typography reflows controls while typeface buttons stay stable");
     check(world.find("cowui::close();") != std::string::npos &&
           world.find("cleargui();") != std::string::npos,
         "loading a map closes native and legacy menus");

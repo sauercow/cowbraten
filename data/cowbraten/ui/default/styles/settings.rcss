@@ -995,8 +995,7 @@ body
  * viewport media queries. Reflow the appearance editor before large rem text
  * can collide with fixed-density controls. */
 .ui-text-large .settings-appearance-presets,
-.ui-text-large .settings-appearance-controls,
-.ui-text-large .settings-font-choice-row
+.ui-text-large .settings-appearance-controls
 {
     flex-direction: column;
 }

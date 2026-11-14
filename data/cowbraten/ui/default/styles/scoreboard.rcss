@@ -279,8 +279,8 @@ body
 .score-name
 {
     display: flex;
-    width: 240dp;
-    min-width: 240dp;
+    width: 260dp;
+    min-width: 260dp;
     min-height: 0;
     flex: 1;
     align-items: center;
@@ -324,9 +324,9 @@ body
 .score-stat
 {
     box-sizing: border-box;
-    width: 72dp;
-    min-width: 72dp;
-    padding-right: 12dp;
+    width: 60dp;
+    min-width: 60dp;
+    padding-right: 8dp;
     border-left-width: 1dp;
     border-left-color: #2D3944;
     font-size: 0.6875rem;
@@ -342,20 +342,20 @@ body
 
 .score-cn
 {
-    width: 60dp;
-    min-width: 60dp;
+    width: 48dp;
+    min-width: 48dp;
 }
 
 .score-frags
 {
-    width: 88dp;
-    min-width: 88dp;
+    width: 68dp;
+    min-width: 68dp;
 }
 
 .score-deaths
 {
-    width: 96dp;
-    min-width: 96dp;
+    width: 76dp;
+    min-width: 76dp;
 }
 
 .scoreboard-teams
@@ -400,9 +400,9 @@ body
 
 .scoreboard-team .score-name
 {
-    width: 124dp;
-    min-width: 124dp;
-    flex: none;
+    width: auto;
+    min-width: 184dp;
+    flex: 1;
     gap: 5dp;
 }
 
@@ -410,17 +410,17 @@ body
 .scoreboard-team .score-frags,
 .scoreboard-team .score-deaths
 {
-    width: auto;
-    min-width: 44dp;
-    flex: 1;
+    width: 44dp;
+    min-width: 34dp;
+    flex: 0 1 44dp;
     padding-right: 0;
     text-align: center;
 }
 
 .scoreboard-team .score-cn
 {
-    width: 38dp;
-    min-width: 38dp;
+    width: 34dp;
+    min-width: 34dp;
 }
 
 .scoreboard-team .scoreboard-columns .score-stat
@@ -696,8 +696,8 @@ body
 
     .score-name
     {
-        width: 300dp;
-        min-width: 300dp;
+        width: 330dp;
+        min-width: 330dp;
         gap: 9dp;
     }
 
@@ -720,9 +720,9 @@ body
 
     .score-stat
     {
-        width: 90dp;
-        min-width: 90dp;
-        padding-right: 15dp;
+        width: 72dp;
+        min-width: 72dp;
+        padding-right: 10dp;
     }
 
     .scoreboard-columns .score-stat
@@ -732,20 +732,20 @@ body
 
     .score-cn
     {
-        width: 75dp;
-        min-width: 75dp;
+        width: 56dp;
+        min-width: 56dp;
     }
 
     .score-frags
     {
-        width: 110dp;
-        min-width: 110dp;
+        width: 84dp;
+        min-width: 84dp;
     }
 
     .score-deaths
     {
-        width: 120dp;
-        min-width: 120dp;
+        width: 92dp;
+        min-width: 92dp;
     }
 
     .scoreboard-teams
@@ -756,8 +756,9 @@ body
 
     .scoreboard-team .score-name
     {
-        width: 150dp;
-        min-width: 150dp;
+        width: auto;
+        min-width: 210dp;
+        flex: 1;
         gap: 6dp;
     }
 
@@ -765,14 +766,15 @@ body
     .scoreboard-team .score-frags,
     .scoreboard-team .score-deaths
     {
-        width: auto;
-        min-width: 60dp;
+        width: 52dp;
+        min-width: 44dp;
+        flex: 0 1 52dp;
     }
 
     .scoreboard-team .score-cn
     {
-        width: 48dp;
-        min-width: 48dp;
+        width: 44dp;
+        min-width: 44dp;
     }
 
     .scoreboard-spectators

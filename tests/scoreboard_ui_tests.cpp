@@ -130,14 +130,17 @@ int main()
           style.find(".scoreboard-spectator-grid") != std::string::npos,
         "spectators use a compact grid below both team columns");
     check(style.find(".scoreboard-team .score-stat") != std::string::npos &&
-          style.find("width: auto") != std::string::npos &&
-          style.find("flex: 1") != std::string::npos &&
+          style.find("width: 44dp") != std::string::npos &&
+          style.find("min-width: 34dp") != std::string::npos &&
+          style.find("flex: 0 1 44dp") != std::string::npos &&
           style.find("text-align: center") != std::string::npos,
-        "visible team metrics share remaining width without a dead zone");
-    check(style.find("width: 124dp") != std::string::npos &&
+        "visible team metrics stay compact and return room to player names");
+    check(style.find("min-width: 184dp") != std::string::npos &&
+          style.find("min-width: 210dp") != std::string::npos &&
+          style.find("width: 260dp") != std::string::npos &&
           style.find("max-width: 1600dp") != std::string::npos &&
-          style.find("flex: none") != std::string::npos,
-        "team name columns and the overall panel remain compact");
+          style.find("flex: 1") != std::string::npos,
+        "player name columns preserve long names and absorb spare width");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;
