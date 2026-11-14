@@ -155,26 +155,33 @@ namespace cowui
     {
         scoreboard::State state;
         scoreboard::readstate(state);
-        server_name = plain_cube_text(state.server_name);
-        match_line = plain_cube_text(state.mode_name) + "  //  " +
-            plain_cube_text(state.map_name);
-        time_text = state.intermission ? "INTERMISSION" :
+        const Rml::String next_server_name = plain_cube_text(state.server_name);
+        const Rml::String next_match_line = plain_cube_text(state.mode_name) +
+            "  //  " + plain_cube_text(state.map_name);
+        const Rml::String next_time_text = state.intermission ? "INTERMISSION" :
             (state.paused ? "PAUSED" :
                 (state.seconds_remaining >= 0
                     ? Rml::CreateString("%d:%02d", state.seconds_remaining / 60,
                         state.seconds_remaining % 60)
                     : Rml::String("UNTIMED")));
-        show_flags = state.show_flags;
-        show_frags = state.show_frags;
-        show_deaths = state.show_deaths;
-        show_suicides = state.show_suicides;
-        show_kpd = state.show_kpd;
-        show_accuracy = state.show_accuracy;
-        show_damage = state.show_damage;
-        show_damage_received = state.show_damage_received;
-        show_ping = state.show_ping;
-        show_pj = state.show_pj;
-        show_client_num = state.show_client_num;
+#define SYNC_VALUE(variable, value) do { const auto &next_value = (value); \
+        if(variable != next_value) { variable = next_value; \
+        model.DirtyVariable(#variable); } } while(0)
+        SYNC_VALUE(server_name, next_server_name);
+        SYNC_VALUE(match_line, next_match_line);
+        SYNC_VALUE(time_text, next_time_text);
+        SYNC_VALUE(show_flags, state.show_flags);
+        SYNC_VALUE(show_frags, state.show_frags);
+        SYNC_VALUE(show_deaths, state.show_deaths);
+        SYNC_VALUE(show_suicides, state.show_suicides);
+        SYNC_VALUE(show_kpd, state.show_kpd);
+        SYNC_VALUE(show_accuracy, state.show_accuracy);
+        SYNC_VALUE(show_damage, state.show_damage);
+        SYNC_VALUE(show_damage_received, state.show_damage_received);
+        SYNC_VALUE(show_ping, state.show_ping);
+        SYNC_VALUE(show_pj, state.show_pj);
+        SYNC_VALUE(show_client_num, state.show_client_num);
+#undef SYNC_VALUE
 
         std::vector<scoreboard::Player> players;
         scoreboard::readplayers(players);
@@ -283,12 +290,6 @@ namespace cowui
             good_title = next_good_title;
             model.DirtyVariable("good_title");
         }
-        const char *variables[] = { "server_name", "match_line", "time_text",
-            "show_flags", "show_frags", "show_deaths", "show_suicides",
-            "show_kpd", "show_accuracy", "show_damage",
-            "show_damage_received", "show_ping", "show_pj",
-            "show_client_num" };
-        for(const char *variable : variables) model.DirtyVariable(variable);
     }
 
     void RmlScoreboard::update(bool menu_active)

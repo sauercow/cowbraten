@@ -80,6 +80,7 @@ run: all
 	./console_ui_tests
 	./console_text_tests
 	./ui_update_tests
+	python3 performance_analysis_tests.py
 
 clean:
 	$(RM) demo_library_tests demo_visualization_tests server_browser_ui_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests hud_layout_tests utilities_ui_tests editor_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests

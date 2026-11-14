@@ -56,6 +56,15 @@ namespace cowui
     static RmlProfile profile_model;
     static RmlSettings settings_model;
     static Rml::Context *context = nullptr;
+    static FrameStats frame_stats;
+    static bool profiling_enabled = false;
+
+    static double elapsedmicroseconds(Uint64 begin, Uint64 end)
+    {
+        static const double scale =
+            1000000.0 / double(SDL_GetPerformanceFrequency());
+        return double(end - begin) * scale;
+    }
 
     struct Screen
     {
@@ -1209,10 +1218,28 @@ namespace cowui
         return false;
     }
 
+    void setprofilingenabled(bool enabled)
+    {
+        profiling_enabled = enabled;
+        render_interface.setprofilingenabled(enabled);
+        frame_stats = FrameStats();
+        render_interface.resetframestats();
+    }
+
+    void beginframestats()
+    {
+        if(!profiling_enabled) return;
+        frame_stats = FrameStats();
+        render_interface.resetframestats();
+    }
+
     void update()
     {
         if(!initialized || !context)
             return;
+
+        const Uint64 model_begin = profiling_enabled
+            ? SDL_GetPerformanceCounter() : 0;
 
         if(active_screen)
             syncconsoleownership();
@@ -1250,7 +1277,12 @@ namespace cowui
            !chat_model.visible() &&
            !console_model.visible() &&
            (!active_screen || legacy_console_presentation))
+        {
+            if(profiling_enabled)
+                frame_stats.model_update_us = elapsedmicroseconds(
+                    model_begin, SDL_GetPerformanceCounter());
             return;
+        }
 
         if(player_input)
         {
@@ -1266,7 +1298,15 @@ namespace cowui
         // Cached menus (especially Settings) contain thousands of elements.
         // Updating a chat message must not walk every menu opened this session.
         // Show() refreshes a hidden document before it receives focus again.
+        const Uint64 context_begin = profiling_enabled
+            ? SDL_GetPerformanceCounter() : 0;
+        if(profiling_enabled)
+            frame_stats.model_update_us = elapsedmicroseconds(
+                model_begin, context_begin);
         context->Update(false);
+        if(profiling_enabled)
+            frame_stats.context_update_us = elapsedmicroseconds(
+                context_begin, SDL_GetPerformanceCounter());
         if(active_screen && active_screen->id == ScreenId::Settings)
             settings_model.scrollpendinglegacyroute(active_screen->document);
     }
@@ -1287,9 +1327,31 @@ namespace cowui
             return;
         }
 
+        const Uint64 render_begin = profiling_enabled
+            ? SDL_GetPerformanceCounter() : 0;
         render_interface.beginframe();
         context->Render();
         render_interface.endframe();
+        if(profiling_enabled)
+            frame_stats.context_render_us = elapsedmicroseconds(
+                render_begin, SDL_GetPerformanceCounter());
+
+        if(profiling_enabled)
+        {
+            const RmlRenderInterface::FrameStats render_stats =
+                render_interface.framestats();
+            frame_stats.draw_calls = render_stats.draw_calls;
+            frame_stats.geometry_compiles = render_stats.geometry_compiles;
+            frame_stats.geometry_releases = render_stats.geometry_releases;
+            frame_stats.texture_binds = render_stats.texture_binds;
+            frame_stats.uniform_updates = render_stats.uniform_updates;
+            frame_stats.vertex_array_binds = render_stats.vertex_array_binds;
+            frame_stats.scissor_changes = render_stats.scissor_changes;
+            frame_stats.live_geometries = render_stats.live_geometries;
+            frame_stats.live_textures = render_stats.live_textures;
+            frame_stats.geometry_cpu_bytes = render_stats.geometry_cpu_bytes;
+            frame_stats.texture_cpu_bytes = render_stats.texture_cpu_bytes;
+        }
 
         if(active_screen &&
            !legacy_console_presentation &&
@@ -1300,6 +1362,28 @@ namespace cowui
                 ui_dimensions.context_width,
                 ui_dimensions.context_height);
         }
+    }
+
+    FrameStats framestats()
+    {
+        const RmlRenderInterface::FrameStats render_stats =
+            render_interface.framestats();
+        frame_stats.live_geometries = render_stats.live_geometries;
+        frame_stats.live_textures = render_stats.live_textures;
+        frame_stats.geometry_cpu_bytes = render_stats.geometry_cpu_bytes;
+        frame_stats.texture_cpu_bytes = render_stats.texture_cpu_bytes;
+        if(context)
+        {
+            frame_stats.documents = context->GetNumDocuments();
+            frame_stats.visible_documents = 0;
+            for(int i = 0; i < frame_stats.documents; ++i)
+            {
+                Rml::ElementDocument *document = context->GetDocument(i);
+                if(document && document->IsVisible())
+                    ++frame_stats.visible_documents;
+            }
+        }
+        return frame_stats;
     }
 
     bool show(ScreenId id)

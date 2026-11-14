@@ -8,6 +8,21 @@ namespace cowui
     class RmlRenderInterface final : public Rml::RenderInterface
     {
     public:
+        struct FrameStats
+        {
+            unsigned int draw_calls = 0;
+            unsigned int geometry_compiles = 0;
+            unsigned int geometry_releases = 0;
+            unsigned int texture_binds = 0;
+            unsigned int uniform_updates = 0;
+            unsigned int vertex_array_binds = 0;
+            unsigned int scissor_changes = 0;
+            unsigned int live_geometries = 0;
+            unsigned int live_textures = 0;
+            unsigned long long geometry_cpu_bytes = 0;
+            unsigned long long texture_cpu_bytes = 0;
+        };
+
         RmlRenderInterface() = default;
         ~RmlRenderInterface() override = default;
 
@@ -19,6 +34,9 @@ namespace cowui
 
         void beginframe();
         void endframe();
+        void setprofilingenabled(bool enabled) { profiling_enabled = enabled; }
+        void resetframestats();
+        FrameStats framestats() const { return frame_stats; }
 
         bool ready() const { return gl_ready; }
 
@@ -79,6 +97,21 @@ namespace cowui
         int viewport_height = 1;
 
         bool gl_ready = false;
+        bool profiling_enabled = false;
+
+        unsigned int live_geometries = 0;
+        unsigned int live_textures = 0;
+        unsigned long long geometry_cpu_bytes = 0;
+        unsigned long long texture_cpu_bytes = 0;
+
+        unsigned int current_texture = 0;
+        unsigned int current_vertex_array = 0;
+        float current_translation_x = 0.0f;
+        float current_translation_y = 0.0f;
+        bool current_use_texture = false;
+        bool current_scissor_enabled = false;
+        bool current_scissor_valid = false;
+        int current_scissor[4] = {0, 0, 0, 0};
 
         struct SavedState
         {
@@ -107,6 +140,7 @@ namespace cowui
         };
 
         SavedState saved_state;
+        FrameStats frame_stats;
     };
 }
 

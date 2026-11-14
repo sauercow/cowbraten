@@ -311,8 +311,8 @@ namespace cowui
 
     struct RmlRenderInterface::Geometry
     {
-        const Rml::Vertex *vertices = nullptr;
-        const int *indices = nullptr;
+        Rml::Vertex *vertices = nullptr;
+        int *indices = nullptr;
 
         int vertex_count = 0;
         int index_count = 0;
@@ -322,6 +322,12 @@ namespace cowui
         GLuint vao = 0;
 
         Geometry *next = nullptr;
+
+        ~Geometry()
+        {
+            delete[] vertices;
+            delete[] indices;
+        }
     };
 
 
@@ -783,6 +789,7 @@ namespace cowui
         Rml::Span<const Rml::Vertex> vertices,
         Rml::Span<const int> indices)
     {
+        if(profiling_enabled) ++frame_stats.geometry_compiles;
         if(vertices.size() == 0 ||
            indices.size() == 0 ||
            vertices.size() > INT_MAX ||
@@ -797,21 +804,40 @@ namespace cowui
         if(!geometry)
             return 0;
 
-        geometry->vertices = vertices.data();
-        geometry->indices = indices.data();
-
         geometry->vertex_count =
             int(vertices.size());
 
         geometry->index_count =
             int(indices.size());
 
+        geometry->vertices = new (std::nothrow) Rml::Vertex[vertices.size()];
+        geometry->indices = new (std::nothrow) int[indices.size()];
+        if(!geometry->vertices || !geometry->indices)
+        {
+            delete geometry;
+            return 0;
+        }
+        std::memcpy(geometry->vertices, vertices.data(),
+            sizeof(Rml::Vertex) * vertices.size());
+        std::memcpy(geometry->indices, indices.data(),
+            sizeof(int) * indices.size());
+
         geometry->next = geometries;
         geometries = geometry;
+        ++live_geometries;
+        geometry_cpu_bytes += sizeof(Rml::Vertex) * vertices.size() +
+            sizeof(int) * indices.size();
+        frame_stats.live_geometries = live_geometries;
+        frame_stats.geometry_cpu_bytes = geometry_cpu_bytes;
 
         if(gl_ready && !uploadgeometry(geometry))
         {
             geometries = geometry->next;
+            --live_geometries;
+            geometry_cpu_bytes -= sizeof(Rml::Vertex) * vertices.size() +
+                sizeof(int) * indices.size();
+            frame_stats.live_geometries = live_geometries;
+            frame_stats.geometry_cpu_bytes = geometry_cpu_bytes;
             delete geometry;
             return 0;
         }
@@ -843,30 +869,40 @@ namespace cowui
         if(texture && !texture->id)
             return;
 
-        glUniform2f_(
-            uniform_translation,
-            translation.x,
-            translation.y
-        );
+        if(profiling_enabled) ++frame_stats.draw_calls;
 
-        glUniform1i_(
-            uniform_use_texture,
-            texture ? 1 : 0
-        );
-
-        if(texture)
+        if(current_translation_x != translation.x ||
+           current_translation_y != translation.y)
         {
-            glBindTexture(
-                GL_TEXTURE_2D,
-                texture->id
-            );
+            if(profiling_enabled) ++frame_stats.uniform_updates;
+            glUniform2f_(uniform_translation, translation.x, translation.y);
+            current_translation_x = translation.x;
+            current_translation_y = translation.y;
+        }
+
+        const bool use_texture = texture != nullptr;
+        if(current_use_texture != use_texture)
+        {
+            if(profiling_enabled) ++frame_stats.uniform_updates;
+            glUniform1i_(uniform_use_texture, use_texture ? 1 : 0);
+            current_use_texture = use_texture;
+        }
+
+        if(texture && current_texture != texture->id)
+        {
+            if(profiling_enabled) ++frame_stats.texture_binds;
+            glBindTexture(GL_TEXTURE_2D, texture->id);
+            current_texture = texture->id;
         }
 
         if(geometry->vao)
         {
-            glBindVertexArray_(
-                geometry->vao
-            );
+            if(current_vertex_array != geometry->vao)
+            {
+                if(profiling_enabled) ++frame_stats.vertex_array_binds;
+                glBindVertexArray_(geometry->vao);
+                current_vertex_array = geometry->vao;
+            }
         }
         else
         {
@@ -941,8 +977,19 @@ namespace cowui
     {
         if(!handle) return;
 
+        if(profiling_enabled) ++frame_stats.geometry_releases;
+
         Geometry *geometry =
             reinterpret_cast<Geometry *>(handle);
+
+        if(live_geometries) --live_geometries;
+        const unsigned long long bytes =
+            sizeof(Rml::Vertex) * geometry->vertex_count +
+            sizeof(int) * geometry->index_count;
+        geometry_cpu_bytes = bytes <= geometry_cpu_bytes
+            ? geometry_cpu_bytes - bytes : 0;
+        frame_stats.live_geometries = live_geometries;
+        frame_stats.geometry_cpu_bytes = geometry_cpu_bytes;
 
         Geometry **current = &geometries;
 
@@ -1206,10 +1253,18 @@ namespace cowui
 
         texture->next = textures;
         textures = texture;
+        ++live_textures;
+        texture_cpu_bytes += data_size;
+        frame_stats.live_textures = live_textures;
+        frame_stats.texture_cpu_bytes = texture_cpu_bytes;
 
         if(gl_ready && !uploadtexture(texture))
         {
             textures = texture->next;
+            --live_textures;
+            texture_cpu_bytes -= data_size;
+            frame_stats.live_textures = live_textures;
+            frame_stats.texture_cpu_bytes = texture_cpu_bytes;
             delete texture;
             return 0;
         }
@@ -1227,6 +1282,12 @@ namespace cowui
 
         Texture *texture =
             reinterpret_cast<Texture *>(handle);
+
+        if(live_textures) --live_textures;
+        texture_cpu_bytes = texture->data_size <= texture_cpu_bytes
+            ? texture_cpu_bytes - texture->data_size : 0;
+        frame_stats.live_textures = live_textures;
+        frame_stats.texture_cpu_bytes = texture_cpu_bytes;
 
         Texture **current = &textures;
 
@@ -1249,10 +1310,13 @@ namespace cowui
 
     void RmlRenderInterface::EnableScissorRegion(bool enable)
     {
+        if(current_scissor_enabled == enable) return;
+        if(profiling_enabled) ++frame_stats.scissor_changes;
         if(enable)
             glEnable(GL_SCISSOR_TEST);
         else
             glDisable(GL_SCISSOR_TEST);
+        current_scissor_enabled = enable;
     }
 
     void RmlRenderInterface::SetScissorRegion(
@@ -1264,12 +1328,14 @@ namespace cowui
         if(width < 0) width = 0;
         if(height < 0) height = 0;
 
-        glScissor(
-            region.Left(),
-            viewport_height - region.Bottom(),
-            width,
-            height
-        );
+        const int next[4] = { region.Left(),
+            viewport_height - region.Bottom(), width, height };
+        if(current_scissor_valid &&
+           std::memcmp(current_scissor, next, sizeof(next)) == 0) return;
+        if(profiling_enabled) ++frame_stats.scissor_changes;
+        glScissor(next[0], next[1], next[2], next[3]);
+        std::memcpy(current_scissor, next, sizeof(next));
+        current_scissor_valid = true;
     }
 
     void RmlRenderInterface::setviewport(
@@ -1281,6 +1347,15 @@ namespace cowui
 
         viewport_height =
             height > 0 ? height : 1;
+    }
+
+    void RmlRenderInterface::resetframestats()
+    {
+        frame_stats = FrameStats();
+        frame_stats.live_geometries = live_geometries;
+        frame_stats.live_textures = live_textures;
+        frame_stats.geometry_cpu_bytes = geometry_cpu_bytes;
+        frame_stats.texture_cpu_bytes = texture_cpu_bytes;
     }
 
     void RmlRenderInterface::beginframe()
@@ -1420,6 +1495,13 @@ namespace cowui
             uniform_use_texture,
             0
         );
+
+        current_texture = saved_state.texture_binding_2d;
+        current_vertex_array = saved_state.vao;
+        current_translation_x = current_translation_y = 0.0f;
+        current_use_texture = false;
+        current_scissor_enabled = false;
+        current_scissor_valid = false;
     }
 
     void RmlRenderInterface::endframe()
@@ -1515,5 +1597,7 @@ namespace cowui
         );
 
         saved_state.valid = false;
+        current_texture = current_vertex_array = 0;
+        current_scissor_valid = false;
     }
 }

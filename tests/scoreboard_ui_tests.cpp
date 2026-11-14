@@ -102,6 +102,11 @@ int main()
         "large player and spectator lists scroll between fixed chrome");
     check(model.find("plain_cube_text(state.server_name)") != std::string::npos,
         "server color controls are removed before RmlUi renders the title");
+    check(model.find("SYNC_VALUE(server_name, next_server_name)") !=
+              std::string::npos &&
+          model.find("for(const char *variable : variables)") ==
+              std::string::npos,
+        "unchanged scoreboard scalars do not dirty the data model every frame");
     check(style.find("min-height: 37dp") != std::string::npos &&
           style.find("max-height: 90%") != std::string::npos,
         "dense rows and taller panel keep more players visible at once");

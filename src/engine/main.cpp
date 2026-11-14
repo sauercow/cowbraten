@@ -9,9 +9,207 @@
 #endif
 
 extern void cleargamma();
+extern int bilinear, trilinear, aniso;
+extern bool hasext(const char *extension);
+
+namespace
+{
+    struct PerformanceSample
+    {
+        unsigned int frame = 0;
+        double interval_us = 0.0;
+        double cpu_frame_us = 0.0;
+        double simulation_us = 0.0;
+        double game_render_us = 0.0;
+        double ui_update_us = 0.0;
+        double ui_render_us = 0.0;
+        double overlay_us = 0.0;
+        double swap_us = 0.0;
+        double gpu_game_us = -1.0;
+        double gpu_ui_us = -1.0;
+        int bilinear = 0;
+        int trilinear = 0;
+        int aniso = 0;
+        cowui::FrameStats ui;
+    };
+
+    vector<PerformanceSample> performance_samples;
+    bool performance_capture = false;
+    string performance_output = "performance.csv";
+    Uint64 performance_previous_frame = 0;
+    unsigned int performance_generation = 0;
+
+    struct PerformanceGpuQueries
+    {
+        GLuint game = 0, ui = 0;
+        int sample = -1;
+    };
+
+    constexpr int PERFORMANCE_GPU_QUERY_COUNT = 64;
+    PerformanceGpuQueries performance_gpu_queries[PERFORMANCE_GPU_QUERY_COUNT];
+    int performance_gpu_query_slot = 0;
+
+    void collectperformancegpu(PerformanceGpuQueries &queries)
+    {
+        if(queries.sample < 0 ||
+           queries.sample >= performance_samples.length()) return;
+        GLuint game_available = 0, ui_available = 0;
+        glGetQueryObjectuiv_(queries.game, GL_QUERY_RESULT_AVAILABLE,
+            &game_available);
+        glGetQueryObjectuiv_(queries.ui, GL_QUERY_RESULT_AVAILABLE,
+            &ui_available);
+        if(!game_available || !ui_available) return;
+        GLuint game_ns = 0, ui_ns = 0;
+        glGetQueryObjectuiv_(queries.game, GL_QUERY_RESULT, &game_ns);
+        glGetQueryObjectuiv_(queries.ui, GL_QUERY_RESULT, &ui_ns);
+        performance_samples[queries.sample].gpu_game_us = game_ns / 1000.0;
+        performance_samples[queries.sample].gpu_ui_us = ui_ns / 1000.0;
+        queries.sample = -1;
+    }
+
+    void releaseperformancegpu()
+    {
+        if(!glDeleteQueries_) return;
+        loopi(PERFORMANCE_GPU_QUERY_COUNT)
+        {
+            collectperformancegpu(performance_gpu_queries[i]);
+            if(performance_gpu_queries[i].game)
+                glDeleteQueries_(1, &performance_gpu_queries[i].game);
+            if(performance_gpu_queries[i].ui)
+                glDeleteQueries_(1, &performance_gpu_queries[i].ui);
+            performance_gpu_queries[i] = PerformanceGpuQueries();
+        }
+    }
+
+    void initperformancegpu()
+    {
+        releaseperformancegpu();
+        performance_gpu_query_slot = 0;
+        if(!glGenQueries_ || !glBeginQuery_ || !glEndQuery_ ||
+           !glGetQueryObjectuiv_ ||
+           (glversion < 330 && !hasext("GL_ARB_timer_query") &&
+            !hasext("GL_EXT_timer_query"))) return;
+        loopi(PERFORMANCE_GPU_QUERY_COUNT)
+        {
+            glGenQueries_(1, &performance_gpu_queries[i].game);
+            glGenQueries_(1, &performance_gpu_queries[i].ui);
+        }
+    }
+
+    PerformanceGpuQueries *beginperformancegpu()
+    {
+        PerformanceGpuQueries &queries =
+            performance_gpu_queries[performance_gpu_query_slot];
+        if(!queries.game || !queries.ui) return NULL;
+        collectperformancegpu(queries);
+        if(queries.sample >= 0) return NULL;
+        glBeginQuery_(GL_TIME_ELAPSED, queries.game);
+        return &queries;
+    }
+
+    double performanceelapsed(Uint64 begin, Uint64 end)
+    {
+        static const double scale =
+            1000000.0 / double(SDL_GetPerformanceFrequency());
+        return double(end - begin) * scale;
+    }
+
+    void stopperformancecapture()
+    {
+        if(!performance_capture && performance_samples.empty())
+            return;
+
+        performance_capture = false;
+        cowui::setprofilingenabled(false);
+        loopi(PERFORMANCE_GPU_QUERY_COUNT)
+            collectperformancegpu(performance_gpu_queries[i]);
+        stream *output = openfile(performance_output, "wb");
+        if(!output)
+        {
+            conoutf(CON_ERROR, "could not write performance capture %s",
+                performance_output);
+            performance_samples.shrink(0);
+            releaseperformancegpu();
+            return;
+        }
+
+        output->putline(
+            "frame,interval_us,cpu_frame_us,simulation_us,game_render_us,"
+            "ui_update_us,ui_render_us,overlay_us,swap_us,gpu_game_us,gpu_ui_us,"
+            "bilinear,trilinear,aniso,ui_model_us,"
+            "rml_update_us,rml_render_us,rml_draw_calls,geometry_compiles,"
+            "geometry_releases,texture_binds,uniform_updates,vertex_array_binds,"
+            "scissor_changes,live_geometries,live_textures,geometry_cpu_bytes,"
+            "texture_cpu_bytes,documents,"
+            "visible_documents");
+        loopv(performance_samples)
+        {
+            const PerformanceSample &sample = performance_samples[i];
+            output->printf(
+                "%u,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%.3f,"
+                "%.3f,%.3f,%u,%u,%u,%u,%u,%u,%u,%u,%u,%llu,%llu,%d,%d\n",
+                sample.frame,
+                sample.interval_us,
+                sample.cpu_frame_us,
+                sample.simulation_us,
+                sample.game_render_us,
+                sample.ui_update_us,
+                sample.ui_render_us,
+                sample.overlay_us,
+                sample.swap_us,
+                sample.gpu_game_us,
+                sample.gpu_ui_us,
+                sample.bilinear,
+                sample.trilinear,
+                sample.aniso,
+                sample.ui.model_update_us,
+                sample.ui.context_update_us,
+                sample.ui.context_render_us,
+                sample.ui.draw_calls,
+                sample.ui.geometry_compiles,
+                sample.ui.geometry_releases,
+                sample.ui.texture_binds,
+                sample.ui.uniform_updates,
+                sample.ui.vertex_array_binds,
+                sample.ui.scissor_changes,
+                sample.ui.live_geometries,
+                sample.ui.live_textures,
+                sample.ui.geometry_cpu_bytes,
+                sample.ui.texture_cpu_bytes,
+                sample.ui.documents,
+                sample.ui.visible_documents);
+        }
+        delete output;
+        conoutf("wrote %d performance samples to %s",
+            performance_samples.length(), performance_output);
+        performance_samples.shrink(0);
+        performance_previous_frame = 0;
+        releaseperformancegpu();
+    }
+
+    void startperformancecapture(const char *output)
+    {
+        stopperformancecapture();
+        copystring(performance_output,
+            output && output[0] ? output : "performance.csv");
+        performance_samples.shrink(0);
+        performance_samples.growbuf(120000);
+        performance_previous_frame = SDL_GetPerformanceCounter();
+        cowui::setprofilingenabled(true);
+        initperformancegpu();
+        ++performance_generation;
+        performance_capture = true;
+    }
+}
+
+ICOMMAND(perf_capture_start, "s", (char *output),
+    startperformancecapture(output));
+ICOMMAND(perf_capture_stop, "", (), stopperformancecapture());
+VAR(ui_perf_bypass, 0, 0, 1);
 
 void cleanup()
 {
+    stopperformancecapture();
     recorder::stop();
     cowui::shutdown();
     cleanupserver();
@@ -1622,10 +1820,15 @@ int main(int argc, char **argv)
 
     for(;;)
     {
+        const Uint64 performance_frame_begin = performance_capture
+            ? SDL_GetPerformanceCounter() : 0;
+        const unsigned int frame_performance_generation =
+            performance_generation;
         static int frames = 0, lastdrawmillis = 0;
         int millis = getclockmillis();
         bool draw = false;
         ratelimit(millis, lastdrawmillis, draw);
+        if(draw) cowui::beginframestats();
         elapsedtime = millis - totalmillis;
         static int timeerr = 0;
         int scaledtime = game::scaletime(elapsedtime) + timeerr;
@@ -1651,6 +1854,9 @@ int main(int argc, char **argv)
         updateparticles();
         updatesounds();
 
+        const Uint64 performance_simulation_end = performance_capture
+            ? SDL_GetPerformanceCounter() : 0;
+
         if(minimized) continue;
 
         if(draw)
@@ -1665,14 +1871,82 @@ int main(int argc, char **argv)
             frames++;
 
             inbetweenframes = false;
+            const Uint64 performance_render_begin = performance_capture
+                ? SDL_GetPerformanceCounter() : 0;
+            PerformanceGpuQueries *performance_gpu = performance_capture
+                ? beginperformancegpu() : NULL;
             if(mainmenu) gl_drawmainmenu();
             else gl_drawframe();
 
-            cowui::update();
-            cowui::render();
+            if(performance_gpu)
+            {
+                glEndQuery_(GL_TIME_ELAPSED);
+                glBeginQuery_(GL_TIME_ELAPSED, performance_gpu->ui);
+            }
+
+            const Uint64 performance_game_render_end = performance_capture
+                ? SDL_GetPerformanceCounter() : 0;
+
+            if(!ui_perf_bypass)
+            {
+                cowui::update();
+            }
+            const Uint64 performance_ui_update_end = performance_capture
+                ? SDL_GetPerformanceCounter() : 0;
+            if(!ui_perf_bypass)
+            {
+                cowui::render();
+            }
+            if(performance_gpu) glEndQuery_(GL_TIME_ELAPSED);
+            const Uint64 performance_ui_end = performance_capture
+                ? SDL_GetPerformanceCounter() : 0;
             drawcommandlineoverlay();
 
+            const Uint64 performance_overlay_end = performance_capture
+                ? SDL_GetPerformanceCounter() : 0;
+
             swapbuffers();
+            const Uint64 performance_swap_end = performance_capture
+                ? SDL_GetPerformanceCounter() : 0;
+
+            if(performance_capture &&
+               frame_performance_generation == performance_generation)
+            {
+                PerformanceSample &sample = performance_samples.add();
+                sample.frame = performance_samples.length();
+                sample.interval_us = performanceelapsed(
+                    performance_previous_frame, performance_frame_begin);
+                sample.cpu_frame_us = performanceelapsed(
+                    performance_frame_begin, performance_swap_end);
+                sample.simulation_us = performanceelapsed(
+                    performance_frame_begin, performance_simulation_end);
+                sample.game_render_us = performanceelapsed(
+                    performance_render_begin, performance_game_render_end);
+                sample.ui_update_us = ui_perf_bypass ? 0.0 :
+                    performanceelapsed(
+                        performance_game_render_end,
+                        performance_ui_update_end);
+                sample.ui_render_us = ui_perf_bypass ? 0.0 :
+                    performanceelapsed(
+                        performance_ui_update_end, performance_ui_end);
+                sample.overlay_us = performanceelapsed(
+                    performance_ui_end, performance_overlay_end);
+                sample.swap_us = performanceelapsed(
+                    performance_overlay_end, performance_swap_end);
+                sample.bilinear = bilinear;
+                sample.trilinear = trilinear;
+                sample.aniso = aniso;
+                if(!ui_perf_bypass)
+                    sample.ui = cowui::framestats();
+                if(performance_gpu)
+                {
+                    performance_gpu->sample = performance_samples.length() - 1;
+                    performance_gpu_query_slot =
+                        (performance_gpu_query_slot + 1) %
+                        PERFORMANCE_GPU_QUERY_COUNT;
+                }
+                performance_previous_frame = performance_frame_begin;
+            }
             renderedframe = inbetweenframes = true;
             lastdrawmillis = millis;
         }

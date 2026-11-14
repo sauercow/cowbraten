@@ -10,6 +10,26 @@ namespace Rml
 
 namespace cowui
 {
+    struct FrameStats
+    {
+        double model_update_us = 0.0;
+        double context_update_us = 0.0;
+        double context_render_us = 0.0;
+        unsigned int draw_calls = 0;
+        unsigned int geometry_compiles = 0;
+        unsigned int geometry_releases = 0;
+        unsigned int texture_binds = 0;
+        unsigned int uniform_updates = 0;
+        unsigned int vertex_array_binds = 0;
+        unsigned int scissor_changes = 0;
+        unsigned int live_geometries = 0;
+        unsigned int live_textures = 0;
+        unsigned long long geometry_cpu_bytes = 0;
+        unsigned long long texture_cpu_bytes = 0;
+        int documents = 0;
+        int visible_documents = 0;
+    };
+
     enum class ScreenId
     {
         Test,
@@ -49,8 +69,11 @@ namespace cowui
     // Route key/button/text events even while hidden to drain captured releases.
     bool processevent(const SDL_Event &event);
 
+    void setprofilingenabled(bool enabled);
+    void beginframestats();
     void update();
     void render();
+    FrameStats framestats();
 
     bool show(ScreenId screen);
     bool tryroutelegacygui(const char *name);

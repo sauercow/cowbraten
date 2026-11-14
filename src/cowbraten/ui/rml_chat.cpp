@@ -235,6 +235,10 @@ namespace cowui
 
     void RmlChat::update(bool menu_active, bool full_console_active)
     {
+        if(!document_visible && !input_active && console_messages.empty() &&
+           messages.empty() &&
+           sauerchat::inputmode() == sauerchat::InputMode::None)
+            return;
         syncinput();
         const int current = sauerchat::now();
         const auto updateopacity = [current](std::vector<Message> &target)

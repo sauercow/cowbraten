@@ -72,6 +72,11 @@ int main()
     check(console.find("requestedchat = 1") != std::string::npos &&
           console.find("requestedchat = 2") != std::string::npos,
         "public and team bindings retain distinct native modes");
+    check(model.find("!document_visible && !input_active") !=
+              std::string::npos &&
+          model.find("console_messages.empty()") != std::string::npos &&
+          model.find("messages.empty()") != std::string::npos,
+        "idle hidden chat avoids string and collection work");
 
     std::cout << '\n' << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;
