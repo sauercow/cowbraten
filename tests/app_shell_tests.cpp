@@ -28,6 +28,7 @@ int main()
     const std::string shell = readfile(root + "templates/app_shell.rml");
     const std::string style = readfile(root + "styles/app_shell.rcss");
     const std::string base = readfile(root + "styles/base.rcss");
+    const std::string ui = readfile("../src/cowbraten/ui/ui.cpp");
     const std::string icons = readfile(root + "icons/icons.rcss");
     const std::string atlas_1x = readfile(root + "icons/atlas/cowbraten-icons-24.png");
     const std::string atlas_2x = readfile(root + "icons/atlas/cowbraten-icons-48.png");
@@ -35,6 +36,15 @@ int main()
         "settings", "system", "utilities", "editor" };
 
     check(!shell.empty() && !style.empty(), "load shared application shell");
+    check(base.find("--font-size-body: 0.8125rem") != std::string::npos &&
+          base.find("--font-size-display: 2rem") != std::string::npos &&
+          base.find("font-size: 16dp") != std::string::npos,
+        "shared typography uses a rem scale rooted in density-independent pixels");
+    check(ui.find("responsiveuiscale") != std::string::npos &&
+          ui.find("float(window_width) / 1920.0f") != std::string::npos &&
+          ui.find("float(window_height) / 1080.0f") != std::string::npos &&
+          ui.find("pixel_density * responsiveuiscale") != std::string::npos,
+        "all screens scale from a 1080p desktop viewport without duplicating HiDPI");
     check(!icons.empty() && !atlas_1x.empty() && !atlas_2x.empty(),
         "load shared icon stylesheet and both sprite atlases");
     check(shell.find("href=\"../icons/icons.rcss\"") != std::string::npos &&

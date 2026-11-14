@@ -50,8 +50,8 @@ int main()
           style.find(".console-line.is-team") != std::string::npos,
         "console styles semantic line types");
     check(style.find(".console-line") != std::string::npos &&
-          style.find("font-size: 16dp;") != std::string::npos &&
-          style.find("font-size: 18dp;") != std::string::npos,
+          style.find("font-size: 1rem;") != std::string::npos &&
+          style.find("font-size: 1.125rem;") != std::string::npos,
         "console scrollback and editor match legacy-readable sizing");
     check(style.find(".console-line:last-child") != std::string::npos &&
           style.find("margin-bottom: 18dp;") != std::string::npos &&

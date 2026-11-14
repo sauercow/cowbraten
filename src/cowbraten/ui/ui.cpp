@@ -30,6 +30,7 @@
 
 #include <SDL.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <array>
@@ -436,6 +437,20 @@ namespace cowui
         return value > 0 ? value : 1;
     }
 
+    static float responsiveuiscale(int window_width, int window_height)
+    {
+        // Treat 1920x1080 as the desktop design viewport. Larger logical
+        // viewports scale the whole RCSS coordinate system, just like page
+        // zoom in a browser, while compact windows retain their breakpoints.
+        const float width_scale = float(window_width) / 1920.0f;
+        const float height_scale = float(window_height) / 1080.0f;
+        return std::clamp(
+            std::min(width_scale, height_scale),
+            1.0f,
+            2.0f
+        );
+    }
+
     static bool setdimensions(
         int window_width,
         int window_height,
@@ -461,9 +476,13 @@ namespace cowui
             float(drawable_width) / float(window_width);
         const float vertical_density =
             float(drawable_height) / float(window_height);
-        const float density_ratio = horizontal_density < vertical_density
+        const float pixel_density = horizontal_density < vertical_density
             ? horizontal_density
             : vertical_density;
+        const float density_ratio = pixel_density * responsiveuiscale(
+            window_width,
+            window_height
+        );
 
         context_changed =
             ui_dimensions.context_width != drawable_width ||

@@ -9,7 +9,7 @@ body
     --demo-panel-width: 1500dp;
     --demo-panel-radius: 16dp;
     --demo-control-height: 40dp;
-    --demo-title-size: 18dp;
+    --demo-title-size: 1.125rem;
     --demo-meta-size: var(--font-size-metadata);
     --demo-status-size: var(--font-size-small);
     --demo-clock-size: var(--font-size-body);
@@ -406,7 +406,7 @@ body
     .demo-player
     {
         --demo-control-height: 36dp;
-        --demo-title-size: 16dp;
+        --demo-title-size: 1rem;
         padding-top: 12dp;
         padding-bottom: 12dp;
     }

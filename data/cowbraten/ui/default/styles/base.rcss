@@ -39,16 +39,16 @@ body
      * keeps theme and future accessibility presets small and predictable.
      */
     --font-interface: Lato;
-    --font-size-caption: 8dp;
-    --font-size-label: 9dp;
-    --font-size-control: 10dp;
-    --font-size-metadata: 11dp;
-    --font-size-small: 12dp;
-    --font-size-body: 13dp;
-    --font-size-body-large: 14dp;
-    --font-size-subtitle: 16dp;
-    --font-size-title: 20dp;
-    --font-size-display: 32dp;
+    --font-size-caption: 0.5rem;
+    --font-size-label: 0.5625rem;
+    --font-size-control: 0.625rem;
+    --font-size-metadata: 0.6875rem;
+    --font-size-small: 0.75rem;
+    --font-size-body: 0.8125rem;
+    --font-size-body-large: 0.875rem;
+    --font-size-subtitle: 1rem;
+    --font-size-title: 1.25rem;
+    --font-size-display: 2rem;
     --letter-spacing-label: 1dp;
     --letter-spacing-title: 2dp;
 
@@ -64,7 +64,9 @@ body
     font-family: var(--font-interface);
     font-style: normal;
     font-weight: normal;
-    font-size: var(--font-size-subtitle);
+    /* The document root defines rem; viewport scaling is applied through the
+     * RmlUi density ratio so every screen grows as one coherent system. */
+    font-size: 16dp;
     line-height: 1.35;
 }
 
@@ -279,7 +281,7 @@ scrollbarhorizontal sliderarrowinc
 .field-label
 {
     color: var(--color-text-muted);
-    font-size: 12dp;
+    font-size: 0.75rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -302,7 +304,7 @@ scrollbarhorizontal sliderarrowinc
     border-left-width: 3dp;
     border-left-color: var(--color-border);
     color: var(--color-text-muted);
-    font-size: 12dp;
+    font-size: 0.75rem;
     line-height: 24dp;
     letter-spacing: 1dp;
     text-transform: uppercase;

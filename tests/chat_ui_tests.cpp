@@ -56,7 +56,7 @@ int main()
           style.find("left: 0;") != std::string::npos &&
           style.find("bottom: 0;") != std::string::npos &&
           style.find("padding: 0;") != std::string::npos &&
-          style.find("font-size: 18dp;") != std::string::npos,
+          style.find("font-size: 1.125rem;") != std::string::npos,
         "chat composer uses legacy-sized text flush across the bottom edge");
     check(model.find("sauerchat::classifyline") != std::string::npos &&
           model.find("sauerchat::topenabled") != std::string::npos &&

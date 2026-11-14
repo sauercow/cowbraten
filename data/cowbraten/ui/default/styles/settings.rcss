@@ -60,7 +60,7 @@ body
     border-color: var(--color-secondary-hover);
     border-radius: var(--radius-control);
     color: var(--color-background);
-    font-size: 24dp;
+    font-size: 1.5rem;
     line-height: 38dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -76,7 +76,7 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 18dp;
+    font-size: 1.125rem;
     line-height: 20dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -86,7 +86,7 @@ body
 {
     display: block;
     color: var(--color-primary);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -123,7 +123,7 @@ body
     flex: none;
     margin-bottom: var(--space-2);
     color: var(--color-primary);
-    font-size: 12dp;
+    font-size: 0.75rem;
     letter-spacing: 2dp;
     text-transform: uppercase;
 }
@@ -172,7 +172,7 @@ body
     display: block;
     margin-bottom: var(--space-1);
     color: var(--color-secondary);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -181,7 +181,7 @@ body
 {
     display: block;
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
 }
 
@@ -264,7 +264,7 @@ body
 .settings-stage-title
 {
     color: var(--color-text);
-    font-size: 24dp;
+    font-size: 1.5rem;
     line-height: 32dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -276,7 +276,7 @@ body
     max-width: 720dp;
     margin-top: 4dp;
     color: var(--color-text-muted);
-    font-size: 12dp;
+    font-size: 0.75rem;
     line-height: 18dp;
 }
 
@@ -316,7 +316,7 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 15dp;
+    font-size: 0.9375rem;
     line-height: 20dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -328,7 +328,7 @@ body
     max-width: 760dp;
     margin-top: 3dp;
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
 }
 
@@ -350,7 +350,7 @@ body
 .settings-value-number
 {
     color: var(--color-primary);
-    font-size: 18dp;
+    font-size: 1.125rem;
     line-height: 42dp;
 }
 
@@ -358,7 +358,7 @@ body
 {
     margin-left: var(--space-1);
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -386,7 +386,7 @@ body
     flex: none;
     width: 32dp;
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
 }
 
@@ -467,7 +467,7 @@ body
     border-top-width: 1dp;
     border-top-color: var(--color-border);
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -512,7 +512,7 @@ body
 {
     display: block;
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -522,7 +522,7 @@ body
     display: block;
     margin-top: var(--space-1);
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
 }
 
@@ -584,7 +584,7 @@ body
     border-color: var(--color-border);
     border-radius: var(--radius-control);
     color: var(--color-text);
-    font-size: 12dp;
+    font-size: 0.75rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -616,7 +616,7 @@ body
 .settings-fps-value-label
 {
     color: var(--color-primary);
-    font-size: 14dp;
+    font-size: 0.875rem;
     line-height: 42dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -684,7 +684,7 @@ body
     display: block;
     margin-top: 4dp;
     color: var(--color-primary);
-    font-size: 15dp;
+    font-size: 0.9375rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -694,7 +694,7 @@ body
     display: block;
     margin-top: 2dp;
     color: var(--color-text-muted);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 0.5dp;
     text-transform: uppercase;
 }
@@ -718,7 +718,7 @@ body
     width: 100%;
     height: 36dp;
     line-height: 34dp;
-    font-size: 11dp;
+    font-size: 0.6875rem;
 }
 
 .settings-resolution-button.is-selected:disabled
@@ -736,7 +736,7 @@ body
     border-left-width: 3dp;
     border-left-color: var(--color-warning);
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 18dp;
 }
 
@@ -783,7 +783,7 @@ body
     width: 100%;
     overflow: hidden;
     color: var(--color-primary);
-    font-size: 12dp;
+    font-size: 0.75rem;
     letter-spacing: 1dp;
     text-align: center;
     text-overflow: ellipsis;
@@ -838,7 +838,7 @@ body
     display: block;
     margin-left: var(--space-2);
     color: var(--color-primary);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -872,7 +872,7 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 15dp;
+    font-size: 0.9375rem;
     line-height: 22dp;
 }
 
@@ -882,7 +882,7 @@ body
     max-width: 210dp;
     margin-top: var(--space-1);
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
     white-space: normal;
 }
@@ -894,7 +894,7 @@ body
     right: var(--space-2);
     top: var(--space-2);
     color: var(--color-primary);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -931,7 +931,7 @@ body
 
 .settings-trail-colors .settings-color-weapon .settings-control-title
 {
-    font-size: 17dp;
+    font-size: 1.0625rem;
     letter-spacing: 1dp;
 }
 
@@ -991,7 +991,7 @@ body
     margin: 0 var(--space-2);
     overflow: hidden;
     color: var(--color-primary);
-    font-size: 12dp;
+    font-size: 0.75rem;
     line-height: 16dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -1036,7 +1036,7 @@ body
     display: block;
     margin-top: 3dp;
     overflow: hidden;
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-overflow: ellipsis;
     text-transform: uppercase;
@@ -1067,7 +1067,7 @@ body
     height: 36dp;
     padding: 0;
     color: var(--color-primary);
-    font-size: 18dp;
+    font-size: 1.125rem;
     line-height: 34dp;
 }
 
@@ -1082,7 +1082,7 @@ body
     border-width: 1dp;
     border-color: var(--color-border);
     color: var(--color-primary);
-    font-size: 15dp;
+    font-size: 0.9375rem;
     line-height: 34dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -1101,7 +1101,7 @@ body
     height: 36dp;
     margin-left: var(--space-2);
     background-color: var(--color-surface-2);
-    font-size: 13dp;
+    font-size: 0.8125rem;
     line-height: 34dp;
 }
 
@@ -1189,7 +1189,7 @@ body
 
 .settings-autoexec-name
 {
-    font-size: 13dp;
+    font-size: 0.8125rem;
     line-height: 18dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -1198,7 +1198,7 @@ body
 .settings-autoexec-path
 {
     color: var(--color-text-muted);
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 15dp;
 }
 
@@ -1207,7 +1207,7 @@ body
     flex: none;
     margin: 0 var(--space-2);
     color: var(--color-primary);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -1246,7 +1246,7 @@ body
     display: block;
     margin-bottom: var(--space-1);
     color: var(--color-primary);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 2dp;
     text-transform: uppercase;
 }
@@ -1276,7 +1276,7 @@ body
     display: block;
     min-width: 0;
     color: var(--color-text);
-    font-size: 12dp;
+    font-size: 0.75rem;
 }
 
 .settings-keybinding-values
@@ -1311,7 +1311,7 @@ body
     width: 100%;
     margin-top: var(--space-1);
     color: var(--color-primary);
-    font-size: 12dp;
+    font-size: 0.75rem;
 }
 
 .settings-key-conflict
@@ -1319,7 +1319,7 @@ body
     width: 100%;
     margin-top: 2dp;
     color: var(--color-warning);
-    font-size: 11dp;
+    font-size: 0.6875rem;
 }
 
 .settings-key-decisions
@@ -1351,7 +1351,7 @@ body
 {
     margin-top: var(--space-2);
     color: var(--color-text);
-    font-size: 12dp;
+    font-size: 0.75rem;
 }
 
 .settings-key-conflict.is-available
@@ -1379,7 +1379,7 @@ body
     border-width: 1dp;
     border-color: var(--color-border);
     color: var(--color-primary);
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 24dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -1392,7 +1392,7 @@ body
     height: 24dp;
     padding: 0;
     line-height: 20dp;
-    font-size: 14dp;
+    font-size: 0.875rem;
     letter-spacing: 0;
     color: var(--color-disabled);
 }
@@ -1408,14 +1408,14 @@ body
     width: 100%;
     margin-top: var(--space-2);
     color: var(--color-warning);
-    font-size: 12dp;
+    font-size: 0.75rem;
 }
 
 .settings-key-unbound
 {
     display: block;
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -1433,7 +1433,7 @@ body
     border-top-width: 1dp;
     border-top-color: var(--color-border);
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 38dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -1500,7 +1500,7 @@ body
 
     .settings-nav-item
     {
-        font-size: 12dp;
+        font-size: 0.75rem;
         white-space: nowrap;
     }
 }
@@ -1545,7 +1545,7 @@ body
 
     .settings-stage-title
     {
-        font-size: 24dp;
+        font-size: 1.5rem;
         line-height: 32dp;
     }
 

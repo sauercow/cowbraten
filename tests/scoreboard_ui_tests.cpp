@@ -73,10 +73,11 @@ int main()
           legacy.find("scoreboard.show(on && !native_scoreboard)") !=
               std::string::npos,
         "showscores uses RmlUi with a safe g3d fallback");
-    check(style.find("background-color: rgba(4, 7, 9, 72)") !=
-              std::string::npos &&
+    check(style.find(".scoreboard-overlay") != std::string::npos &&
+          style.find("background-color: transparent") != std::string::npos &&
+          style.find("background-color: #0B1015C2") != std::string::npos &&
           style.find(".scoreboard-player.is-local") != std::string::npos,
-        "light overlay preserves gameplay context and highlights the local player");
+        "translucent panel preserves gameplay without an outer black tint");
     check(rml.find("scoreboard-kicker") != std::string::npos &&
           rml.find("cb-ico-clock") != std::string::npos &&
           rml.find("cb-ico-crosshair") != std::string::npos &&
@@ -111,9 +112,9 @@ int main()
           style.find("max-height: 90%") != std::string::npos,
         "dense rows and taller panel keep more players visible at once");
     check(style.find("@media (min-width: 2000dp)") != std::string::npos &&
-          style.find("max-width: 2000dp") != std::string::npos &&
-          style.find("font-size: 14dp") != std::string::npos,
-        "QHD and larger viewports scale the scoreboard and its content together");
+          style.find("max-width: 1600dp") != std::string::npos &&
+          style.find("font-size: 0.875rem") != std::string::npos,
+        "QHD viewports scale content without stretching the scoreboard");
     check(rml.find("scoreboard-teams") != std::string::npos &&
           rml.find("player : evil_rows") != std::string::npos &&
           rml.find("player : good_rows") != std::string::npos &&
@@ -125,8 +126,14 @@ int main()
           style.find(".scoreboard-spectator-grid") != std::string::npos,
         "spectators use a compact grid below both team columns");
     check(style.find(".scoreboard-team .score-stat") != std::string::npos &&
+          style.find("width: auto") != std::string::npos &&
+          style.find("flex: 1") != std::string::npos &&
           style.find("text-align: center") != std::string::npos,
-        "team values align with their centered column icons");
+        "visible team metrics share remaining width without a dead zone");
+    check(style.find("width: 124dp") != std::string::npos &&
+          style.find("max-width: 1600dp") != std::string::npos &&
+          style.find("flex: none") != std::string::npos,
+        "team name columns and the overall panel remain compact");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

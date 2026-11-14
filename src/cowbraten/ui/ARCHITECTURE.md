@@ -109,11 +109,13 @@ documents remain loaded until shutdown. Reopening is an explicit request for a
 screen rather than an implicit DOM operation.
 
 The RmlUi context uses drawable pixels so geometry, text, clipping, and
-textures remain sharp on HiDPI displays. RCSS dimensions use density-independent
-pixels, with the ratio derived from SDL's drawable-to-window scale. SDL pointer
-coordinates are mapped into drawable context space before dispatch. This keeps
-the interface at the same logical size across scale factors without reducing
-framebuffer precision.
+textures remain sharp on HiDPI displays. RCSS geometry uses density-independent
+pixels and typography uses `rem` tokens rooted at 16dp. The density ratio
+combines SDL's drawable-to-window scale with responsive desktop scaling from a
+1920x1080 design viewport, capped at 2x. Thus QHD and 4K displays scale the
+whole interface even when operating-system scaling is disabled, without
+double-scaling HiDPI windows. SDL pointer coordinates remain mapped into
+drawable context space before dispatch.
 
 The legacy Sauer command line temporarily takes text-input ownership without
 closing or hiding the active RmlUi screen. Its normal `saycommand`,

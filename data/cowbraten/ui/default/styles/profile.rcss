@@ -54,7 +54,7 @@ body
     border-color: var(--color-secondary-hover);
     border-radius: var(--radius-control);
     color: var(--color-background);
-    font-size: 24dp;
+    font-size: 1.5rem;
     line-height: 38dp;
     text-align: center;
 }
@@ -68,7 +68,7 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 18dp;
+    font-size: 1.125rem;
     line-height: 20dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -78,7 +78,7 @@ body
 {
     display: block;
     color: var(--color-primary);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -114,7 +114,7 @@ body
 {
     margin-bottom: var(--space-2);
     color: var(--color-primary);
-    font-size: 12dp;
+    font-size: 0.75rem;
     letter-spacing: 2dp;
     text-transform: uppercase;
 }
@@ -138,7 +138,7 @@ body
     width: 32dp;
     flex: none;
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
 }
 
 .profile-nav-item.is-selected .profile-nav-index
@@ -155,7 +155,7 @@ body
     border-left-width: 3dp;
     border-left-color: var(--color-secondary);
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
 }
 
@@ -164,7 +164,7 @@ body
     display: block;
     margin-bottom: var(--space-1);
     color: var(--color-secondary);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -199,7 +199,7 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 32dp;
+    font-size: 2rem;
     line-height: 36dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -209,7 +209,7 @@ body
 {
     display: block;
     color: var(--color-text-muted);
-    font-size: 13dp;
+    font-size: 0.8125rem;
     line-height: 20dp;
 }
 
@@ -244,7 +244,7 @@ body
 {
     display: block;
     color: var(--color-disabled);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     line-height: 13dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -256,7 +256,7 @@ body
     margin-top: 4dp;
     overflow: hidden;
     color: var(--color-text);
-    font-size: 15dp;
+    font-size: 0.9375rem;
     line-height: 20dp;
     letter-spacing: 1dp;
     text-overflow: ellipsis;
@@ -286,7 +286,7 @@ body
     margin-top: 17dp;
     flex: none;
     padding: 0 10dp;
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 32dp;
 }
 
@@ -326,7 +326,7 @@ body
     border-radius: var(--radius-control);
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 32dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -391,7 +391,7 @@ body
     display: block;
     height: 28dp;
     color: var(--color-disabled);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     line-height: 28dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -421,7 +421,7 @@ body
     border-left-color: transparent;
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 33dp;
     letter-spacing: 1dp;
     text-align: left;
@@ -464,7 +464,7 @@ body
     border-left-color: var(--color-border);
     color: var(--color-error);
     font-family: Lato;
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 33dp;
     text-align: center;
 }
@@ -487,7 +487,7 @@ body
     width: 72dp;
     flex: none;
     color: var(--color-success);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     line-height: 13dp;
     letter-spacing: 1dp;
     text-align: right;
@@ -526,7 +526,7 @@ body
     border-bottom-width: 1dp;
     border-bottom-color: var(--color-border);
     color: var(--color-text);
-    font-size: 13dp;
+    font-size: 0.8125rem;
     line-height: 39dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -599,7 +599,7 @@ body
     display: block;
     flex: 1;
     min-width: 0;
-    font-size: 13dp;
+    font-size: 0.8125rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -647,7 +647,7 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 22dp;
+    font-size: 1.375rem;
     line-height: 26dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -657,7 +657,7 @@ body
 {
     display: block;
     color: var(--color-text-muted);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -665,7 +665,7 @@ body
 .profile-preview-live
 {
     color: var(--color-success);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -700,7 +700,7 @@ body
     border-top-width: 1dp;
     border-top-color: var(--color-border);
     color: var(--color-text-muted);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     line-height: 31dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -713,7 +713,7 @@ body
     min-height: 54dp;
     padding: 10dp var(--space-2);
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
 }
 
@@ -748,7 +748,7 @@ body
     border-color: var(--color-border);
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 34dp;
     letter-spacing: 1dp;
     text-align: left;
@@ -832,7 +832,7 @@ body
     display: block;
     margin-top: 2dp;
     color: var(--color-text-muted);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     line-height: 12dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -849,7 +849,7 @@ body
     border-width: 1dp;
     border-color: var(--color-border);
     color: var(--color-primary);
-    font-size: 13dp;
+    font-size: 0.8125rem;
     line-height: 28dp;
     text-align: center;
 }
@@ -871,7 +871,7 @@ body
     width: 34dp;
     flex: none;
     color: var(--color-disabled);
-    font-size: 8dp;
+    font-size: 0.5rem;
     line-height: 12dp;
     letter-spacing: 1dp;
     text-align: left;
@@ -956,7 +956,7 @@ body
     width: 92dp;
     height: 34dp;
     color: var(--color-text);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -973,7 +973,7 @@ body
 {
     display: block;
     color: var(--color-disabled);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     line-height: 13dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -992,7 +992,7 @@ body
     border-color: var(--color-border);
     color: var(--color-text);
     font-family: Lato;
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 32dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -1058,7 +1058,7 @@ body
     margin-top: 3dp;
     overflow: hidden;
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
     letter-spacing: 1dp;
     text-overflow: ellipsis;
@@ -1077,7 +1077,7 @@ body
     margin-top: auto;
     padding-top: 10dp;
     color: var(--color-text-muted);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     line-height: 14dp;
 }
 
@@ -1094,7 +1094,7 @@ body
     border-top-width: 1dp;
     border-top-color: var(--color-border);
     color: var(--color-text-muted);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -1196,7 +1196,7 @@ body
 
     .profile-stage-title
     {
-        font-size: 28dp;
+        font-size: 1.75rem;
         line-height: 31dp;
     }
 
@@ -1284,7 +1284,7 @@ body
 
     .profile-stage-title
     {
-        font-size: 24dp;
+        font-size: 1.5rem;
         line-height: 27dp;
     }
 

@@ -62,7 +62,7 @@ body
     border-color: var(--color-secondary-hover);
     border-radius: var(--radius-control);
     color: var(--color-background);
-    font-size: 24dp;
+    font-size: 1.5rem;
     line-height: 38dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -79,7 +79,7 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 18dp;
+    font-size: 1.125rem;
     line-height: 20dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -89,7 +89,7 @@ body
 {
     display: block;
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -126,7 +126,7 @@ body
     flex: none;
     margin-bottom: var(--space-2);
     color: var(--color-primary);
-    font-size: 12dp;
+    font-size: 0.75rem;
     letter-spacing: 2dp;
     text-transform: uppercase;
 }
@@ -167,7 +167,7 @@ body
     flex: none;
     width: 72dp;
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-align: right;
 }
@@ -229,7 +229,7 @@ body
 .main-brand-title
 {
     color: var(--color-text);
-    font-size: 72dp;
+    font-size: 4.5rem;
     line-height: 76dp;
     letter-spacing: 6dp;
     text-transform: uppercase;
@@ -258,7 +258,7 @@ body
     display: block;
     max-width: 640dp;
     color: var(--color-text);
-    font-size: 20dp;
+    font-size: 1.25rem;
     line-height: 28dp;
     letter-spacing: 1dp;
 }
@@ -269,7 +269,7 @@ body
     max-width: 560dp;
     margin-top: var(--space-2);
     color: var(--color-text-muted);
-    font-size: 14dp;
+    font-size: 0.875rem;
     line-height: 22dp;
 }
 
@@ -296,7 +296,7 @@ body
     display: block;
     margin-bottom: var(--space-1);
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -305,7 +305,7 @@ body
 {
     display: block;
     color: var(--color-text-muted);
-    font-size: 12dp;
+    font-size: 0.75rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -323,7 +323,7 @@ body
     border-top-width: 1dp;
     border-top-color: var(--color-border);
     color: var(--color-text-muted);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -380,7 +380,7 @@ body
 
     .main-brand-title
     {
-        font-size: 52dp;
+        font-size: 3.25rem;
         line-height: 58dp;
         letter-spacing: 4dp;
     }
@@ -432,13 +432,13 @@ body
 
     .main-brand-title
     {
-        font-size: 48dp;
+        font-size: 3rem;
         line-height: 54dp;
     }
 
     .main-brand-subtitle
     {
-        font-size: 18dp;
+        font-size: 1.125rem;
         line-height: 24dp;
     }
 

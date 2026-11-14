@@ -64,7 +64,7 @@ body
     background-color: var(--color-secondary);
     border-radius: 3dp;
     color: #11161B;
-    font-size: 24dp;
+    font-size: 1.5rem;
     line-height: 43dp;
     text-align: center;
 }
@@ -86,7 +86,7 @@ body
 .game-menu-brandcopy strong
 {
     color: var(--color-text);
-    font-size: 17dp;
+    font-size: 1.0625rem;
     line-height: 20dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -95,7 +95,7 @@ body
 .game-menu-brandcopy small
 {
     color: var(--color-primary);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     line-height: 13dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -113,7 +113,7 @@ body
     max-width: 210dp;
     overflow: hidden;
     color: var(--color-text);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     letter-spacing: 1dp;
     text-overflow: ellipsis;
     text-transform: uppercase;
@@ -123,7 +123,7 @@ body
 .game-menu-player small
 {
     color: var(--color-text-muted);
-    font-size: 8dp;
+    font-size: 0.5rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -167,7 +167,7 @@ body
 {
     display: block;
     color: var(--color-secondary);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 15dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -178,7 +178,7 @@ body
     display: block;
     margin-top: 3dp;
     color: var(--color-text);
-    font-size: 31dp;
+    font-size: 1.9375rem;
     line-height: 34dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -188,7 +188,7 @@ body
 {
     display: block;
     color: var(--color-text-muted);
-    font-size: 13dp;
+    font-size: 0.8125rem;
     line-height: 17dp;
 }
 
@@ -284,7 +284,7 @@ body
     width: 34dp;
     flex: none;
     color: #AAB4BF;
-    font-size: 9dp;
+    font-size: 0.5625rem;
     letter-spacing: 1dp;
 }
 
@@ -325,7 +325,7 @@ body
     flex: 1;
     min-width: 0;
     overflow: hidden;
-    font-size: 13dp;
+    font-size: 0.8125rem;
     font-weight: normal;
     letter-spacing: 1dp;
     text-overflow: ellipsis;
@@ -346,7 +346,7 @@ body
     border-color: #485462;
     border-radius: 4dp;
     color: #E8EDF2;
-    font-size: 9dp;
+    font-size: 0.5625rem;
     line-height: 26dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -404,7 +404,7 @@ body
     border-bottom-width: 1dp;
     border-bottom-color: #343D47;
     color: var(--color-text);
-    font-size: 14dp;
+    font-size: 0.875rem;
     line-height: 38dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -446,7 +446,7 @@ body
     justify-content: center;
     background-color: #202830;
     color: #46515C;
-    font-size: 34dp;
+    font-size: 2.125rem;
     letter-spacing: 7dp;
 }
 
@@ -477,7 +477,7 @@ body
 .game-menu-map-caption strong
 {
     overflow: hidden;
-    font-size: 11dp;
+    font-size: 0.6875rem;
     letter-spacing: 1dp;
     text-overflow: ellipsis;
     text-transform: uppercase;
@@ -538,7 +538,7 @@ body
 .game-menu-server-row strong
 {
     color: var(--color-text);
-    font-size: 14dp;
+    font-size: 0.875rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -546,7 +546,7 @@ body
 .game-menu-server-row small
 {
     color: var(--color-text-muted);
-    font-size: 9dp;
+    font-size: 0.5625rem;
 }
 
 .game-menu-match-grid
@@ -592,14 +592,14 @@ body
 .game-menu-stat small
 {
     color: var(--color-text-muted);
-    font-size: 8dp;
+    font-size: 0.5rem;
     letter-spacing: 1dp;
 }
 
 .game-menu-stat strong
 {
     color: var(--color-text);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
 }
 
@@ -654,7 +654,7 @@ body
 .game-menu-quick-copy strong
 {
     color: var(--color-text);
-    font-size: 12dp;
+    font-size: 0.75rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -662,7 +662,7 @@ body
 .game-menu-quick-copy small
 {
     color: var(--color-text-muted);
-    font-size: 9dp;
+    font-size: 0.5625rem;
 }
 
 .game-menu-toggle
@@ -681,7 +681,7 @@ body
     border-radius: 17dp;
     color: var(--color-text);
     font-family: Lato;
-    font-size: 10dp;
+    font-size: 0.625rem;
     tab-index: auto;
 }
 
@@ -728,7 +728,7 @@ body
     border-color: #46515C;
     color: var(--color-text);
     font-family: Lato;
-    font-size: 9dp;
+    font-size: 0.5625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
     tab-index: auto;
@@ -746,7 +746,7 @@ body
 .game-menu-team-buttons button strong
 {
     display: block;
-    font-size: 9dp;
+    font-size: 0.5625rem;
     font-weight: normal;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -794,7 +794,7 @@ body
 .game-menu-inline-button strong
 {
     display: block;
-    font-size: 9dp;
+    font-size: 0.5625rem;
     font-weight: normal;
     letter-spacing: 1dp;
 }
@@ -840,7 +840,7 @@ body
     border-radius: 3dp;
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 8dp;
+    font-size: 0.5rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
     tab-index: auto;
@@ -857,7 +857,7 @@ body
 .game-menu-master-modes button strong
 {
     display: block;
-    font-size: 8dp;
+    font-size: 0.5rem;
     font-weight: normal;
     letter-spacing: 1dp;
 }
@@ -909,7 +909,7 @@ body
 .game-menu-connected
 {
     color: var(--color-text-muted);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -1001,7 +1001,7 @@ body
 
     .game-menu-title
     {
-        font-size: 25dp;
+        font-size: 1.5625rem;
         line-height: 28dp;
     }
 

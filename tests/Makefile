@@ -29,7 +29,7 @@ settings_ui_tests: settings_ui_tests.cpp ../data/cowbraten/ui/default/screens/se
 profile_ui_tests: profile_ui_tests.cpp ../data/cowbraten/ui/default/screens/profile.rml ../data/cowbraten/ui/themes/modern-metallic/theme.rcss ../src/cowbraten/ui/rml_profile.cpp ../src/cowbraten/ui/sauer_profile_bridge.cpp ../src/fpsgame/client.cpp ../src/cowbraten/detection.cpp
 	$(CXX) $(CXXFLAGS) -o $@ profile_ui_tests.cpp
 
-app_shell_tests: app_shell_tests.cpp ../data/cowbraten/ui/default/templates/app_shell.rml ../data/cowbraten/ui/default/styles/app_shell.rcss ../data/cowbraten/ui/default/icons/icons.rcss ../data/cowbraten/ui/default/icons/atlas/cowbraten-icons-24.png ../data/cowbraten/ui/default/icons/atlas/cowbraten-icons-48.png
+app_shell_tests: app_shell_tests.cpp ../data/cowbraten/ui/default/templates/app_shell.rml ../data/cowbraten/ui/default/styles/app_shell.rcss ../data/cowbraten/ui/default/icons/icons.rcss ../data/cowbraten/ui/default/icons/atlas/cowbraten-icons-24.png ../data/cowbraten/ui/default/icons/atlas/cowbraten-icons-48.png ../src/cowbraten/ui/ui.cpp
 	$(CXX) $(CXXFLAGS) -o $@ app_shell_tests.cpp
 
 game_menu_ui_tests: game_menu_ui_tests.cpp ../data/cowbraten/ui/default/screens/game_menu.rml ../data/cowbraten/ui/default/styles/game_menu.rcss ../src/cowbraten/ui/rml_game_menu.cpp ../src/cowbraten/ui/cube_text.h

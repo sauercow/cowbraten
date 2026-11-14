@@ -28,7 +28,7 @@
 .games-title, .campaign-title
 {
     color: var(--color-text);
-    font-size: 25dp;
+    font-size: 1.5625rem;
     line-height: 31dp;
     letter-spacing: 1dp;
 }
@@ -36,7 +36,7 @@
 .games-copy
 {
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 17dp;
 }
 
@@ -55,7 +55,7 @@
 .games-current small, .campaign-series
 {
     color: var(--color-primary);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -63,7 +63,7 @@
 .games-current strong
 {
     color: var(--color-text);
-    font-size: 12dp;
+    font-size: 0.75rem;
 }
 
 .games-tabs
@@ -85,7 +85,7 @@
     border-bottom-width: 2dp;
     border-bottom-color: transparent;
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -151,7 +151,7 @@
     border-bottom-width: 1dp;
     border-bottom-color: var(--color-border);
     color: var(--color-text);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -166,7 +166,7 @@
     width: 190dp;
     height: 31dp;
     margin-left: auto;
-    font-size: 10dp;
+    font-size: 0.625rem;
 }
 
 .mode-list, .map-list, .campaign-list
@@ -193,7 +193,7 @@
     border-left-width: 2dp;
     border-left-color: transparent;
     color: var(--color-text-muted);
-    font-size: 10dp;
+    font-size: 0.625rem;
     text-align: left;
     text-transform: uppercase;
 }
@@ -278,7 +278,7 @@
 {
     display: block;
     color: var(--color-disabled);
-    font-size: 13dp;
+    font-size: 0.8125rem;
     line-height: 76dp;
     letter-spacing: 3dp;
     text-align: center;
@@ -289,7 +289,7 @@
     display: block;
     padding: 8dp;
     overflow: hidden;
-    font-size: 9dp;
+    font-size: 0.5625rem;
     letter-spacing: 1dp;
     text-overflow: ellipsis;
     text-transform: uppercase;
@@ -306,7 +306,7 @@
 {
     margin-top: 18dp;
     color: var(--color-primary);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 2dp;
     text-transform: uppercase;
 }
@@ -315,7 +315,7 @@
 {
     margin-top: 6dp;
     color: var(--color-text);
-    font-size: 22dp;
+    font-size: 1.375rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -326,7 +326,7 @@
     margin-top: 12dp;
     flex: 1;
     color: var(--color-text-muted);
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 15dp;
 }
 
@@ -345,7 +345,7 @@
     margin-top: 6dp;
     justify-content: space-between;
     color: var(--color-text-muted);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     text-transform: uppercase;
 }
 
@@ -370,7 +370,7 @@
     flex: none;
     min-height: 16dp;
     color: var(--color-text-muted);
-    font-size: 9dp;
+    font-size: 0.5625rem;
     letter-spacing: 1dp;
 }
 
@@ -431,13 +431,13 @@
 {
     margin-top: 10dp;
     color: var(--color-text);
-    font-size: 13dp;
+    font-size: 0.8125rem;
 }
 
 .campaign-card small
 {
     margin-top: 5dp;
-    font-size: 9dp;
+    font-size: 0.5625rem;
 }
 
 @media (max-width: 1100dp)

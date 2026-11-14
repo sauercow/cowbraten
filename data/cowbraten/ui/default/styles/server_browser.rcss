@@ -62,7 +62,7 @@ body
     border-color: var(--color-secondary-hover);
     border-radius: var(--radius-control);
     color: var(--color-background);
-    font-size: 24dp;
+    font-size: 1.5rem;
     line-height: 38dp;
     letter-spacing: 1dp;
     text-align: center;
@@ -79,7 +79,7 @@ body
 {
     display: block;
     color: var(--color-text);
-    font-size: 18dp;
+    font-size: 1.125rem;
     line-height: 20dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -89,7 +89,7 @@ body
 {
     display: block;
     color: var(--color-primary);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     line-height: 16dp;
     letter-spacing: 2dp;
     text-transform: uppercase;
@@ -127,7 +127,7 @@ body
 {
     display: block;
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 12dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -137,7 +137,7 @@ body
 {
     display: block;
     color: var(--color-primary);
-    font-size: 13dp;
+    font-size: 0.8125rem;
     line-height: 20dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -181,7 +181,7 @@ body
     flex: none;
     width: 56dp;
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -191,7 +191,7 @@ body
     flex: none;
     height: 32dp;
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -241,7 +241,7 @@ body
     border-color: transparent;
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 37dp;
     letter-spacing: 1dp;
     text-align: left;
@@ -334,7 +334,7 @@ body
     border-color: var(--color-border) var(--color-border) var(--color-border) transparent;
     color: var(--color-text-muted);
     font-family: Lato;
-    font-size: 12dp;
+    font-size: 0.75rem;
     line-height: 16dp;
     text-align: left;
     tab-index: auto;
@@ -477,7 +477,7 @@ body
     display: block;
     overflow: hidden;
     color: var(--color-text);
-    font-size: 13dp;
+    font-size: 0.8125rem;
     line-height: 17dp;
     white-space: nowrap;
 }
@@ -492,7 +492,7 @@ body
     display: block;
     overflow: hidden;
     color: var(--color-disabled);
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 13dp;
     letter-spacing: 1dp;
     white-space: nowrap;
@@ -547,7 +547,7 @@ body
 .servers-empty-title
 {
     color: var(--color-text);
-    font-size: 16dp;
+    font-size: 1rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }
@@ -556,7 +556,7 @@ body
 {
     margin-top: var(--space-1);
     color: var(--color-text-muted);
-    font-size: 12dp;
+    font-size: 0.75rem;
 }
 
 .servers-selection
@@ -585,7 +585,7 @@ body
     display: block;
     overflow: hidden;
     color: var(--color-text);
-    font-size: 15dp;
+    font-size: 0.9375rem;
     line-height: 22dp;
     white-space: nowrap;
 }
@@ -595,7 +595,7 @@ body
     display: block;
     overflow: hidden;
     color: var(--color-text-muted);
-    font-size: 10dp;
+    font-size: 0.625rem;
     line-height: 16dp;
     letter-spacing: 1dp;
     text-transform: uppercase;
@@ -629,7 +629,7 @@ body
     border-top-width: 1dp;
     border-top-color: var(--color-border);
     color: var(--color-text-muted);
-    font-size: 10dp;
+    font-size: 0.625rem;
     letter-spacing: 1dp;
     text-transform: uppercase;
 }

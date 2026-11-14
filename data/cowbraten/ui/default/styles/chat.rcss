@@ -22,7 +22,7 @@ body
     flex: none;
     min-height: 21dp;
     color: #C6CDD5;
-    font-size: 16dp;
+    font-size: 1rem;
     line-height: 21dp;
     font-effect: shadow(1dp 1dp #000000), outline(1dp #000000C0);
     white-space: pre-wrap;
@@ -76,7 +76,7 @@ body
     border-left-width: 2dp;
     border-left-color: var(--color-primary);
     color: var(--color-text);
-    font-size: 16dp;
+    font-size: 1rem;
     line-height: 21dp;
 }
 
@@ -95,7 +95,7 @@ body
     width: 54dp;
     padding-top: 1dp;
     color: var(--color-primary);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     letter-spacing: 1dp;
 }
 
@@ -123,7 +123,7 @@ body
     border-width: 1dp;
     border-color: var(--color-primary);
     color: var(--color-text);
-    font-size: 18dp;
+    font-size: 1.125rem;
 }
 
 .chat-composer.is-team
@@ -136,7 +136,7 @@ body
     flex: none;
     width: 68dp;
     color: var(--color-primary);
-    font-size: 12dp;
+    font-size: 0.75rem;
     letter-spacing: 2dp;
 }
 
@@ -163,7 +163,7 @@ body
 {
     flex: 1;
     color: var(--color-text-muted);
-    font-size: 11dp;
+    font-size: 0.6875rem;
     letter-spacing: 1dp;
     text-align: right;
     text-transform: uppercase;
