@@ -1,5 +1,21 @@
 # Changelog
 
+## cowbraten 1.0.1 — 2026-11-13
+
+Stable promotion of the complete 1.0.1 release-candidate line. This is the recommended classic Cowbraten release while the RmlUi-based 1.1 line remains experimental.
+
+### Included work
+
+- Preserve the HiDPI, display-transition, fullscreen, and window-sizing fixes introduced in RC1.
+- Preserve the multiplayer kill-streak lifecycle correction introduced in RC2.
+- Preserve the optional HD demo recording, playback, interpolation, and compatible live-spectating work introduced in RC3.
+- Keep normal `.dmo` playback, vanilla Sauerbraten server compatibility, p1xbraten 9.0.0 detection, and the existing network protocol unchanged.
+
+### Notes
+
+- HD demos use optional companion `.dmohd` files; standard demos remain fully supported.
+- The native RmlUi interface belongs to the experimental 1.1 release line and is not part of this stable classic release.
+
 ## cowbraten 1.0.1-rc.3 — 2026-10-23
 
 ### HD Demos
