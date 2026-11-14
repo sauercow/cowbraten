@@ -4687,9 +4687,111 @@
                             </div>
                         </div>
 
+                        <div class="settings-section settings-subsection-panel panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Size and readability</div>
+                                    <div class="settings-control-description">
+                                        Scale the complete interface or increase only its typography. Both settings apply immediately to menus, overlays, chat, console, and scoreboard.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div data-if="interface_appearance_available">
+                                <div class="settings-appearance-presets">
+                                    <div class="settings-appearance-preset-row">
+                                        <button class="button settings-appearance-preset"
+                                            data-class-is-selected="interface_scale == 90 &amp;&amp; interface_text_scale == 90"
+                                            data-event-click="select_interface_preset(0)">
+                                            <span class="settings-appearance-preset-name">Compact</span>
+                                            <span class="settings-appearance-preset-value">90 / 90</span>
+                                        </button>
+                                        <button class="button settings-appearance-preset"
+                                            data-class-is-selected="interface_scale == 100 &amp;&amp; interface_text_scale == 100"
+                                            data-event-click="select_interface_preset(1)">
+                                            <span class="settings-appearance-preset-name">Default</span>
+                                            <span class="settings-appearance-preset-value">100 / 100</span>
+                                        </button>
+                                    </div>
+                                    <div class="settings-appearance-preset-row">
+                                        <button class="button settings-appearance-preset"
+                                            data-class-is-selected="interface_scale == 100 &amp;&amp; interface_text_scale == 115"
+                                            data-event-click="select_interface_preset(2)">
+                                            <span class="settings-appearance-preset-name">Readable</span>
+                                            <span class="settings-appearance-preset-value">100 / 115</span>
+                                        </button>
+                                        <button class="button settings-appearance-preset"
+                                            data-class-is-selected="interface_scale == 110 &amp;&amp; interface_text_scale == 125"
+                                            data-event-click="select_interface_preset(3)">
+                                            <span class="settings-appearance-preset-name">Large</span>
+                                            <span class="settings-appearance-preset-value">110 / 125</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="settings-appearance-controls">
+                                    <div class="settings-appearance-control">
+                                        <div class="settings-display-row">
+                                            <div class="settings-control-copy">
+                                                <div class="settings-control-title">Interface scale</div>
+                                                <div class="settings-control-description">Controls, spacing, icons, and text together.</div>
+                                            </div>
+                                            <div class="settings-value">
+                                                <span class="settings-value-number">{{ interface_scale }}</span>
+                                                <span class="settings-value-unit">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-range-row">
+                                            <span class="settings-range-bound">{{ interface_scale_minimum }}</span>
+                                            <input class="settings-range"
+                                                type="range" min="75" max="150" step="5"
+                                                data-attr-min="interface_scale_minimum"
+                                                data-attr-max="interface_scale_maximum"
+                                                data-attr-value="interface_scale"
+                                                data-event-change="select_interface_scale(ev.value)" />
+                                            <span class="settings-range-bound settings-range-maximum">{{ interface_scale_maximum }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="settings-appearance-control">
+                                        <div class="settings-display-row">
+                                            <div class="settings-control-copy">
+                                                <div class="settings-control-title">Text size</div>
+                                                <div class="settings-control-description">Root rem size, independent from control dimensions.</div>
+                                            </div>
+                                            <div class="settings-value">
+                                                <span class="settings-value-number">{{ interface_text_scale }}</span>
+                                                <span class="settings-value-unit">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="settings-range-row">
+                                            <span class="settings-range-bound">{{ interface_text_scale_minimum }}</span>
+                                            <input class="settings-range"
+                                                type="range" min="75" max="150" step="5"
+                                                data-attr-min="interface_text_scale_minimum"
+                                                data-attr-max="interface_text_scale_maximum"
+                                                data-attr-value="interface_text_scale"
+                                                data-event-change="select_interface_text_scale(ev.value)" />
+                                            <span class="settings-range-bound settings-range-maximum">{{ interface_text_scale_maximum }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="settings-appearance-actions">
+                                    <span class="settings-control-description">QHD uses a subtle automatic boost; stronger scaling is reserved for 4K. Manual values are applied on top.</span>
+                                    <button class="button" data-event-click="reset_interface_appearance()">Restore defaults</button>
+                                </div>
+                            </div>
+
+                            <div class="settings-control-description" data-if="!interface_appearance_available">
+                                Interface sizing is unavailable in this build.
+                            </div>
+                        </div>
+
                         <div class="settings-control-footer settings-control-footer-compact"
-                            data-if="theme_status != ''">
-                            <span>{{ theme_status }}</span>
+                            data-if="theme_status != '' || interface_appearance_status != ''">
+                            <span data-if="interface_appearance_status != ''">{{ interface_appearance_status }}</span>
+                            <span data-if="interface_appearance_status == ''">{{ theme_status }}</span>
                         </div>
                     </div>
 

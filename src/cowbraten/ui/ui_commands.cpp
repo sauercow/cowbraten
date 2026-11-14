@@ -6,6 +6,8 @@ SVARFP(uitheme, "default", {
     cowui::settheme(uitheme);
     if(initing == NOT_INITING) writecfg();
 });
+VARFP(uiscale, 75, 100, 150, cowui::interfacepreferenceschanged());
+VARFP(uitextscale, 75, 100, 150, cowui::interfacepreferenceschanged());
 SVARP(profile_name_1, "");
 SVARP(profile_name_2, "");
 SVARP(profile_name_3, "");
@@ -69,6 +71,8 @@ namespace cowui
 
         f->printf("// Cowbraten-only UI state; legacy clients do not rewrite this file.\n");
         f->printf("uitheme %s\n", escapestring(uitheme));
+        f->printf("uiscale %d\n", uiscale);
+        f->printf("uitextscale %d\n", uitextscale);
         f->printf("profile_name_1 %s\n", escapestring(profile_name_1));
         f->printf("profile_name_2 %s\n", escapestring(profile_name_2));
         f->printf("profile_name_3 %s\n", escapestring(profile_name_3));

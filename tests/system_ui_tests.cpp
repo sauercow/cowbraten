@@ -82,6 +82,16 @@ int main()
           style.find("text-align: center;") != std::string::npos &&
           style.find("background-color: #2F7CCB35;") != std::string::npos,
         "System sections render as aligned segmented buttons");
+    check(rml.find("cb-ico-unlock") != std::string::npos &&
+          rml.find("cb-ico-shield") != std::string::npos &&
+          rml.find("cb-ico-lock") != std::string::npos &&
+          rml.find("cb-ico-eye-off") != std::string::npos &&
+          rml.find("admin-mode-row") != std::string::npos &&
+          style.find("justify-content: center;") != std::string::npos &&
+          style.find(".admin-mode-row { display: flex; gap: 7dp; }") !=
+              std::string::npos &&
+          style.find("flex: 1;") != std::string::npos,
+        "server access modes are centered icon-labelled segmented controls");
 
     const char *routes[] = { "crosshair", "soundpacks", "trailcolors",
         "ammobar", "gameclock", "hudscore", "scoreboard",

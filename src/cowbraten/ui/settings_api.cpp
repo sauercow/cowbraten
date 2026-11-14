@@ -2914,6 +2914,56 @@ namespace cowui
             return accepted;
         }
 
+        static void copyinterfaceappearance(
+            const sauersettings::InterfaceAppearance &source,
+            InterfaceAppearance &result)
+        {
+            result.ui_scale = source.ui_scale;
+            result.ui_scale_minimum = source.ui_scale_minimum;
+            result.ui_scale_maximum = source.ui_scale_maximum;
+            result.text_scale = source.text_scale;
+            result.text_scale_minimum = source.text_scale_minimum;
+            result.text_scale_maximum = source.text_scale_maximum;
+        }
+
+        bool readinterfaceappearance(InterfaceAppearance &result)
+        {
+            sauersettings::InterfaceAppearance current;
+            const bool read = sauersettings::readinterfaceappearance(current);
+            if(read)
+                copyinterfaceappearance(current, result);
+            return read;
+        }
+
+        bool writeuiscale(int value, InterfaceAppearance &result)
+        {
+            sauersettings::InterfaceAppearance current;
+            const bool accepted = sauersettings::writeuiscale(value, current);
+            if(accepted || sauersettings::readinterfaceappearance(current))
+                copyinterfaceappearance(current, result);
+            return accepted;
+        }
+
+        bool writeuitextscale(int value, InterfaceAppearance &result)
+        {
+            sauersettings::InterfaceAppearance current;
+            const bool accepted = sauersettings::writeuitextscale(
+                value, current);
+            if(accepted || sauersettings::readinterfaceappearance(current))
+                copyinterfaceappearance(current, result);
+            return accepted;
+        }
+
+        bool resetinterfaceappearance(InterfaceAppearance &result)
+        {
+            sauersettings::InterfaceAppearance current;
+            const bool accepted =
+                sauersettings::resetinterfaceappearance(current);
+            if(accepted || sauersettings::readinterfaceappearance(current))
+                copyinterfaceappearance(current, result);
+            return accepted;
+        }
+
         static void copyconsole(
             const sauersettings::Console &source,
             Console &result)

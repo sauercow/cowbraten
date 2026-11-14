@@ -34,18 +34,30 @@
 
                 <div class="admin-mode-title">Server access</div>
                 <div class="admin-modes">
-                    <button data-class-is-selected="master_mode == 0"
-                        data-attrif-disabled="!local_master"
-                        data-event-click="select_master_mode(0)">Open</button>
-                    <button data-class-is-selected="master_mode == 1"
-                        data-attrif-disabled="!local_master"
-                        data-event-click="select_master_mode(1)">Veto</button>
-                    <button data-class-is-selected="master_mode == 2"
-                        data-attrif-disabled="!local_master"
-                        data-event-click="select_master_mode(2)">Locked</button>
-                    <button data-class-is-selected="master_mode == 3"
-                        data-attrif-disabled="!local_master"
-                        data-event-click="select_master_mode(3)">Private</button>
+                    <div class="admin-mode-row">
+                        <button class="admin-mode-button" data-class-is-selected="master_mode == 0"
+                            data-attrif-disabled="!local_master"
+                            data-event-click="select_master_mode(0)">
+                            <span class="cb-ico cb-ico-unlock cb-ico--sm"></span><span>Open</span>
+                        </button>
+                        <button class="admin-mode-button" data-class-is-selected="master_mode == 1"
+                            data-attrif-disabled="!local_master"
+                            data-event-click="select_master_mode(1)">
+                            <span class="cb-ico cb-ico-shield cb-ico--sm"></span><span>Veto</span>
+                        </button>
+                    </div>
+                    <div class="admin-mode-row">
+                        <button class="admin-mode-button" data-class-is-selected="master_mode == 2"
+                            data-attrif-disabled="!local_master"
+                            data-event-click="select_master_mode(2)">
+                            <span class="cb-ico cb-ico-lock cb-ico--sm"></span><span>Locked</span>
+                        </button>
+                        <button class="admin-mode-button" data-class-is-selected="master_mode == 3"
+                            data-attrif-disabled="!local_master"
+                            data-event-click="select_master_mode(3)">
+                            <span class="cb-ico cb-ico-eye-off cb-ico--sm"></span><span>Private</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="admin-status">{{ status }}</div>
             </div>

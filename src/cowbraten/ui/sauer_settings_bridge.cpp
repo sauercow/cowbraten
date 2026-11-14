@@ -2,6 +2,7 @@
 #include "game.h"
 
 #include "sauer_settings_bridge.h"
+#include "ui_persistence.h"
 
 #ifdef __APPLE__
 #include <SDL2_mixer/SDL_mixer.h>
@@ -876,6 +877,12 @@ namespace cowui
         {
             ident *id = getident("uitheme");
             return id && id->type == ID_SVAR ? id : nullptr;
+        }
+
+        static ident *interfaceappearanceident(const char *name)
+        {
+            ident *id = getident(name);
+            return id && id->type == ID_VAR ? id : nullptr;
         }
 
         static ident *autoignorenameident(int slot)
@@ -5525,6 +5532,59 @@ namespace cowui
             if(!readtheme(result))
                 return false;
             return result == requested;
+        }
+
+        bool readinterfaceappearance(InterfaceAppearance &result)
+        {
+            ident *ui_scale = interfaceappearanceident("uiscale");
+            ident *text_scale = interfaceappearanceident("uitextscale");
+            if(!ui_scale || !ui_scale->storage.i ||
+               !text_scale || !text_scale->storage.i)
+                return false;
+
+            result.ui_scale = *ui_scale->storage.i;
+            result.ui_scale_minimum = ui_scale->minval;
+            result.ui_scale_maximum = ui_scale->maxval;
+            result.text_scale = *text_scale->storage.i;
+            result.text_scale_minimum = text_scale->minval;
+            result.text_scale_maximum = text_scale->maxval;
+            return true;
+        }
+
+        static bool writeinterfaceappearancescale(
+            const char *name, int value, InterfaceAppearance &result)
+        {
+            ident *id = interfaceappearanceident(name);
+            if(!id || !id->storage.i ||
+               value < id->minval || value > id->maxval)
+                return false;
+            setvarchecked(id, value);
+            return readinterfaceappearance(result) &&
+                cowui::savepersistentstate();
+        }
+
+        bool writeuiscale(int value, InterfaceAppearance &result)
+        {
+            return writeinterfaceappearancescale("uiscale", value, result);
+        }
+
+        bool writeuitextscale(int value, InterfaceAppearance &result)
+        {
+            return writeinterfaceappearancescale(
+                "uitextscale", value, result);
+        }
+
+        bool resetinterfaceappearance(InterfaceAppearance &result)
+        {
+            ident *ui_scale = interfaceappearanceident("uiscale");
+            ident *text_scale = interfaceappearanceident("uitextscale");
+            if(!ui_scale || !ui_scale->storage.i ||
+               !text_scale || !text_scale->storage.i)
+                return false;
+            setvarchecked(ui_scale, 100);
+            setvarchecked(text_scale, 100);
+            return readinterfaceappearance(result) &&
+                cowui::savepersistentstate();
         }
 
         // Native guibitfield "important information" uses 0x11.

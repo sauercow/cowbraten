@@ -18,6 +18,16 @@ namespace cowui
             ModernMetallic
         };
 
+        struct InterfaceAppearance
+        {
+            int ui_scale;
+            int ui_scale_minimum;
+            int ui_scale_maximum;
+            int text_scale;
+            int text_scale_minimum;
+            int text_scale_maximum;
+        };
+
         struct Fov
         {
             int value;
@@ -964,6 +974,10 @@ namespace cowui
 
         bool readtheme(Theme &result);
         bool writetheme(Theme theme, Theme &result);
+        bool readinterfaceappearance(InterfaceAppearance &result);
+        bool writeuiscale(int value, InterfaceAppearance &result);
+        bool writeuitextscale(int value, InterfaceAppearance &result);
+        bool resetinterfaceappearance(InterfaceAppearance &result);
 
         bool readconsole(Console &result);
         bool writeimportantintopfeed(bool enabled, Console &result);

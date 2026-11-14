@@ -37,6 +37,8 @@
 #include <string>
 
 extern char *uitheme;
+extern int uiscale;
+extern int uitextscale;
 
 namespace cowui
 {
@@ -176,6 +178,17 @@ namespace cowui
         document->SetStyleSheetContainer(
             base->CombineStyleSheetContainer(*theme_style_sheet));
         return true;
+    }
+
+    static void applyinterfacepreferences(Rml::ElementDocument *document)
+    {
+        if(!document)
+            return;
+        document->SetClass("ui-text-large", uitextscale >= 115);
+        document->SetProperty(
+            "font-size",
+            Rml::CreateString("%.3fdp", 16.0f * float(uitextscale) / 100.0f)
+        );
     }
 
     struct UiDimensions
@@ -439,15 +452,21 @@ namespace cowui
 
     static float responsiveuiscale(int window_width, int window_height)
     {
-        // Treat 1920x1080 as the desktop design viewport. Larger logical
-        // viewports scale the whole RCSS coordinate system, just like page
-        // zoom in a browser, while compact windows retain their breakpoints.
+        // Treat 1920x1080 as the desktop design viewport. Physical desktop
+        // size does not grow linearly with resolution: QHD is commonly still
+        // a 27-inch display, while 4K benefits from a stronger accessibility
+        // boost. This is the equivalent of a conservative large-screen media
+        // query, independent from SDL's HiDPI pixel density.
         const float width_scale = float(window_width) / 1920.0f;
         const float height_scale = float(window_height) / 1080.0f;
-        return std::clamp(
-            std::min(width_scale, height_scale),
-            1.0f,
-            2.0f
+        const float viewport_scale = std::min(width_scale, height_scale);
+        if(viewport_scale <= 1.0f)
+            return 1.0f;
+        if(viewport_scale <= 1.5f)
+            return 1.0f + (viewport_scale - 1.0f) * 0.25f;
+        return std::min(
+            1.5f,
+            1.125f + (viewport_scale - 1.5f) * 0.75f
         );
     }
 
@@ -479,10 +498,10 @@ namespace cowui
         const float pixel_density = horizontal_density < vertical_density
             ? horizontal_density
             : vertical_density;
-        const float density_ratio = pixel_density * responsiveuiscale(
-            window_width,
-            window_height
-        );
+        const float density_ratio =
+            pixel_density *
+            responsiveuiscale(window_width, window_height) *
+            float(uiscale) / 100.0f;
 
         context_changed =
             ui_dimensions.context_width != drawable_width ||
@@ -862,6 +881,7 @@ namespace cowui
         action_router.install();
 
         initialized = true;
+        interfacepreferenceschanged();
         return true;
     }
 
@@ -952,6 +972,35 @@ namespace cowui
         {
             settings_model.videochanged();
         }
+    }
+
+    void interfacepreferenceschanged()
+    {
+        if(!initialized || !context)
+            return;
+
+        bool context_changed = false;
+        setdimensions(
+            ui_dimensions.window_width,
+            ui_dimensions.window_height,
+            ui_dimensions.drawable_width,
+            ui_dimensions.drawable_height,
+            context_changed
+        );
+        if(context_changed)
+        {
+            context->SetDimensions(Rml::Vector2i(
+                ui_dimensions.context_width,
+                ui_dimensions.context_height
+            ));
+            context->SetDensityIndependentPixelRatio(
+                ui_dimensions.density_ratio
+            );
+        }
+
+        const int document_count = context->GetNumDocuments();
+        for(int i = 0; i < document_count; ++i)
+            applyinterfacepreferences(context->GetDocument(i));
     }
 
     void beforeglreset()
@@ -1471,6 +1520,7 @@ namespace cowui
                 screen->document = nullptr;
                 return false;
             }
+            applyinterfacepreferences(screen->document);
         }
 
         const bool opening = active_screen == nullptr;

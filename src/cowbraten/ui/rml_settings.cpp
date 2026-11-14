@@ -1340,9 +1340,58 @@ namespace cowui
                 &theme_modern_metallic
             ) &&
             constructor.Bind("theme_status", &theme_status) &&
+            constructor.Bind(
+                "interface_appearance_available",
+                &interface_appearance_available
+            ) &&
+            constructor.Bind("interface_scale", &interface_scale) &&
+            constructor.Bind(
+                "interface_scale_minimum",
+                &interface_scale_minimum
+            ) &&
+            constructor.Bind(
+                "interface_scale_maximum",
+                &interface_scale_maximum
+            ) &&
+            constructor.Bind(
+                "interface_text_scale",
+                &interface_text_scale
+            ) &&
+            constructor.Bind(
+                "interface_text_scale_minimum",
+                &interface_text_scale_minimum
+            ) &&
+            constructor.Bind(
+                "interface_text_scale_maximum",
+                &interface_text_scale_maximum
+            ) &&
+            constructor.Bind(
+                "interface_appearance_status",
+                &interface_appearance_status
+            ) &&
             constructor.BindEventCallback(
                 "select_theme",
                 &RmlSettings::selecttheme,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_interface_scale",
+                &RmlSettings::selectuiscale,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_interface_text_scale",
+                &RmlSettings::selectuitextscale,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_interface_preset",
+                &RmlSettings::selectinterfacepreset,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "reset_interface_appearance",
+                &RmlSettings::resetinterfaceappearance,
                 this
             ) &&
             constructor.BindEventCallback(
@@ -4635,9 +4684,14 @@ namespace cowui
     bool RmlSettings::refreshinterface()
     {
         settings::Theme current;
-        const bool available = settings::readtheme(current);
-        presenttheme(current, available);
-        return available;
+        const bool theme_is_available = settings::readtheme(current);
+        presenttheme(current, theme_is_available);
+
+        settings::InterfaceAppearance appearance = {};
+        const bool appearance_is_available =
+            settings::readinterfaceappearance(appearance);
+        presentinterfaceappearance(appearance, appearance_is_available);
+        return theme_is_available && appearance_is_available;
     }
 
     void RmlSettings::presenttheme(settings::Theme theme, bool available)
@@ -4683,6 +4737,152 @@ namespace cowui
             ? "Theme applied and saved"
             : "Theme change was not accepted";
         model.DirtyVariable("theme_status");
+    }
+
+    void RmlSettings::presentinterfaceappearance(
+        const settings::InterfaceAppearance &state, bool available)
+    {
+        if(interface_appearance_available != available)
+        {
+            interface_appearance_available = available;
+            model.DirtyVariable("interface_appearance_available");
+        }
+        if(!available)
+            return;
+
+#define PRESENT_INTERFACE_VALUE(member, source) \
+        if(member != source) \
+        { \
+            member = source; \
+            model.DirtyVariable(#member); \
+        }
+        PRESENT_INTERFACE_VALUE(interface_scale, state.ui_scale);
+        PRESENT_INTERFACE_VALUE(
+            interface_scale_minimum, state.ui_scale_minimum);
+        PRESENT_INTERFACE_VALUE(
+            interface_scale_maximum, state.ui_scale_maximum);
+        PRESENT_INTERFACE_VALUE(interface_text_scale, state.text_scale);
+        PRESENT_INTERFACE_VALUE(
+            interface_text_scale_minimum, state.text_scale_minimum);
+        PRESENT_INTERFACE_VALUE(
+            interface_text_scale_maximum, state.text_scale_maximum);
+#undef PRESENT_INTERFACE_VALUE
+    }
+
+    void RmlSettings::selectuiscale(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !interface_appearance_available)
+            return;
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+            return;
+        const int requested = arguments[0].Get<int>(interface_scale);
+        if(requested == interface_scale)
+            return;
+
+        settings::InterfaceAppearance state = {};
+        const bool accepted = settings::writeuiscale(requested, state);
+        const bool available = accepted ||
+            settings::readinterfaceappearance(state);
+        presentinterfaceappearance(state, available);
+        interface_appearance_status = accepted
+            ? "Interface scale applied and saved"
+            : "Interface scale was not accepted";
+        model.DirtyVariable("interface_appearance_status");
+    }
+
+    void RmlSettings::selectuitextscale(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !interface_appearance_available)
+            return;
+        Rml::Element *element = event.GetCurrentElement();
+        if(!element || !element->GetParentNode())
+            return;
+        const int requested = arguments[0].Get<int>(interface_text_scale);
+        if(requested == interface_text_scale)
+            return;
+
+        settings::InterfaceAppearance state = {};
+        const bool accepted = settings::writeuitextscale(requested, state);
+        const bool available = accepted ||
+            settings::readinterfaceappearance(state);
+        presentinterfaceappearance(state, available);
+        interface_appearance_status = accepted
+            ? "Text size applied and saved"
+            : "Text size was not accepted";
+        model.DirtyVariable("interface_appearance_status");
+    }
+
+    void RmlSettings::resetinterfaceappearance(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(!arguments.empty() || !interface_appearance_available)
+            return;
+        settings::InterfaceAppearance state = {};
+        const bool accepted = settings::resetinterfaceappearance(state);
+        const bool available = accepted ||
+            settings::readinterfaceappearance(state);
+        presentinterfaceappearance(state, available);
+        interface_appearance_status = accepted
+            ? "Default interface size restored"
+            : "Interface defaults could not be restored";
+        model.DirtyVariable("interface_appearance_status");
+    }
+
+    void RmlSettings::selectinterfacepreset(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1 || !interface_appearance_available)
+            return;
+
+        const int preset = arguments[0].Get<int>(-1);
+        int requested_interface = 100;
+        int requested_text = 100;
+        const char *label = "Default";
+        switch(preset)
+        {
+            case 0:
+                requested_interface = 90;
+                requested_text = 90;
+                label = "Compact";
+                break;
+            case 1:
+                break;
+            case 2:
+                requested_text = 115;
+                label = "Readable";
+                break;
+            case 3:
+                requested_interface = 110;
+                requested_text = 125;
+                label = "Large";
+                break;
+            default:
+                return;
+        }
+
+        settings::InterfaceAppearance state = {};
+        const bool interface_accepted =
+            settings::writeuiscale(requested_interface, state);
+        const bool text_accepted =
+            settings::writeuitextscale(requested_text, state);
+        const bool available = (interface_accepted && text_accepted) ||
+            settings::readinterfaceappearance(state);
+        presentinterfaceappearance(state, available);
+        interface_appearance_status = interface_accepted && text_accepted
+            ? Rml::CreateString("%s preset applied and saved", label)
+            : "Interface preset could not be fully applied";
+        model.DirtyVariable("interface_appearance_status");
     }
 
     void RmlSettings::selectautoexecprofile(

@@ -64,7 +64,7 @@ int main()
             ranges_have_model_values = false;
     }
 
-    check(bound_ranges == 34, "audit all 34 Settings range controls");
+    check(bound_ranges == 36, "audit all 36 Settings range controls");
     check(ranges_have_no_literal_defaults,
         "bound ranges have no competing HTML value defaults");
     check(ranges_have_model_values,
@@ -137,6 +137,52 @@ int main()
               std::string::npos &&
           commands.find("writecfg();") != std::string::npos,
         "theme selection applies live and persists through uitheme");
+    check(rml.find("select_interface_scale(ev.value)") != std::string::npos &&
+          rml.find("select_interface_text_scale(ev.value)") !=
+              std::string::npos &&
+          rml.find("reset_interface_appearance()") != std::string::npos &&
+          rml.find("select_interface_preset(0)") != std::string::npos &&
+          rml.find("select_interface_preset(3)") != std::string::npos &&
+          implementation.find("settings::writeuiscale") !=
+              std::string::npos &&
+          implementation.find("settings::writeuitextscale") !=
+              std::string::npos,
+        "Interface exposes presets plus live overall and rem typography scaling");
+    check(commands.find("VARFP(uiscale, 75, 100, 150") !=
+              std::string::npos &&
+          commands.find("VARFP(uitextscale, 75, 100, 150") !=
+              std::string::npos &&
+          commands.find("f->printf(\"uiscale %d") != std::string::npos &&
+          commands.find("f->printf(\"uitextscale %d") != std::string::npos &&
+          bridge.find("savepersistentstate()") != std::string::npos,
+        "Interface appearance has bounded Cowbraten-only persistence");
+    const std::string settings_style = readfile(
+        "../data/cowbraten/ui/default/styles/settings.rcss");
+    const std::size_t preset_style = settings_style.find(
+        ".settings-appearance-preset\n{");
+    check(preset_style != std::string::npos &&
+          settings_style.find("display: flex;", preset_style) !=
+              std::string::npos &&
+          settings_style.find("flex-direction: column;", preset_style) !=
+              std::string::npos &&
+          settings_style.find("justify-content: center;", preset_style) !=
+              std::string::npos &&
+          settings_style.find("text-align: center;", preset_style) !=
+              std::string::npos,
+        "Interface preset name and value form a centered vertical group");
+    check(settings_style.find(
+              ".ui-text-large .settings-appearance-presets") !=
+              std::string::npos &&
+          settings_style.find(
+              ".ui-text-large .settings-appearance-controls") !=
+              std::string::npos &&
+          settings_style.find(
+              ".ui-text-large .settings-appearance-actions") !=
+              std::string::npos &&
+          settings_style.find("min-height: 136dp;") !=
+              std::string::npos &&
+          settings_style.find("flex: none;") != std::string::npos,
+        "large typography reflows appearance controls without collisions");
     check(world.find("cowui::close();") != std::string::npos &&
           world.find("cleargui();") != std::string::npos,
         "loading a map closes native and legacy menus");

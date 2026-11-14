@@ -43,8 +43,21 @@ int main()
     check(ui.find("responsiveuiscale") != std::string::npos &&
           ui.find("float(window_width) / 1920.0f") != std::string::npos &&
           ui.find("float(window_height) / 1080.0f") != std::string::npos &&
-          ui.find("pixel_density * responsiveuiscale") != std::string::npos,
-        "all screens scale from a 1080p desktop viewport without duplicating HiDPI");
+          ui.find("responsiveuiscale(window_width, window_height)") !=
+              std::string::npos &&
+          ui.find("float(uiscale) / 100.0f") != std::string::npos &&
+          ui.find("(viewport_scale - 1.0f) * 0.25f") !=
+              std::string::npos &&
+          ui.find("1.125f + (viewport_scale - 1.5f) * 0.75f") !=
+              std::string::npos,
+        "desktop scaling keeps QHD subtle and reserves stronger growth for 4K");
+    check(ui.find("applyinterfacepreferences") != std::string::npos &&
+          ui.find("16.0f * float(uitextscale) / 100.0f") !=
+              std::string::npos &&
+          ui.find("SetClass(\"ui-text-large\", uitextscale >= 115)") !=
+              std::string::npos &&
+          ui.find("context->GetNumDocuments()") != std::string::npos,
+        "live text scaling updates rem and exposes a large-type layout breakpoint");
     check(!icons.empty() && !atlas_1x.empty() && !atlas_2x.empty(),
         "load shared icon stylesheet and both sprite atlases");
     check(shell.find("href=\"../icons/icons.rcss\"") != std::string::npos &&

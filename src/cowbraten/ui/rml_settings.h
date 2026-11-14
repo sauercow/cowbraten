@@ -21,6 +21,7 @@ namespace cowui
     {
         enum class PresentationMode;
         enum class Theme;
+        struct InterfaceAppearance;
         struct Gamma;
         struct Audio;
         struct CrosshairChoice;
@@ -203,6 +204,16 @@ namespace cowui
         void presenttheme(settings::Theme theme, bool available);
         void selecttheme(Rml::DataModelHandle, Rml::Event &event,
             const Rml::VariantList &arguments);
+        void presentinterfaceappearance(
+            const settings::InterfaceAppearance &state, bool available);
+        void selectuiscale(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectuitextscale(Rml::DataModelHandle, Rml::Event &event,
+            const Rml::VariantList &arguments);
+        void selectinterfacepreset(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        void resetinterfaceappearance(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
         bool refreshtrailcolors();
         void presenttrailcolors(const settings::TrailColors &state,
             bool available);
@@ -1209,6 +1220,14 @@ namespace cowui
         bool theme_default = true;
         bool theme_modern_metallic = false;
         Rml::String theme_status;
+        bool interface_appearance_available = false;
+        int interface_scale = 100;
+        int interface_scale_minimum = 75;
+        int interface_scale_maximum = 150;
+        int interface_text_scale = 100;
+        int interface_text_scale_minimum = 75;
+        int interface_text_scale_maximum = 150;
+        Rml::String interface_appearance_status;
         bool console_available = false;
         bool console_top_important = true;
         bool console_top_warnings = true;
