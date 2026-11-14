@@ -105,6 +105,10 @@ int main()
     check(style.find("min-height: 37dp") != std::string::npos &&
           style.find("max-height: 90%") != std::string::npos,
         "dense rows and taller panel keep more players visible at once");
+    check(style.find("@media (min-width: 2000dp)") != std::string::npos &&
+          style.find("max-width: 2000dp") != std::string::npos &&
+          style.find("font-size: 14dp") != std::string::npos,
+        "QHD and larger viewports scale the scoreboard and its content together");
     check(rml.find("scoreboard-teams") != std::string::npos &&
           rml.find("player : evil_rows") != std::string::npos &&
           rml.find("player : good_rows") != std::string::npos &&

@@ -609,3 +609,208 @@ body
         line-height: 21dp;
     }
 }
+
+/*
+ * The base layout is intentionally compact for 1080p and smaller viewports.
+ * At QHD and above, let the scoreboard use the available canvas and increase
+ * its reading size as a unit instead of only stretching empty columns.
+ */
+@media (min-width: 2000dp)
+{
+    .scoreboard-panel
+    {
+        width: 90%;
+        max-width: 2000dp;
+        max-height: 92%;
+    }
+
+    .scoreboard-header
+    {
+        min-height: 106dp;
+        padding: 16dp 30dp 24dp 30dp;
+    }
+
+    .scoreboard-kicker
+    {
+        font-size: 10dp;
+        line-height: 14dp;
+    }
+
+    .scoreboard-server
+    {
+        font-size: 26dp;
+        line-height: 30dp;
+    }
+
+    .scoreboard-match
+    {
+        font-size: 11dp;
+        line-height: 15dp;
+    }
+
+    .scoreboard-time
+    {
+        gap: 11dp;
+    }
+
+    .scoreboard-time span
+    {
+        width: 22dp;
+        height: 22dp;
+    }
+
+    .scoreboard-time strong
+    {
+        font-size: 26dp;
+    }
+
+    .scoreboard-header-rule
+    {
+        right: 30dp;
+        bottom: 12dp;
+        left: 30dp;
+    }
+
+    .scoreboard-columns
+    {
+        min-height: 42dp;
+        padding: 0 22dp;
+        font-size: 11dp;
+    }
+
+    .scoreboard-group
+    {
+        min-height: 34dp;
+        padding: 11dp 27dp 0 27dp;
+        font-size: 12dp;
+    }
+
+    .scoreboard-player
+    {
+        min-height: 46dp;
+        margin: 0 15dp 5dp 15dp;
+        padding: 0 13dp;
+    }
+
+    .score-name
+    {
+        width: 300dp;
+        min-width: 300dp;
+        gap: 9dp;
+    }
+
+    .score-name strong,
+    .score-stat
+    {
+        font-size: 14dp;
+    }
+
+    .score-name small
+    {
+        font-size: 10dp;
+    }
+
+    .score-player-icon
+    {
+        width: 36dp;
+        height: 36dp;
+    }
+
+    .score-stat
+    {
+        width: 90dp;
+        min-width: 90dp;
+        padding-right: 15dp;
+    }
+
+    .scoreboard-columns .score-stat
+    {
+        font-size: 11dp;
+    }
+
+    .score-cn
+    {
+        width: 75dp;
+        min-width: 75dp;
+    }
+
+    .score-frags
+    {
+        width: 110dp;
+        min-width: 110dp;
+    }
+
+    .score-deaths
+    {
+        width: 120dp;
+        min-width: 120dp;
+    }
+
+    .scoreboard-teams
+    {
+        padding: 0 10dp 10dp 10dp;
+        gap: 10dp;
+    }
+
+    .scoreboard-team .score-name
+    {
+        width: 165dp;
+        min-width: 165dp;
+        gap: 6dp;
+    }
+
+    .scoreboard-team .score-stat,
+    .scoreboard-team .score-frags,
+    .scoreboard-team .score-deaths
+    {
+        width: 60dp;
+        min-width: 60dp;
+    }
+
+    .scoreboard-team .score-cn
+    {
+        width: 48dp;
+        min-width: 48dp;
+    }
+
+    .scoreboard-spectators
+    {
+        padding: 0 10dp 10dp 10dp;
+    }
+
+    .scoreboard-spectators .scoreboard-group
+    {
+        min-height: 30dp;
+        padding: 8dp 15dp 0 15dp;
+    }
+
+    .scoreboard-spectator
+    {
+        min-height: 38dp;
+        padding: 0 11dp;
+        gap: 9dp;
+    }
+
+    .scoreboard-spectator strong
+    {
+        font-size: 13dp;
+    }
+
+    .scoreboard-spectator small
+    {
+        font-size: 11dp;
+    }
+
+    .scoreboard-footer
+    {
+        min-height: 48dp;
+        padding: 0 25dp;
+        font-size: 11dp;
+    }
+
+    .scoreboard-footer-hint b
+    {
+        padding: 4dp 8dp;
+        font-size: 11dp;
+    }
+}
