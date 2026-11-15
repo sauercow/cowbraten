@@ -10,6 +10,7 @@
 
 extern void cleargamma();
 extern int bilinear, trilinear, aniso;
+extern int maxfps, vsync;
 extern bool hasext(const char *extension);
 
 namespace
@@ -48,6 +49,115 @@ namespace
     constexpr int PERFORMANCE_GPU_QUERY_COUNT = 64;
     PerformanceGpuQueries performance_gpu_queries[PERFORMANCE_GPU_QUERY_COUNT];
     int performance_gpu_query_slot = 0;
+
+    double performanceelapsed(Uint64 begin, Uint64 end);
+
+    struct SessionTelemetry
+    {
+        stream *output = NULL;
+        Uint64 started = 0, bucket_started = 0, previous_frame = 0;
+        unsigned int interval_ms = 1000, frames = 0, intervals = 0;
+        unsigned int over_16_ms = 0, over_33_ms = 0;
+        double interval_sum_us = 0.0, interval_min_us = 0.0,
+            interval_max_us = 0.0;
+        double cpu_sum_us = 0.0, cpu_max_us = 0.0;
+
+        bool active() const { return output != NULL; }
+
+        void resetbucket(Uint64 now)
+        {
+            bucket_started = now;
+            frames = intervals = over_16_ms = over_33_ms = 0;
+            interval_sum_us = interval_min_us = interval_max_us = 0.0;
+            cpu_sum_us = cpu_max_us = 0.0;
+        }
+
+        void stop()
+        {
+            if(!output) return;
+            output->flush();
+            delete output;
+            output = NULL;
+            logoutf("stopped session telemetry");
+        }
+
+        void start(const char *filename, int requested_interval_ms)
+        {
+            stop();
+            const char *path = filename && filename[0]
+                ? filename : "session_engine.csv";
+            output = openfile(path, "wb");
+            if(!output)
+            {
+                conoutf(CON_ERROR, "could not write session telemetry %s", path);
+                return;
+            }
+            interval_ms = clamp(requested_interval_ms, 250, 60000);
+            started = SDL_GetPerformanceCounter();
+            previous_frame = 0;
+            resetbucket(started);
+            output->putline(
+                "elapsed_s,sample_s,frames,fps,frame_ms_avg,frame_ms_min,"
+                "frame_ms_max,cpu_frame_ms_avg,cpu_frame_ms_max,"
+                "frames_over_16ms,frames_over_33ms,bilinear,trilinear,aniso,"
+                "drawable_width,drawable_height,maxfps,vsync,mainmenu");
+            output->flush();
+            conoutf("session telemetry writing to %s every %u ms",
+                path, interval_ms);
+        }
+
+        void sample(Uint64 frame_begin, Uint64 frame_end)
+        {
+            // The command can be entered from the console after this frame
+            // has already begun, in which case there is no valid start time.
+            if(!frame_begin)
+            {
+                previous_frame = 0;
+                resetbucket(frame_end);
+                return;
+            }
+            const double cpu_us = performanceelapsed(frame_begin, frame_end);
+            cpu_sum_us += cpu_us;
+            cpu_max_us = max(cpu_max_us, cpu_us);
+            ++frames;
+
+            if(previous_frame)
+            {
+                const double interval_us = performanceelapsed(
+                    previous_frame, frame_begin);
+                interval_sum_us += interval_us;
+                ++intervals;
+                if(!interval_min_us || interval_us < interval_min_us)
+                    interval_min_us = interval_us;
+                interval_max_us = max(interval_max_us, interval_us);
+                if(interval_us > 16666.667) ++over_16_ms;
+                if(interval_us > 33333.333) ++over_33_ms;
+            }
+            previous_frame = frame_begin;
+
+            const double sample_us = performanceelapsed(bucket_started,
+                frame_end);
+            if(sample_us < interval_ms * 1000.0) return;
+
+            const double elapsed_us = performanceelapsed(started, frame_end);
+            const double fps = sample_us > 0.0
+                ? frames * 1000000.0 / sample_us : 0.0;
+            int drawable_width = 0, drawable_height = 0;
+            getdrawabledimensions(drawable_width, drawable_height);
+            output->printf(
+                "%.3f,%.3f,%u,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%u,%u,"
+                "%d,%d,%d,%d,%d,%d,%d,%d\n",
+                elapsed_us / 1000000.0, sample_us / 1000000.0, frames, fps,
+                intervals ? interval_sum_us / intervals / 1000.0 : 0.0,
+                interval_min_us / 1000.0, interval_max_us / 1000.0,
+                frames ? cpu_sum_us / frames / 1000.0 : 0.0,
+                cpu_max_us / 1000.0, over_16_ms, over_33_ms,
+                bilinear, trilinear, aniso, drawable_width, drawable_height,
+                maxfps, vsync, mainmenu ? 1 : 0);
+            output->flush();
+            resetbucket(frame_end);
+        }
+    } session_telemetry;
 
     void collectperformancegpu(PerformanceGpuQueries &queries)
     {
@@ -205,11 +315,15 @@ namespace
 ICOMMAND(perf_capture_start, "s", (char *output),
     startperformancecapture(output));
 ICOMMAND(perf_capture_stop, "", (), stopperformancecapture());
+ICOMMAND(session_capture_start, "si", (char *output, int *interval_ms),
+    session_telemetry.start(output, *interval_ms));
+ICOMMAND(session_capture_stop, "", (), session_telemetry.stop());
 VAR(ui_perf_bypass, 0, 0, 1);
 
 void cleanup()
 {
     stopperformancecapture();
+    session_telemetry.stop();
     recorder::stop();
     cowui::shutdown();
     cleanupserver();
@@ -1820,7 +1934,8 @@ int main(int argc, char **argv)
 
     for(;;)
     {
-        const Uint64 performance_frame_begin = performance_capture
+        const Uint64 performance_frame_begin =
+            (performance_capture || session_telemetry.active())
             ? SDL_GetPerformanceCounter() : 0;
         const unsigned int frame_performance_generation =
             performance_generation;
@@ -1906,8 +2021,13 @@ int main(int argc, char **argv)
                 ? SDL_GetPerformanceCounter() : 0;
 
             swapbuffers();
-            const Uint64 performance_swap_end = performance_capture
+            const Uint64 performance_swap_end =
+                (performance_capture || session_telemetry.active())
                 ? SDL_GetPerformanceCounter() : 0;
+
+            if(session_telemetry.active())
+                session_telemetry.sample(performance_frame_begin,
+                    performance_swap_end);
 
             if(performance_capture &&
                frame_performance_generation == performance_generation)
