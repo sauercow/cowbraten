@@ -40,7 +40,7 @@
 
                 <button class="button button-secondary servers-refresh"
                     onclick="servers.refresh">
-                    <span class="cb-ico cb-ico-refresh cb-ico--sm"></span>Refresh List
+                    <span class="cb-ico cb-ico-refresh cb-ico--sm"></span>Refresh
                 </button>
             </div>
 

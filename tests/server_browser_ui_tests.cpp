@@ -41,6 +41,10 @@ int main()
               std::string::npos,
         "server rows expose a stateful favorite star");
 
+    check(screen.find(">Refresh\n") != std::string::npos &&
+          screen.find("Refresh List") == std::string::npos,
+        "refresh label stays on one centered line");
+
     check(browser.find("RegisterMember(\"favorite\"") !=
               std::string::npos &&
           browser.find("BindEventCallback(\n                \"toggle_favorite\"") !=
