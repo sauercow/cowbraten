@@ -2,6 +2,26 @@
 #include "weaponstats.h"
 
 
+// C++ bridge implemented in cowbraten/ui/ui.cpp. No RmlUi header in fpsgame.
+namespace cowui
+{
+    bool matchhudactive();
+    void submitmatchhud(bool enabled_score, bool enabled_clock,
+                        bool score_available, bool clock_available,
+                        int left, int right, const char *time);
+}
+
+// RmlUi bridge, implemented in cowbraten/ui/ui.cpp. No RmlUi dependency here.
+namespace cowui
+{
+    bool fragfeedbackactive();
+    void setfragfeedbackallowed(bool value);
+    void submitfragfeedback(const char *attacker, const char *target,
+                            const char *weapon, int combo,
+                            int when, int duration, bool fade);
+    void submitfragmilestone(int value, int when, int duration, bool fade);
+}
+
 namespace game
 {
     bool intermission = false;
@@ -533,6 +553,7 @@ namespace game
     extern int hudfragmessagefade;
 
     FVARP(streakmilestonescale, 1.0f, 1.25f, 2.0f);
+    VARP(modernfragfeedback, 0, 1, 1);
 
     static bool killstreakmilestone(int streak)
     {
@@ -739,6 +760,35 @@ namespace game
         else
         {
             addfragmessage(contype, aname, dname, d->lasthitpushgun);
+        }
+        // Presentation-only event; streak computation above is unchanged.
+        // One visible compact card replaces the queue only while RmlUi is alive.
+        if(modernfragfeedback && cowui::fragfeedbackactive() &&
+           (hudfragmessages == 1 || (hudfragmessages == 2 && !m_insta)))
+        {
+            const int feedback_duration = int(hudfragmessageduration * 1000.0f);
+            const bool feedback_fade = hudfragmessagefade != 0;
+            if(streakfrag >= 2 && killstreakmilestone(streakfrag))
+                cowui::submitfragmilestone(streakfrag, lastmillis,
+                                           feedback_duration, feedback_fade);
+            else
+            {
+                // A milestone masks ordinary kill messages during its lifetime.
+                const bool milestone_active = streakmilestonevalue &&
+                    streakmilestonemillis &&
+                    lastmillis - streakmilestonemillis <=
+                        feedback_duration + (feedback_fade ? 255 : 0);
+                if(!milestone_active || streakfrag >= 2)
+                {
+                    const char *source = d == actor ? "SUICIDE" :
+                        (actor == player1 ? "YOU" : actor->name);
+                    const char *target = d == player1 ? "YOU" : d->name;
+                    const char *weapon = d == actor ? "SELF" :
+                        (m_insta ? "RIFLE" : "FRAG");
+                    cowui::submitfragfeedback(source, target, weapon,
+                        streakfrag, lastmillis, feedback_duration, feedback_fade);
+                }
+            }
         }
         deathstate(d);
 		ai::killed(d, actor);
@@ -1532,6 +1582,10 @@ namespace game
 
     void gameplayhud(int w, int h)
     {
+        cowui::setfragfeedbackallowed(modernfragfeedback && !m_edit && !m_sp &&
+            (hudfragmessages == 1 || (hudfragmessages == 2 && !m_insta)));
+        if(cowui::matchhudactive() && (m_edit || m_sp))
+            cowui::submitmatchhud(false, false, false, false, 0, 0, nullptr);
         pushhudmatrix();
         hudmatrix.scale(h/1800.0f, h/1800.0f, 1);
         flushhudmatrix();
@@ -1554,14 +1608,57 @@ namespace game
 
                 if(!m_edit && !m_sp)
         {
-            if(gameclock) drawgameclock(w, h);
-            if(hudscore) drawhudscore(w, h);
+            if(cowui::matchhudactive())
+            {
+                int left_score = 0, right_score = 0;
+                bool score_available = false;
+                if(hudscore)
+                {
+                    const int numgroups = groupplayers();
+                    if(m_teammode)
+                    {
+                        int found = 0;
+                        loopi(numgroups)
+                        {
+                            const scoregroup &sg = *groups[i];
+                            if(!sg.team || !sg.players.length()) continue;
+                            if(!strcmp(sg.team, "good")) { left_score = sg.score; found |= 1; }
+                            else if(!strcmp(sg.team, "evil")) { right_score = sg.score; found |= 2; }
+                        }
+                        // Only display a 2-sided result when BOTH teams exist.
+                        score_available = found == 3;
+                    }
+                    else if(numgroups && groups[0]->players.length() >= 2)
+                    {
+                        left_score = groups[0]->players[0]->frags;
+                        right_score = groups[0]->players[1]->frags;
+                        score_available = true;
+                    }
+                }
+                const bool clock_available = maplimit >= 0;
+                const int match_seconds = clock_available
+                    ? max(maplimit - lastmillis + 999, 0) / 1000 : 0;
+                defformatstring(match_clock_text, "%d:%02d",
+                    match_seconds / 60, match_seconds % 60);
+                cowui::submitmatchhud(hudscore != 0, gameclock != 0,
+                    score_available, clock_available, left_score, right_score,
+                    match_clock_text);
+            }
+            else
+            {
+                if(gameclock) drawgameclock(w, h);
+                if(hudscore) drawhudscore(w, h);
+            }
 
             if(hudfragmessages==1 || (hudfragmessages==2 && !m_insta))
             {
-                // A milestone temporarily takes the place of regular frag messages.
-                if(!drawstreakmilestone(w, h))
-                    drawfragmessages(w, h);
+                // Native RmlUi notification takes over only after successful init.
+                if(!modernfragfeedback || !cowui::fragfeedbackactive())
+                {
+                    // Legacy fallback keeps every old setting and queue intact.
+                    if(!drawstreakmilestone(w, h))
+                        drawfragmessages(w, h);
+                }
             }
         }
         drawdemorecording(w, h);

@@ -129,7 +129,8 @@ UI_OBJS= \
 	cowbraten/ui/sauer_scoreboard_bridge.o \
 	cowbraten/ui/sauer_settings_bridge.o \
 	cowbraten/ui/sauer_keybindings_bridge.o \
-	cowbraten/ui/ui_commands.o
+	cowbraten/ui/ui_commands.o \
+	cowbraten/ui/sauer_music_bridge.o
 
 CLIENT_OBJS= \
 	$(UI_OBJS) \

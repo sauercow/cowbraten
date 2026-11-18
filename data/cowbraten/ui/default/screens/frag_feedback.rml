@@ -1,0 +1,25 @@
+<rml>
+<head>
+    <title>Frag feedback</title>
+    <link type="text/rcss" href="../styles/frag_feedback.rcss" />
+</head>
+<body data-model="cow_frag_feedback">
+    <div id="cow-frag-root" class="cow-frag-root">
+        <!-- One current notification. No reserve space in the crosshair zone. -->
+        <div class="cow-frag-line" data-if="show_frag">
+            <span id="cow-frag-source" class="cow-frag-source" data-if="!show_combo"></span>
+            <span id="cow-frag-combo" class="cow-frag-combo" data-if="show_combo"></span>
+            <span class="cow-frag-weapon">
+                <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
+                <span id="cow-frag-weapon-text"></span>
+            </span>
+            <span id="cow-frag-target" class="cow-frag-target"></span>
+        </div>
+        <div class="cow-frag-milestone" data-if="show_milestone">
+            <span class="cow-frag-laurel">&#9733;</span>
+            <strong id="cow-frag-milestone-text"></strong>
+            <span class="cow-frag-laurel">&#9733;</span>
+        </div>
+    </div>
+</body>
+</rml>

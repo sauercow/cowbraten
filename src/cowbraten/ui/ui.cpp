@@ -6,6 +6,8 @@
 #include "rml_file.h"
 #include "rml_server_browser.h"
 #include "rml_scoreboard.h"
+#include "rml_frag_feedback.h"
+#include "rml_match_score_hud.h"
 #include "rml_demo_manager.h"
 #include "rml_demo_player.h"
 #include "rml_editor.h"
@@ -17,6 +19,7 @@
 #include "rml_utilities.h"
 #include "sauer_demo_bridge.h"
 #include "sauer_input_bridge.h"
+#include "sauer_music_bridge.h"
 
 #include <RmlUi/Core.h>
 #include <RmlUi/Core/Context.h>
@@ -40,6 +43,7 @@ extern char *uitheme;
 extern int uiscale;
 extern int uitextscale;
 extern char *uifont;
+extern int lastmillis;
 
 namespace cowui
 {
@@ -50,6 +54,12 @@ namespace cowui
     static RmlConsole console_model;
     static RmlServerBrowser server_browser;
     static RmlScoreboard scoreboard_model;
+    static RmlFragFeedback frag_feedback_model;
+    static bool frag_feedback_attempted = false;
+    static bool frag_feedback_ready = false;
+    static bool frag_feedback_allowed = false;
+    static RmlMatchScoreHud match_score_hud_model;
+    static bool match_score_hud_ready = false;
     static RmlDemoManager demo_manager;
     static RmlDemoPlayer demo_player;
     static RmlGameMenu game_menu_model;
@@ -864,6 +874,7 @@ namespace cowui
            !console_model.init(context) ||
            !server_browser.init(context, action_router) ||
            !scoreboard_model.init(context, action_router) ||
+           !(match_score_hud_ready = match_score_hud_model.init(context)) ||
            !demo_manager.init(context, action_router) ||
            !demo_player.init(context, action_router) ||
            !game_menu_model.init(context, action_router) ||
@@ -883,6 +894,12 @@ namespace cowui
             game_menu_model.shutdown(context);
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
+            match_score_hud_model.shutdown(context);
+            match_score_hud_ready = false;
+            frag_feedback_model.shutdown(context);
+            frag_feedback_ready = false;
+            frag_feedback_attempted = false;
+            frag_feedback_allowed = false;
             scoreboard_model.shutdown(context);
             server_browser.shutdown(context);
             console_model.shutdown(context);
@@ -904,6 +921,7 @@ namespace cowui
 
     void shutdown()
     {
+        sauermusic::sync(false);
         settings_model.cancelkeycapture();
         captured_keys.fill(false);
         captured_buttons.fill(false);
@@ -926,6 +944,12 @@ namespace cowui
             game_menu_model.shutdown(context);
             demo_player.shutdown(context);
             demo_manager.shutdown(context);
+            match_score_hud_model.shutdown(context);
+            match_score_hud_ready = false;
+            frag_feedback_model.shutdown(context);
+            frag_feedback_ready = false;
+            frag_feedback_attempted = false;
+            frag_feedback_allowed = false;
             scoreboard_model.shutdown(context);
             server_browser.shutdown(context);
             console_model.shutdown(context);
@@ -1323,6 +1347,8 @@ namespace cowui
         if(!initialized || !context)
             return;
 
+	sauermusic::sync(active_screen != nullptr);
+
         const Uint64 model_begin = profiling_enabled
             ? SDL_GetPerformanceCounter() : 0;
 
@@ -1330,6 +1356,17 @@ namespace cowui
             syncconsoleownership();
 
         scoreboard_model.update(active_screen != nullptr);
+        // Optional modern feedback. Failure keeps the original HUD renderer.
+        if(!frag_feedback_attempted)
+        {
+            frag_feedback_attempted = true;
+            frag_feedback_ready = frag_feedback_model.init(context);
+        }
+        if(frag_feedback_ready)
+            frag_feedback_model.update(lastmillis,
+                frag_feedback_allowed && active_screen == nullptr &&
+                !scoreboard_model.visible());
+        if(active_screen && match_score_hud_ready) match_score_hud_model.update(MatchHudInput());
         demo_player.update(active_screen != nullptr);
         chat_model.update(
             active_screen != nullptr,
@@ -1844,6 +1881,7 @@ namespace cowui
 
         hidedocument(*active_screen);
         active_screen = nullptr;
+	sauermusic::sync(false);
         full_menu_from_game = false;
         legacy_console_input = false;
         legacy_console_presentation = false;
@@ -1865,6 +1903,44 @@ namespace cowui
     {
         return initialized && demo_player.visible() &&
             demo_player.receivesinput();
+    }
+
+    // Called from fpsgame::gameplayhud while keeping the existing toggle vars.
+    bool matchhudactive() { return match_score_hud_ready; }
+
+    void submitmatchhud(bool enabled_score, bool enabled_clock, bool score_available,
+                        bool clock_available, int left, int right, const char *time)
+    {
+        if(!match_score_hud_ready) return;
+        MatchHudInput input;
+        input.score_enabled = enabled_score;
+        input.clock_enabled = enabled_clock;
+        input.score_available = score_available;
+        input.clock_available = clock_available;
+        input.left_score = left;
+        input.right_score = right;
+        input.clock_text = time ? time : "";
+        match_score_hud_model.update(input);
+    }
+
+    // Called from the game HUD. The original frag queue stays intact as fallback.
+    bool fragfeedbackactive() { return frag_feedback_ready; }
+
+    void setfragfeedbackallowed(bool value) { frag_feedback_allowed = value; }
+
+    void submitfragfeedback(const char *attacker, const char *target,
+                            const char *weapon, int combo,
+                            int when, int duration, bool fade)
+    {
+        if(frag_feedback_ready)
+            frag_feedback_model.submitfrag(attacker, target, weapon,
+                                          combo, when, duration, fade);
+    }
+
+    void submitfragmilestone(int value, int when, int duration, bool fade)
+    {
+        if(frag_feedback_ready)
+            frag_feedback_model.submitmilestone(value, when, duration, fade);
     }
 
     bool setscoreboardvisible(bool value)

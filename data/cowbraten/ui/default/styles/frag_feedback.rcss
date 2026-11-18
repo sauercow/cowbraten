@@ -1,0 +1,92 @@
+/* Cowbraten 1.1.0 - compact P1x-style frag/combo feedback.
+   Independent of gameclock/hudscore. Positioned below the score strip,
+   away from the upper-left console and lower-left chat. */
+body {
+    font-family: Lato;
+    font-size: 18px;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    pointer-events: none;
+}
+.cow-frag-root {
+    position: absolute;
+    top: 21%;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    pointer-events: none;
+}
+.cow-frag-line, .cow-frag-milestone {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    min-width: 230px;
+    max-width: 720px;
+    padding: 0 9px;
+    background-color: #101A28E8;
+    color: #E9F3FF;
+    border: 1px solid #2779A6;
+    border-radius: 8px;
+}
+.cow-frag-source, .cow-frag-target, .cow-frag-combo {
+    padding: 0 13px;
+    font-size: 20px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.cow-frag-source {
+    color: #86DAFF;
+    border-left: 3px solid #17B7F8;
+}
+.cow-frag-combo {
+    color: #FFCC62;
+    background-color: #3C2B17F5;
+    border-left: 3px solid #F6A62A;
+    font-size: 23px;
+}
+.cow-frag-weapon {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    height: 100%;
+    border-left: 1px solid #45637E;
+    border-right: 1px solid #45637E;
+    color: #CDDFEF;
+    font-size: 13px;
+}
+.cow-frag-weapon i {
+    margin-right: 7px;
+    color: #EAF5FF;
+}
+.cow-frag-target {
+    color: #FFFFFF;
+    border-right: 3px solid #309CE4;
+}
+.cow-frag-milestone {
+    min-width: 265px;
+    border-color: #F5A623;
+    background-color: #302414EF;
+    color: #FFD16B;
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+.cow-frag-laurel {
+    padding: 0 13px;
+    color: #FFC04F;
+    font-size: 20px;
+}
+@media (max-width: 1000px) {
+    .cow-frag-line, .cow-frag-milestone { height: 35px; }
+    .cow-frag-source, .cow-frag-target, .cow-frag-combo { font-size: 16px; padding: 0 8px; }
+    .cow-frag-weapon { font-size: 11px; padding: 0 7px; }
+    .cow-frag-milestone { font-size: 18px; }
+}

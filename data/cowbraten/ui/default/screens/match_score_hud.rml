@@ -1,0 +1,23 @@
+<rml>
+<head>
+    <title>Cowbraten match score HUD</title>
+    <link type="text/rcss" href="../styles/match_score_hud.rcss" />
+</head>
+<body data-model="cow_match_hud">
+    <!-- Always centered as a GROUP. No column occupies space when hidden.
+         Keep the horizontal console at upper left and the chat at lower left. -->
+    <div class="cow-match-hud-top" data-if="hud_visible">
+        <div class="cow-match-hud-strip">
+            <div class="cow-match-chip cow-match-chip-blue" data-if="show_score">
+                <span class="cow-match-value">{{ left_score }}</span>
+            </div>
+            <div class="cow-match-chip cow-match-chip-clock" data-if="show_clock">
+                <span class="cow-match-clock-value">{{ clock_text }}</span>
+            </div>
+            <div class="cow-match-chip cow-match-chip-red" data-if="show_score">
+                <span class="cow-match-value">{{ right_score }}</span>
+            </div>
+        </div>
+    </div>
+</body>
+</rml>
