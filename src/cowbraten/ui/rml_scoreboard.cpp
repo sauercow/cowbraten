@@ -190,8 +190,7 @@ namespace cowui
             [](const scoreboard::Player &player)
             {
                 return !player.spectator &&
-                    (player.group_name == "good" || player.team == "good" ||
-                     player.group_name == "evil" || player.team == "evil");
+                    (player.group_name == "good" || player.group_name == "evil");
             });
         std::vector<Row> next, next_evil, next_good, next_spectators;
         Rml::String next_evil_title = "EVIL", next_good_title = "GOOD";
@@ -208,10 +207,8 @@ namespace cowui
             row.spectator = player.spectator;
             row.dead = player.dead;
             row.privileged = player.privilege != 0;
-            row.good_team = player.group_name == "good" ||
-                player.team == "good";
-            row.evil_team = player.group_name == "evil" ||
-                player.team == "evil";
+            row.good_team = player.group_name == "good";
+            row.evil_team = player.group_name == "evil";
             row.name = plain_cube_text(player.name);
             row.role = player.privilege >= 2 ? "ADMIN" :
                 (player.privilege ? "MASTER" :
