@@ -31,3 +31,8 @@ ui-ux
 /build/
 
 src/**/*.d
+
+# Emacs backup and autosave files
+*~
+#*#
+.#*
