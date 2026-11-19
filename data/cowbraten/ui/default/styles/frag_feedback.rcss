@@ -85,7 +85,7 @@ body {
     color: #FFCC62;
     background-color: transparent;
     border: 0;
-    padding: 0 0.2em;
+    padding: 0 0.55em 0 0.2em;
     margin: 0;
     font-size: 1.08em;
 }
