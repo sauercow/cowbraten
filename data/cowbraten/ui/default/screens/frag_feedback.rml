@@ -10,8 +10,8 @@
                 <span id="cow-frag-source-0" class="cow-frag-source"></span>
                 <span id="cow-frag-combo-0" class="cow-frag-combo"></span>
                 <span class="cow-frag-weapon">
-                    <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
-                    <span id="cow-frag-weapon-0" class="cow-frag-weapon-text"></span>
+                    <img id="cow-frag-weapon-icon-0" class="cow-frag-weapon-icon"
+                         src="../images/hud/v1/unknown.png" />
                 </span>
                 <span id="cow-frag-target-0" class="cow-frag-target"></span>
             </div>
@@ -21,8 +21,8 @@
                 <span id="cow-frag-source-1" class="cow-frag-source"></span>
                 <span id="cow-frag-combo-1" class="cow-frag-combo"></span>
                 <span class="cow-frag-weapon">
-                    <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
-                    <span id="cow-frag-weapon-1" class="cow-frag-weapon-text"></span>
+                    <img id="cow-frag-weapon-icon-1" class="cow-frag-weapon-icon"
+                         src="../images/hud/v1/unknown.png" />
                 </span>
                 <span id="cow-frag-target-1" class="cow-frag-target"></span>
             </div>
@@ -32,8 +32,8 @@
                 <span id="cow-frag-source-2" class="cow-frag-source"></span>
                 <span id="cow-frag-combo-2" class="cow-frag-combo"></span>
                 <span class="cow-frag-weapon">
-                    <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
-                    <span id="cow-frag-weapon-2" class="cow-frag-weapon-text"></span>
+                    <img id="cow-frag-weapon-icon-2" class="cow-frag-weapon-icon"
+                         src="../images/hud/v1/unknown.png" />
                 </span>
                 <span id="cow-frag-target-2" class="cow-frag-target"></span>
             </div>
@@ -43,8 +43,8 @@
                 <span id="cow-frag-source-3" class="cow-frag-source"></span>
                 <span id="cow-frag-combo-3" class="cow-frag-combo"></span>
                 <span class="cow-frag-weapon">
-                    <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
-                    <span id="cow-frag-weapon-3" class="cow-frag-weapon-text"></span>
+                    <img id="cow-frag-weapon-icon-3" class="cow-frag-weapon-icon"
+                         src="../images/hud/v1/unknown.png" />
                 </span>
                 <span id="cow-frag-target-3" class="cow-frag-target"></span>
             </div>
@@ -54,8 +54,8 @@
                 <span id="cow-frag-source-4" class="cow-frag-source"></span>
                 <span id="cow-frag-combo-4" class="cow-frag-combo"></span>
                 <span class="cow-frag-weapon">
-                    <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
-                    <span id="cow-frag-weapon-4" class="cow-frag-weapon-text"></span>
+                    <img id="cow-frag-weapon-icon-4" class="cow-frag-weapon-icon"
+                         src="../images/hud/v1/unknown.png" />
                 </span>
                 <span id="cow-frag-target-4" class="cow-frag-target"></span>
             </div>
@@ -65,8 +65,8 @@
                 <span id="cow-frag-source-5" class="cow-frag-source"></span>
                 <span id="cow-frag-combo-5" class="cow-frag-combo"></span>
                 <span class="cow-frag-weapon">
-                    <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
-                    <span id="cow-frag-weapon-5" class="cow-frag-weapon-text"></span>
+                    <img id="cow-frag-weapon-icon-5" class="cow-frag-weapon-icon"
+                         src="../images/hud/v1/unknown.png" />
                 </span>
                 <span id="cow-frag-target-5" class="cow-frag-target"></span>
             </div>
@@ -76,8 +76,8 @@
                 <span id="cow-frag-source-6" class="cow-frag-source"></span>
                 <span id="cow-frag-combo-6" class="cow-frag-combo"></span>
                 <span class="cow-frag-weapon">
-                    <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
-                    <span id="cow-frag-weapon-6" class="cow-frag-weapon-text"></span>
+                    <img id="cow-frag-weapon-icon-6" class="cow-frag-weapon-icon"
+                         src="../images/hud/v1/unknown.png" />
                 </span>
                 <span id="cow-frag-target-6" class="cow-frag-target"></span>
             </div>
@@ -87,8 +87,8 @@
                 <span id="cow-frag-source-7" class="cow-frag-source"></span>
                 <span id="cow-frag-combo-7" class="cow-frag-combo"></span>
                 <span class="cow-frag-weapon">
-                    <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
-                    <span id="cow-frag-weapon-7" class="cow-frag-weapon-text"></span>
+                    <img id="cow-frag-weapon-icon-7" class="cow-frag-weapon-icon"
+                         src="../images/hud/v1/unknown.png" />
                 </span>
                 <span id="cow-frag-target-7" class="cow-frag-target"></span>
             </div>
@@ -98,8 +98,8 @@
                 <span id="cow-frag-source-8" class="cow-frag-source"></span>
                 <span id="cow-frag-combo-8" class="cow-frag-combo"></span>
                 <span class="cow-frag-weapon">
-                    <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
-                    <span id="cow-frag-weapon-8" class="cow-frag-weapon-text"></span>
+                    <img id="cow-frag-weapon-icon-8" class="cow-frag-weapon-icon"
+                         src="../images/hud/v1/unknown.png" />
                 </span>
                 <span id="cow-frag-target-8" class="cow-frag-target"></span>
             </div>
@@ -109,17 +109,16 @@
                 <span id="cow-frag-source-9" class="cow-frag-source"></span>
                 <span id="cow-frag-combo-9" class="cow-frag-combo"></span>
                 <span class="cow-frag-weapon">
-                    <i class="cb-ico cb-ico-crosshair cb-ico--md"></i>
-                    <span id="cow-frag-weapon-9" class="cow-frag-weapon-text"></span>
+                    <img id="cow-frag-weapon-icon-9" class="cow-frag-weapon-icon"
+                         src="../images/hud/v1/unknown.png" />
                 </span>
                 <span id="cow-frag-target-9" class="cow-frag-target"></span>
             </div>
         </div>
         <div id="cow-frag-milestone" class="cow-frag-anchor">
             <div class="cow-frag-milestone">
-                <span class="cow-frag-laurel">&#9733;</span>
+                <img class="cow-frag-streak-icon" src="../images/hud/v1/streak.png" />
                 <strong id="cow-frag-milestone-text"></strong>
-                <span class="cow-frag-laurel">&#9733;</span>
             </div>
         </div>
     </div>

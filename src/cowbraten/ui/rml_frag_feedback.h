@@ -3,6 +3,7 @@
 #include <RmlUi/Core.h>
 #include "frag_feedback_logic.h"
 #include "frag_feedback_snapshot.h"
+#include "frag_feedback_weapon_icons.h"
 
 #include <array>
 #include <string>
@@ -29,10 +30,10 @@ namespace cowui
                 slot.container = document->GetElementById(Rml::CreateString("cow-frag-row-%d", i));
                 slot.source = document->GetElementById(Rml::CreateString("cow-frag-source-%d", i));
                 slot.combo = document->GetElementById(Rml::CreateString("cow-frag-combo-%d", i));
-                slot.weapon = document->GetElementById(Rml::CreateString("cow-frag-weapon-%d", i));
+                slot.weapon_icon = document->GetElementById(Rml::CreateString("cow-frag-weapon-icon-%d", i));
                 slot.target = document->GetElementById(Rml::CreateString("cow-frag-target-%d", i));
                 valid = valid && slot.container && slot.source && slot.combo &&
-                    slot.weapon && slot.target;
+                    slot.weapon_icon && slot.target;
             }
             if(!valid)
             {
@@ -122,8 +123,18 @@ namespace cowui
                 settext(slot.source, source);
                 settext(slot.combo, row.combo >= 2
                     ? Rml::CreateString("x%d", row.combo) : "");
-                settext(slot.weapon, weaponname(row.weapon,
-                    source.empty()));
+                // Preserve the exact weapon ID from the legacy frag queue.
+                // Updating img.src only when its ID changes avoids a texture
+                // lookup and a DOM layout invalidation every frame.
+                const bool suicide = source.empty();
+                if(slot.cached_weapon != row.weapon || slot.cached_suicide != suicide)
+                {
+                    slot.weapon_icon->SetAttribute("src",
+                        Rml::String("../images/hud/v1/") +
+                        fragfeedbackweaponicon(row.weapon, suicide));
+                    slot.cached_weapon = row.weapon;
+                    slot.cached_suicide = suicide;
+                }
                 settext(slot.target, target);
                 slot.source->SetProperty("display", source.empty() ? "none" : "inline");
                 slot.combo->SetProperty("display", row.combo >= 2 ? "inline" : "none");
@@ -145,20 +156,10 @@ namespace cowui
         struct Slot
         {
             Rml::Element *container = nullptr, *source = nullptr;
-            Rml::Element *combo = nullptr, *weapon = nullptr, *target = nullptr;
+            Rml::Element *combo = nullptr, *weapon_icon = nullptr, *target = nullptr;
+            int cached_weapon = -1;
+            bool cached_suicide = false;
         };
-
-        static const char *weaponname(int weapon, bool suicide)
-        {
-            if(suicide) return "SELF";
-            static const char *names[] = {
-                "FIST", "SHOTGUN", "CHAINGUN", "ROCKET", "RIFLE",
-                "GRENADE", "PISTOL", "FIREBALL", "ICEBALL", "SLIMEBALL",
-                "BITE", "BARREL"
-            };
-            return weapon >= 0 && weapon < int(sizeof(names)/sizeof(*names))
-                ? names[weapon] : "FRAG";
-        }
 
         static Rml::String plainname(const char *name)
         {
