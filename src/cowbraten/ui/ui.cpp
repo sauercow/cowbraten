@@ -1923,7 +1923,8 @@ namespace cowui
     bool matchhudactive() { return match_score_hud_ready; }
 
     void submitmatchhud(bool enabled_score, bool enabled_clock, bool score_available,
-                        bool clock_available, int left, int right, const char *time)
+                        bool clock_available, int left, int right,
+                        bool blue_on_left, const char *time)
     {
         if(!match_score_hud_ready) return;
         MatchHudInput input;
@@ -1934,7 +1935,7 @@ namespace cowui
         input.left_score = left;
         input.right_score = right;
         input.clock_text = time ? time : "";
-        match_score_hud_model.update(input);
+        match_score_hud_model.update(input, blue_on_left);
     }
 
     // Lower status dock bridge: the original OpenGL renderer remains intact.

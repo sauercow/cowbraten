@@ -46,7 +46,7 @@ body {
     padding: 0 0.55em;
     background-color: #101A28E8;
     color: #E9F3FF;
-    border: 1px solid #2779A6;
+    border: 1px #2779A6;
     border-radius: 0.44em;
     white-space: nowrap;
     pointer-events: none;
@@ -59,11 +59,11 @@ body {
 }
 .cow-frag-source {
     color: #86DAFF;
-    border-left: 0.15em solid #17B7F8;
+    border-left: 0.15em #17B7F8;
 }
 .cow-frag-target {
     color: #FFFFFF;
-    border-right: 0.15em solid #309CE4;
+    border-right: 0.15em #309CE4;
 }
 .cow-frag-source.cow-tone-enemy, .cow-frag-target.cow-tone-enemy {
     color: #FF626F;
@@ -96,8 +96,8 @@ body {
     justify-content: center;
     padding: 0 0.65em;
     height: 100%;
-    border-left: 1px solid #45637E;
-    border-right: 1px solid #45637E;
+    border-left: 1px #45637E;
+    border-right: 1px #45637E;
     color: #CDDFEF;
     font-size: 0.9em;
     white-space: nowrap;

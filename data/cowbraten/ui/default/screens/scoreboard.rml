@@ -67,8 +67,8 @@
                 </div>
 
                 <div class="scoreboard-teams" data-if="team_mode">
-                    <div class="scoreboard-team scoreboard-team-evil">
-                        <div class="scoreboard-group is-evil-team">{{ evil_title }}</div>
+                    <div class="scoreboard-team scoreboard-team-own">
+                        <div class="scoreboard-group is-own-team">{{ left_team_title }}</div>
                         <div class="scoreboard-columns scoreboard-row">
                             <span class="score-name score-column-name"><i class="cb-ico cb-ico-user cb-ico--md"></i><strong>Player</strong></span>
                             <span class="score-stat score-column" data-if="show_flags"><i class="cb-ico cb-ico-flag cb-ico--sm"></i><b>Flags</b></span>
@@ -83,8 +83,8 @@
                             <span class="score-stat score-column" data-if="show_pj"><i class="cb-ico cb-ico-activity cb-ico--sm"></i><b>PJ</b></span>
                             <span class="score-stat score-column score-cn" data-if="show_client_num"><i class="cb-ico cb-ico-network cb-ico--sm"></i><b>CN</b></span>
                         </div>
-                        <div class="scoreboard-repeat" data-for="player : evil_rows">
-                            <div class="scoreboard-row scoreboard-player is-evil-team"
+                        <div class="scoreboard-repeat" data-for="player : left_team_rows">
+                            <div class="scoreboard-row scoreboard-player is-own-team"
                                 data-class-is-local="player.local" data-class-is-dead="player.dead">
                                 <span class="score-name"><i class="score-player-icon cb-ico cb-ico-user-round cb-ico--lg"></i><i class="score-local-dot" data-if="player.local"></i><strong>{{ player.name }}</strong><small data-if="player.role != ''">{{ player.role }}</small></span>
                                 <span class="score-stat" data-if="show_flags">{{ player.flags }}</span>
@@ -102,8 +102,8 @@
                         </div>
                     </div>
 
-                    <div class="scoreboard-team scoreboard-team-good">
-                        <div class="scoreboard-group is-good-team">{{ good_title }}</div>
+                    <div class="scoreboard-team scoreboard-team-opponent">
+                        <div class="scoreboard-group is-opponent-team">{{ right_team_title }}</div>
                         <div class="scoreboard-columns scoreboard-row">
                             <span class="score-name score-column-name"><i class="cb-ico cb-ico-user cb-ico--md"></i><strong>Player</strong></span>
                             <span class="score-stat score-column" data-if="show_flags"><i class="cb-ico cb-ico-flag cb-ico--sm"></i><b>Flags</b></span>
@@ -118,8 +118,8 @@
                             <span class="score-stat score-column" data-if="show_pj"><i class="cb-ico cb-ico-activity cb-ico--sm"></i><b>PJ</b></span>
                             <span class="score-stat score-column score-cn" data-if="show_client_num"><i class="cb-ico cb-ico-network cb-ico--sm"></i><b>CN</b></span>
                         </div>
-                        <div class="scoreboard-repeat" data-for="player : good_rows">
-                            <div class="scoreboard-row scoreboard-player is-good-team"
+                        <div class="scoreboard-repeat" data-for="player : right_team_rows">
+                            <div class="scoreboard-row scoreboard-player is-opponent-team"
                                 data-class-is-local="player.local" data-class-is-dead="player.dead">
                                 <span class="score-name"><i class="score-player-icon cb-ico cb-ico-user-round cb-ico--lg"></i><i class="score-local-dot" data-if="player.local"></i><strong>{{ player.name }}</strong><small data-if="player.role != ''">{{ player.role }}</small></span>
                                 <span class="score-stat" data-if="show_flags">{{ player.flags }}</span>

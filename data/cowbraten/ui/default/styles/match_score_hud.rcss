@@ -36,7 +36,6 @@ body {
     padding: 0 13px;
     margin: 0 3px;
     border-width: 1px;
-    border-style: solid;
     border-radius: 9px;
     background-color: #131B27EC;
     color: #F7FAFF;

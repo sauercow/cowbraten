@@ -21,6 +21,7 @@ namespace cowui
                !constructor.Bind("show_clock", &show_clock) ||
                !constructor.Bind("left_score", &left_score) ||
                !constructor.Bind("right_score", &right_score) ||
+               !constructor.Bind("blue_on_left", &blue_on_left) ||
                !constructor.Bind("clock_text", &clock_text))
             {
                 ctx->RemoveDataModel("cow_match_hud");
@@ -38,7 +39,7 @@ namespace cowui
             return true;
         }
 
-        void update(const MatchHudInput &input)
+        void update(const MatchHudInput &input, bool next_blue_on_left = true)
         {
             const MatchHudView next = make_match_hud_view(input);
 #define MATCH_UPDATE(var, val) do { const auto &v = (val); \
@@ -48,6 +49,7 @@ namespace cowui
             MATCH_UPDATE(show_clock, next.show_clock);
             MATCH_UPDATE(left_score, next.left_score);
             MATCH_UPDATE(right_score, next.right_score);
+            MATCH_UPDATE(blue_on_left, next_blue_on_left);
             MATCH_UPDATE(clock_text, Rml::String(next.clock_text.c_str()));
 #undef MATCH_UPDATE
         }
@@ -67,6 +69,7 @@ namespace cowui
         Rml::ElementDocument *document = nullptr;
         Rml::DataModelHandle model;
         bool hud_visible = false, show_score = false, show_clock = false;
+        bool blue_on_left = true;
         int left_score = 0, right_score = 0;
         Rml::String clock_text;
     };

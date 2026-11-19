@@ -8,13 +8,17 @@
          Keep the horizontal console at upper left and the chat at lower left. -->
     <div class="cow-match-hud-top" data-if="hud_visible">
         <div class="cow-match-hud-strip">
-            <div class="cow-match-chip cow-match-chip-blue" data-if="show_score">
+            <div class="cow-match-chip" data-if="show_score"
+                data-class-cow-match-chip-blue="blue_on_left"
+                data-class-cow-match-chip-red="!blue_on_left">
                 <span class="cow-match-value">{{ left_score }}</span>
             </div>
             <div class="cow-match-chip cow-match-chip-clock" data-if="show_clock">
                 <span class="cow-match-clock-value">{{ clock_text }}</span>
             </div>
-            <div class="cow-match-chip cow-match-chip-red" data-if="show_score">
+            <div class="cow-match-chip" data-if="show_score"
+                data-class-cow-match-chip-blue="!blue_on_left"
+                data-class-cow-match-chip-red="blue_on_left">
                 <span class="cow-match-value">{{ right_score }}</span>
             </div>
         </div>

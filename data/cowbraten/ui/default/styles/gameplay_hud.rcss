@@ -35,7 +35,7 @@ body {
     width: 7.25em;
     margin-right: 0.20em;
     padding: 0 0.32em;
-    border: 1px solid #56748C;
+    border: 1px #56748C;
     border-radius: 0.43em;
     background-color: #0B1725E9;
     color: #F6FAFF;

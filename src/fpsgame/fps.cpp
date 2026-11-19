@@ -2,6 +2,7 @@
 #include "weaponstats.h"
 #include "../cowbraten/ui/frag_feedback_snapshot.h"
 #include "../cowbraten/ui/gameplay_hud_snapshot.h"
+#include "../cowbraten/ui/team_perspective.h"
 
 
 // C++ bridge implemented in cowbraten/ui/ui.cpp. No RmlUi header in fpsgame.
@@ -10,7 +11,8 @@ namespace cowui
     bool matchhudactive();
     void submitmatchhud(bool enabled_score, bool enabled_clock,
                         bool score_available, bool clock_available,
-                        int left, int right, const char *time);
+                        int left, int right, bool blue_on_left,
+                        const char *time);
 }
 
 // RmlUi bridge, implemented in cowbraten/ui/ui.cpp. No RmlUi dependency here.
@@ -1622,7 +1624,7 @@ namespace game
             cowui::syncfragfeedback(snapshot);
         }
         if(cowui::matchhudactive() && (m_edit || m_sp))
-            cowui::submitmatchhud(false, false, false, false, 0, 0, nullptr);
+            cowui::submitmatchhud(false, false, false, false, 0, 0, true, nullptr);
         pushhudmatrix();
         hudmatrix.scale(h/1800.0f, h/1800.0f, 1);
         flushhudmatrix();
@@ -1687,26 +1689,42 @@ namespace game
             {
                 int left_score = 0, right_score = 0;
                 bool score_available = false;
+                bool blue_on_left = true;
                 if(hudscore)
                 {
                     const int numgroups = groupplayers();
                     if(m_teammode)
                     {
                         int found = 0;
+                        int good_score = 0, evil_score = 0;
                         loopi(numgroups)
                         {
                             const scoregroup &sg = *groups[i];
                             if(!sg.team || !sg.players.length()) continue;
-                            if(!strcmp(sg.team, "good")) { left_score = sg.score; found |= 1; }
-                            else if(!strcmp(sg.team, "evil")) { right_score = sg.score; found |= 2; }
+                            if(!strcmp(sg.team, "good")) { good_score = sg.score; found |= 1; }
+                            else if(!strcmp(sg.team, "evil")) { evil_score = sg.score; found |= 2; }
                         }
+                        // Use the same viewpoint as TAB (hudplayer/followed player).
+                        const bool good_left = cowui::teamperspective::good_on_left(
+                            cowui::teamperspective::identify(d ? d->team : nullptr));
+                        left_score = good_left ? good_score : evil_score;
+                        right_score = good_left ? evil_score : good_score;
                         // Only display a 2-sided result when BOTH teams exist.
                         score_available = found == 3;
                     }
                     else if(numgroups && groups[0]->players.length() >= 2)
                     {
-                        left_score = groups[0]->players[0]->frags;
-                        right_score = groups[0]->players[1]->frags;
+                        // Legacy drawhudscore keeps the leading score in the
+                        // first slot. Only the slot colours follow the player
+                        // being observed; the two slots do not swap.
+                        fpsent *observed = followingplayer(player1);
+                        scoregroup *group = groups[0];
+                        left_score = group->players[0]->frags;
+                        const bool watching_leader = observed == group->players[0];
+                        right_score = watching_leader || observed->state == CS_SPECTATOR
+                            ? group->players[1]->frags : observed->frags;
+                        blue_on_left = cowui::teamperspective::blue_on_left_in_ffa(
+                            watching_leader, left_score, right_score);
                         score_available = true;
                     }
                 }
@@ -1717,7 +1735,7 @@ namespace game
                     match_seconds / 60, match_seconds % 60);
                 cowui::submitmatchhud(hudscore != 0, gameclock != 0,
                     score_available, clock_available, left_score, right_score,
-                    match_clock_text);
+                    blue_on_left, match_clock_text);
             }
             else
             {

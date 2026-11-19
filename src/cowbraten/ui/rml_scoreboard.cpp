@@ -3,6 +3,7 @@
 #include "cube_text.h"
 #include "rml_action.h"
 #include "scoreboard_api.h"
+#include "team_perspective.h"
 #include "ui.h"
 
 #include <RmlUi/Core/Context.h>
@@ -64,14 +65,14 @@ namespace cowui
         else valid = false;
         valid = valid && constructor.RegisterArray<std::vector<Row>>() &&
             constructor.Bind("rows", &rows) &&
-            constructor.Bind("evil_rows", &evil_rows) &&
-            constructor.Bind("good_rows", &good_rows) &&
+            constructor.Bind("left_team_rows", &left_team_rows) &&
+            constructor.Bind("right_team_rows", &right_team_rows) &&
             constructor.Bind("spectator_rows", &spectator_rows) &&
             constructor.Bind("server_name", &server_name) &&
             constructor.Bind("match_line", &match_line) &&
             constructor.Bind("time_text", &time_text) &&
-            constructor.Bind("evil_title", &evil_title) &&
-            constructor.Bind("good_title", &good_title) &&
+            constructor.Bind("left_team_title", &left_team_title) &&
+            constructor.Bind("right_team_title", &right_team_title) &&
             constructor.Bind("team_mode", &team_mode) &&
             constructor.Bind("has_spectators", &has_spectators) &&
             constructor.Bind("show_flags", &show_flags) &&
@@ -104,8 +105,8 @@ namespace cowui
         model = Rml::DataModelHandle();
         context = nullptr;
         rows.clear();
-        evil_rows.clear();
-        good_rows.clear();
+        left_team_rows.clear();
+        right_team_rows.clear();
         spectator_rows.clear();
     }
 
@@ -192,6 +193,16 @@ namespace cowui
                 return !player.spectator &&
                     (player.group_name == "good" || player.group_name == "evil");
             });
+        // The bridge marks hudplayer() as local; this also follows the
+        // observed player when spectating, matching the visible game HUD.
+        teamperspective::Team local_team = teamperspective::UNKNOWN;
+        for(const scoreboard::Player &player : players)
+        {
+            if(!player.local || player.spectator) continue;
+            local_team = teamperspective::identify(player.group_name.c_str());
+            if(local_team != teamperspective::UNKNOWN) break;
+        }
+        const bool good_left = teamperspective::good_on_left(local_team);
         std::vector<Row> next, next_evil, next_good, next_spectators;
         Rml::String next_evil_title = "EVIL", next_good_title = "GOOD";
         for(const scoreboard::Player &player : players)
@@ -252,15 +263,18 @@ namespace cowui
             rows.swap(next);
             model.DirtyVariable("rows");
         }
-        if(next_evil != evil_rows)
+        // The two RML columns are presentation slots, not fixed team IDs.
+        const std::vector<Row> &next_left = good_left ? next_good : next_evil;
+        const std::vector<Row> &next_right = good_left ? next_evil : next_good;
+        if(next_left != left_team_rows)
         {
-            evil_rows.swap(next_evil);
-            model.DirtyVariable("evil_rows");
+            left_team_rows = next_left;
+            model.DirtyVariable("left_team_rows");
         }
-        if(next_good != good_rows)
+        if(next_right != right_team_rows)
         {
-            good_rows.swap(next_good);
-            model.DirtyVariable("good_rows");
+            right_team_rows = next_right;
+            model.DirtyVariable("right_team_rows");
         }
         if(next_spectators != spectator_rows)
         {
@@ -278,15 +292,19 @@ namespace cowui
             team_mode = next_team_mode;
             model.DirtyVariable("team_mode");
         }
-        if(evil_title != next_evil_title)
+        const Rml::String &next_left_title = good_left
+            ? next_good_title : next_evil_title;
+        const Rml::String &next_right_title = good_left
+            ? next_evil_title : next_good_title;
+        if(left_team_title != next_left_title)
         {
-            evil_title = next_evil_title;
-            model.DirtyVariable("evil_title");
+            left_team_title = next_left_title;
+            model.DirtyVariable("left_team_title");
         }
-        if(good_title != next_good_title)
+        if(right_team_title != next_right_title)
         {
-            good_title = next_good_title;
-            model.DirtyVariable("good_title");
+            right_team_title = next_right_title;
+            model.DirtyVariable("right_team_title");
         }
     }
 
