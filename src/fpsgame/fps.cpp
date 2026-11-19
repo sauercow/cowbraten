@@ -1,5 +1,6 @@
 #include "game.h"
 #include "weaponstats.h"
+#include "../cowbraten/ui/frag_feedback_snapshot.h"
 
 
 // C++ bridge implemented in cowbraten/ui/ui.cpp. No RmlUi header in fpsgame.
@@ -16,10 +17,6 @@ namespace cowui
 {
     bool fragfeedbackactive();
     void setfragfeedbackallowed(bool value);
-    void submitfragfeedback(const char *attacker, const char *target,
-                            const char *weapon, int combo,
-                            int when, int duration, bool fade);
-    void submitfragmilestone(int value, int when, int duration, bool fade);
 }
 
 namespace game
@@ -724,9 +721,24 @@ namespace game
         }
         if(h==player1 && d==player1) dname = "\fs\f2you\fr";
         if(h==player1 && actor==player1) aname = "\fs\f2you\fr";
+
+        // Capture presentation roles once, at event time, rather than
+        // guessing from stripped player names in RmlUi. Respect the legacy
+        // force-colour and team-colour settings.
+        const auto frag_tone = [h](const fpsent *p) -> int
+        {
+            if(p == h) return FRAG_TONE_SELF;
+            if(m_teammode && teamcolorfrags)
+                return isteam(p->team, h->team) ? FRAG_TONE_ALLY : FRAG_TONE_ENEMY;
+            return (hudfragmessageforcecolors && !m_teammode)
+                ? FRAG_TONE_ENEMY : FRAG_TONE_NEUTRAL;
+        };
+        const int victim_tone = frag_tone(d);
+        const int attacker_tone = frag_tone(actor);
         if(d==actor)
         {
-            addfragmessage(contype, NULL, dname, HICON_TOKEN-HICON_FIST);
+            addfragmessage(contype, NULL, dname, HICON_TOKEN-HICON_FIST,
+                           FRAG_TONE_NEUTRAL, victim_tone);
         }
         else if(streakfrag >= 2)
         {
@@ -747,49 +759,26 @@ namespace game
                 string streakname;
 
                 // Use Sauerbraten's built-in yellow for streak counters.
-                formatstring(streakname, "\fs\f2x%d\fr", streakfrag);
+                // Intentional improvement shared with vanilla: always YOU xN.
+                formatstring(streakname, "\fs\f2YOU x%d\fr", streakfrag);
 
                 addfragmessage(
                     contype,
                     streakname,
                     dname,
-                    d->lasthitpushgun
+                    d->lasthitpushgun,
+                    FRAG_TONE_SELF, victim_tone, streakfrag
                 );
             }
         }
         else
         {
-            addfragmessage(contype, aname, dname, d->lasthitpushgun);
+            addfragmessage(contype, aname, dname, d->lasthitpushgun,
+                           attacker_tone, victim_tone);
         }
-        // Presentation-only event; streak computation above is unchanged.
-        // One visible compact card replaces the queue only while RmlUi is alive.
-        if(modernfragfeedback && cowui::fragfeedbackactive() &&
-           (hudfragmessages == 1 || (hudfragmessages == 2 && !m_insta)))
-        {
-            const int feedback_duration = int(hudfragmessageduration * 1000.0f);
-            const bool feedback_fade = hudfragmessagefade != 0;
-            if(streakfrag >= 2 && killstreakmilestone(streakfrag))
-                cowui::submitfragmilestone(streakfrag, lastmillis,
-                                           feedback_duration, feedback_fade);
-            else
-            {
-                // A milestone masks ordinary kill messages during its lifetime.
-                const bool milestone_active = streakmilestonevalue &&
-                    streakmilestonemillis &&
-                    lastmillis - streakmilestonemillis <=
-                        feedback_duration + (feedback_fade ? 255 : 0);
-                if(!milestone_active || streakfrag >= 2)
-                {
-                    const char *source = d == actor ? "SUICIDE" :
-                        (actor == player1 ? "YOU" : actor->name);
-                    const char *target = d == player1 ? "YOU" : d->name;
-                    const char *weapon = d == actor ? "SELF" :
-                        (m_insta ? "RIFLE" : "FRAG");
-                    cowui::submitfragfeedback(source, target, weapon,
-                        streakfrag, lastmillis, feedback_duration, feedback_fade);
-                }
-            }
-        }
+        // RmlUi observes the SAME filtered fragmessages queue as vanilla.
+        // No separate submit-on-kill path (which showed third-party kills
+        // regardless of hudfragmessagefilter and replaced earlier rows).
         deathstate(d);
 		ai::killed(d, actor);
     }
@@ -1582,8 +1571,52 @@ namespace game
 
     void gameplayhud(int w, int h)
     {
-        cowui::setfragfeedbackallowed(modernfragfeedback && !m_edit && !m_sp &&
-            (hudfragmessages == 1 || (hudfragmessages == 2 && !m_insta)));
+        const bool use_modern_frag = modernfragfeedback && !m_edit && !m_sp &&
+            (hudfragmessages == 1 || (hudfragmessages == 2 && !m_insta));
+        cowui::setfragfeedbackallowed(use_modern_frag);
+        if(use_modern_frag && cowui::fragfeedbackactive())
+        {
+            cowui::FragFeedbackSnapshot snapshot;
+            snapshot.x = hudfragmessagex;
+            snapshot.y = hudfragmessagey;
+            snapshot.scale = hudfragmessagescale;
+            snapshot.stack_direction = hudfragmessagestackdir;
+            snapshot.duration_ms = int(hudfragmessageduration * 1000.0f);
+            snapshot.fade = hudfragmessagefade != 0;
+            snapshot.milestone_scale = streakmilestonescale;
+
+            // Reproduce drawstreakmilestone() precedence and expiry.
+            if(streakmilestonevalue && streakmilestonemillis)
+            {
+                if(lastmillis - streakmilestonemillis <=
+                   snapshot.duration_ms + (snapshot.fade ? 255 : 0))
+                {
+                    snapshot.milestone = streakmilestonevalue;
+                    snapshot.milestone_timestamp = streakmilestonemillis;
+                }
+                else
+                {
+                    streakmilestonevalue = 0;
+                    streakmilestonemillis = 0;
+                }
+            }
+
+            expirefragmessages();
+            for(int i = fragmessages.length() - 1;
+                i >= 0 && snapshot.count < cowui::MaxFragFeedbackRows; --i)
+            {
+                const fragmessage &message = fragmessages[i];
+                cowui::FragFeedbackRow &row = snapshot.rows[snapshot.count++];
+                copystring(row.attacker, message.attackername, sizeof(row.attacker));
+                copystring(row.victim, message.victimname, sizeof(row.victim));
+                row.weapon = message.weapon;
+                row.timestamp = message.fragtime;
+                row.combo = message.combo;
+                row.attacker_tone = message.attacker_tone;
+                row.victim_tone = message.victim_tone;
+            }
+            cowui::syncfragfeedback(snapshot);
+        }
         if(cowui::matchhudactive() && (m_edit || m_sp))
             cowui::submitmatchhud(false, false, false, false, 0, 0, nullptr);
         pushhudmatrix();

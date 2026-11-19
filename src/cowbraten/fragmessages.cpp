@@ -14,16 +14,31 @@ namespace game {
     MOD(HVARP, hudfragmessagefilter, 0, 0x2800, 0x7FFFFFF); // default: own frags + teamkills
     MOD(VARP, hudfragmessageforcecolors, 0, 1, 1);
 
-    void addfragmessage(int contype, const char *aname, const char *vname, int gun)
+    void addfragmessage(int contype, const char *aname, const char *vname, int gun,
+                        int attacker_tone, int victim_tone, int combo)
     {
         if(!(contype&hudfragmessagefilter)) return;
         if(fragmessages.length()>=maxhudfragmessages) fragmessages.remove(0, fragmessages.length()-maxhudfragmessages+1);
-        fragmessages.add(fragmessage(aname, vname, gun));
+        fragmessages.add(fragmessage(aname, vname, gun,
+                                     attacker_tone, victim_tone, combo));
     }
 
     void clearfragmessages()
     {
         fragmessages.shrink(0);
+    }
+
+    // Run during modern HUD presentation as the legacy renderer would prune
+    // the queue during drawfragmessages(). The original renderer is untouched.
+    void expirefragmessages()
+    {
+        const int lifetime = int(hudfragmessageduration * 1000.0f) +
+                             (hudfragmessagefade ? 255 : 0);
+        int expired = 0;
+        while(expired < fragmessages.length() &&
+              lastmillis - fragmessages[expired].fragtime > lifetime)
+            ++expired;
+        if(expired) fragmessages.remove(0, expired);
     }
 
     void drawfragmessages(int w, int h)

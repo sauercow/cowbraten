@@ -12,6 +12,12 @@ namespace cowui
             float opacity;
         };
 
+        // Mirror the original auto direction: stack towards the closest edge.
+        inline int stackdirection(int configured, float y)
+        {
+            return configured ? (configured < 0 ? -1 : 1) : (y > 0.5f ? 1 : -1);
+        }
+
         inline Frame frame(int now, int started, int duration, bool fade, bool active)
         {
             if(!active || started < 0) return {false, 0.0f};

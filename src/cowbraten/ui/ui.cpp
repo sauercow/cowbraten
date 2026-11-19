@@ -7,6 +7,7 @@
 #include "rml_server_browser.h"
 #include "rml_scoreboard.h"
 #include "rml_frag_feedback.h"
+#include "frag_feedback_snapshot.h"
 #include "rml_match_score_hud.h"
 #include "rml_demo_manager.h"
 #include "rml_demo_player.h"
@@ -1363,9 +1364,10 @@ namespace cowui
             frag_feedback_ready = frag_feedback_model.init(context);
         }
         if(frag_feedback_ready)
+            // Keep death notifications visible even when deathscore automatically
+            // opens the scoreboard. The legacy frag HUD is not gated by it.
             frag_feedback_model.update(lastmillis,
-                frag_feedback_allowed && active_screen == nullptr &&
-                !scoreboard_model.visible());
+                frag_feedback_allowed && active_screen == nullptr);
         if(active_screen && match_score_hud_ready) match_score_hud_model.update(MatchHudInput());
         demo_player.update(active_screen != nullptr);
         chat_model.update(
@@ -1928,19 +1930,10 @@ namespace cowui
 
     void setfragfeedbackallowed(bool value) { frag_feedback_allowed = value; }
 
-    void submitfragfeedback(const char *attacker, const char *target,
-                            const char *weapon, int combo,
-                            int when, int duration, bool fade)
+    void syncfragfeedback(const FragFeedbackSnapshot &snapshot)
     {
         if(frag_feedback_ready)
-            frag_feedback_model.submitfrag(attacker, target, weapon,
-                                          combo, when, duration, fade);
-    }
-
-    void submitfragmilestone(int value, int when, int duration, bool fade)
-    {
-        if(frag_feedback_ready)
-            frag_feedback_model.submitmilestone(value, when, duration, fade);
+            frag_feedback_model.sync(snapshot);
     }
 
     bool setscoreboardvisible(bool value)

@@ -2,9 +2,13 @@
 
 #include <RmlUi/Core.h>
 #include "frag_feedback_logic.h"
+#include "frag_feedback_snapshot.h"
 
-// Visual-only overlay. All streak scoring remains in fpsgame/fps.cpp.
-// Initialized lazily from the normal RmlUi update path, with legacy fallback.
+#include <array>
+#include <string>
+
+// Presentation only. The queue, filters, limits, streak accounting and
+// milestone precedence all live in the original fpsgame/fragmessages code.
 namespace cowui
 {
     class RmlFragFeedback final
@@ -13,103 +17,149 @@ namespace cowui
         bool init(Rml::Context *context)
         {
             if(!context) return false;
-            auto constructor = context->CreateDataModel("cow_frag_feedback");
-            if(!constructor ||
-               !constructor.Bind("show_frag", &show_frag) ||
-               !constructor.Bind("show_combo", &show_combo) ||
-               !constructor.Bind("show_milestone", &show_milestone) ||
-               !constructor.Bind("actor", &actor) ||
-               !constructor.Bind("victim", &victim) ||
-               !constructor.Bind("weapon", &weapon) ||
-               !constructor.Bind("combo_text", &combo_text) ||
-               !constructor.Bind("milestone_text", &milestone_text))
-            {
-                context->RemoveDataModel("cow_frag_feedback");
-                return false;
-            }
-            model = constructor.GetModelHandle();
             document = context->LoadDocument("data/cowbraten/ui/default/screens/frag_feedback.rml");
-            if(!document)
+            if(!document) return false;
+            root = document->GetElementById("cow-frag-root");
+            milestone = document->GetElementById("cow-frag-milestone");
+            milestone_text = document->GetElementById("cow-frag-milestone-text");
+            bool valid = root && milestone && milestone_text;
+            for(int i = 0; i < MaxFragFeedbackRows; ++i)
             {
-                context->RemoveDataModel("cow_frag_feedback");
-                model = Rml::DataModelHandle();
-                return false;
+                Slot &slot = slots[i];
+                slot.container = document->GetElementById(Rml::CreateString("cow-frag-row-%d", i));
+                slot.source = document->GetElementById(Rml::CreateString("cow-frag-source-%d", i));
+                slot.combo = document->GetElementById(Rml::CreateString("cow-frag-combo-%d", i));
+                slot.weapon = document->GetElementById(Rml::CreateString("cow-frag-weapon-%d", i));
+                slot.target = document->GetElementById(Rml::CreateString("cow-frag-target-%d", i));
+                valid = valid && slot.container && slot.source && slot.combo &&
+                    slot.weapon && slot.target;
+            }
+            if(!valid)
+            {
+                document->Close();
+                document = nullptr;
+                root = milestone = milestone_text = nullptr;
+                slots = {};
+                return false; // Enables unmodified legacy fallback.
             }
             document->SetProperty("font-family", "Lato");
             document->SetProperty("font-size", "18px");
+            root->SetProperty("display", "none");
             document->Show();
             return true;
         }
 
-        void submitfrag(const char *source, const char *target, const char *gun,
-                        int combo, int now, int duration, bool fade)
+        void sync(const FragFeedbackSnapshot &state)
         {
-            if(!document) return;
-            set(show_milestone, false, "show_milestone");
-            set(show_frag, true, "show_frag");
-            set(show_combo, combo >= 2, "show_combo");
-            set(actor, plainname(source), "actor");
-            settext("cow-frag-source", actor);
-            set(victim, plainname(target), "victim");
-            settext("cow-frag-target", victim);
-            set(weapon, Rml::String(gun ? gun : "FRAG"), "weapon");
-            settext("cow-frag-weapon-text", weapon);
-            set(combo_text, Rml::CreateString("x%d", combo >= 2 ? combo : 2), "combo_text");
-            settext("cow-frag-combo", combo_text);
-            start = now;
-            duration_ms = duration;
-            fade_enabled = fade;
-        }
-
-        void submitmilestone(int value, int now, int duration, bool fade)
-        {
-            if(!document) return;
-            set(show_frag, false, "show_frag");
-            set(show_combo, false, "show_combo");
-            set(show_milestone, true, "show_milestone");
-            set(milestone_text, Rml::CreateString("%d STREAK", value), "milestone_text");
-            settext("cow-frag-milestone-text", milestone_text);
-            start = now;
-            duration_ms = duration;
-            fade_enabled = fade;
+            snapshot = state;
+            have_snapshot = true;
         }
 
         void update(int now, bool allowed)
         {
-            if(!document) return;
-            const auto f = fragfeedback::frame(now, start, duration_ms, fade_enabled,
-                                               allowed && (show_frag || show_milestone));
-            if(!f.visible)
+            if(!document || !root) return;
+            if(!allowed || !have_snapshot)
             {
-                set(show_frag, false, "show_frag");
-                set(show_milestone, false, "show_milestone");
+                root->SetProperty("display", "none");
+                return;
             }
-            if(Rml::Element *root = document->GetElementById("cow-frag-root"))
-                root->SetProperty("opacity", Rml::CreateString("%.3f", f.opacity));
+
+            root->SetProperty("display", "block");
+            // The root spans one viewport width and its children center with flex.
+            // Shift its left edge so the middle matches hudfragmessagex.
+            // This avoids percentage transforms, which failed to center
+            // the current RmlUi cards on the configured anchor.
+            root->SetProperty("left", Rml::CreateString("%.3f%%",
+                (snapshot.x - 0.5f) * 100.0f));
+            root->SetProperty("top", Rml::CreateString("%.3f%%", snapshot.y * 100.0f));
+            // RmlUi font metrics scale with the original hudfragmessagescale
+            // (0.5 by default). The actual card dimensions use em units.
+            const float scale = snapshot.scale > 0.0f ? snapshot.scale : 0.5f;
+            root->SetProperty("font-size", Rml::CreateString("%.2fpx", 18.0f * scale / 0.5f));
+
+            const auto mf = fragfeedback::frame(now, snapshot.milestone_timestamp,
+                                               snapshot.duration_ms, snapshot.fade,
+                                               snapshot.milestone > 0);
+            if(mf.visible)
+            {
+                milestone->SetProperty("display", "flex");
+                milestone->SetProperty("opacity", Rml::CreateString("%.3f", mf.opacity));
+                milestone->SetProperty("font-size", Rml::CreateString("%.3fem",
+                    snapshot.milestone_scale > 0.0f ? snapshot.milestone_scale : 1.0f));
+                settext(milestone_text, Rml::CreateString("%d STREAK", snapshot.milestone));
+            }
+            else milestone->SetProperty("display", "none");
+
+            // Legacy milestones obscure the queue for their duration.
+            const int direction = fragfeedback::stackdirection(snapshot.stack_direction,
+                                                                snapshot.y);
+            for(int i = 0; i < MaxFragFeedbackRows; ++i)
+            {
+                Slot &slot = slots[i];
+                const bool candidate = !mf.visible && i < snapshot.count;
+                const fragfeedback::Frame frame = candidate
+                    ? fragfeedback::frame(now, snapshot.rows[i].timestamp,
+                                         snapshot.duration_ms, snapshot.fade, true)
+                    : fragfeedback::Frame{false, 0.0f};
+                if(!frame.visible)
+                {
+                    slot.container->SetProperty("display", "none");
+                    continue;
+                }
+                const FragFeedbackRow &row = snapshot.rows[i];
+                slot.container->SetProperty("display", "flex");
+                slot.container->SetProperty("top", Rml::CreateString("%.3fem",
+                    float(i * direction) * 3.1f));
+                slot.container->SetProperty("opacity", Rml::CreateString("%.3f", frame.opacity));
+
+                // Actual names already passed through the vanilla filter.
+                Rml::String source = plainname(row.attacker);
+                if(row.combo >= 2) source = "YOU";
+                else if(source == "you") source = "YOU";
+                Rml::String target = plainname(row.victim);
+                if(target == "you") target = "YOU";
+
+                settext(slot.source, source);
+                settext(slot.combo, row.combo >= 2
+                    ? Rml::CreateString("x%d", row.combo) : "");
+                settext(slot.weapon, weaponname(row.weapon,
+                    source.empty()));
+                settext(slot.target, target);
+                slot.source->SetProperty("display", source.empty() ? "none" : "inline");
+                slot.combo->SetProperty("display", row.combo >= 2 ? "inline" : "none");
+                applytone(slot.source, row.attacker_tone);
+                applytone(slot.target, row.victim_tone);
+            }
         }
 
-        void shutdown(Rml::Context *context)
+        void shutdown(Rml::Context *)
         {
-            if(document)
-            {
-                document->Close();
-                document = nullptr;
-            }
-            if(context) context->RemoveDataModel("cow_frag_feedback");
-            model = Rml::DataModelHandle();
-            start = -1;
-            show_frag = show_combo = show_milestone = false;
+            if(document) document->Close();
+            document = nullptr;
+            root = milestone = milestone_text = nullptr;
+            slots = {};
+            have_snapshot = false;
         }
 
     private:
-        template<class T>
-        void set(T &field, const T &next, const char *name)
+        struct Slot
         {
-            if(field != next) { field = next; model.DirtyVariable(name); }
+            Rml::Element *container = nullptr, *source = nullptr;
+            Rml::Element *combo = nullptr, *weapon = nullptr, *target = nullptr;
+        };
+
+        static const char *weaponname(int weapon, bool suicide)
+        {
+            if(suicide) return "SELF";
+            static const char *names[] = {
+                "FIST", "SHOTGUN", "CHAINGUN", "ROCKET", "RIFLE",
+                "GRENADE", "PISTOL", "FIREBALL", "ICEBALL", "SLIMEBALL",
+                "BITE", "BARREL"
+            };
+            return weapon >= 0 && weapon < int(sizeof(names)/sizeof(*names))
+                ? names[weapon] : "FRAG";
         }
 
-        // Strip Cube color escapes while keeping names as bound RmlUi text,
-        // never as untrusted RML/HTML markup.
         static Rml::String plainname(const char *name)
         {
             Rml::String result;
@@ -123,10 +173,9 @@ namespace cowui
             return result;
         }
 
-        // Write escaped text directly instead of relying on data-model interpolation.
-        void settext(const char *id, const Rml::String &value)
+        static void settext(Rml::Element *element, const Rml::String &value)
         {
-            if(!document) return;
+            if(!element) return;
             Rml::String escaped;
             for(char c : value)
             {
@@ -140,15 +189,23 @@ namespace cowui
                     default: escaped.push_back(c); break;
                 }
             }
-            if(Rml::Element *element = document->GetElementById(id))
-                element->SetInnerRML(escaped);
+            // Avoid regenerating text DOM nodes on every frame.
+            if(element->GetInnerRML() != escaped) element->SetInnerRML(escaped);
+        }
+
+        static void applytone(Rml::Element *element, int tone)
+        {
+            if(!element) return;
+            element->SetClass("cow-tone-self", tone == 1);
+            element->SetClass("cow-tone-enemy", tone == 2);
+            element->SetClass("cow-tone-ally", tone == 3);
+            element->SetClass("cow-tone-neutral", tone == 0);
         }
 
         Rml::ElementDocument *document = nullptr;
-        Rml::DataModelHandle model;
-        bool show_frag = false, show_combo = false, show_milestone = false;
-        Rml::String actor, victim, weapon, combo_text, milestone_text;
-        int start = -1, duration_ms = 1200;
-        bool fade_enabled = true;
+        Rml::Element *root = nullptr, *milestone = nullptr, *milestone_text = nullptr;
+        std::array<Slot, MaxFragFeedbackRows> slots{};
+        FragFeedbackSnapshot snapshot;
+        bool have_snapshot = false;
     };
 }
