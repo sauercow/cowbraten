@@ -1,0 +1,44 @@
+<rml>
+<head>
+  <title>Gameplay status HUD</title>
+  <link type="text/rcss" href="../styles/gameplay_hud.rcss" />
+</head>
+<body>
+  <div id="cow-status-root" class="cow-status-root">
+    <div class="cow-status-dock">
+      <div id="cow-status-health" class="cow-status-card cow-status-health">
+        <img class="cow-status-icon" src="../images/hud/v1/health.png" />
+        <div class="cow-status-metrics">
+          <span id="cow-status-health-value" class="cow-status-value">100</span>
+          <span id="cow-status-health-max" class="cow-status-max"></span>
+          <span class="cow-status-label">HEALTH</span>
+        </div>
+      </div>
+      <div id="cow-status-armour" class="cow-status-card cow-status-armour">
+        <img class="cow-status-icon" src="../images/hud/v1/armor_compact.png" />
+        <div class="cow-status-metrics">
+          <span id="cow-status-armour-value" class="cow-status-value">0</span>
+          <span class="cow-status-label">ARMOR</span>
+        </div>
+      </div>
+      <div id="cow-status-ammo" class="cow-status-card cow-status-ammo">
+        <img id="cow-status-gun-0" class="cow-status-icon" src="../images/hud/v1/fist.png" />
+        <img id="cow-status-gun-1" class="cow-status-icon" src="../images/hud/v1/shotgun.png" />
+        <img id="cow-status-gun-2" class="cow-status-icon" src="../images/hud/v1/chaingun.png" />
+        <img id="cow-status-gun-3" class="cow-status-icon" src="../images/hud/v1/rocket_launcher.png" />
+        <img id="cow-status-gun-4" class="cow-status-icon" src="../images/hud/v1/rifle.png" />
+        <img id="cow-status-gun-5" class="cow-status-icon" src="../images/hud/v1/grenade_launcher.png" />
+        <img id="cow-status-gun-6" class="cow-status-icon" src="../images/hud/v1/pistol.png" />
+        <img id="cow-status-gun-7" class="cow-status-icon" src="../images/hud/v1/unknown.png" />
+        <div class="cow-status-metrics">
+          <span id="cow-status-ammo-value" class="cow-status-value">0</span>
+          <span class="cow-status-label">AMMO</span>
+        </div>
+      </div>
+      <div id="cow-status-quad" class="cow-status-quad">
+        <img class="cow-status-icon" src="../images/hud/v1/quad.png" />
+      </div>
+    </div>
+  </div>
+</body>
+</rml>

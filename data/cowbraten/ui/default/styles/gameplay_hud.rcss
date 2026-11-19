@@ -1,0 +1,112 @@
+/* Cowbraten status dock. Layout dimensions in em scale with viewport height.
+   The FPS engine owns game state; this sheet only describes presentation. */
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    font-family: Lato;
+    pointer-events: none;
+}
+.cow-status-root {
+    position: absolute;
+    left: 0;
+    top: 92.333%;
+    width: 100%;
+    display: none;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    pointer-events: none;
+}
+.cow-status-dock {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.cow-status-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 2.60em;
+    width: 7.25em;
+    margin-right: 0.20em;
+    padding: 0 0.32em;
+    border: 1px solid #56748C;
+    border-radius: 0.43em;
+    background-color: #0B1725E9;
+    color: #F6FAFF;
+    pointer-events: none;
+}
+.cow-status-health {
+    border-color: #FF506A;
+    background-color: #2C1724E9;
+}
+.cow-status-armour {
+    border-color: #318DE9;
+    background-color: #10283BE9;
+}
+.cow-status-ammo {
+    border-color: #FFB72E;
+    background-color: #302512E9;
+}
+.cow-status-icon {
+    display: inline-block;
+    width: 2.35em;
+    height: 1.47em;
+    flex-shrink: 0;
+    margin-right: 0.22em;
+}
+.cow-status-metrics {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.cow-status-value {
+    font-size: 1.38em;
+    font-weight: bold;
+    color: #FFFFFF;
+    white-space: nowrap;
+}
+.cow-status-max {
+    display: none;
+    font-size: 0.55em;
+    color: #B8E5FC;
+}
+.cow-status-label {
+    font-size: 0.52em;
+    letter-spacing: 0.07em;
+    color: #D0DCEB;
+}
+.cow-status-warning .cow-status-value { color: #FFC56A; }
+.cow-status-critical .cow-status-value { color: #FF6678; }
+.cow-status-boosted .cow-status-value { color: #78E7FF; }
+.cow-status-empty { opacity: 1; }
+.cow-status-empty .cow-status-value { color: #8C9AAA; }
+.cow-armour-green { border-color: #5CCD85; }
+.cow-armour-yellow { border-color: #F8CF63; }
+.cow-armour-blue { border-color: #459BFF; }
+.cow-status-quad {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    height: 2.60em;
+    padding: 0 0.25em;
+}
+.cow-status-quad .cow-status-icon {
+    margin-right: 0;
+}
+
+
+/* cow-status-compact-internal-v1 */
+/* Square-cropped source keeps the armour shield's natural proportions. */
+#cow-status-armour .cow-status-icon {
+    width: 2.40em;
+    height: 1.50em;
+    margin-right: 0.22em;
+}

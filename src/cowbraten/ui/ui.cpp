@@ -7,6 +7,7 @@
 #include "rml_server_browser.h"
 #include "rml_scoreboard.h"
 #include "rml_frag_feedback.h"
+#include "rml_gameplay_hud.h"
 #include "frag_feedback_snapshot.h"
 #include "rml_match_score_hud.h"
 #include "rml_demo_manager.h"
@@ -59,6 +60,8 @@ namespace cowui
     static bool frag_feedback_attempted = false;
     static bool frag_feedback_ready = false;
     static bool frag_feedback_allowed = false;
+    static RmlGameplayHud gameplay_hud_model;
+    static bool gameplay_hud_ready = false;
     static RmlMatchScoreHud match_score_hud_model;
     static bool match_score_hud_ready = false;
     static RmlDemoManager demo_manager;
@@ -901,6 +904,8 @@ namespace cowui
             frag_feedback_ready = false;
             frag_feedback_attempted = false;
             frag_feedback_allowed = false;
+            gameplay_hud_model.shutdown(context);
+            gameplay_hud_ready = false;
             scoreboard_model.shutdown(context);
             server_browser.shutdown(context);
             console_model.shutdown(context);
@@ -915,6 +920,8 @@ namespace cowui
 
         action_router.install();
 
+        // Optional module. If its RML is missing, keep vanilla HUD available.
+        gameplay_hud_ready = gameplay_hud_model.init(context);
         initialized = true;
         interfacepreferenceschanged();
         return true;
@@ -951,6 +958,8 @@ namespace cowui
             frag_feedback_ready = false;
             frag_feedback_attempted = false;
             frag_feedback_allowed = false;
+            gameplay_hud_model.shutdown(context);
+            gameplay_hud_ready = false;
             scoreboard_model.shutdown(context);
             server_browser.shutdown(context);
             console_model.shutdown(context);
@@ -1357,6 +1366,7 @@ namespace cowui
             syncconsoleownership();
 
         scoreboard_model.update(active_screen != nullptr);
+        if(gameplay_hud_ready) gameplay_hud_model.update(active_screen == nullptr);
         // Optional modern feedback. Failure keeps the original HUD renderer.
         if(!frag_feedback_attempted)
         {
@@ -1398,6 +1408,7 @@ namespace cowui
 
         if(!demo_player.visible() &&
            !scoreboard_model.visible() &&
+           !gameplay_hud_model.visible() &&
            !chat_model.visible() &&
            !console_model.visible() &&
            (!active_screen || legacy_console_presentation))
@@ -1441,6 +1452,7 @@ namespace cowui
            !context ||
            (!active_screen &&
             !scoreboard_model.visible() &&
+            !gameplay_hud_model.visible() &&
             !demo_player.visible() &&
             !chat_model.visible() &&
             !console_model.visible()) ||
@@ -1923,6 +1935,14 @@ namespace cowui
         input.right_score = right;
         input.clock_text = time ? time : "";
         match_score_hud_model.update(input);
+    }
+
+    // Lower status dock bridge: the original OpenGL renderer remains intact.
+    bool gameplayhudactive() { return gameplay_hud_ready; }
+
+    void syncgameplayhud(const GameplayHudSnapshot &state)
+    {
+        if(gameplay_hud_ready) gameplay_hud_model.sync(state);
     }
 
     // Called from the game HUD. The original frag queue stays intact as fallback.

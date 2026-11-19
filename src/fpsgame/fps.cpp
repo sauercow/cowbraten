@@ -1,6 +1,7 @@
 #include "game.h"
 #include "weaponstats.h"
 #include "../cowbraten/ui/frag_feedback_snapshot.h"
+#include "../cowbraten/ui/gameplay_hud_snapshot.h"
 
 
 // C++ bridge implemented in cowbraten/ui/ui.cpp. No RmlUi header in fpsgame.
@@ -17,6 +18,8 @@ namespace cowui
 {
     bool fragfeedbackactive();
     void setfragfeedbackallowed(bool value);
+    bool gameplayhudactive();
+    void syncgameplayhud(const GameplayHudSnapshot &state);
 }
 
 namespace game
@@ -1226,6 +1229,7 @@ namespace game
     }
 
     VARP(healthcolors, 0, 1, 1);
+    VARP(cowgameplayhud, 0, 1, 1); // 0 = original OpenGL status, 1 = RmlUi
 
     extern int ammobar;
 
@@ -1624,9 +1628,47 @@ namespace game
         flushhudmatrix();
 
         fpsent *d = hudplayer();
+        const bool modern_status = cowgameplayhud && cowui::gameplayhudactive();
+        cowui::GameplayHudSnapshot status;
+        status.enabled = modern_status;
+        status.show = d && d->state != CS_EDITING && d->state != CS_SPECTATOR;
+        if(status.show)
+        {
+            status.alive = d->state != CS_DEAD;
+            status.health = status.alive ? d->health : 0;
+            status.max_health = d->maxhealth;
+            status.armour = d->armour;
+            status.armour_type = d->armourtype;
+            status.ammo = d->ammo[d->gunselect];
+            status.gun = d->gunselect;
+            status.quad = d->quadmillis > 0;
+            const float virtual_width = h > 0 ? 1800.0f*w/h : 3200.0f;
+            status.x = statusdockcenter(w, h) / virtual_width;
+            status.y = STATUS_DOCK_Y / 1800.0f;
+            status.health_tone = healthcolors && !m_insta ?
+                (!status.alive || status.health <= 25 ? 2 :
+                 (status.health <= 50 ? 1 : (status.health > 100 ? 3 : 0))) : 0;
+            const float ratio = d->gunselect >= GUN_SG &&
+                d->gunselect <= GUN_PISTOL
+                ? float(status.ammo) / max(itemstats[d->gunselect-GUN_SG].add, 1)
+                : 1.0f;
+            status.ammo_tone = status.ammo == 0 ? 2 : (ratio < 0.5f ? 1 : 0);
+        }
+        cowui::syncgameplayhud(status);
         if(d->state!=CS_EDITING)
         {
-            if(d->state!=CS_SPECTATOR) drawhudicons(d, w, h);
+            if(d->state!=CS_SPECTATOR)
+            {
+                if(!modern_status) drawhudicons(d, w, h);
+                else if(d->state != CS_DEAD && ammohud && !ammobar)
+                {
+                    // Keep the legacy secondary ammo HUD until its own migration.
+                    const float center = statusdockcenter(w, h);
+                    const float start = center - 1.5f*STATUS_BLOCK_WIDTH;
+                    drawammohud(d, start + 2.0f*STATUS_BLOCK_WIDTH,
+                        STATUS_DOCK_Y, STATUS_ICON_SIZE);
+                }
+            }
             if(cmode) cmode->drawhud(d, w, h);
         }
 
