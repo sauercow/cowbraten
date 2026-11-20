@@ -202,6 +202,11 @@ remain owned by Sauer's text editor so existing `text*` commands keep working;
 document pass. Menu init, tab selection, and `guionclear` lifecycle behavior are
 preserved by the adapter.
 
+The engine's deferred graphics/audio confirmation also uses this adapter. It
+lists the pending subsystem descriptions and exposes fixed Apply-now and
+Keep-for-next-launch actions; the original `g3d_gui` apply dialog remains only
+as a startup/UI-initialization failure fallback.
+
 When opened from another native screen, the compact document is pulled to the
 front as an RmlUi modal while the previous document remains visible beneath
 its scrim. Closing the compact document restores focus to that underlay without
@@ -220,6 +225,9 @@ legacy-autoexec behavior.
 
 The blinking in-game `REC` indicator is part of the native gameplay overlay.
 Its original OpenGL draw remains only as the document-initialization fallback.
+Carried CTF flags, Hold timers, and Collect token counts extend the same native
+status dock. Mode radar/minimap drawing remains engine-owned because it combines
+the live generated minimap texture with world-space blips and camera rotation.
 
 ## Text utilities model
 

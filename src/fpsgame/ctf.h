@@ -556,7 +556,7 @@ struct ctfclientmode : clientmode
 
     void drawhud(fpsent *d, int w, int h)
     {
-        if(d->state == CS_ALIVE)
+        if(!nativegameplayhud() && d->state == CS_ALIVE)
         {
             loopv(flags) if(flags[i].owner == d)
             {
@@ -628,6 +628,20 @@ struct ctfclientmode : clientmode
                 draw_textf("%s%d", (x+s/2)/2-(wait>=10 ? 28 : 16), (y+s/2)/2-32, flash ? "\f3" : "", wait);
                 pophudmatrix();
             }
+        }
+    }
+
+    void gameplayhud(fpsent *d, cowui::GameplayHudSnapshot &status)
+    {
+        if(d->state != CS_ALIVE) return;
+        loopv(flags) if(flags[i].owner == d)
+        {
+            flag &f = flags[i];
+            status.mode_icon = m_hold ? 3 :
+                (f.team == ctfteamflag(player1->team) ? 1 : 2);
+            status.mode_count = m_hold
+                ? max(HOLDSECS - f.holdcounter()/1000, 0) : 0;
+            break;
         }
     }
 

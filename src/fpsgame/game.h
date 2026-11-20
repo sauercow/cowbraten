@@ -2,6 +2,7 @@
 #define __GAME_H__
 
 #include "cube.h"
+#include "../cowbraten/ui/gameplay_hud_snapshot.h"
 
 // console message types
 
@@ -710,6 +711,8 @@ namespace entities
 
 namespace game
 {
+    extern bool nativegameplayhud();
+
     struct clientmode
     {
         virtual ~clientmode() {}
@@ -717,6 +720,7 @@ namespace game
         virtual void preload() {}
         virtual int clipconsole(int w, int h) { return 0; }
         virtual void drawhud(fpsent *d, int w, int h) {}
+        virtual void gameplayhud(fpsent *, cowui::GameplayHudSnapshot &) {}
         virtual void rendergame() {}
         virtual void respawned(fpsent *d) {}
         virtual void setup() {}

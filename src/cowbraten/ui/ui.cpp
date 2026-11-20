@@ -1407,6 +1407,8 @@ namespace cowui
         if(!initialized || !context)
             return;
 
+        routeapplydialog();
+
 	sauermusic::sync(active_screen != nullptr);
 
         const Uint64 model_begin = profiling_enabled

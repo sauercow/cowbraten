@@ -20,6 +20,8 @@ namespace cowui
         bool quad = false;
         bool demo_recording = false;
         bool demo_recording_bright = true;
+        int mode_icon = 0; // 0 none, 1 blue flag, 2 red flag, 3 neutral flag, 4 token
+        int mode_count = 0;
         int health = 0;
         int max_health = 100;
         int armour = 0;

@@ -1233,6 +1233,11 @@ namespace game
     VARP(healthcolors, 0, 1, 1);
     VARP(cowgameplayhud, 0, 1, 1); // 0 = original OpenGL status, 1 = RmlUi
 
+    bool nativegameplayhud()
+    {
+        return cowgameplayhud && cowui::gameplayhudactive();
+    }
+
     extern int ammobar;
 
     float statushudy() { return STATUS_DOCK_Y; }
@@ -1728,6 +1733,7 @@ namespace game
                     ammobarscale;
             }
         }
+        if(cmode) cmode->gameplayhud(d, status);
         cowui::syncgameplayhud(status);
         if(d->state!=CS_EDITING)
         {

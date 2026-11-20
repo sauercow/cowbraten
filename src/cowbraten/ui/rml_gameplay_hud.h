@@ -54,9 +54,13 @@ namespace cowui
             quad_card = document->GetElementById("cow-status-quad");
             recording_indicator = document->GetElementById(
                 "cow-demo-recording");
+            mode_card = document->GetElementById("cow-status-mode");
+            mode_icon = document->GetElementById("cow-status-mode-icon");
+            mode_count = document->GetElementById("cow-status-mode-count");
             const bool valid = root && health_value && health_max &&
                 armour_value && ammo_value && armour_card && ammo_card &&
-                health_card && quad_card && recording_indicator &&
+                health_card && quad_card && recording_indicator && mode_card &&
+                mode_icon && mode_count &&
                 ammo_bar_root && secondary_up_group &&
                 secondary_down_group && secondary_cycle_group;
             bool all_weapons = true;
@@ -132,6 +136,23 @@ namespace cowui
             ammo_card->SetProperty("display", snapshot.alive ? "flex" : "none");
             quad_card->SetProperty("display", snapshot.alive && snapshot.quad
                 ? "flex" : "none");
+            const bool mode_shown = snapshot.alive && snapshot.mode_icon > 0;
+            mode_card->SetProperty("display", mode_shown ? "flex" : "none");
+            if(mode_shown)
+            {
+                static const char *resources[] =
+                {
+                    "", "?cowbraten-resource:packages/hud/blip_blue_flag.png",
+                    "?cowbraten-resource:packages/hud/blip_red_flag.png",
+                    "?cowbraten-resource:packages/hud/blip_neutral_flag.png",
+                    "?cowbraten-resource:packages/hud/blip_red_skull.png"
+                };
+                const int icon = snapshot.mode_icon >= 1 &&
+                    snapshot.mode_icon <= 4 ? snapshot.mode_icon : 0;
+                mode_icon->SetAttribute("src", resources[icon]);
+                settext(mode_count, snapshot.mode_count > 0
+                    ? Rml::CreateString("%d", snapshot.mode_count) : "");
+            }
 
             health_card->SetClass("cow-status-warning", snapshot.health_tone == 1);
             health_card->SetClass("cow-status-critical", snapshot.health_tone == 2);
@@ -177,6 +198,7 @@ namespace cowui
                 ammo_value = nullptr;
             armour_card = ammo_card = health_card = quad_card = nullptr;
             recording_indicator = nullptr;
+            mode_card = mode_icon = mode_count = nullptr;
             secondary_up_group = secondary_down_group =
                 secondary_cycle_group = nullptr;
             for(int i = 0; i < 8; ++i) weapon_images[i] = nullptr;
@@ -277,6 +299,8 @@ namespace cowui
         Rml::Element *ammo_card = nullptr;
         Rml::Element *quad_card = nullptr;
         Rml::Element *recording_indicator = nullptr;
+        Rml::Element *mode_card = nullptr, *mode_icon = nullptr;
+        Rml::Element *mode_count = nullptr;
         Rml::Element *secondary_up_group = nullptr;
         Rml::Element *secondary_down_group = nullptr;
         Rml::Element *secondary_cycle_group = nullptr;

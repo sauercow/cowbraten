@@ -60,8 +60,12 @@ int main()
         "optional full ammo bar uses the native overlay with GL fallback");
     check(game.find("statushudnextx") != std::string::npos &&
           ctf.find("statushudnextx(w, h, d)") != std::string::npos &&
-          collect.find("statushudnextx(w, h, d)") != std::string::npos,
-        "mode-specific flag and token indicators extend the same dock");
+          collect.find("statushudnextx(w, h, d)") != std::string::npos &&
+          snapshot.find("mode_icon") != std::string::npos &&
+          native_rml.find("cow-status-mode") != std::string::npos &&
+          ctf.find("!nativegameplayhud()") != std::string::npos &&
+          collect.find("!nativegameplayhud()") != std::string::npos,
+        "mode-specific flag and token indicators use the native dock with fallback");
     check(snapshot.find("demo_recording") != std::string::npos &&
           native_hud.find("cow-demo-recording") != std::string::npos &&
           native_rml.find("cow-demo-recording") != std::string::npos &&

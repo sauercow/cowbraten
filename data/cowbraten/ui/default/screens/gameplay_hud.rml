@@ -53,6 +53,10 @@
       <div id="cow-status-quad" class="cow-status-quad">
         <img class="cow-status-icon" src="../images/hud/v1/quad.png" />
       </div>
+      <div id="cow-status-mode" class="cow-status-mode">
+        <img id="cow-status-mode-icon" class="cow-status-icon" />
+        <span id="cow-status-mode-count"></span>
+      </div>
     </div>
   </div>
   <div id="cow-ammo-bar-root" class="cow-ammo-bar-root">

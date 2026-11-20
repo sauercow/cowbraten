@@ -1139,6 +1139,64 @@ static struct applymenu : menu
     }
 } applymenu;
 
+static bool applydialogrouted = false;
+
+ICOMMAND(cowpendingchanges, "", (),
+{
+    vector<char> descriptions;
+    loopv(needsapply)
+    {
+        if(i) descriptions.put('\n');
+        descriptions.put(needsapply[i].desc, strlen(needsapply[i].desc));
+    }
+    descriptions.add('\0');
+    result(descriptions.getbuf());
+});
+
+ICOMMAND(cowapplychanges, "i", (int *apply),
+{
+    int changetypes = 0;
+    loopv(needsapply) changetypes |= needsapply[i].type;
+    needsapply.shrink(0);
+    applydialogrouted = false;
+    cowui::closelegacygui();
+    if(*apply)
+    {
+        if(changetypes&CHANGE_GFX) updatelater.add().schedule("resetgl");
+        if(changetypes&CHANGE_SOUND) updatelater.add().schedule("resetsound");
+    }
+});
+
+bool cowui::routeapplydialog()
+{
+    if(needsapply.empty() || applydialogrouted) return false;
+
+    static bool declared = false;
+    if(!declared)
+    {
+        char name[] = "__cow_apply_changes";
+        char body[] =
+            "guitext \"The following settings require a subsystem restart:\"; "
+            "guitextbox (cowpendingchanges) 48 4; guibar; guistayopen [ "
+            "guilist [ guibutton \"Apply now\" [cowapplychanges 1]; "
+            "guibutton \"Keep for next launch\" [cowapplychanges 0] ] ]";
+        char title[] = "Apply changes";
+        char init[] = "";
+        newgui(name, body, title, init);
+        declared = true;
+    }
+
+    const int position = guistack.find(&applymenu);
+    if(position >= 0) guistack.remove(position);
+    if(!cowui::tryroutelegacygui("__cow_apply_changes"))
+    {
+        if(guistack.find(&applymenu) < 0) pushgui(&applymenu);
+        return false;
+    }
+    applydialogrouted = true;
+    return true;
+}
+
 VARP(applydialog, 0, 1, 1);
 
 static bool processingmenu = false;
@@ -1162,6 +1220,11 @@ namespace cowui
         if(!compactmenu) return;
         menu *m = compactmenu;
         compactmenu = NULL;
+        if(m->name && !strcmp(m->name, "__cow_apply_changes"))
+        {
+            needsapply.shrink(0);
+            applydialogrouted = false;
+        }
         if(m->onclear)
         {
             uint *action = m->onclear;

@@ -444,7 +444,7 @@ struct collectclientmode : clientmode
 
     void drawhud(fpsent *d, int w, int h)
     {
-        if(d->state == CS_ALIVE && d->tokens > 0)
+        if(!nativegameplayhud() && d->state == CS_ALIVE && d->tokens > 0)
         {
             float x = statushudnextx(w, h, d);
             const float scale = 1.35f;
@@ -504,6 +504,15 @@ struct collectclientmode : clientmode
                 draw_textf("%s%d", (x+s/2)/2-(wait>=10 ? 28 : 16), (y+s/2)/2-32, flash ? "\f3" : "", wait);
                 pophudmatrix();
             }
+        }
+    }
+
+    void gameplayhud(fpsent *d, cowui::GameplayHudSnapshot &status)
+    {
+        if(d->state == CS_ALIVE && d->tokens > 0)
+        {
+            status.mode_icon = 4;
+            status.mode_count = d->tokens;
         }
     }
 

@@ -147,6 +147,19 @@ body {
 .cow-status-quad .cow-status-icon {
     margin-right: 0;
 }
+.cow-status-mode {
+    display: none;
+    height: 2.60em;
+    padding: 0 0.30em;
+    flex-direction: row;
+    align-items: center;
+    color: #FFFFFF;
+    font-size: 1.15em;
+    font-weight: bold;
+}
+.cow-status-mode .cow-status-icon {
+    margin-right: 0.15em;
+}
 .cow-ammo-bar-root {
     position: absolute;
     left: 0;

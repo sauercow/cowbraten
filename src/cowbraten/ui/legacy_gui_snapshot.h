@@ -42,6 +42,7 @@ namespace cowui
     bool activatelegacygui(int activation, const char *value = nullptr);
     bool openlegacygui(const char *name);
     void releaselegacygui();
+    bool routeapplydialog();
     void renderlegacyguipreview(const char *kind, const char *resource,
         int first, int second, int third,
         int x, int y, int width, int height);

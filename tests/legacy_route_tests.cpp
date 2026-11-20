@@ -127,6 +127,11 @@ int main()
           ui.find("PullToFront()") != std::string::npos &&
           ui.find("Rml::ModalFlag::Modal") != std::string::npos,
         "compact menus are modal overlays above the active RmlUi screen");
+    check(engine_menus.find("routeapplydialog") != std::string::npos &&
+          engine_menus.find("__cow_apply_changes") != std::string::npos &&
+          engine_menus.find("cowapplychanges") != std::string::npos &&
+          ui.find("routeapplydialog();") != std::string::npos,
+        "engine apply confirmation routes through the RmlUi compact adapter");
     check(engine_main.find("event.key.keysym.sym >= SDLK_F1") !=
               std::string::npos &&
           engine_main.find("cowui::receivesinput() && !function_bind") !=
