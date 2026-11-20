@@ -1,5 +1,41 @@
 # Changelog
 
+## cowbraten 1.1.0-rc.3 — 2026-11-20
+
+The third RmlUi release candidate completes the ordinary legacy-interface migration. Legacy menu declarations are no longer loaded by default, while an explicit compatibility switch and the original files remain available for third-party content and recovery.
+
+### Legacy-interface migration
+
+- Reconstruct configurable `newgui` and Autoexec menus as compact RmlUi overlays instead of redirecting them to unrelated full-screen pages.
+- Preserve typed buttons, fields, sliders, checkboxes, progress bars, package images, model previews, tabs, lifecycle hooks, and original engine-owned actions.
+- Keep compact menus above the main application shell and allow function-key binds to open them while another native screen is visible.
+- Route the engine apply-confirmation dialog through the same native compact-menu adapter.
+- Add native loading and map presentation, gameplay status dock, secondary ammo indicators, configurable ammo bar, demo-recording indicator, mode flags/tokens, match score, and frag feedback.
+- Add a persistent startup switch for legacy menu scripts. They are disabled by default but remain available as an explicit compatibility fallback.
+- Retain the engine-owned spatial radar/minimap and texture palette, early-loading OpenGL fallback, and unknown third-party GUI fallback as intentional compatibility boundaries.
+
+### Demo and interface refinements
+
+- Add an online-only option for automatic demo recording while retaining manual and offline recording behavior when the option is disabled.
+- Correct compact-menu layering and close-button alignment.
+- Replace enlarged legacy radar blips with dedicated native flag artwork in CTF
+  and Hold, and reuse the native skull artwork for carried Collect tokens.
+- Restore legacy team colors, FFA scoreboard grouping, spectator score behavior, weapon feedback placement, and game-clock positioning in the native HUD.
+- Improve large-text scoreboard columns, first-open interface preferences, and server-browser refresh presentation.
+- Add long-session performance telemetry and reusable FFA benchmark scenarios.
+
+### Performance
+
+- Cache unchanged gameplay HUD snapshots so RmlUi properties and layout are not invalidated every rendered frame.
+- Skip empty frag-feedback updates and cap passive overlay reconciliation at 120 Hz while keeping interactive menus and rendering uncapped.
+- Reduce measured gameplay UI update time from approximately 1.0 ms to 0.013 ms per frame in the Linux validation environment.
+
+### Validation
+
+- Pass the complete interface, routing, loading, HUD, demo, persistence, and performance-analysis test suite.
+- Compile the Linux client and standalone server and validate a real FFA runtime session with legacy menu scripts disabled.
+- Preserve p1xbraten 9.0.0 detection, the Sauerbraten network protocol, and the standard demo format.
+
 ## cowbraten 1.1.0-rc.2 — 2026-11-13
 
 The second RmlUi release candidate. It expands the initial production slice into the normal player flow, adds responsive presentation and customization, and carries the complete 1.0.1 maintenance line. Final 1.1.0 remains gated on migrating or deliberately classifying every interface path that still draws through the legacy GUI.

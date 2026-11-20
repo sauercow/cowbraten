@@ -148,17 +148,50 @@ body {
     margin-right: 0;
 }
 .cow-status-mode {
+    position: relative;
     display: none;
     height: 2.60em;
+    width: 4.45em;
+    margin-left: 0.02em;
     padding: 0 0.30em;
+    border: 1px #AAB4C0;
+    border-radius: 0.43em;
+    background-color: #1B2028E9;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
     color: #FFFFFF;
-    font-size: 1.15em;
     font-weight: bold;
+    pointer-events: none;
 }
 .cow-status-mode .cow-status-icon {
-    margin-right: 0.15em;
+    width: 3.45em;
+    height: 2.16em;
+    margin-right: 0;
+}
+.cow-status-mode #cow-status-mode-count {
+    position: absolute;
+    right: 0.18em;
+    bottom: 0.10em;
+    min-width: 0.72em;
+    padding: 0.02em 0.10em;
+    border-radius: 0.18em;
+    background-color: #07101FCC;
+    color: #FFFFFF;
+    font-size: 0.72em;
+    text-align: center;
+}
+.cow-mode-red {
+    border-color: #FF506A;
+    background-color: #2C1724E9;
+}
+.cow-mode-blue {
+    border-color: #318DE9;
+    background-color: #10283BE9;
+}
+.cow-mode-neutral, .cow-mode-token {
+    border-color: #AAB4C0;
+    background-color: #1B2028E9;
 }
 .cow-ammo-bar-root {
     position: absolute;

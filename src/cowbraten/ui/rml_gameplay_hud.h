@@ -152,14 +152,20 @@ namespace cowui
             {
                 static const char *resources[] =
                 {
-                    "", "?cowbraten-resource:packages/hud/blip_blue_flag.png",
-                    "?cowbraten-resource:packages/hud/blip_red_flag.png",
-                    "?cowbraten-resource:packages/hud/blip_neutral_flag.png",
-                    "?cowbraten-resource:packages/hud/blip_red_skull.png"
+                    "", "../images/hud/v1/flag_blue.png",
+                    "../images/hud/v1/flag_red.png",
+                    "../images/hud/v1/flag_neutral.png",
+                    "../images/hud/v1/suicide.png"
                 };
                 const int icon = snapshot.mode_icon >= 1 &&
                     snapshot.mode_icon <= 4 ? snapshot.mode_icon : 0;
                 mode_icon->SetAttribute("src", resources[icon]);
+                mode_card->SetClass("cow-mode-blue", icon == 1);
+                mode_card->SetClass("cow-mode-red", icon == 2);
+                mode_card->SetClass("cow-mode-neutral", icon == 3);
+                mode_card->SetClass("cow-mode-token", icon == 4);
+                mode_count->SetProperty("display",
+                    snapshot.mode_count > 0 ? "block" : "none");
                 settext(mode_count, snapshot.mode_count > 0
                     ? Rml::CreateString("%d", snapshot.mode_count) : "");
             }

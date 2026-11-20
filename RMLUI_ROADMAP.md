@@ -2,11 +2,20 @@
 
 ## Release-candidate baseline
 
-Cowbraten **1.1.0-rc.2** is the current RmlUi release candidate. It contains the complete Cowbraten 1.0.1 maintenance history, the native interface described below, p1xbraten 9.0.0 detection compatibility, and the existing Sauerbraten network and standard demo format versions.
+Cowbraten **1.1.0-rc.3** is the current RmlUi release candidate. It contains the complete Cowbraten 1.0.1 maintenance history, the native interface described below, p1xbraten 9.0.0 detection compatibility, and the existing Sauerbraten network and standard demo format versions.
 
-Cowbraten **1.0.1-rc.3** remains the classic-interface release candidate. The intended stable **1.0.1** release is an exact promotion of rc.3 after final verification; the rc.3 tag will remain historical and will not be moved.
+Cowbraten **1.0.1** is the stable classic-interface release. Its rc.3 tag remains historical and immutable.
 
-The **1.1.0** stable designation is reserved until every interface path that still draws through the legacy GUI has been found and either migrated to RmlUi or explicitly documented as an intentional compatibility/engine boundary.
+The ordinary legacy-interface inventory is complete for RC3. The **1.1.0** stable designation is reserved for final cross-platform verification of this interface and packaging baseline.
+
+## Completed in rc.3
+
+- Migrate loading, gameplay status, secondary ammo, configurable ammo bar, demo recording, carried mode items, match score, frag feedback, and apply confirmation to RmlUi.
+- Capture configurable `newgui` and Autoexec menus into typed snapshots and reconstruct their controls, editors, progress, images, previews, tabs, lifecycle hooks, and opaque engine-owned actions as compact native overlays.
+- Layer compact overlays above active native screens and preserve function-key menu binds.
+- Disable legacy menu declarations by default through a persistent startup switch while retaining the original files and explicit fallback.
+- Add online-only automatic demo recording and finish native HUD/scoreboard behavior corrections.
+- Cache unchanged HUD state, skip inactive feedback, and throttle passive reconciliation so the native overlay no longer imposes a per-frame layout cost.
 
 ## Completed in rc.2
 
@@ -39,21 +48,23 @@ The **1.1.0** stable designation is reserved until every interface path that sti
 - Public/team chat, console editing, completion and history use the existing engine paths behind their native presentation.
 - The top-left feed uses the available viewport width rather than an arbitrary 40–44% maximum, while preserving minimap clearance.
 
-## Validation completed for rc.2
+## Validation completed through rc.3
 
 - Linux client and standalone server compilation.
 - Focused regression coverage for the app shell, settings, profile, game setup, servers, demos, chat, console, editor, utilities, HUD, and scoreboard.
 - SDL dummy-audio/offscreen-video startup and rendering checks, including both Legacy and Lato font loading.
 - Responsive document checks at compact and desktop viewports and performance regression tooling for high-update interface paths.
+- Full configurable-menu routing, startup-switch, loading, HUD cache, and passive-overlay regression coverage.
+- Real FFA runtime profiling with legacy menu scripts disabled; UI update overhead measured at approximately 0.013 ms per frame in the Linux validation environment.
 
 Windows and macOS packaging paths are retained, but interactive platform-specific display, input, and audio-device testing should continue as those environments are available.
 
-## Stable-release gates
+## Stable-release verification gates
 
-1. Inventory every `showgui`, legacy GUI render, HUD draw, and compatibility handoff reachable during normal play, spectating, demos, administration, and editing.
-2. Migrate every remaining ordinary player-facing legacy surface to RmlUi.
-3. Record intentional exceptions in this document with their reason and ownership; they must not remain accidental fallbacks.
-4. Exercise navigation, focus, text input, scrolling, bindings, display transitions, persistence, audio devices, servers, demos, multiplayer, bot matches, and editing interactively.
+1. Complete: inventory every `showgui`, legacy GUI render, HUD draw, and compatibility handoff reachable during normal play, spectating, demos, administration, and editing.
+2. Complete: migrate every ordinary player-facing legacy surface to RmlUi.
+3. Complete: record intentional exceptions in this document with their reason and ownership.
+4. Exercise navigation, focus, text input, scrolling, bindings, display transitions, persistence, audio devices, servers, demos, multiplayer, bot matches, and editing interactively across supported platforms.
 5. Run the available Linux, Windows, and macOS build/package checks and record platform-specific limitations.
 6. Re-run the full regression suite and runtime smoke checks from a clean release worktree.
 
@@ -64,15 +75,15 @@ Windows and macOS packaging paths are retained, but interactive platform-specifi
 - Loading that happens before RmlUi is ready, or while its document cannot be loaded, uses the original OpenGL presentation. Generated lightmap preview textures also remain engine-rendered because they are raw GL handles rather than package resources.
 - HD recordings use optional `.dmohd` companion files; standard `.dmo` recording and playback remain supported.
 
-## Remaining migration inventory
+## Completed migration inventory
 
 - Custom `newgui` documents created by third-party or user `autoexec.cfg` files now use the general RmlUi recorder, including editor buffers, progress bars, package textures, 3D previews, tabs, init, and clear hooks. The recorder evaluates configured controls into typed snapshots and opaque activation indices, so user-defined menus retain their actions without exposing CubeScript to RML. Unknown future engine primitives still fail the capture as a whole instead of presenting a partial menu.
 - The locally observed `autoignore`, `aliases`, and `ss` Autoexec menus now route to native Chat, Profile, and Graphics screens. Display actions remain user-owned `ss_*` aliases discovered through a typed bridge, so personal resolutions are not copied into product code and RML cannot submit script text.
 - The ordinary engine main-menu backdrop is still drawn by the engine behind the native application shell.
 - The compact secondary-ammo cluster, configurable full ammo bar, demo-recording indicator, carried flags, Hold timer, and Collect token count are part of the native status snapshot, with the original OpenGL drawing retained only when the native overlay cannot initialize. Mode radar/minimap and its world-relative blips remain an intentional spatial engine surface because they combine a generated minimap texture, camera rotation, and live world locations. Respawn placement remains coupled to that radar surface.
-- Legacy menu declarations and configuration files must remain available until a runtime switch can skip their UI declarations without skipping gameplay configuration, binds, aliases, map scripts, or mod compatibility.
+- Legacy menu declarations and configuration files remain available, but the persistent startup switch now skips their UI declarations by default without skipping gameplay configuration, binds, aliases, map scripts, or mod compatibility.
 
-The target removal step is therefore to stop loading and rendering the legacy *UI* by default while retaining its files and an explicit compatibility switch. It is not to remove CubeScript or the engine configuration layer.
+RC3 completes the target removal step: legacy *UI* declarations are not loaded by default, while their files and an explicit compatibility switch remain. CubeScript and the engine configuration layer are intentionally unaffected.
 
 ## Post-1.1 maintenance
 
@@ -84,6 +95,6 @@ The target removal step is therefore to stop loading and rendering the legacy *U
 ## Tag and branch policy
 
 - Keep `cow-v1.0.1-rc.3` and all other RC tags immutable.
-- After verification, tag the exact rc.3 code promotion as `cow-v1.0.1`; do not add feature work to that line.
-- Tag this work as `cow-v1.1.0-rc.2` only after its release commit is prepared and verified.
+- Keep the stable classic-interface tag `cow-v1.0.1` immutable.
+- Tag this work as `cow-v1.1.0-rc.3` only after its release commit is prepared and verified.
 - Create `cow-v1.1.0` only after the stable-release gates above are complete.

@@ -50,6 +50,8 @@ int main()
         "../src/cowbraten/ui/rml_gameplay_hud.h");
     const std::string native_rml = readfile(
         "../data/cowbraten/ui/default/screens/gameplay_hud.rml");
+    const std::string native_style = readfile(
+        "../data/cowbraten/ui/default/styles/gameplay_hud.rcss");
     const std::string ui = readfile("../src/cowbraten/ui/ui.cpp");
     const std::string frag_feedback = readfile(
         "../src/cowbraten/ui/rml_frag_feedback.h");
@@ -85,6 +87,21 @@ int main()
           ctf.find("!nativegameplayhud()") != std::string::npos &&
           collect.find("!nativegameplayhud()") != std::string::npos,
         "mode-specific flag and token indicators use the native dock with fallback");
+    check(native_hud.find("../images/hud/v1/flag_blue.png") != std::string::npos &&
+          native_hud.find("../images/hud/v1/flag_red.png") != std::string::npos &&
+          native_hud.find("../images/hud/v1/flag_neutral.png") != std::string::npos &&
+          native_hud.find("../images/hud/v1/suicide.png") != std::string::npos &&
+          native_hud.find("packages/hud/blip_") == std::string::npos,
+        "mode indicators use native HUD artwork instead of legacy radar blips");
+    check(native_hud.find("cow-mode-blue") != std::string::npos &&
+          native_hud.find("cow-mode-red") != std::string::npos &&
+          native_hud.find("cow-mode-neutral") != std::string::npos &&
+          native_hud.find("cow-mode-token") != std::string::npos &&
+          native_style.find(".cow-mode-red") != std::string::npos &&
+          native_style.find(".cow-mode-blue") != std::string::npos &&
+          native_style.find(".cow-mode-neutral, .cow-mode-token") !=
+              std::string::npos,
+        "mode cards match their red blue and neutral gameplay semantics");
     check(snapshot.find("demo_recording") != std::string::npos &&
           native_hud.find("cow-demo-recording") != std::string::npos &&
           native_rml.find("cow-demo-recording") != std::string::npos &&

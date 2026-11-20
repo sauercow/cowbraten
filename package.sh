@@ -35,7 +35,7 @@ function pack() {
     case "$platform" in
         windows)
             mkdir -p dist
-            rm -f dist/cowbraten_setup*
+            rm -f dist/cowbraten_setup_"$version".exe
             makensis -DVERSION="$version" src/windows/cowbraten.nsi
             mv cowbraten_setup_* dist/
             ;;

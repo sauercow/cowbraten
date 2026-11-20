@@ -2,22 +2,26 @@
 
 This repository contains **cowbraten**, a standalone-branded fork of [p1xbraten](https://github.com/sauerbraten/p1xbraten) with a native RmlUi interface and additional demo playback, HUD, crosshair, sound, and quality-of-life features. It retains p1xbraten network detection compatibility while versioning and packaging cowbraten separately.
 
-Current fork version: **1.1.0-rc.2**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights and the [RmlUi status document](./RMLUI_ROADMAP.md) for implementation details and remaining release work.
+Current fork version: **1.1.0-rc.3**, based on **p1xbraten 9.0.0**. See the [changelog](./CHANGELOG.md) for release highlights and the [RmlUi status document](./RMLUI_ROADMAP.md) for implementation details and remaining release work.
 
 ## Release plan
 
-- **1.0.1-rc.3** remains the current classic-interface release candidate. The plan is to promote that exact code to **1.0.1** stable after final release verification.
-- **1.1.0-rc.2** is the current RmlUi release candidate. It includes the complete 1.0.1 line plus the new interface, demo library and playback tools, responsive HUD and scoreboard work, and the other features described below.
-- **1.1.0** stable is reserved for the point at which the remaining legacy-drawn interface paths have been migrated or explicitly classified as intentional engine surfaces.
+- **1.0.1** is the stable classic-interface line.
+- **1.1.0-rc.3** is the current RmlUi release candidate. It includes the complete 1.0.1 line, migrates ordinary legacy menu paths, and keeps only explicit engine and compatibility boundaries.
+- **1.1.0** stable is reserved for final cross-platform verification of the RC3 interface and packaging baseline.
 - All of these lines continue to report p1xbraten 9.0.0 compatibility and keep the existing Sauerbraten network protocol and standard demo format.
 
-## 1.1.0-rc.2 highlights
+## 1.1.0-rc.3 highlights
 
 - A native, responsive RmlUi interface for the normal player flow: identity, game setup, servers, demos, settings, administration, utilities, map editing, in-game menus, chat, console, and scoreboard.
 - A shared application shell, semantic icon set, alternate visual theme, independent interface/text scaling, and selectable **Legacy** or **Lato** interface typography. Legacy uses Sauerbraten's own `packages/fonts/default.ttf`, matching the console and FPS text from the classic client.
 - A rebuilt demo library with metadata, search and classification, favorites, recoverable trash, playback transport controls, and local demo visualization options including X-RAY and hitboxes.
 - Server favorites, profile presets and model-spoofing controls, safe autoexec profiles, automatic chat ignore rules, and typed administration actions.
 - Responsive gameplay overlays and scoreboard, including compact-screen behavior and a top-left feed that uses the available width while preserving minimap clearance.
+- Native compact reconstruction of configurable `newgui` and Autoexec menus, including their controls, previews, tabs, lifecycle hooks, and original actions.
+- Native loading, status HUD, ammo displays, mode indicators, match score, frag feedback, and apply-confirmation presentation.
+- Legacy menu scripts disabled by default through a persistent startup switch, with their files and explicit compatibility fallback retained.
+- Cached passive overlays that avoid per-frame layout invalidation and substantially reduce gameplay UI overhead.
 - A typed C++ boundary between documents and engine behavior: interface markup cannot execute arbitrary CubeScript or select arbitrary engine identifiers.
 
 - [Installation](#installation)
@@ -94,9 +98,11 @@ Release builds provide both a portable ZIP and an executable `cowbraten_setup_li
 
 Cowbraten 1.1 uses a native RmlUi layer for the normal player interface: Profile, Play and game setup, Servers, Demos, Settings, Administration and About, text utilities, map editing, the in-game menu, chat, console, and scoreboard. These screens use typed C++ APIs for engine state and preserve the existing Sauer configuration format.
 
-The specialized in-engine 3D texture palette remains engine-owned. User and third-party `newgui` documents are reconstructed as RmlUi panels while keeping their evaluated labels, editor buffers, progress, package textures, 3D previews, configuration fields, tabs, lifecycle hooks, and original engine-owned actions. The updated `menus.cfg` remains installed while the remaining engine overlays and compatibility fallback are retired.
+The specialized in-engine 3D texture palette and spatial radar/minimap remain engine-owned. User and third-party `newgui` documents are reconstructed as RmlUi panels while keeping their evaluated labels, editor buffers, progress, package textures, 3D previews, configuration fields, tabs, lifecycle hooks, and original engine-owned actions. Legacy menu files remain installed for compatibility, but their UI declarations are not loaded by default.
 
 If you do not want to use the cowbraten menus, run `/usecowbratenmenus 0`.
+
+To restore the original legacy menu declarations for compatibility, enable **Settings → Advanced → Autoexec → Legacy menu fallback** and restart, or set `/loadlegacymenus 1` before the next launch.
 
 
 ## Patches
