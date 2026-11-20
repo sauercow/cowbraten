@@ -10,7 +10,8 @@ namespace cowui
         {
             SecondaryUpSlots = 3,
             SecondaryDownSlots = 3,
-            SecondaryCycleSlots = 6
+            SecondaryCycleSlots = 6,
+            AmmoBarSlots = 6
         };
 
         bool enabled = false;
@@ -30,6 +31,17 @@ namespace cowui
         int secondary_down[SecondaryDownSlots] = { -1, -1, -1 };
         int secondary_cycle[SecondaryCycleSlots] =
             { -1, -1, -1, -1, -1, -1 };
+        bool show_ammo_bar = false;
+        bool ammo_bar_horizontal = false;
+        bool ammo_bar_flip = false;
+        bool ammo_bar_visible[AmmoBarSlots] = {};
+        int ammo_bar_count[AmmoBarSlots] = {};
+        int ammo_bar_tone[AmmoBarSlots] = {};
+        float ammo_bar_x[AmmoBarSlots] = {};
+        float ammo_bar_y[AmmoBarSlots] = {};
+        float ammo_bar_icon_size = 0.0f;
+        float ammo_bar_label_gap = 0.0f;
+        float ammo_bar_label_size = 0.0f;
         float x = 0.5f;     // HUD viewport normalized; matches legacy dock center
         float y = 0.923333f;// legacy STATUS_DOCK_Y / 1800
     };

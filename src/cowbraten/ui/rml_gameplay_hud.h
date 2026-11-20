@@ -18,6 +18,7 @@ namespace cowui
                 "data/cowbraten/ui/default/screens/gameplay_hud.rml");
             if(!document) { context = nullptr; return false; }
             root = document->GetElementById("cow-status-root");
+            ammo_bar_root = document->GetElementById("cow-ammo-bar-root");
             health_value = document->GetElementById("cow-status-health-value");
             health_max = document->GetElementById("cow-status-health-max");
             armour_value = document->GetElementById("cow-status-armour-value");
@@ -43,10 +44,17 @@ namespace cowui
             for(int i = 0; i < GameplayHudSnapshot::SecondaryCycleSlots; ++i)
                 secondary_cycle[i] = document->GetElementById(
                     Rml::CreateString("cow-status-cycle-%d", i));
+            for(int i = 0; i < GameplayHudSnapshot::AmmoBarSlots; ++i)
+            {
+                ammo_bar_items[i] = document->GetElementById(
+                    Rml::CreateString("cow-ammo-bar-item-%d", i));
+                ammo_bar_counts[i] = document->GetElementById(
+                    Rml::CreateString("cow-ammo-bar-count-%d", i));
+            }
             quad_card = document->GetElementById("cow-status-quad");
             const bool valid = root && health_value && health_max &&
                 armour_value && ammo_value && armour_card && ammo_card &&
-                health_card && quad_card && secondary_up_group &&
+                health_card && quad_card && ammo_bar_root && secondary_up_group &&
                 secondary_down_group && secondary_cycle_group;
             bool all_weapons = true;
             for(int i = 0; i < 8; ++i)
@@ -57,6 +65,9 @@ namespace cowui
                 all_weapons = all_weapons && secondary_down[i];
             for(int i = 0; i < GameplayHudSnapshot::SecondaryCycleSlots; ++i)
                 all_weapons = all_weapons && secondary_cycle[i];
+            for(int i = 0; i < GameplayHudSnapshot::AmmoBarSlots; ++i)
+                all_weapons = all_weapons && ammo_bar_items[i] &&
+                    ammo_bar_counts[i];
             if(!valid || !all_weapons)
             {
                 shutdown(ctx);
@@ -64,6 +75,7 @@ namespace cowui
             }
             document->SetProperty("font-family", "Lato");
             root->SetProperty("display", "none");
+            ammo_bar_root->SetProperty("display", "none");
             document->Show();
             return true;
         }
@@ -77,10 +89,14 @@ namespace cowui
         void update(bool allow_overlay)
         {
             if(!document || !root) return;
-            shown = allow_overlay && have_snapshot &&
+            const bool status_shown = allow_overlay && have_snapshot &&
                 snapshot.enabled && snapshot.show;
-            root->SetProperty("display", shown ? "flex" : "none");
-            if(!shown) return;
+            const bool ammo_bar_shown = status_shown && snapshot.alive &&
+                snapshot.show_ammo_bar;
+            shown = status_shown || ammo_bar_shown;
+            root->SetProperty("display", status_shown ? "flex" : "none");
+            ammo_bar_root->SetProperty("display", ammo_bar_shown ? "block" : "none");
+            if(!status_shown) return;
 
             // In Sauer's virtual HUD, statusdockcenter(w,h) is expressed in
             // (1800*w/h) units. Center the complete RmlUi row at that exact
@@ -136,6 +152,8 @@ namespace cowui
                 setweapon(secondary_down[i], snapshot.secondary_down[i], secondary);
             for(int i = 0; i < GameplayHudSnapshot::SecondaryCycleSlots; ++i)
                 setweapon(secondary_cycle[i], snapshot.secondary_cycle[i], secondary);
+
+            if(ammo_bar_shown) updateammobar();
         }
 
         bool visible() const { return shown; }
@@ -146,7 +164,8 @@ namespace cowui
             if(document) document->Close();
             document = nullptr;
             context = nullptr;
-            root = health_value = health_max = armour_value = ammo_value = nullptr;
+            root = ammo_bar_root = health_value = health_max = armour_value =
+                ammo_value = nullptr;
             armour_card = ammo_card = health_card = quad_card = nullptr;
             secondary_up_group = secondary_down_group =
                 secondary_cycle_group = nullptr;
@@ -157,6 +176,8 @@ namespace cowui
                 secondary_down[i] = nullptr;
             for(int i = 0; i < GameplayHudSnapshot::SecondaryCycleSlots; ++i)
                 secondary_cycle[i] = nullptr;
+            for(int i = 0; i < GameplayHudSnapshot::AmmoBarSlots; ++i)
+                ammo_bar_items[i] = ammo_bar_counts[i] = nullptr;
             shown = false;
             have_snapshot = false;
         }
@@ -185,9 +206,61 @@ namespace cowui
             if(visible) element->SetAttribute("src", resources[gun]);
         }
 
+        void updateammobar()
+        {
+            const float icon = snapshot.ammo_bar_icon_size;
+            const float label_height = snapshot.ammo_bar_label_size*1.25f;
+            const float distance = icon*0.5f + snapshot.ammo_bar_label_gap +
+                label_height*0.5f;
+            for(int i = 0; i < GameplayHudSnapshot::AmmoBarSlots; ++i)
+            {
+                Rml::Element *item = ammo_bar_items[i];
+                Rml::Element *count = ammo_bar_counts[i];
+                const bool visible = snapshot.ammo_bar_visible[i];
+                item->SetProperty("display", visible ? "block" : "none");
+                if(!visible) continue;
+                item->SetProperty("left", Rml::CreateString("%.2fpx",
+                    snapshot.ammo_bar_x[i] - icon*0.5f));
+                item->SetProperty("top", Rml::CreateString("%.2fpx",
+                    snapshot.ammo_bar_y[i] - icon*0.5f));
+                item->SetProperty("width", Rml::CreateString("%.2fpx", icon));
+                item->SetProperty("height", Rml::CreateString("%.2fpx", icon));
+                item->SetClass("cow-ammo-bar-warning",
+                    snapshot.ammo_bar_tone[i] == 1);
+                item->SetClass("cow-ammo-bar-critical",
+                    snapshot.ammo_bar_tone[i] == 2);
+                item->SetClass("cow-ammo-bar-empty",
+                    snapshot.ammo_bar_count[i] == 0);
+                settext(count, Rml::CreateString("%d",
+                    snapshot.ammo_bar_count[i]));
+                count->SetProperty("font-size", Rml::CreateString("%.2fpx",
+                    snapshot.ammo_bar_label_size));
+                count->SetProperty("width", Rml::CreateString("%.2fpx", icon*2.0f));
+                count->SetProperty("height", Rml::CreateString("%.2fpx", label_height));
+                if(snapshot.ammo_bar_horizontal)
+                {
+                    count->SetProperty("left", Rml::CreateString("%.2fpx", -icon*0.5f));
+                    const float center = icon*0.5f +
+                        (snapshot.ammo_bar_flip ? -distance : distance);
+                    count->SetProperty("top", Rml::CreateString("%.2fpx",
+                        center - label_height*0.5f));
+                }
+                else
+                {
+                    const float center = icon*0.5f +
+                        (snapshot.ammo_bar_flip ? -distance : distance);
+                    count->SetProperty("left", Rml::CreateString("%.2fpx",
+                        center - icon));
+                    count->SetProperty("top", Rml::CreateString("%.2fpx",
+                        icon*0.5f - label_height*0.5f));
+                }
+            }
+        }
+
         Rml::Context *context = nullptr;
         Rml::ElementDocument *document = nullptr;
         Rml::Element *root = nullptr;
+        Rml::Element *ammo_bar_root = nullptr;
         Rml::Element *health_value = nullptr, *health_max = nullptr;
         Rml::Element *armour_value = nullptr, *ammo_value = nullptr;
         Rml::Element *health_card = nullptr, *armour_card = nullptr;
@@ -203,5 +276,7 @@ namespace cowui
         Rml::Element *secondary_up[GameplayHudSnapshot::SecondaryUpSlots] = {};
         Rml::Element *secondary_down[GameplayHudSnapshot::SecondaryDownSlots] = {};
         Rml::Element *secondary_cycle[GameplayHudSnapshot::SecondaryCycleSlots] = {};
+        Rml::Element *ammo_bar_items[GameplayHudSnapshot::AmmoBarSlots] = {};
+        Rml::Element *ammo_bar_counts[GameplayHudSnapshot::AmmoBarSlots] = {};
     };
 }

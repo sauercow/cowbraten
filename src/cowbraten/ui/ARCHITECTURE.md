@@ -172,10 +172,10 @@ name. The normal application-shell backdrop remains engine-owned for now.
 
 `fpsgame::gameplayhud()` remains authoritative for the observed player and
 weapon availability. It publishes health, armour, active ammo, quad state,
-and the configured `ammohudup`, `ammohuddown`, and `ammohudcycle` secondary
-weapon lists through `GameplayHudSnapshot`. `RmlGameplayHud` renders the whole
-status dock, including those compact secondary icons. The old OpenGL status
-and secondary-ammo functions remain available only when `cowgameplayhud` is
+the configured `ammohudup`, `ammohuddown`, and `ammohudcycle` secondary weapon
+lists, and every full-ammo-bar layout setting through `GameplayHudSnapshot`.
+`RmlGameplayHud` renders the status dock and optional ammo bar. The old OpenGL
+status and ammo functions remain available only when `cowgameplayhud` is
 disabled or the RmlUi document cannot initialize.
 
 ## Text utilities model

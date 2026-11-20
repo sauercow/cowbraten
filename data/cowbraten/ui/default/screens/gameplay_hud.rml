@@ -55,5 +55,13 @@
       </div>
     </div>
   </div>
+  <div id="cow-ammo-bar-root" class="cow-ammo-bar-root">
+    <div id="cow-ammo-bar-item-0" class="cow-ammo-bar-item"><img src="../images/hud/v1/shotgun.png" /><span id="cow-ammo-bar-count-0">0</span></div>
+    <div id="cow-ammo-bar-item-1" class="cow-ammo-bar-item"><img src="../images/hud/v1/chaingun.png" /><span id="cow-ammo-bar-count-1">0</span></div>
+    <div id="cow-ammo-bar-item-2" class="cow-ammo-bar-item"><img src="../images/hud/v1/rocket_launcher.png" /><span id="cow-ammo-bar-count-2">0</span></div>
+    <div id="cow-ammo-bar-item-3" class="cow-ammo-bar-item"><img src="../images/hud/v1/rifle.png" /><span id="cow-ammo-bar-count-3">0</span></div>
+    <div id="cow-ammo-bar-item-4" class="cow-ammo-bar-item"><img src="../images/hud/v1/grenade_launcher.png" /><span id="cow-ammo-bar-count-4">0</span></div>
+    <div id="cow-ammo-bar-item-5" class="cow-ammo-bar-item"><img src="../images/hud/v1/pistol.png" /><span id="cow-ammo-bar-count-5">0</span></div>
+  </div>
 </body>
 </rml>

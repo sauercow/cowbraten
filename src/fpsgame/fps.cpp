@@ -1688,6 +1688,43 @@ namespace game
                         status.secondary_cycle[count++] = gun;
                 }
             }
+            status.show_ammo_bar = status.alive && ammobar && !m_insta;
+            if(status.show_ammo_bar)
+            {
+                const int numguns = GUN_PISTOL - GUN_SG + 1;
+                int visibleguns = numguns;
+                loopi(numguns) if(!ammobargunvisible(d, GUN_SG + i,
+                    ammobarhideempty != 0)) --visibleguns;
+                const float stepsize = HICON_SIZE + ammobarsep;
+                const float initialoffset = (ammobaralign - 1) *
+                    (visibleguns - 1) * stepsize / 2.0f;
+                int skipped = 0;
+                loopi(numguns)
+                {
+                    const int gun = GUN_SG + i;
+                    const bool visible = ammobargunvisible(d, gun,
+                        ammobarhideempty != 0);
+                    status.ammo_bar_visible[i] = visible;
+                    status.ammo_bar_count[i] = d->ammo[gun];
+                    const float ratio = float(d->ammo[gun]) /
+                        itemstats[gun-GUN_SG].add;
+                    status.ammo_bar_tone[i] = d->ammo[gun] == 0 || ratio >= 1.0f
+                        ? 0 : (ratio >= 0.5f ? 1 : 2);
+                    if(!visible) { ++skipped; continue; }
+                    const float offset = initialoffset +
+                        (i - skipped) * stepsize;
+                    status.ammo_bar_x[i] = ammobarx*w +
+                        (ammobarhorizontal ? offset*ammobarscale : 0.0f);
+                    status.ammo_bar_y[i] = ammobary*h +
+                        (ammobarhorizontal ? 0.0f : offset*ammobarscale);
+                }
+                status.ammo_bar_horizontal = ammobarhorizontal != 0;
+                status.ammo_bar_flip = ammobarflip != 0;
+                status.ammo_bar_icon_size = HICON_SIZE*ammobarscale;
+                status.ammo_bar_label_gap = ammobarcountsep*ammobarscale;
+                status.ammo_bar_label_size = 64.0f*ammobarcountscale*
+                    ammobarscale;
+            }
         }
         cowui::syncgameplayhud(status);
         if(d->state!=CS_EDITING)
@@ -1705,7 +1742,7 @@ namespace game
 
         if(d->state!=CS_EDITING && d->state!=CS_SPECTATOR && d->state!=CS_DEAD)
         {
-            if(ammobar) drawammobar(w, h, d);
+            if(ammobar && !modern_status) drawammobar(w, h, d);
         }
 
                 if(!m_edit && !m_sp)

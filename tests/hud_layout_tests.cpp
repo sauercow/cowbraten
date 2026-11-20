@@ -52,6 +52,12 @@ int main()
           native_hud.find("setweapon(secondary_cycle") != std::string::npos &&
           native_rml.find("cow-status-secondary-cycle") != std::string::npos,
         "tiny available-weapon icons migrate into the native status dock");
+    check(hud.find("status.show_ammo_bar") != std::string::npos &&
+          hud.find("if(ammobar && !modern_status) drawammobar") != std::string::npos &&
+          snapshot.find("AmmoBarSlots = 6") != std::string::npos &&
+          native_hud.find("updateammobar()") != std::string::npos &&
+          native_rml.find("cow-ammo-bar-root") != std::string::npos,
+        "optional full ammo bar uses the native overlay with GL fallback");
     check(game.find("statushudnextx") != std::string::npos &&
           ctf.find("statushudnextx(w, h, d)") != std::string::npos &&
           collect.find("statushudnextx(w, h, d)") != std::string::npos,
