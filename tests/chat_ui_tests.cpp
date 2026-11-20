@@ -32,6 +32,8 @@ int main()
         "../src/cowbraten/ui/rml_chat.cpp");
     const std::string bridge = readfile(
         "../src/cowbraten/ui/sauer_chat_bridge.cpp");
+    const std::string text_bridge = readfile(
+        "../src/cowbraten/ui/sauer_text_bridge.cpp");
     const std::string console = readfile("../src/engine/console.cpp");
 
     check(rml.find("data-model=\"chat\"") != std::string::npos &&
@@ -72,6 +74,12 @@ int main()
           model.find("consoletext::markup") != std::string::npos &&
           model.find("sauerchat::inputmode") != std::string::npos,
         "chat model uses the typed Sauer bridge");
+    check(model.find("sauertext::utf8(text, position)") != std::string::npos &&
+          model.find("length - position") != std::string::npos &&
+          text_bridge.find("encodeutf8") != std::string::npos &&
+          text_bridge.find("result.push_back(text[segment_end++])") !=
+              std::string::npos,
+        "chat composer converts legacy text to UTF-8 around the cursor");
     check(bridge.find("confilter & type") != std::string::npos &&
           bridge.find("miniconfilter & type") != std::string::npos &&
           console.find("cowui::filterconsole(confilter)") != std::string::npos &&

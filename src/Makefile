@@ -112,6 +112,7 @@ UI_OBJS= \
 	cowbraten/ui/keybindings_api.o \
 	cowbraten/ui/sauer_chat_bridge.o \
 	cowbraten/ui/sauer_console_bridge.o \
+	cowbraten/ui/sauer_text_bridge.o \
 	cowbraten/ui/sauer_file_bridge.o \
 	cowbraten/ui/sauer_demo_bridge.o \
 	cowbraten/ui/sauer_input_bridge.o \

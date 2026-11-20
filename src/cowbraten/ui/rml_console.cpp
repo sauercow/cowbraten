@@ -2,6 +2,7 @@
 
 #include "rml_console_text.h"
 #include "sauer_console_bridge.h"
+#include "sauer_text_bridge.h"
 #include "ui.h"
 
 #include <RmlUi/Core/Context.h>
@@ -97,8 +98,9 @@ namespace cowui
     RmlConsole::Line RmlConsole::makeline(int type, const char *text)
     {
         Line line;
-        line.text = plain(text);
-        line.rml = consoletext::markup(text);
+        const std::string utf8_text = sauertext::utf8(text);
+        line.text = plain(utf8_text.c_str());
+        line.rml = consoletext::markup(utf8_text.c_str());
         line.warning = sauerconsole::warning(type);
         line.error = sauerconsole::error(type);
         line.chat = sauerconsole::chat(type);
@@ -240,9 +242,13 @@ namespace cowui
 
 #define SYNC(variable, value) do { const auto next = (value); if(variable != next) { variable = next; model.DirtyVariable(#variable); } } while(0)
         SYNC(input_active, active);
-        SYNC(input_label, Rml::String(plain(sauerconsole::inputlabel())));
-        SYNC(input_before, Rml::String(text, position));
-        SYNC(input_after, Rml::String(text + position));
+        const std::string utf8_label = sauertext::utf8(
+            sauerconsole::inputlabel());
+        SYNC(input_label, Rml::String(plain(utf8_label.c_str())));
+        SYNC(input_before, Rml::String(sauertext::utf8(text, position)));
+        SYNC(input_after, Rml::String(sauertext::utf8(
+            text + position,
+            length - position)));
 #undef SYNC
     }
 

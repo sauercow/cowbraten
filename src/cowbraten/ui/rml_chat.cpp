@@ -2,6 +2,7 @@
 
 #include "sauer_chat_bridge.h"
 #include "sauer_console_bridge.h"
+#include "sauer_text_bridge.h"
 #include "rml_console_text.h"
 #include "ui.h"
 
@@ -103,8 +104,9 @@ namespace cowui
     {
         bool team = false;
         Message message;
-        message.text = plain(text);
-        message.rml = consoletext::markup(text);
+        const std::string utf8_text = sauertext::utf8(text);
+        message.text = plain(utf8_text.c_str());
+        message.rml = consoletext::markup(utf8_text.c_str());
         message.chat = sauerchat::classifyline(type, team);
         message.team = team;
         message.label = message.chat
@@ -230,8 +232,10 @@ namespace cowui
         SYNC(input_active, active);
         SYNC(input_team, team);
         SYNC(input_label, Rml::String(team ? "TEAM" : "ALL"));
-        SYNC(input_before, Rml::String(text, position));
-        SYNC(input_after, Rml::String(text + position));
+        SYNC(input_before, Rml::String(sauertext::utf8(text, position)));
+        SYNC(input_after, Rml::String(sauertext::utf8(
+            text + position,
+            length - position)));
 #undef SYNC
     }
 

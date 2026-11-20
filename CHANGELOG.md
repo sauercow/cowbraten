@@ -22,6 +22,9 @@ The third RmlUi release candidate completes the ordinary legacy-interface migrat
   and Hold, and reuse the native skull artwork for carried Collect tokens.
 - Restore legacy team colors, FFA scoreboard grouping, spectator score behavior, weapon feedback placement, and game-clock positioning in the native HUD.
 - Improve large-text scoreboard columns, first-open interface preferences, and server-browser refresh presentation.
+- Restore accented Latin and other legacy Sauer characters in the native chat
+  composer, chat feed, and full console by converting engine text to UTF-8 at
+  the RmlUi boundary.
 - Add long-session performance telemetry and reusable FFA benchmark scenarios.
 
 ### Performance
