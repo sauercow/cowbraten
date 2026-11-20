@@ -48,6 +48,10 @@ int main()
     const std::string ui = readfile("../src/cowbraten/ui/ui.cpp");
     const std::string engine_menus = readfile("../src/engine/menus.cpp");
     const std::string engine_main = readfile("../src/engine/main.cpp");
+    const std::string embedded = readfile(
+        "../src/cowbraten/embedded_cfgs.cpp");
+    const std::string bootstrap = readfile(
+        "../data/cowbraten/ui-bootstrap.cfg");
     const std::string snapshot = readfile(
         "../src/cowbraten/ui/legacy_gui_snapshot.h");
     const std::string adapter = readfile(
@@ -137,6 +141,18 @@ int main()
           engine_main.find("cowui::receivesinput() && !function_bind") !=
               std::string::npos,
         "unhandled function-key binds can open compact menus above native UI");
+    check(engine_main.find("game::loadlegacymenustate();") !=
+              std::string::npos &&
+          engine_main.find("if(game::loadlegacymenus)") !=
+              std::string::npos &&
+          embedded.find("loadlegacymenus, 0, 0, 1") != std::string::npos &&
+          embedded.find("if(!loadlegacymenus) return;") !=
+              std::string::npos,
+        "startup switch bypasses both legacy menu files before config loading");
+    check(bootstrap.find("newgui") == std::string::npos &&
+          bootstrap.find("togglemainmenu") != std::string::npos &&
+          bootstrap.find("bind ESCAPE") != std::string::npos,
+        "non-legacy startup retains the essential menu binding without GUI definitions");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

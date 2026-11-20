@@ -53,6 +53,8 @@ namespace game
     extern const char *autoexec();
     extern void loadautoexecprofile();
     extern void saveautoexecprofile();
+    extern int loadlegacymenus;
+    extern void loadlegacymenustate();
     extern const char *savedservers();
     extern void loadconfigs();
     extern int writeembeddedcfgs();

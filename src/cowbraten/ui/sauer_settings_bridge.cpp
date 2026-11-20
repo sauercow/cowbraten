@@ -873,6 +873,12 @@ namespace cowui
             return id && id->type == ID_SVAR ? id : nullptr;
         }
 
+        static ident *legacymenuloadingident()
+        {
+            ident *id = getident("loadlegacymenus");
+            return id && id->type == ID_VAR ? id : nullptr;
+        }
+
         static ident *uithemeident()
         {
             ident *id = getident("uitheme");
@@ -5513,6 +5519,24 @@ namespace cowui
             if(loaded)
                 writecfg();
             return loaded;
+        }
+
+        bool readlegacymenuloading(bool &enabled)
+        {
+            ident *id = legacymenuloadingident();
+            if(!id || !id->storage.i)
+                return false;
+            enabled = *id->storage.i != 0;
+            return true;
+        }
+
+        bool writelegacymenuloading(bool enabled)
+        {
+            ident *id = legacymenuloadingident();
+            if(!id || !id->storage.i)
+                return false;
+            setvarchecked(id, enabled ? 1 : 0);
+            return (*id->storage.i != 0) == enabled;
         }
 
         static bool validdisplaypresetid(const char *id)

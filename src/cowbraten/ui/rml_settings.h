@@ -522,6 +522,8 @@ namespace cowui
         void removeautoignorerow(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         bool refreshautoexec();
+        void selectlegacymenuloading(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
         void selectautoexecprofile(Rml::DataModelHandle,
             Rml::Event &event, const Rml::VariantList &arguments);
         void runautoexecprofile(Rml::DataModelHandle,
@@ -1235,6 +1237,7 @@ namespace cowui
         Rml::String auto_ignore_status;
         std::vector<AutoexecChoice> autoexec_choices;
         Rml::String autoexec_status;
+        bool legacy_menu_loading = false;
         std::vector<DisplayPresetChoice> display_presets;
         Rml::String display_preset_status;
         bool theme_available = false;

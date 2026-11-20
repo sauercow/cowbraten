@@ -4880,6 +4880,24 @@
                         </div>
 
                         <div class="settings-section settings-compact-section panel">
+                            <div class="settings-display-row">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Legacy menu fallback</div>
+                                    <div class="settings-control-description">
+                                        Load the original menu scripts at startup. Keep this off to use only RmlUi; the legacy files remain installed and can be re-enabled here for the next launch.
+                                    </div>
+                                </div>
+                                <label class="checkbox-row settings-display-toggle">
+                                    <input class="checkbox" type="checkbox"
+                                        data-attrif-checked="legacy_menu_loading"
+                                        data-event-change="select_legacy_menu_loading(ev.checked)" />
+                                    <span data-if="legacy_menu_loading">On</span>
+                                    <span data-if="!legacy_menu_loading">Off</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section settings-compact-section panel">
                             <div class="settings-control-title">Adding profiles</div>
                             <div class="settings-control-description">
                                 Create files such as autoexecs/duels.cfg or autoexecs/recording.cfg in your Cowbraten home directory, then refresh this list. Profile names may use letters, numbers, underscores, and hyphens.

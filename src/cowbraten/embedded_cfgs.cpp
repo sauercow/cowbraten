@@ -2,6 +2,33 @@
 #include "embedded_cfgs.h"
 
 namespace game {
+    static const char *legacymenusconfig = "legacy-menus.cfg";
+    static bool loadinglegacymenustate = false;
+
+    static void savelegacymenustate()
+    {
+        stream *f = openutf8file(legacymenusconfig, "w");
+        if(!f)
+        {
+            conoutf(CON_ERROR, "could not save legacy menu loading state");
+            return;
+        }
+        f->printf("// Load the original menu scripts on startup as a fallback.\n");
+        f->printf("loadlegacymenus %d\n", loadlegacymenus ? 1 : 0);
+        delete f;
+    }
+
+    MOD(VARF, loadlegacymenus, 0, 0, 1, {
+        if(!loadinglegacymenustate) savelegacymenustate();
+    });
+
+    void loadlegacymenustate()
+    {
+        loadinglegacymenustate = true;
+        execfile(legacymenusconfig, false);
+        loadinglegacymenustate = false;
+    }
+
     struct embeddedfile<17379> menus_cfg = {
         "data/cowbraten/menus.cfg.gz",
         0xa61c4d24,
@@ -71,6 +98,7 @@ namespace game {
     }
 
     MOD(VARFP, usecowbratenmenus, 0, 1, 1, {
+        if(!loadlegacymenus) return;
         if(usecowbratenmenus) execfile(menus_cfg.name);
         else execfile("data/menus.cfg");
     });

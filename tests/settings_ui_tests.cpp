@@ -123,6 +123,13 @@ int main()
           rml.find("run_autoexec_profile(profile.id)") !=
             std::string::npos,
         "Settings exposes Autoexec profile selection and live loading");
+    check(rml.find("select_legacy_menu_loading(ev.checked)") !=
+              std::string::npos &&
+          implementation.find("settings::writelegacymenuloading") !=
+              std::string::npos &&
+          bridge.find("getident(\"loadlegacymenus\")") !=
+              std::string::npos,
+        "Startup exposes the persistent legacy menu fallback switch");
     check(game.find("SVARP(autoexecprofile, \"original\")") !=
             std::string::npos &&
           game.find("autoexecs/%s.cfg") != std::string::npos &&

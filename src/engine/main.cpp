@@ -1905,10 +1905,20 @@ int main(int argc, char **argv)
     logoutf("init: cfg");
     game::writeembeddedcfgs();
     initing = INIT_LOAD;
+    game::loadlegacymenustate();
     execfile("data/cowbraten/keymap.cfg.gz");
     execfile("data/stdedit.cfg");
     execfile("data/sounds.cfg");
-    execfile("data/menus.cfg");
+    if(game::loadlegacymenus)
+    {
+        execfile("data/menus.cfg");
+        conoutf("legacy menu scripts: enabled");
+    }
+    else
+    {
+        execfile("data/cowbraten/ui-bootstrap.cfg");
+        conoutf("legacy menu scripts: disabled (fallback remains available)");
+    }
     execfile("data/heightmap.cfg");
     execfile("data/blendbrush.cfg");
     defformatstring(gamecfgname, "data/game_%s.cfg", game::gameident());

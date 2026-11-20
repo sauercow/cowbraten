@@ -1354,6 +1354,7 @@ namespace cowui
             constructor.Bind("auto_ignore_status", &auto_ignore_status) &&
             constructor.Bind("autoexec_choices", &autoexec_choices) &&
             constructor.Bind("autoexec_status", &autoexec_status) &&
+            constructor.Bind("legacy_menu_loading", &legacy_menu_loading) &&
             constructor.Bind("display_presets", &display_presets) &&
             constructor.Bind("display_preset_status", &display_preset_status) &&
             constructor.Bind("theme_available", &theme_available) &&
@@ -1457,6 +1458,11 @@ namespace cowui
             constructor.BindEventCallback(
                 "refresh_autoexec_profiles",
                 &RmlSettings::refreshautoexecprofiles,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "select_legacy_menu_loading",
+                &RmlSettings::selectlegacymenuloading,
                 this
             ) &&
             constructor.BindEventCallback(
@@ -4724,6 +4730,14 @@ namespace cowui
             autoexec_choices.swap(choices);
             model.DirtyVariable("autoexec_choices");
         }
+        bool enabled = true;
+        if(!settings::readlegacymenuloading(enabled))
+            return false;
+        if(legacy_menu_loading != enabled)
+        {
+            legacy_menu_loading = enabled;
+            model.DirtyVariable("legacy_menu_loading");
+        }
         return true;
     }
 
@@ -4992,6 +5006,24 @@ namespace cowui
         autoexec_status = accepted
             ? "Default saved for the next startup"
             : "Profile unavailable; selection was not changed";
+        model.DirtyVariable("autoexec_status");
+    }
+
+    void RmlSettings::selectlegacymenuloading(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1)
+            return;
+        const bool enabled = arguments[0].Get<bool>();
+        const bool accepted = settings::writelegacymenuloading(enabled);
+        refreshautoexec();
+        autoexec_status = accepted
+            ? (enabled
+                ? "Legacy menu fallback will load on the next startup"
+                : "Legacy menu scripts will stay unloaded on the next startup")
+            : "Legacy menu startup setting could not be saved";
         model.DirtyVariable("autoexec_status");
     }
 

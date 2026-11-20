@@ -62,7 +62,7 @@ console_ui_tests: console_ui_tests.cpp ../data/cowbraten/ui/default/screens/cons
 console_text_tests: console_text_tests.cpp ../src/cowbraten/ui/rml_console_text.h
 	$(CXX) $(CXXFLAGS) -I../src/cowbraten/ui -o $@ console_text_tests.cpp
 
-legacy_route_tests: legacy_route_tests.cpp ../data/cowbraten/menus.cfg ../data/cowbraten/master.cfg ../data/cowbraten/ui/default/screens/legacy_gui.rml ../src/engine/main.cpp ../src/cowbraten/ui/ui.cpp ../src/cowbraten/ui/rml_legacy_gui.cpp ../src/cowbraten/ui/legacy_gui_snapshot.h
+legacy_route_tests: legacy_route_tests.cpp ../data/cowbraten/menus.cfg ../data/cowbraten/master.cfg ../data/cowbraten/ui-bootstrap.cfg ../data/cowbraten/ui/default/screens/legacy_gui.rml ../src/engine/main.cpp ../src/cowbraten/embedded_cfgs.cpp ../src/cowbraten/ui/ui.cpp ../src/cowbraten/ui/rml_legacy_gui.cpp ../src/cowbraten/ui/legacy_gui_snapshot.h
 	$(CXX) $(CXXFLAGS) -o $@ legacy_route_tests.cpp
 
 loading_ui_tests: loading_ui_tests.cpp ../data/cowbraten/ui/default/screens/loading.rml ../data/cowbraten/ui/default/styles/loading.rcss ../src/cowbraten/ui/rml_loading.h ../src/cowbraten/ui/ui.cpp ../src/engine/main.cpp

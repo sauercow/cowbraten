@@ -989,6 +989,8 @@ namespace cowui
         bool visitautoexecprofiles(AutoexecChoiceVisitor visitor, void *data);
         bool writeautoexecprofile(const char *id);
         bool runautoexecprofile(const char *id);
+        bool readlegacymenuloading(bool &enabled);
+        bool writelegacymenuloading(bool enabled);
         bool visitdisplaypresets(DisplayPresetChoiceVisitor visitor,
             void *data);
         bool rundisplaypreset(const char *id);

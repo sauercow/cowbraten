@@ -2896,6 +2896,16 @@ namespace cowui
             return sauersettings::runautoexecprofile(id);
         }
 
+        bool readlegacymenuloading(bool &enabled)
+        {
+            return sauersettings::readlegacymenuloading(enabled);
+        }
+
+        bool writelegacymenuloading(bool enabled)
+        {
+            return sauersettings::writelegacymenuloading(enabled);
+        }
+
         struct DisplayPresetChoiceAdapter
         {
             DisplayPresetChoiceVisitor visitor;
