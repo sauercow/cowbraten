@@ -43,12 +43,18 @@ namespace cowui
             result.hd_playback = readbool("demohdplay", true);
             result.hd_recording = readbool("demohdrecord", true);
             result.automatic_recording = readbool("autorecordclientdemo", false);
+            result.automatic_recording_online_only =
+                readbool("autorecordclientdemoonlineonly", false);
             return result;
         }
 
         bool set_hd_playback(bool value) { return writebool("demohdplay", value); }
         bool set_hd_recording(bool value) { return writebool("demohdrecord", value); }
         bool set_automatic_recording(bool value) { return writebool("autorecordclientdemo", value); }
+        bool set_automatic_recording_online_only(bool value)
+        {
+            return writebool("autorecordclientdemoonlineonly", value);
+        }
 
         bool recording() { return game::demorecord != nullptr; }
         bool playback() { return server::demoplaybackactive(); }

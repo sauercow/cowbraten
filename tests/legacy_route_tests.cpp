@@ -47,6 +47,7 @@ int main()
     const std::string master = readfile("../data/cowbraten/master.cfg");
     const std::string ui = readfile("../src/cowbraten/ui/ui.cpp");
     const std::string engine_menus = readfile("../src/engine/menus.cpp");
+    const std::string engine_main = readfile("../src/engine/main.cpp");
     const std::string snapshot = readfile(
         "../src/cowbraten/ui/legacy_gui_snapshot.h");
     const std::string adapter = readfile(
@@ -111,6 +112,15 @@ int main()
               std::string::npos &&
           adapter.find("result && capture_complete") != std::string::npos,
         "partially supported menus fall back whole instead of losing controls");
+    check(ui.find("legacy_gui_underlay") != std::string::npos &&
+          ui.find("PullToFront()") != std::string::npos &&
+          ui.find("Rml::ModalFlag::Modal") != std::string::npos,
+        "compact menus are modal overlays above the active RmlUi screen");
+    check(engine_main.find("event.key.keysym.sym >= SDLK_F1") !=
+              std::string::npos &&
+          engine_main.find("cowui::receivesinput() && !function_bind") !=
+              std::string::npos,
+        "unhandled function-key binds can open compact menus above native UI");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

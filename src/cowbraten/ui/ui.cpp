@@ -156,6 +156,7 @@ namespace cowui
     };
 
     static Screen *active_screen = nullptr;
+    static Screen *legacy_gui_underlay = nullptr;
     static bool full_menu_from_game = false;
 
     static bool initialized = false;
@@ -341,7 +342,7 @@ namespace cowui
     static void closeui(Rml::Event &event)
     {
         event.StopPropagation();
-        close();
+        closelegacygui();
     }
 
     static void backui(Rml::Event &event)
@@ -1330,7 +1331,9 @@ namespace cowui
                     if(!event.key.repeat)
                     {
                         const bool can_close = sauerinput::canclosemenu();
-                        if(active_screen->id == ScreenId::GameMenu)
+                        if(active_screen->id == ScreenId::LegacyGui)
+                            closelegacygui();
+                        else if(active_screen->id == ScreenId::GameMenu)
                             close();
                         else if(full_menu_from_game && can_close)
                             show(ScreenId::GameMenu);
@@ -1641,10 +1644,29 @@ namespace cowui
         }
 
         const bool opening = active_screen == nullptr;
-        if(active_screen)
+        const bool overlaying = id == ScreenId::LegacyGui && active_screen;
+        if(overlaying)
+        {
+            legacy_gui_underlay = active_screen;
+        }
+        else if(active_screen)
+        {
             hidedocument(*active_screen);
+            if(active_screen->id == ScreenId::LegacyGui && legacy_gui_underlay)
+            {
+                hidedocument(*legacy_gui_underlay);
+                legacy_gui_underlay = nullptr;
+            }
+        }
 
-        screen->document->Show();
+        if(id == ScreenId::LegacyGui)
+        {
+            screen->document->PullToFront();
+            screen->document->Show(
+                Rml::ModalFlag::Modal,
+                Rml::FocusFlag::Auto);
+        }
+        else screen->document->Show();
         active_screen = screen;
         legacy_console_input = false;
         legacy_console_presentation = false;
@@ -1946,13 +1968,34 @@ namespace cowui
             return;
 
         hidedocument(*active_screen);
+        if(active_screen->id == ScreenId::LegacyGui && legacy_gui_underlay)
+            hidedocument(*legacy_gui_underlay);
         active_screen = nullptr;
+        legacy_gui_underlay = nullptr;
 	sauermusic::sync(false);
         full_menu_from_game = false;
         legacy_console_input = false;
         legacy_console_presentation = false;
 
         sauerinput::endmenu();
+    }
+
+    void closelegacygui()
+    {
+        if(!active_screen || active_screen->id != ScreenId::LegacyGui ||
+           !legacy_gui_underlay)
+        {
+            close();
+            return;
+        }
+
+        hidedocument(*active_screen);
+        active_screen = legacy_gui_underlay;
+        legacy_gui_underlay = nullptr;
+        legacy_console_input = false;
+        legacy_console_presentation = false;
+        if(active_screen->document) active_screen->document->Focus();
+        syncconsoleownership();
     }
 
     bool modalactive()

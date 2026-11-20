@@ -80,6 +80,7 @@ namespace cowui
         static void open_location(Rml::Event &);
         static void toggle_hd_playback(Rml::Event &); static void toggle_hd_recording(Rml::Event &);
         static void toggle_auto_recording(Rml::Event &);
+        static void toggle_auto_recording_online_only(Rml::Event &);
 
         demos::Library library;
         demos::Filter filter;
@@ -101,6 +102,7 @@ namespace cowui
         bool confirm_visible = false, can_play = false, has_selection = false;
         bool single_selection = false, hd_playback = true, hd_recording = true;
         bool automatic_recording = false, recording_active = false;
+        bool automatic_recording_online_only = false;
         bool favorites_only = false, active_players_only = false;
         bool saved_filter_available = false;
         Tab tab = Tab::Library;

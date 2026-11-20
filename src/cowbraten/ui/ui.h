@@ -117,6 +117,9 @@ namespace cowui
     void applyinterfacepreferences(Rml::ElementDocument *document);
     void interfacepreferenceschanged();
     void close();
+    // Closes only a compact configurable-menu overlay and restores the
+    // RmlUi screen beneath it. Falls back to close() when no underlay exists.
+    void closelegacygui();
     // The modal session survives temporary console/chat ownership.
     bool modalactive();
     // RmlUi receives events only while the console is not taking its turn.

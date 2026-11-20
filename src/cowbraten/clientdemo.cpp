@@ -22,6 +22,9 @@ namespace game {
     // player preferences. setupdemorecord() remains the duplicate guard, so a
     // legacy `mapstart = [recordclientdemo 2]` cannot create a second stream.
     VARP(autorecordclientdemo, 0, 0, 1);
+    // Optional scope for native map-load recording. Remote is the engine's
+    // authoritative distinction between an online server and a local game.
+    VARP(autorecordclientdemoonlineonly, 0, 0, 1);
 
     stream *demo = NULL, *demorecord = NULL;
     int demostartmillis = 0;
@@ -315,7 +318,9 @@ namespace game {
 
     void autorecordmapload()
     {
-        if(autorecordclientdemo && !demoplayback && !demorecord)
+        if(autorecordclientdemo &&
+           (!autorecordclientdemoonlineonly || remote) &&
+           !demoplayback && !demorecord)
             setupdemorecord();
     }
 

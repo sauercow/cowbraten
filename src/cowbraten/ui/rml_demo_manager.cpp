@@ -86,6 +86,7 @@ namespace cowui
             constructor.Bind("can_play", &can_play) && constructor.Bind("has_selection", &has_selection) &&
             constructor.Bind("single_selection", &single_selection) && constructor.Bind("hd_playback", &hd_playback) &&
             constructor.Bind("hd_recording", &hd_recording) && constructor.Bind("automatic_recording", &automatic_recording) &&
+            constructor.Bind("automatic_recording_online_only", &automatic_recording_online_only) &&
             constructor.Bind("recording_active", &recording_active) && constructor.Bind("favorites_only", &favorites_only) &&
             constructor.Bind("active_players_only", &active_players_only) &&
             constructor.Bind("saved_filter_available", &saved_filter_available) &&
@@ -120,6 +121,7 @@ namespace cowui
         ACTION("demos.open-location", open_location); ACTION("demos.settings.hd-playback", toggle_hd_playback);
         ACTION("demos.settings.hd-recording", toggle_hd_recording);
         ACTION("demos.settings.auto-recording", toggle_auto_recording);
+        ACTION("demos.settings.auto-recording-online-only", toggle_auto_recording_online_only);
 #undef ACTION
         if(!valid)
         {
@@ -227,6 +229,8 @@ namespace cowui
 #define SYNC(variable, value) if(variable != value) { variable = value; model.DirtyVariable(#variable); }
         SYNC(hd_playback, settings.hd_playback); SYNC(hd_recording, settings.hd_recording);
         SYNC(automatic_recording, settings.automatic_recording); SYNC(recording_active, recording);
+        SYNC(automatic_recording_online_only,
+            settings.automatic_recording_online_only);
 #undef SYNC
     }
 
@@ -659,4 +663,13 @@ namespace cowui
     void RmlDemoManager::toggle_hd_playback(Rml::Event &e) { if(instance) { sauerdemo::set_hd_playback(event_checked(e)); instance->sync_settings(); } stop(e); }
     void RmlDemoManager::toggle_hd_recording(Rml::Event &e) { if(instance) { sauerdemo::set_hd_recording(event_checked(e)); instance->sync_settings(); } stop(e); }
     void RmlDemoManager::toggle_auto_recording(Rml::Event &e) { if(instance) { sauerdemo::set_automatic_recording(event_checked(e)); instance->sync_settings(); } stop(e); }
+    void RmlDemoManager::toggle_auto_recording_online_only(Rml::Event &e)
+    {
+        if(instance)
+        {
+            sauerdemo::set_automatic_recording_online_only(event_checked(e));
+            instance->sync_settings();
+        }
+        stop(e);
+    }
 }

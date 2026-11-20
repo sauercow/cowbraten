@@ -17,7 +17,7 @@ $(RMLUI_BUILD)/librmlui.a: rmlui
 demo_library_tests: demo_library_tests.cpp ../src/cowbraten/ui/demo_library.cpp ../src/cowbraten/ui/demo_library.h
 	$(CXX) $(CXXFLAGS) -I../src/cowbraten/ui -o $@ demo_library_tests.cpp ../src/cowbraten/ui/demo_library.cpp -lz
 
-demo_visualization_tests: demo_visualization_tests.cpp ../src/fpsgame/render.cpp ../src/cowbraten/demohd.cpp ../src/engine/rendergl.cpp ../src/engine/rendermodel.cpp ../data/cowbraten/demoxray.cfg ../data/cowbraten/ui/default/screens/demo_player.rml ../data/cowbraten/ui/default/styles/base.rcss ../data/cowbraten/ui/default/styles/demo_player.rcss ../src/cowbraten/ui/rml_demo_player.cpp
+demo_visualization_tests: demo_visualization_tests.cpp ../src/fpsgame/render.cpp ../src/cowbraten/demohd.cpp ../src/cowbraten/clientdemo.cpp ../src/engine/rendergl.cpp ../src/engine/rendermodel.cpp ../data/cowbraten/demoxray.cfg ../data/cowbraten/ui/default/screens/demo_player.rml ../data/cowbraten/ui/default/screens/demos.rml ../data/cowbraten/ui/default/styles/base.rcss ../data/cowbraten/ui/default/styles/demo_player.rcss ../src/cowbraten/ui/rml_demo_player.cpp ../src/cowbraten/ui/rml_demo_manager.cpp ../src/cowbraten/ui/sauer_demo_bridge.cpp
 	$(CXX) $(CXXFLAGS) -o $@ demo_visualization_tests.cpp
 
 server_browser_ui_tests: server_browser_ui_tests.cpp ../data/cowbraten/ui/default/screens/servers.rml ../data/cowbraten/ui/default/styles/server_browser.rcss ../src/cowbraten/ui/rml_server_browser.cpp ../src/cowbraten/ui/rml_server_browser.h ../src/cowbraten/ui/ui_commands.cpp ../src/cowbraten/ui/ui_persistence.h
@@ -62,7 +62,7 @@ console_ui_tests: console_ui_tests.cpp ../data/cowbraten/ui/default/screens/cons
 console_text_tests: console_text_tests.cpp ../src/cowbraten/ui/rml_console_text.h
 	$(CXX) $(CXXFLAGS) -I../src/cowbraten/ui -o $@ console_text_tests.cpp
 
-legacy_route_tests: legacy_route_tests.cpp ../data/cowbraten/menus.cfg ../data/cowbraten/master.cfg ../data/cowbraten/ui/default/screens/legacy_gui.rml ../src/cowbraten/ui/ui.cpp ../src/cowbraten/ui/rml_legacy_gui.cpp ../src/cowbraten/ui/legacy_gui_snapshot.h
+legacy_route_tests: legacy_route_tests.cpp ../data/cowbraten/menus.cfg ../data/cowbraten/master.cfg ../data/cowbraten/ui/default/screens/legacy_gui.rml ../src/engine/main.cpp ../src/cowbraten/ui/ui.cpp ../src/cowbraten/ui/rml_legacy_gui.cpp ../src/cowbraten/ui/legacy_gui_snapshot.h
 	$(CXX) $(CXXFLAGS) -o $@ legacy_route_tests.cpp
 
 loading_ui_tests: loading_ui_tests.cpp ../data/cowbraten/ui/default/screens/loading.rml ../data/cowbraten/ui/default/styles/loading.rcss ../src/cowbraten/ui/rml_loading.h ../src/cowbraten/ui/ui.cpp ../src/engine/main.cpp

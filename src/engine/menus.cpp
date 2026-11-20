@@ -1131,7 +1131,7 @@ namespace cowui
         if(action.onchange[0])
             updatelater.add().schedule(action.onchange);
         if(action.close)
-            close();
+            closelegacygui();
         return true;
     }
 }

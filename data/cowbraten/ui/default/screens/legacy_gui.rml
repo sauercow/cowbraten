@@ -15,7 +15,7 @@
                     <small>Configurable menu</small>
                     <strong>{{ menu_title }}</strong>
                 </div>
-                <button class="legacy-gui-close" onclick="navigation.close">&#215;</button>
+                <button class="legacy-gui-close" onclick="navigation.close"><span>&#215;</span></button>
             </div>
 
             <div class="legacy-gui-controls">

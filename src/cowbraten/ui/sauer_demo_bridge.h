@@ -10,6 +10,7 @@ namespace cowui
             bool hd_playback = true;
             bool hd_recording = true;
             bool automatic_recording = false;
+            bool automatic_recording_online_only = false;
         };
 
         const char *demo_directory();
@@ -17,6 +18,7 @@ namespace cowui
         bool set_hd_playback(bool value);
         bool set_hd_recording(bool value);
         bool set_automatic_recording(bool value);
+        bool set_automatic_recording_online_only(bool value);
 
         bool recording();
         bool playback();

@@ -199,6 +199,22 @@ original renderer opens the complete menu. This is the deliberate migration
 boundary until those widgets gain native equivalents; it prevents a partially
 rendered third-party menu from silently losing controls.
 
+When opened from another native screen, the compact document is pulled to the
+front as an RmlUi modal while the previous document remains visible beneath
+its scrim. Closing the compact document restores focus to that underlay without
+ending the shared menu-input session. Unhandled function keys continue to the
+engine bind table while native UI is open, so bindings such as
+`bind F6 [showgui aliases]` can create the overlay from any native screen.
+
+## Demo recording scope
+
+The Recording tab owns the persistent `autorecordclientdemo` setting and its
+optional `autorecordclientdemoonlineonly` scope. With the latter enabled,
+map-load recording starts only when the gameplay client reports a remote
+connection; local maps and offline bot matches are skipped. Explicit
+`recordclientdemo 2` commands remain unconditional, which preserves manual and
+legacy-autoexec behavior.
+
 ## Text utilities model
 
 The legacy `notepad`, `scratchpad`, and `pastebuffer` documents share one

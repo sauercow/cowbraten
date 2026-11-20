@@ -1435,7 +1435,12 @@ void checkinput()
             case SDL_KEYDOWN:
             case SDL_KEYUP:
             {
-                if(cowui::processevent(event) || cowui::receivesinput())
+                const bool ui_consumed = cowui::processevent(event);
+                const bool function_bind =
+                    event.key.keysym.sym >= SDLK_F1 &&
+                    event.key.keysym.sym <= SDLK_F24;
+                if(ui_consumed ||
+                   (cowui::receivesinput() && !function_bind))
                     break;
 
                 if(event.key.keysym.sym == SDLK_ESCAPE && event.key.repeat)

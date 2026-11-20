@@ -37,6 +37,14 @@ int main()
         "../data/cowbraten/ui/default/styles/demo_player.rcss");
     const std::string player = readfile(
         "../src/cowbraten/ui/rml_demo_player.cpp");
+    const std::string manager_screen = readfile(
+        "../data/cowbraten/ui/default/screens/demos.rml");
+    const std::string manager = readfile(
+        "../src/cowbraten/ui/rml_demo_manager.cpp");
+    const std::string recording = readfile(
+        "../src/cowbraten/clientdemo.cpp");
+    const std::string demo_bridge = readfile(
+        "../src/cowbraten/ui/sauer_demo_bridge.cpp");
 
     check(render.find("return connected && demoplayback && !remote;") !=
               std::string::npos,
@@ -75,6 +83,18 @@ int main()
           player_style.find("font-size: var(--demo-control-size);") !=
               std::string::npos,
         "demo player consumes global typography and local density tokens");
+    check(manager_screen.find("Online Matches Only") != std::string::npos &&
+          manager_screen.find("demos.settings.auto-recording-online-only") !=
+              std::string::npos &&
+          manager.find("automatic_recording_online_only") != std::string::npos &&
+          demo_bridge.find("autorecordclientdemoonlineonly") !=
+              std::string::npos,
+        "Recording settings expose a persistent online-only option");
+    check(recording.find("VARP(autorecordclientdemoonlineonly") !=
+              std::string::npos &&
+          recording.find("!autorecordclientdemoonlineonly || remote") !=
+              std::string::npos,
+        "automatic recording skips offline maps only when requested");
 
     std::cout << '\n' << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;
