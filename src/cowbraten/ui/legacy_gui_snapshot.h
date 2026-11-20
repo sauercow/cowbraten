@@ -26,7 +26,8 @@ namespace cowui
         virtual ~LegacyGuiSink() {}
         virtual void begin(const char *name, const char *title) = 0;
         virtual void control(LegacyGuiControlType type, int activation,
-            const char *label, const char *value, const char *icon,
+            const char *label, const char *value, const char *display_value,
+            const char *icon,
             int minimum, int maximum, bool active) = 0;
         virtual void end() = 0;
     };

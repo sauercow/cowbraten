@@ -95,8 +95,10 @@ int main()
           engine_menus.find("LegacyGuiControlType::Checkbox") != std::string::npos &&
           engine_menus.find("LegacyGuiControlType::Slider") != std::string::npos &&
           engine_menus.find("LegacyGuiControlType::Field") != std::string::npos &&
+          engine_menus.find("capturedactiontype::ListSlider") != std::string::npos &&
           adapter.find("activatelegacygui") != std::string::npos &&
-          adapter_rml.find("data-for=\"control : controls\"") != std::string::npos,
+          adapter_rml.find("data-for=\"control : controls\"") != std::string::npos &&
+          adapter_rml.find("control.display_value") != std::string::npos,
         "generic newgui capture exposes typed controls and opaque actions");
     check(!hasroute(ui, "aliases") && !hasroute(ui, "autoignore") &&
           !hasroute(ui, "ss"),
@@ -105,6 +107,10 @@ int main()
     check(ui.find("if(!legacy_gui_model.activate(name)) return false;") !=
               std::string::npos,
         "unknown third-party GUI names retain an explicit compatibility handoff");
+    check(engine_menus.find("LegacyGuiControlType::Unsupported") !=
+              std::string::npos &&
+          adapter.find("result && capture_complete") != std::string::npos,
+        "partially supported menus fall back whole instead of losing controls");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

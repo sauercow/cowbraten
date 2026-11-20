@@ -134,6 +134,14 @@ body
     border-color: var(--color-primary);
 }
 
+.legacy-gui-image-action img
+{
+    width: 48dp;
+    height: 48dp;
+    margin-right: 10dp;
+    object-fit: contain;
+}
+
 .legacy-gui-toggle-mark
 {
     box-sizing: border-box;
@@ -187,8 +195,44 @@ body
 
 .legacy-gui-slider input
 {
+    height: 24dp;
     margin-left: 10dp;
     flex: 1;
+}
+
+.legacy-gui-slider input slidertrack
+{
+    height: 4dp;
+    margin-top: 10dp;
+    background-color: #28343E;
+    border-width: 1dp;
+    border-color: #4B5863;
+}
+
+.legacy-gui-slider input sliderprogress
+{
+    height: 4dp;
+    background-color: var(--color-primary-pressed);
+}
+
+.legacy-gui-slider input sliderbar
+{
+    width: 14dp;
+    height: 14dp;
+    margin-top: 5dp;
+    margin-left: -7dp;
+    margin-right: -7dp;
+    background-color: var(--color-primary);
+    border-width: 2dp;
+    border-color: #0D1218;
+    border-radius: 7dp;
+}
+
+.legacy-gui-slider input sliderarrowdec,
+.legacy-gui-slider input sliderarrowinc
+{
+    width: 0;
+    height: 0;
 }
 
 .legacy-gui-field input

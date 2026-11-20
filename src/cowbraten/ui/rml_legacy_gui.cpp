@@ -19,6 +19,7 @@ namespace cowui
                 row.RegisterMember("maximum", &Row::maximum) &&
                 row.RegisterMember("label", &Row::label) &&
                 row.RegisterMember("value", &Row::value) &&
+                row.RegisterMember("display_value", &Row::display_value) &&
                 row.RegisterMember("icon", &Row::icon) &&
                 row.RegisterMember("active", &Row::active) &&
                 row.RegisterMember("text", &Row::text) &&
@@ -52,6 +53,7 @@ namespace cowui
         model = Rml::DataModelHandle();
         rows.clear(); menu_name.clear(); menu_title.clear();
         pending_refresh = false;
+        capture_complete = true;
     }
 
     bool RmlLegacyGui::activate(const char *name)
@@ -68,6 +70,7 @@ namespace cowui
     bool RmlLegacyGui::recapture()
     {
         pending_refresh = false;
+        capture_complete = true;
         rows.clear();
         const bool result = !menu_name.empty() &&
             capturelegacygui(menu_name.c_str(), *this);
@@ -76,18 +79,25 @@ namespace cowui
             model.DirtyVariable("menu_title");
             model.DirtyVariable("controls");
         }
-        return result;
+        return result && capture_complete;
     }
 
     void RmlLegacyGui::begin(const char *, const char *title)
     {
+        capture_complete = true;
         menu_title = title ? title : "Menu";
     }
 
     void RmlLegacyGui::control(LegacyGuiControlType type, int activation,
-        const char *label, const char *value, const char *icon,
+        const char *label, const char *value, const char *display_value,
+        const char *icon,
         int minimum, int maximum, bool active)
     {
+        if(type == LegacyGuiControlType::Unsupported)
+        {
+            capture_complete = false;
+            return;
+        }
         if(type == LegacyGuiControlType::ListBegin ||
            type == LegacyGuiControlType::ListEnd) return;
         if(type == LegacyGuiControlType::Tab && label && menu_title == label)
@@ -95,6 +105,8 @@ namespace cowui
         Row row;
         row.activation = activation; row.minimum = minimum; row.maximum = maximum;
         row.label = label ? label : ""; row.value = value ? value : "";
+        row.display_value = display_value && display_value[0]
+            ? display_value : row.value;
         row.icon = icon ? icon : ""; row.active = active;
         row.text = type == LegacyGuiControlType::Text;
         row.title = type == LegacyGuiControlType::Title;

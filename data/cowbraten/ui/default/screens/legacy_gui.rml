@@ -36,7 +36,7 @@
                     </button>
 
                     <label data-if="control.slider" class="legacy-gui-slider">
-                        <span>{{ control.label }}</span><b>{{ control.value }}</b>
+                        <span>{{ control.label }}</span><b>{{ control.display_value }}</b>
                         <input type="range" data-attr-min="control.minimum"
                             data-attr-max="control.maximum" data-attr-value="control.value"
                             data-event-change="change_control(control.activation, ev.value)" />
@@ -49,7 +49,10 @@
                     </label>
 
                     <button data-if="control.image" class="legacy-gui-button legacy-gui-image-action"
-                        data-event-click="run_control(control.activation)"><span>{{ control.label }}</span></button>
+                        data-event-click="run_control(control.activation)">
+                        <img data-if="control.value != ''" data-attr-src="control.value" />
+                        <span>{{ control.label }}</span>
+                    </button>
                 </div>
             </div>
         </div>

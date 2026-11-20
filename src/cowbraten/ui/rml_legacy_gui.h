@@ -21,7 +21,8 @@ namespace cowui
 
         void begin(const char *name, const char *title) override;
         void control(LegacyGuiControlType type, int activation,
-            const char *label, const char *value, const char *icon,
+            const char *label, const char *value, const char *display_value,
+            const char *icon,
             int minimum, int maximum, bool active) override;
         void end() override;
 
@@ -29,7 +30,7 @@ namespace cowui
         struct Row
         {
             int activation = -1, minimum = 0, maximum = 0;
-            Rml::String label, value, icon;
+            Rml::String label, value, display_value, icon;
             bool active = false;
             bool text = false, title = false, button = false;
             bool separator = false, toggle = false, slider = false;
@@ -46,5 +47,6 @@ namespace cowui
         Rml::DataModelHandle model;
         Rml::String menu_name, menu_title;
         bool pending_refresh = false;
+        bool capture_complete = true;
     };
 }
