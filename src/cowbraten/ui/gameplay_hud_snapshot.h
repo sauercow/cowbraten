@@ -18,6 +18,8 @@ namespace cowui
         bool show = false;
         bool alive = false;
         bool quad = false;
+        bool demo_recording = false;
+        bool demo_recording_bright = true;
         int health = 0;
         int max_health = 100;
         int armour = 0;

@@ -62,6 +62,11 @@ int main()
           ctf.find("statushudnextx(w, h, d)") != std::string::npos &&
           collect.find("statushudnextx(w, h, d)") != std::string::npos,
         "mode-specific flag and token indicators extend the same dock");
+    check(snapshot.find("demo_recording") != std::string::npos &&
+          native_hud.find("cow-demo-recording") != std::string::npos &&
+          native_rml.find("cow-demo-recording") != std::string::npos &&
+          hud.find("if(!modern_status) drawdemorecording") != std::string::npos,
+        "demo recording indicator uses RmlUi with an OpenGL failure fallback");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";
     return failed ? 1 : 0;

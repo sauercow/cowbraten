@@ -187,17 +187,20 @@ indices through `LegacyGuiSink`. Script actions and ident names remain in the
 engine-side activation table and never enter RML. The compact RmlUi renderer
 uses this path for arbitrary menus containing text, titles, separators, tabs,
 buttons, images, checkboxes, radio buttons, bitfields, numeric and discrete
-list sliders, fields, key fields, and list layout boundaries. Buttons and
+list sliders, fields, key fields, multiline editor buffers, progress bars,
+package-backed images and textures, 3D player/model/prefab previews, and list
+layout boundaries. Buttons and
 images retain their original close behavior; value controls stay open and
 refresh from engine state. Discrete sliders keep their declared engine values
 and optional display names rather than exposing a synthetic numeric range.
 
-Capture is all-or-nothing. The recorder marks editor widgets, progress bars,
-direct engine texture widgets, and 3D player/model/prefab previews unsupported.
-If any such primitive occurs, the RmlUi adapter declines the document and the
-original renderer opens the complete menu. This is the deliberate migration
-boundary until those widgets gain native equivalents; it prevents a partially
-rendered third-party menu from silently losing controls.
+Capture remains all-or-nothing for an unknown engine-side primitive, preventing
+a partially rendered third-party menu from silently losing controls. Known
+declarative controls no longer require the original renderer. Editor buffers
+remain owned by Sauer's text editor so existing `text*` commands keep working;
+3D previews render into rectangles measured from their RmlUi elements after the
+document pass. Menu init, tab selection, and `guionclear` lifecycle behavior are
+preserved by the adapter.
 
 When opened from another native screen, the compact document is pulled to the
 front as an RmlUi modal while the previous document remains visible beneath
@@ -214,6 +217,9 @@ map-load recording starts only when the gameplay client reports a remote
 connection; local maps and offline bot matches are skipped. Explicit
 `recordclientdemo 2` commands remain unconditional, which preserves manual and
 legacy-autoexec behavior.
+
+The blinking in-game `REC` indicator is part of the native gameplay overlay.
+Its original OpenGL draw remains only as the document-initialization fallback.
 
 ## Text utilities model
 

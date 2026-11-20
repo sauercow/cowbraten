@@ -52,9 +52,12 @@ namespace cowui
                     Rml::CreateString("cow-ammo-bar-count-%d", i));
             }
             quad_card = document->GetElementById("cow-status-quad");
+            recording_indicator = document->GetElementById(
+                "cow-demo-recording");
             const bool valid = root && health_value && health_max &&
                 armour_value && ammo_value && armour_card && ammo_card &&
-                health_card && quad_card && ammo_bar_root && secondary_up_group &&
+                health_card && quad_card && recording_indicator &&
+                ammo_bar_root && secondary_up_group &&
                 secondary_down_group && secondary_cycle_group;
             bool all_weapons = true;
             for(int i = 0; i < 8; ++i)
@@ -93,9 +96,15 @@ namespace cowui
                 snapshot.enabled && snapshot.show;
             const bool ammo_bar_shown = status_shown && snapshot.alive &&
                 snapshot.show_ammo_bar;
-            shown = status_shown || ammo_bar_shown;
+            const bool recording_shown = allow_overlay && have_snapshot &&
+                snapshot.enabled && snapshot.demo_recording;
+            shown = status_shown || ammo_bar_shown || recording_shown;
             root->SetProperty("display", status_shown ? "flex" : "none");
             ammo_bar_root->SetProperty("display", ammo_bar_shown ? "block" : "none");
+            recording_indicator->SetProperty("display",
+                recording_shown ? "block" : "none");
+            recording_indicator->SetProperty("opacity",
+                snapshot.demo_recording_bright ? "1" : "0.47");
             if(!status_shown) return;
 
             // In Sauer's virtual HUD, statusdockcenter(w,h) is expressed in
@@ -167,6 +176,7 @@ namespace cowui
             root = ammo_bar_root = health_value = health_max = armour_value =
                 ammo_value = nullptr;
             armour_card = ammo_card = health_card = quad_card = nullptr;
+            recording_indicator = nullptr;
             secondary_up_group = secondary_down_group =
                 secondary_cycle_group = nullptr;
             for(int i = 0; i < 8; ++i) weapon_images[i] = nullptr;
@@ -266,6 +276,7 @@ namespace cowui
         Rml::Element *health_card = nullptr, *armour_card = nullptr;
         Rml::Element *ammo_card = nullptr;
         Rml::Element *quad_card = nullptr;
+        Rml::Element *recording_indicator = nullptr;
         Rml::Element *secondary_up_group = nullptr;
         Rml::Element *secondary_down_group = nullptr;
         Rml::Element *secondary_cycle_group = nullptr;

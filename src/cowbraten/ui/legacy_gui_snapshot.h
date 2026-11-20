@@ -17,6 +17,9 @@ namespace cowui
         Field,
         KeyField,
         Image,
+        Editor,
+        Progress,
+        Preview,
         Tab,
         Unsupported
     };
@@ -37,4 +40,9 @@ namespace cowui
     // activation indices; CubeScript source never crosses into the document.
     bool capturelegacygui(const char *name, LegacyGuiSink &sink);
     bool activatelegacygui(int activation, const char *value = nullptr);
+    bool openlegacygui(const char *name);
+    void releaselegacygui();
+    void renderlegacyguipreview(const char *kind, const char *resource,
+        int first, int second, int third,
+        int x, int y, int width, int height);
 }

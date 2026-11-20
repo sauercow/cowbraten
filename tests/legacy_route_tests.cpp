@@ -96,11 +96,22 @@ int main()
           engine_menus.find("LegacyGuiControlType::Checkbox") != std::string::npos &&
           engine_menus.find("LegacyGuiControlType::Slider") != std::string::npos &&
           engine_menus.find("LegacyGuiControlType::Field") != std::string::npos &&
+          engine_menus.find("LegacyGuiControlType::Editor") != std::string::npos &&
+          engine_menus.find("LegacyGuiControlType::Progress") != std::string::npos &&
+          engine_menus.find("LegacyGuiControlType::Preview") != std::string::npos &&
           engine_menus.find("capturedactiontype::ListSlider") != std::string::npos &&
           adapter.find("activatelegacygui") != std::string::npos &&
           adapter_rml.find("data-for=\"control : controls\"") != std::string::npos &&
           adapter_rml.find("control.display_value") != std::string::npos,
         "generic newgui capture exposes typed controls and opaque actions");
+    check(adapter.find("renderpreviews") != std::string::npos &&
+          adapter.find("selecttab") != std::string::npos &&
+          adapter_rml.find("control.editor") != std::string::npos &&
+          adapter_rml.find("control.progress") != std::string::npos &&
+          adapter_rml.find("control.preview") != std::string::npos &&
+          engine_menus.find("openlegacygui") != std::string::npos &&
+          engine_menus.find("releaselegacygui") != std::string::npos,
+        "configurable menus preserve editors, progress, previews, tabs, and lifecycle");
     check(!hasroute(ui, "aliases") && !hasroute(ui, "autoignore") &&
           !hasroute(ui, "ss"),
         "Autoexec menus use their actual declarations instead of named shortcuts");

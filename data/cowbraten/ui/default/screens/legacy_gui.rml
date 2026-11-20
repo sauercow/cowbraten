@@ -19,9 +19,10 @@
             </div>
 
             <div class="legacy-gui-controls">
-                <div data-for="control : controls" class="legacy-gui-row">
+                <div data-for="control : controls" data-if="control.visible" class="legacy-gui-row">
                     <div data-if="control.title" class="legacy-gui-title">{{ control.label }}</div>
-                    <div data-if="control.tab" class="legacy-gui-tab">{{ control.label }}</div>
+                    <button data-if="control.tab" class="legacy-gui-tab"
+                        data-event-click="select_tab(control.tab_index)">{{ control.label }}</button>
                     <div data-if="control.text" class="legacy-gui-text">{{ control.label }}</div>
                     <div data-if="control.separator" class="legacy-gui-separator"></div>
 
@@ -47,6 +48,22 @@
                         <input class="text-input" type="text" data-value="control.value"
                             data-event-change="change_control(control.activation, ev.value)" />
                     </label>
+
+                    <label data-if="control.editor" class="legacy-gui-editor">
+                        <span>{{ control.label }}</span>
+                        <textarea data-value="control.value"
+                            data-event-change="change_control(control.activation, ev.value)"></textarea>
+                    </label>
+
+                    <div data-if="control.progress" class="legacy-gui-progress">
+                        <div><span data-attr-style="'width: ' + control.progress_width + ';'"></span></div>
+                    </div>
+
+                    <button data-if="control.preview" class="legacy-gui-preview"
+                        data-attr-id="control.element_id"
+                        data-event-click="run_control(control.activation)">
+                        <span>{{ control.label }}</span>
+                    </button>
 
                     <button data-if="control.image" class="legacy-gui-button legacy-gui-image-action"
                         data-event-click="run_control(control.activation)">

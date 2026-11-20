@@ -44,6 +44,35 @@ static inline bool throttlepreview(bool loaded)
     return true;
 }
 
+char *readguieditor(const char *name, int mode)
+{
+    if(!name || !name[0]) return newstring("");
+    editor *e = useeditor(name, mode <= 0 ? EDITORFOREVER : mode, false);
+    e->active = e->rendered = true;
+    return e->tostring();
+}
+
+void writeguieditor(const char *name, int mode, const char *value)
+{
+    if(!name || !name[0]) return;
+    editor *e = useeditor(name, mode <= 0 ? EDITORFOREVER : mode, true);
+    e->active = e->rendered = true;
+    e->clear(NULL);
+    const char *line = value ? value : "";
+    while(*line)
+    {
+        const char *end = strchr(line, '\n');
+        if(!end)
+        {
+            e->lines.add().set(line);
+            break;
+        }
+        e->lines.add().set(line, int(end - line));
+        line = end + 1;
+    }
+    if(e->lines.empty()) e->lines.add().set("");
+}
+
 struct gui : g3d_gui
 {
     struct list

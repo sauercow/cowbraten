@@ -1633,6 +1633,8 @@ namespace game
         const bool modern_status = cowgameplayhud && cowui::gameplayhudactive();
         cowui::GameplayHudSnapshot status;
         status.enabled = modern_status;
+        status.demo_recording = huddemorecording && demorecord;
+        status.demo_recording_bright = ((totalmillis / 500) % 2) == 0;
         status.show = d && d->state != CS_EDITING && d->state != CS_SPECTATOR;
         if(status.show)
         {
@@ -1816,7 +1818,7 @@ namespace game
                 }
             }
         }
-        drawdemorecording(w, h);
+        if(!modern_status) drawdemorecording(w, h);
     }
 
     int clipconsole(int w, int h)

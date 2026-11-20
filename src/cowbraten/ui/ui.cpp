@@ -1550,6 +1550,15 @@ namespace cowui
                 ui_dimensions.context_width,
                 ui_dimensions.context_height);
         }
+        else if(active_screen &&
+                !legacy_console_presentation &&
+                active_screen->id == ScreenId::LegacyGui)
+        {
+            legacy_gui_model.renderpreviews(
+                active_screen->document,
+                ui_dimensions.context_width,
+                ui_dimensions.context_height);
+        }
     }
 
     FrameStats framestats()
@@ -1967,6 +1976,8 @@ namespace cowui
         if(!active_screen)
             return;
 
+        if(active_screen->id == ScreenId::LegacyGui)
+            releaselegacygui();
         hidedocument(*active_screen);
         if(active_screen->id == ScreenId::LegacyGui && legacy_gui_underlay)
             hidedocument(*legacy_gui_underlay);
@@ -1989,6 +2000,7 @@ namespace cowui
             return;
         }
 
+        releaselegacygui();
         hidedocument(*active_screen);
         active_screen = legacy_gui_underlay;
         legacy_gui_underlay = nullptr;

@@ -9,6 +9,17 @@ body {
     font-family: Lato;
     pointer-events: none;
 }
+.cow-demo-recording {
+    position: absolute;
+    display: none;
+    right: 2%;
+    top: 2.1%;
+    color: #FF3F48;
+    font-size: 1.45rem;
+    font-weight: bold;
+    letter-spacing: 0.08rem;
+    pointer-events: none;
+}
 .cow-status-root {
     position: absolute;
     left: 0;

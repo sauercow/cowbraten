@@ -515,6 +515,8 @@ extern void textinput(bool on, int mask = ~0);
 // menu
 extern void menuprocess();
 extern void addchange(const char *desc, int type);
+extern char *readguieditor(const char *name, int mode);
+extern void writeguieditor(const char *name, int mode, const char *value);
 extern void clearchanges(int type);
 extern bool haschanges(int type);
 

@@ -63,5 +63,6 @@
     <div id="cow-ammo-bar-item-4" class="cow-ammo-bar-item"><img src="../images/hud/v1/grenade_launcher.png" /><span id="cow-ammo-bar-count-4">0</span></div>
     <div id="cow-ammo-bar-item-5" class="cow-ammo-bar-item"><img src="../images/hud/v1/pistol.png" /><span id="cow-ammo-bar-count-5">0</span></div>
   </div>
+  <div id="cow-demo-recording" class="cow-demo-recording">REC</div>
 </body>
 </rml>

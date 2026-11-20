@@ -12,6 +12,8 @@
 static vec menupos;
 static int menustart = 0;
 static g3d_gui *cgui = NULL;
+struct menu;
+static menu *compactmenu = NULL;
 
 VAR(guitabnum, 1, 0, 0);
 
@@ -127,7 +129,8 @@ namespace
         Bitfield,
         Slider,
         ListSlider,
-        Field
+        Field,
+        Editor
     };
 
     struct capturedaction
@@ -135,8 +138,13 @@ namespace
         capturedactiontype type = capturedactiontype::Command;
         string command, variable, onchange, choices;
         float on = 1.0f, off = 0.0f, radio = 0.0f;
-        int mask = 0;
+        int mask = 0, mode = 0;
         bool close = true;
+
+        capturedaction()
+        {
+            command[0] = variable[0] = onchange[0] = choices[0] = '\0';
+        }
     };
 
     static cowui::LegacyGuiSink *capturesink = nullptr;
@@ -197,14 +205,20 @@ namespace
         }
         void setalign(int, int) override {}
         void setscale(float) override {}
-        int image(Texture *, float, const char * = nullptr) override
+        int image(Texture *texture, float, const char *title = nullptr) override
         {
-            capturecontrol(cowui::LegacyGuiControlType::Unsupported);
+            capturecontrol(cowui::LegacyGuiControlType::Image, -1,
+                title && title[0] ? title : (texture && texture->name
+                    ? texture->name : ""),
+                texture && texture->name ? texture->name : "");
             return 0;
         }
-        int texture(VSlot &, float, bool = true) override
+        int texture(VSlot &vslot, float, bool = true) override
         {
-            capturecontrol(cowui::LegacyGuiControlType::Unsupported);
+            const char *name = vslot.slot && vslot.slot->sts.length()
+                ? vslot.slot->sts[0].name : "";
+            capturecontrol(cowui::LegacyGuiControlType::Image, -1,
+                name, name);
             return 0;
         }
         void slider(int &, int, int, int, const char * = nullptr) override
@@ -215,9 +229,10 @@ namespace
         {
             capturecontrol(cowui::LegacyGuiControlType::Separator);
         }
-        void progress(float) override
+        void progress(float value) override
         {
-            capturecontrol(cowui::LegacyGuiControlType::Unsupported);
+            capturecontrol(cowui::LegacyGuiControlType::Progress, -1,
+                "", floatstr(clamp(value, 0.0f, 1.0f)));
         }
         void strut(float) override {}
         void space(float) override {}
@@ -370,8 +385,9 @@ void clearguis(int level = -1)
 
 void guionclear(char *action)
 {
-    if(guistack.empty()) return;
-    menu *m = guistack.last();
+    menu *m = compactmenu ? compactmenu :
+        (guistack.empty() ? NULL : guistack.last());
+    if(!m) return;
     if(m->onclear) { freecode(m->onclear); m->onclear = NULL; } 
     if(action[0]) m->onclear = compilecode(action);
 }
@@ -774,6 +790,21 @@ void guifield(char *var, int *maxlength, char *onchange)
 //-ve maxlength indicates a wrapped text field of any (approx 260 chars) length, |maxlength| is the field width
 void guieditor(char *name, int *maxlength, int *height, int *mode)
 {
+    if(capturesink)
+    {
+        capturedaction action;
+        action.type = capturedactiontype::Editor;
+        copystring(action.variable, name);
+        action.mode = *mode;
+        action.close = false;
+        char *contents = readguieditor(name, *mode);
+        capturecontrol(cowui::LegacyGuiControlType::Editor,
+            captureaction(action), name, contents, "", "",
+            *height > 0 ? *height : 1,
+            *maxlength ? abs(*maxlength) : 12);
+        delete[] contents;
+        return;
+    }
     if(!cgui) return;
     cgui->field(name, GUI_BUTTON_COLOR, *maxlength ? *maxlength : 12, *height, NULL, *mode<=0 ? EDITORFOREVER : *mode);
     //returns a non-NULL pointer (the currentline) when the user commits, could then manipulate via text* commands
@@ -931,6 +962,17 @@ COMMAND(guitextbox, "siii");
 
 void guiplayerpreview(int *model, int *team, int *weap, char *action, float *scale, int *overlaid, char *title)
 {
+    if(capturesink)
+    {
+        capturedaction captured;
+        captured.type = capturedactiontype::Command;
+        copystring(captured.command, action);
+        captured.close = shouldclearmenu;
+        capturecontrol(cowui::LegacyGuiControlType::Preview,
+            action[0] ? captureaction(captured) : -1,
+            title, intstr(*weap), "", "player", *model, *team);
+        return;
+    }
     if(!cgui) return;
     int ret = cgui->playerpreview(*model, *team, *weap, *scale, *overlaid!=0 ? title : NULL);
     if(ret&G3D_UP)
@@ -946,7 +988,6 @@ COMMAND(guiplayerpreview, "iiisfis");
 
 void guimodelpreview(char *model, char *animspec, char *action, float *scale, int *overlaid, char *title, int *throttle)
 {
-    if(!cgui) return;
     int anim = ANIM_ALL;
     if(animspec[0])
     {
@@ -963,6 +1004,18 @@ void guimodelpreview(char *model, char *animspec, char *action, float *scale, in
             if(anims.length()) anim = anims[0];
         }
     }
+    if(capturesink)
+    {
+        capturedaction captured;
+        captured.type = capturedactiontype::Command;
+        copystring(captured.command, action);
+        captured.close = shouldclearmenu;
+        capturecontrol(cowui::LegacyGuiControlType::Preview,
+            action[0] ? captureaction(captured) : -1,
+            title, model, "", "model", anim, 0);
+        return;
+    }
+    if(!cgui) return;
     int ret = cgui->modelpreview(model, anim|ANIM_LOOP, *scale, *overlaid!=0 ? title : NULL, *throttle!=0);
     if(ret&G3D_UP)
     {
@@ -982,6 +1035,17 @@ COMMAND(guimodelpreview, "sssfisi");
 
 void guiprefabpreview(char *prefab, int *color, char *action, float *scale, int *overlaid, char *title, int *throttle)
 {
+    if(capturesink)
+    {
+        capturedaction captured;
+        captured.type = capturedactiontype::Command;
+        copystring(captured.command, action);
+        captured.close = shouldclearmenu;
+        capturecontrol(cowui::LegacyGuiControlType::Preview,
+            action[0] ? captureaction(captured) : -1,
+            title, prefab, "", "prefab", *color, 0);
+        return;
+    }
     if(!cgui) return;
     int ret = cgui->prefabpreview(prefab, vec::hexcolor(*color), *scale, *overlaid!=0 ? title : NULL, *throttle!=0);
     if(ret&G3D_UP)
@@ -999,6 +1063,41 @@ void guiprefabpreview(char *prefab, int *color, char *action, float *scale, int 
     }
 }
 COMMAND(guiprefabpreview, "sisfisi");
+
+namespace cowui
+{
+    void renderlegacyguipreview(const char *kind, const char *resource,
+        int first, int second, int third,
+        int x, int y, int width, int height)
+    {
+        if(!kind || width <= 1 || height <= 1) return;
+        modelpreview::start(x, y, width, height, true);
+        if(!strcmp(kind, "player"))
+            game::renderplayerpreview(first, second, third);
+        else if(!strcmp(kind, "model") && resource && resource[0])
+        {
+            model *m = loadmodel(resource);
+            if(m)
+            {
+                entitylight light;
+                light.color = vec(1, 1, 1);
+                light.dir = vec(0, -1, 2).normalize();
+                vec center, radius;
+                m->boundbox(center, radius);
+                float yaw;
+                vec origin = calcmodelpreviewpos(radius, yaw).sub(center);
+                rendermodel(&light, resource, first, origin, yaw, 0, 0,
+                    NULL, NULL, 0);
+            }
+        }
+        else if(!strcmp(kind, "prefab") && resource && resource[0])
+            previewprefab(resource, vec::hexcolor(first));
+        modelpreview::end();
+        hudshader->set();
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+    }
+}
 
 struct change
 {
@@ -1046,6 +1145,32 @@ static bool processingmenu = false;
 
 namespace cowui
 {
+    bool openlegacygui(const char *name)
+    {
+        if(!name || !name[0]) return false;
+        menu *m = guis.access(name);
+        if(!m || !m->contents) return false;
+        releaselegacygui();
+        compactmenu = m;
+        compactmenu->clear();
+        if(compactmenu->init) execute(compactmenu->init);
+        return true;
+    }
+
+    void releaselegacygui()
+    {
+        if(!compactmenu) return;
+        menu *m = compactmenu;
+        compactmenu = NULL;
+        if(m->onclear)
+        {
+            uint *action = m->onclear;
+            m->onclear = NULL;
+            execute(action);
+            freecode(action);
+        }
+    }
+
     bool capturelegacygui(const char *name, LegacyGuiSink &sink)
     {
         if(!name || !name[0] || capturesink)
@@ -1125,6 +1250,11 @@ namespace cowui
             case capturedactiontype::Field:
                 if(!id || !value) return false;
                 updatelater.add().schedule(id, const_cast<char *>(value));
+                break;
+
+            case capturedactiontype::Editor:
+                if(!value) return false;
+                writeguieditor(action.variable, action.mode, value);
                 break;
         }
 
