@@ -83,6 +83,9 @@ int main()
           player_style.find("font-size: var(--demo-control-size);") !=
               std::string::npos,
         "demo player consumes global typography and local density tokens");
+    check(player.find("plain_cube_text(sauerdemo::playback_camera())") !=
+              std::string::npos,
+        "demo camera player names cross the UTF-8 boundary");
     check(manager_screen.find("Online Matches Only") != std::string::npos &&
           manager_screen.find("demos.settings.auto-recording-online-only") !=
               std::string::npos &&

@@ -1,5 +1,6 @@
 #include "rml_system.h"
 
+#include "cube_text.h"
 #include "rml_action.h"
 
 #include <RmlUi/Core/Context.h>
@@ -101,7 +102,7 @@ namespace cowui
         local_master = state.local_master;
         team_mode = state.team_mode;
         master_mode = state.master_mode;
-        server_name = state.server_name;
+        server_name = plain_cube_text(state.server_name);
         std::vector<admin::Client> source;
         admin::readclients(source);
         std::vector<ClientRow> next;
@@ -109,9 +110,13 @@ namespace cowui
         {
             ClientRow row;
             row.client_num = client.client_num;
-            row.name = client.name;
-            row.team = client.team.empty() ? "No team" : client.team;
-            row.version = client.version.empty() ? "Vanilla / unknown" : client.version;
+            row.name = plain_cube_text(client.name);
+            row.team = client.team.empty()
+                ? Rml::String("No team")
+                : Rml::String(plain_cube_text(client.team));
+            row.version = client.version.empty()
+                ? Rml::String("Vanilla / unknown")
+                : Rml::String(plain_cube_text(client.version));
             row.spectator = client.spectator;
             row.master = client.privilege != 0;
             row.local = client.local;

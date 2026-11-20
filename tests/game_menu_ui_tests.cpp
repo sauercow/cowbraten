@@ -95,9 +95,11 @@ int main()
         "match status presents live server and map information");
     check(implementation.find("plain_cube_text(state.server_name)") !=
               std::string::npos &&
+          implementation.find("plain_cube_text(state.player_name)") !=
+              std::string::npos &&
           implementation.find("#include \"cube_text.h\"") !=
               std::string::npos,
-        "match status removes Cube color controls from the server title");
+        "match status converts native names and removes Cube color controls");
     check(style.find("background-color: rgba(5, 7, 10, 0.66)") != std::string::npos &&
           style.find("width: 1220dp") != std::string::npos &&
           style.find(".game-menu-dashboard") != std::string::npos,

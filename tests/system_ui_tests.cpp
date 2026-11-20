@@ -61,6 +61,10 @@ int main()
     check(bridge_header.find("#include <string>") == std::string::npos &&
           bridge_header.find("ClientVisitor") != std::string::npos,
         "engine boundary remains POD and visitor based");
+    check(model.find("plain_cube_text(state.server_name)") !=
+              std::string::npos &&
+          model.find("plain_cube_text(client.name)") != std::string::npos,
+        "Administration converts native server and player names to UTF-8");
     check(ui.find("!std::strcmp(name, \"master\")") != std::string::npos &&
           ui.find("system_model.activate(0)") != std::string::npos &&
           ui.find("!std::strcmp(name, \"about\")") != std::string::npos &&

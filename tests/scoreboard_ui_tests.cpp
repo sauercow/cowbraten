@@ -33,6 +33,8 @@ int main()
     const std::string bridge_header = readfile(
         "../src/cowbraten/ui/sauer_scoreboard_bridge.h");
     const std::string ui = readfile("../src/cowbraten/ui/ui.cpp");
+    const std::string cube_text = readfile(
+        "../src/cowbraten/ui/cube_text.h");
     const std::string legacy = readfile("../src/fpsgame/scoreboard.cpp");
 
     check(!rml.empty() && !style.empty() && !model.empty(),
@@ -107,6 +109,11 @@ int main()
         "large player and spectator lists scroll between fixed chrome");
     check(model.find("plain_cube_text(state.server_name)") != std::string::npos,
         "server color controls are removed before RmlUi renders the title");
+    check(model.find("row.name = plain_cube_text(player.name)") !=
+              std::string::npos &&
+          cube_text.find("sauertext::utf8(text.c_str(), text.size())") !=
+              std::string::npos,
+        "player names cross the Cube-to-UTF-8 boundary before rendering");
     check(model.find("SYNC_VALUE(server_name, next_server_name)") !=
               std::string::npos &&
           model.find("for(const char *variable : variables)") ==

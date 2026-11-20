@@ -1,5 +1,6 @@
 #include "rml_demo_player.h"
 
+#include "cube_text.h"
 #include "rml_action.h"
 #include "sauer_demo_bridge.h"
 #include "ui.h"
@@ -129,9 +130,9 @@ namespace cowui
         SYNC(hitbox_enabled, sauerdemo::hitbox_enabled());
         SYNC(position, sauerdemo::playback_position());
         SYNC(duration, std::max(sauerdemo::playback_duration(), 1));
-        SYNC(map_name, Rml::String(sauerdemo::playback_map()));
-        SYNC(mode_name, Rml::String(sauerdemo::playback_mode()));
-        SYNC(camera_name, Rml::String(sauerdemo::playback_camera()));
+        SYNC(map_name, Rml::String(plain_cube_text(sauerdemo::playback_map())));
+        SYNC(mode_name, Rml::String(plain_cube_text(sauerdemo::playback_mode())));
+        SYNC(camera_name, Rml::String(plain_cube_text(sauerdemo::playback_camera())));
         SYNC(position_text, time_text(position));
         SYNC(duration_text, time_text(duration));
         SYNC(progress_width, Rml::CreateString("%.3f%%", 100.0 * position / duration));

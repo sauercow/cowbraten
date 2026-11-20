@@ -32,6 +32,7 @@
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/Factory.h>
 #include <RmlUi/Core/StyleSheetContainer.h>
+#include <RmlUi/Core/SystemInterface.h>
 #include <RmlUi/Core/TextInputContext.h>
 #include <RmlUi/Core/TextInputHandler.h>
 
@@ -51,6 +52,27 @@ extern int lastmillis;
 
 namespace cowui
 {
+    class RmlSystemInterface final : public Rml::SystemInterface
+    {
+    public:
+        void SetClipboardText(const Rml::String &text) override
+        {
+            SDL_SetClipboardText(text.c_str());
+        }
+
+        void GetClipboardText(Rml::String &text) override
+        {
+            char *clipboard = SDL_GetClipboardText();
+            if(clipboard)
+            {
+                text = clipboard;
+                SDL_free(clipboard);
+            }
+            else text.clear();
+        }
+    };
+
+    static RmlSystemInterface system_interface;
     static RmlRenderInterface render_interface;
     static RmlFileInterface file_interface;
     static RmlActionRouter action_router;
@@ -770,6 +792,10 @@ namespace cowui
 
         Rml::SetRenderInterface(
             &render_interface
+        );
+
+        Rml::SetSystemInterface(
+            &system_interface
         );
 
         Rml::SetFileInterface(

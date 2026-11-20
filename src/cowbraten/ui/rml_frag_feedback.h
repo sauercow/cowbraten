@@ -1,6 +1,7 @@
 #pragma once
 
 #include <RmlUi/Core.h>
+#include "cube_text.h"
 #include "frag_feedback_logic.h"
 #include "frag_feedback_snapshot.h"
 #include "frag_feedback_weapon_icons.h"
@@ -178,12 +179,10 @@ namespace cowui
         {
             Rml::String result;
             if(!name) return result;
-            for(const unsigned char *p = (const unsigned char *)name; *p; ++p)
-            {
-                if(*p == '\f' && p[1]) { ++p; continue; }
-                if(*p < 32 && *p != '\t') continue;
-                result.push_back(char(*p));
-            }
+            const std::string converted = plain_cube_text(name);
+            result.reserve(converted.size());
+            for(unsigned char c : converted)
+                if(c >= 32 || c == '\t') result.push_back(char(c));
             return result;
         }
 

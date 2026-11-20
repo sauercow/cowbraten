@@ -12,6 +12,13 @@ extern std::size_t encodeutf8(
     std::size_t source_length,
     std::size_t *carry);
 
+extern std::size_t decodeutf8(
+    uchar *destination,
+    std::size_t destination_length,
+    const uchar *source,
+    std::size_t source_length,
+    std::size_t *carry);
+
 namespace cowui
 {
     namespace sauertext
@@ -66,6 +73,31 @@ namespace cowui
         std::string utf8(const char *text)
         {
             return text ? utf8(text, std::strlen(text)) : std::string();
+        }
+
+        std::string cube(const char *text, std::size_t length)
+        {
+            if(!text || !length) return std::string();
+
+            // A decoded Cube character occupies one byte and can never make
+            // the result larger than its UTF-8 source.
+            std::vector<uchar> converted(length);
+            const std::size_t converted_length = decodeutf8(
+                converted.data(),
+                converted.size(),
+                reinterpret_cast<const uchar *>(text),
+                length,
+                nullptr
+            );
+            return std::string(
+                reinterpret_cast<const char *>(converted.data()),
+                converted_length
+            );
+        }
+
+        std::string cube(const char *text)
+        {
+            return text ? cube(text, std::strlen(text)) : std::string();
         }
     }
 }

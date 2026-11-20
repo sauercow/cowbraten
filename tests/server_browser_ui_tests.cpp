@@ -57,6 +57,11 @@ int main()
           browser.find("return left.favorite;") != std::string::npos,
         "favorites remain ahead of the selected server sort");
 
+    check(browser.find("plain_cube_text(entry.description") !=
+              std::string::npos &&
+          browser.find("plain_cube_text(entry.map)") != std::string::npos,
+        "server descriptions and map names cross the UTF-8 boundary");
+
     check(persistence.find("SVARP(serverfavorites, \"\")") !=
               std::string::npos &&
           persistence.find("serverfavorites %s") != std::string::npos &&

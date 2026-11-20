@@ -116,19 +116,21 @@ namespace cowui
                 : next_evil_team
                     ? "RED"
                     : state.team_mode
-                        ? state.team_name.c_str()
+                        ? Rml::String(plain_cube_text(state.team_name))
                         : "FFA";
 
 #define SYNC_VALUE(member, value) \
         do { if(member != (value)) { member = (value); model.DirtyVariable(#member); } } while(0)
 
-        SYNC_VALUE(player_name, state.player_name);
+        SYNC_VALUE(player_name, plain_cube_text(state.player_name));
         SYNC_VALUE(server_name, plain_cube_text(state.server_name));
         SYNC_VALUE(server_address, state.server_address);
-        SYNC_VALUE(mode_name, state.mode_name);
-        SYNC_VALUE(map_name, state.map_name.empty() ? "Untitled map" : state.map_name);
+        SYNC_VALUE(mode_name, plain_cube_text(state.mode_name));
+        SYNC_VALUE(map_name, state.map_name.empty()
+            ? Rml::String("Untitled map")
+            : Rml::String(plain_cube_text(state.map_name)));
         SYNC_VALUE(map_image, next_map_image);
-        SYNC_VALUE(team_name, state.team_name);
+        SYNC_VALUE(team_name, plain_cube_text(state.team_name));
         SYNC_VALUE(team_label, next_team_label);
         SYNC_VALUE(time_remaining, state.time_remaining);
         SYNC_VALUE(player_count_label,

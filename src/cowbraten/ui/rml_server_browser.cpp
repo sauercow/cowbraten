@@ -1,5 +1,6 @@
 #include "rml_server_browser.h"
 
+#include "cube_text.h"
 #include "rml_action.h"
 #include "ui.h"
 #include "ui_persistence.h"
@@ -216,12 +217,12 @@ namespace cowui
         Row row;
         row.id = entry.id;
         row.host = entry.host;
-        row.description = entry.description[0]
+        row.description = plain_cube_text(entry.description[0]
             ? entry.description
-            : entry.host;
-        row.map = entry.map[0] ? entry.map : "--";
-        row.mode = entry.mode[0] ? entry.mode : "--";
-        row.status = entry.status;
+            : entry.host);
+        row.map = entry.map[0] ? plain_cube_text(entry.map) : "--";
+        row.mode = entry.mode[0] ? plain_cube_text(entry.mode) : "--";
+        row.status = plain_cube_text(entry.status);
         row.player_count = entry.players;
         row.ping_value = entry.ping;
         row.selectable = entry.selectable;

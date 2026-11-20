@@ -1,6 +1,7 @@
 #include "profile_api.h"
 
 #include "sauer_profile_bridge.h"
+#include "sauer_text_bridge.h"
 
 namespace cowui
 {
@@ -92,16 +93,18 @@ namespace cowui
             char value[64] = "";
             if(!sauerprofile::readname(value, sizeof(value)))
                 return false;
-            result = value;
+            result = sauertext::utf8(value);
             return true;
         }
 
         bool writename(const char *value, std::string &result)
         {
+            const std::string encoded = sauertext::cube(value);
             char accepted[64] = "";
-            if(!sauerprofile::writename(value, accepted, sizeof(accepted)))
+            if(!sauerprofile::writename(
+                   encoded.c_str(), accepted, sizeof(accepted)))
                 return false;
-            result = accepted;
+            result = sauertext::utf8(accepted);
             return true;
         }
 
@@ -115,22 +118,25 @@ namespace cowui
             char value[64] = "";
             if(!sauerprofile::readsavedname(index, value, sizeof(value)))
                 return false;
-            result = value;
+            result = sauertext::utf8(value);
             return true;
         }
 
         bool savename(const char *value, std::string &result)
         {
+            const std::string encoded = sauertext::cube(value);
             char accepted[64] = "";
-            if(!sauerprofile::savename(value, accepted, sizeof(accepted)))
+            if(!sauerprofile::savename(
+                   encoded.c_str(), accepted, sizeof(accepted)))
                 return false;
-            result = accepted;
+            result = sauertext::utf8(accepted);
             return true;
         }
 
         bool deletename(const char *value)
         {
-            return sauerprofile::deletename(value);
+            const std::string encoded = sauertext::cube(value);
+            return sauerprofile::deletename(encoded.c_str());
         }
 
         void renderpreview(
