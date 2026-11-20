@@ -108,11 +108,8 @@ int main()
           bridge.find("ai_name_%d") != std::string::npos,
         "legacy AutoIgnore aliases migrate into native settings");
     check(rml.find("id=\"settings-autoignore\"") != std::string::npos &&
-          implementation.find("!std::strcmp(name, \"autoignore\")") !=
-              std::string::npos &&
-          implementation.find("pending_legacy_anchor = \"settings-autoignore\"") !=
-              std::string::npos,
-        "legacy Auto Ignore menu opens native Chat settings");
+          implementation.find("commit_auto_ignore_name") != std::string::npos,
+        "native Auto Ignore settings coexist with configurable compact menus");
     check(rml.find("id=\"settings-display-presets\"") != std::string::npos &&
           rml.find("run_display_preset(preset.id)") != std::string::npos &&
           implementation.find("refreshdisplaypresets()") != std::string::npos &&

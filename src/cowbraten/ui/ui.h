@@ -41,7 +41,8 @@ namespace cowui
         Servers,
         Demos,
         Settings,
-        Profile
+        Profile,
+        LegacyGui
     };
 
     // Window dimensions define logical UI density and SDL input coordinates;

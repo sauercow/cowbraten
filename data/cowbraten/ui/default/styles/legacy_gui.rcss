@@ -1,0 +1,227 @@
+body
+{
+    background-color: transparent;
+}
+
+.legacy-gui-screen
+{
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.legacy-gui-scrim
+{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(5, 7, 10, 0.58);
+}
+
+.legacy-gui-panel
+{
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    width: 470dp;
+    max-width: 90%;
+    max-height: 84%;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #0D1218F8;
+    border-width: 1dp;
+    border-color: #56616D;
+    border-radius: 7dp;
+}
+
+.legacy-gui-header
+{
+    box-sizing: border-box;
+    display: flex;
+    min-height: 68dp;
+    padding: 12dp 14dp 12dp 18dp;
+    flex: none;
+    align-items: center;
+    background-color: #121920;
+    border-bottom-width: 1dp;
+    border-bottom-color: #37414B;
+}
+
+.legacy-gui-header > div,
+.legacy-gui-header small,
+.legacy-gui-header strong
+{
+    display: block;
+}
+
+.legacy-gui-header small
+{
+    color: var(--color-secondary);
+    font-size: 0.625rem;
+    letter-spacing: 1dp;
+    text-transform: uppercase;
+}
+
+.legacy-gui-header strong
+{
+    margin-top: 2dp;
+    color: var(--color-text);
+    font-size: 1.125rem;
+    letter-spacing: 1dp;
+}
+
+.legacy-gui-close
+{
+    width: 38dp;
+    height: 38dp;
+    margin-left: auto;
+    padding: 0;
+    background-color: transparent;
+    border-width: 1dp;
+    border-color: #47515B;
+    border-radius: 4dp;
+    color: var(--color-text-muted);
+    font-size: 1.35rem;
+}
+
+.legacy-gui-close:hover
+{
+    background-color: #26313A;
+    color: var(--color-text);
+}
+
+.legacy-gui-controls
+{
+    box-sizing: border-box;
+    display: block;
+    min-height: 0;
+    padding: 14dp;
+    overflow-y: auto;
+}
+
+.legacy-gui-row
+{
+    display: block;
+}
+
+.legacy-gui-button,
+.legacy-gui-toggle
+{
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    min-height: 38dp;
+    margin-bottom: 7dp;
+    padding: 8dp 12dp;
+    align-items: center;
+    background-color: #182129;
+    border-width: 1dp;
+    border-color: #3F4A54;
+    border-radius: 4dp;
+    color: var(--color-text);
+    text-align: left;
+}
+
+.legacy-gui-button:hover,
+.legacy-gui-toggle:hover
+{
+    background-color: #222E37;
+    border-color: var(--color-primary);
+}
+
+.legacy-gui-toggle-mark
+{
+    box-sizing: border-box;
+    display: block;
+    width: 16dp;
+    height: 16dp;
+    margin-right: 10dp;
+    flex: none;
+    background-color: #0B1015;
+    border-width: 1dp;
+    border-color: #65717C;
+    border-radius: 2dp;
+}
+
+.legacy-gui-toggle.is-active .legacy-gui-toggle-mark
+{
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+}
+
+.legacy-gui-slider,
+.legacy-gui-field
+{
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    min-height: 48dp;
+    margin-bottom: 8dp;
+    padding: 7dp 10dp;
+    align-items: center;
+    background-color: #121A21;
+    border-width: 1dp;
+    border-color: #35404A;
+    border-radius: 4dp;
+}
+
+.legacy-gui-slider > span,
+.legacy-gui-field > span
+{
+    width: 145dp;
+    flex: none;
+    color: var(--color-text-muted);
+}
+
+.legacy-gui-slider > b
+{
+    width: 48dp;
+    color: var(--color-secondary);
+    text-align: right;
+}
+
+.legacy-gui-slider input
+{
+    margin-left: 10dp;
+    flex: 1;
+}
+
+.legacy-gui-field input
+{
+    min-width: 0;
+    flex: 1;
+}
+
+.legacy-gui-text
+{
+    padding: 4dp 3dp 9dp 3dp;
+    color: var(--color-text-muted);
+}
+
+.legacy-gui-title,
+.legacy-gui-tab
+{
+    padding: 7dp 2dp;
+    color: var(--color-text);
+    font-size: 1rem;
+    letter-spacing: 1dp;
+}
+
+.legacy-gui-tab
+{
+    color: var(--color-secondary);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+}
+
+.legacy-gui-separator
+{
+    height: 1dp;
+    margin: 7dp 0 12dp 0;
+    background-color: #3B4650;
+}

@@ -49,6 +49,10 @@ int main()
     const std::string engine_menus = readfile("../src/engine/menus.cpp");
     const std::string snapshot = readfile(
         "../src/cowbraten/ui/legacy_gui_snapshot.h");
+    const std::string adapter = readfile(
+        "../src/cowbraten/ui/rml_legacy_gui.cpp");
+    const std::string adapter_rml = readfile(
+        "../data/cowbraten/ui/default/screens/legacy_gui.rml");
 
     check(!menus.empty() && !master.empty() && !ui.empty(),
         "load legacy declarations and native route table");
@@ -81,22 +85,25 @@ int main()
     check(generated_routed,
         "every generated entity editor GUI has an RmlUi route");
 
-    check(hasroute(ui, "autoignore"),
-        "known Autoexec Auto Ignore menu routes to native Settings");
-    check(hasroute(ui, "aliases"),
-        "known Autoexec alias selector routes to native Profile");
+    check(ui.find("legacy_gui_model.activate(name)") != std::string::npos &&
+          ui.find("show(ScreenId::LegacyGui)") != std::string::npos,
+        "configurable newgui names route through the generic RmlUi adapter");
     check(snapshot.find("struct LegacyGuiSink") != std::string::npos &&
           snapshot.find("opaque") != std::string::npos &&
           snapshot.find("activation indices") != std::string::npos &&
           engine_menus.find("capturelegacygui") != std::string::npos &&
           engine_menus.find("LegacyGuiControlType::Checkbox") != std::string::npos &&
           engine_menus.find("LegacyGuiControlType::Slider") != std::string::npos &&
-          engine_menus.find("LegacyGuiControlType::Field") != std::string::npos,
+          engine_menus.find("LegacyGuiControlType::Field") != std::string::npos &&
+          adapter.find("activatelegacygui") != std::string::npos &&
+          adapter_rml.find("data-for=\"control : controls\"") != std::string::npos,
         "generic newgui capture exposes typed controls and opaque actions");
-    check(hasroute(ui, "ss"),
-        "known Autoexec screen preset menu routes to native Settings");
+    check(!hasroute(ui, "aliases") && !hasroute(ui, "autoignore") &&
+          !hasroute(ui, "ss"),
+        "Autoexec menus use their actual declarations instead of named shortcuts");
 
-    check(ui.find("else\n            return false;") != std::string::npos,
+    check(ui.find("if(!legacy_gui_model.activate(name)) return false;") !=
+              std::string::npos,
         "unknown third-party GUI names retain an explicit compatibility handoff");
 
     std::cout << "\n" << passed << " passed, " << failed << " failed\n";

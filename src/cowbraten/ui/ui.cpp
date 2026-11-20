@@ -16,6 +16,7 @@
 #include "rml_editor.h"
 #include "rml_game_menu.h"
 #include "rml_game_setup.h"
+#include "rml_legacy_gui.h"
 #include "rml_profile.h"
 #include "rml_settings.h"
 #include "rml_system.h"
@@ -76,6 +77,7 @@ namespace cowui
     static RmlEditor editor_model;
     static RmlProfile profile_model;
     static RmlSettings settings_model;
+    static RmlLegacyGui legacy_gui_model;
     static Rml::Context *context = nullptr;
     static FrameStats frame_stats;
     static bool profiling_enabled = false;
@@ -144,6 +146,11 @@ namespace cowui
         {
             ScreenId::Profile,
             "data/cowbraten/ui/default/screens/profile.rml",
+            nullptr
+        },
+        {
+            ScreenId::LegacyGui,
+            "data/cowbraten/ui/default/screens/legacy_gui.rml",
             nullptr
         }
     };
@@ -890,8 +897,10 @@ namespace cowui
            !utilities_model.init(context, action_router) ||
            !editor_model.init(context, action_router) ||
            !profile_model.init(context, action_router) ||
-           !settings_model.init(context, action_router))
+           !settings_model.init(context, action_router) ||
+           !legacy_gui_model.init(context))
         {
+            legacy_gui_model.shutdown(context);
             settings_model.shutdown(context);
             profile_model.shutdown(context);
             editor_model.shutdown(context);
@@ -960,6 +969,7 @@ namespace cowui
         {
             loading_model.shutdown();
             loading_ready = false;
+            legacy_gui_model.shutdown(context);
             settings_model.shutdown(context);
             profile_model.shutdown(context);
             editor_model.shutdown(context);
@@ -1441,6 +1451,8 @@ namespace cowui
                 system_model.update();
             else if(active_screen->id == ScreenId::GameMenu)
                 game_menu_model.update();
+            else if(active_screen->id == ScreenId::LegacyGui)
+                legacy_gui_model.update();
         }
 
         if(!demo_player.visible() &&
@@ -1662,12 +1674,6 @@ namespace cowui
             screen = ScreenId::Settings;
         else if(!std::strcmp(name, "playermodel"))
             screen = ScreenId::Profile;
-        else if(!std::strcmp(name, "aliases"))
-        {
-            if(!show(ScreenId::Profile)) return false;
-            profile_model.activatesavednames();
-            return true;
-        }
         else if(!std::strcmp(name, "crosshair") ||
                 !std::strcmp(name, "soundpacks") ||
                 !std::strcmp(name, "trailcolors") ||
@@ -1675,9 +1681,7 @@ namespace cowui
                 !std::strcmp(name, "gameclock") ||
                 !std::strcmp(name, "hudscore") ||
                 !std::strcmp(name, "scoreboard") ||
-                !std::strcmp(name, "hudfragmessages") ||
-                !std::strcmp(name, "autoignore") ||
-                !std::strcmp(name, "ss"))
+                !std::strcmp(name, "hudfragmessages"))
         {
             if(!show(ScreenId::Settings)) return false;
             return settings_model.activatelegacyroute(name);
@@ -1803,7 +1807,10 @@ namespace cowui
             return true;
         }
         else
-            return false;
+        {
+            if(!legacy_gui_model.activate(name)) return false;
+            return show(ScreenId::LegacyGui);
+        }
 
         return show(screen);
     }

@@ -1,0 +1,58 @@
+<rml>
+<head>
+    <title>Configurable menu</title>
+    <link type="text/rcss" href="../styles/base.rcss" />
+    <link type="text/rcss" href="../styles/controls.rcss" />
+    <link type="text/rcss" href="../styles/legacy_gui.rcss" />
+</head>
+
+<body data-model="legacy_gui">
+    <div class="legacy-gui-screen">
+        <div class="legacy-gui-scrim" onclick="navigation.close"></div>
+        <div class="legacy-gui-panel">
+            <div class="legacy-gui-header">
+                <div>
+                    <small>Configurable menu</small>
+                    <strong>{{ menu_title }}</strong>
+                </div>
+                <button class="legacy-gui-close" onclick="navigation.close">&#215;</button>
+            </div>
+
+            <div class="legacy-gui-controls">
+                <div data-for="control : controls" class="legacy-gui-row">
+                    <div data-if="control.title" class="legacy-gui-title">{{ control.label }}</div>
+                    <div data-if="control.tab" class="legacy-gui-tab">{{ control.label }}</div>
+                    <div data-if="control.text" class="legacy-gui-text">{{ control.label }}</div>
+                    <div data-if="control.separator" class="legacy-gui-separator"></div>
+
+                    <button data-if="control.button" class="legacy-gui-button"
+                        data-event-click="run_control(control.activation)"><span>{{ control.label }}</span></button>
+
+                    <button data-if="control.toggle" class="legacy-gui-toggle"
+                        data-class-is-active="control.active"
+                        data-event-click="run_control(control.activation)">
+                        <span class="legacy-gui-toggle-mark"></span>
+                        <span>{{ control.label }}</span>
+                    </button>
+
+                    <label data-if="control.slider" class="legacy-gui-slider">
+                        <span>{{ control.label }}</span><b>{{ control.value }}</b>
+                        <input type="range" data-attr-min="control.minimum"
+                            data-attr-max="control.maximum" data-attr-value="control.value"
+                            data-event-change="change_control(control.activation, ev.value)" />
+                    </label>
+
+                    <label data-if="control.field" class="legacy-gui-field">
+                        <span>{{ control.label }}</span>
+                        <input class="text-input" type="text" data-value="control.value"
+                            data-event-change="change_control(control.activation, ev.value)" />
+                    </label>
+
+                    <button data-if="control.image" class="legacy-gui-button legacy-gui-image-action"
+                        data-event-click="run_control(control.activation)"><span>{{ control.label }}</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</rml>
