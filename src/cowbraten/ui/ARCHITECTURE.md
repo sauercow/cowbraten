@@ -144,14 +144,13 @@ legacy no-op and does not disturb the active RmlUi screen. While RmlUi is
 visible, the legacy GUI stack is not rendered, which prevents two menu layers
 from competing while preserving legacy stack state for a later handoff.
 
-Known user-menu compatibility routes are semantic rather than visual copies.
-`aliases` opens Profile with its saved-name selector expanded, `autoignore`
-opens native Chat settings, and `ss` opens Graphics. Graphics enumerates only
-engine aliases whose identifiers match the constrained `ss_*` form and sends
-their selected identifier through the typed Settings bridge. The bridge
-revalidates the identifier and executes the existing engine-owned alias; RML
-never receives or evaluates its CubeScript body. This preserves personal
-resolution/FOV scripts without hard-coding them into Cowbraten.
+User-defined menu names are not special-cased. After the exact-name routes for
+production screens, the router asks the compact adapter to capture the actual
+`newgui` declaration. Thus `aliases`, `autoignore`, `ss`, and third-party names
+retain their configured labels, fields, and actions instead of redirecting to
+an approximately related production screen. A missing declaration remains the
+legacy no-op. A declaration containing an unsupported primitive falls back as
+a whole to the legacy renderer.
 
 ## Loading presentation
 
@@ -186,8 +185,19 @@ the menu body against a recorder implementing `g3d_gui`; the recorder emits
 evaluated text, control state, layout boundaries, and opaque activation
 indices through `LegacyGuiSink`. Script actions and ident names remain in the
 engine-side activation table and never enter RML. The compact RmlUi renderer
-will use this path for arbitrary menus once its control coverage is complete;
-unsupported primitives continue through the original renderer meanwhile.
+uses this path for arbitrary menus containing text, titles, separators, tabs,
+buttons, images, checkboxes, radio buttons, bitfields, numeric and discrete
+list sliders, fields, key fields, and list layout boundaries. Buttons and
+images retain their original close behavior; value controls stay open and
+refresh from engine state. Discrete sliders keep their declared engine values
+and optional display names rather than exposing a synthetic numeric range.
+
+Capture is all-or-nothing. The recorder marks editor widgets, progress bars,
+direct engine texture widgets, and 3D player/model/prefab previews unsupported.
+If any such primitive occurs, the RmlUi adapter declines the document and the
+original renderer opens the complete menu. This is the deliberate migration
+boundary until those widgets gain native equivalents; it prevents a partially
+rendered third-party menu from silently losing controls.
 
 ## Text utilities model
 

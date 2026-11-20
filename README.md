@@ -94,7 +94,7 @@ Release builds provide both a portable ZIP and an executable `cowbraten_setup_li
 
 Cowbraten 1.1 uses a native RmlUi layer for the normal player interface: Profile, Play and game setup, Servers, Demos, Settings, Administration and About, text utilities, map editing, the in-game menu, chat, console, and scoreboard. These screens use typed C++ APIs for engine state and preserve the existing Sauer configuration format.
 
-The specialized in-engine 3D texture palette remains engine-owned, and unknown third-party `showgui` documents retain a compatibility fallback to the legacy GUI. The updated `menus.cfg` is still installed for that compatibility path.
+The specialized in-engine 3D texture palette remains engine-owned. User and third-party `newgui` documents made from standard compact controls are reconstructed as RmlUi panels while keeping their evaluated labels, configuration fields, and original engine-owned actions. Documents containing editor widgets, progress bars, direct engine textures, or 3D previews fall back as a whole to the legacy GUI until those primitives have native equivalents. The updated `menus.cfg` remains installed for that compatibility path.
 
 If you do not want to use the cowbraten menus, run `/usecowbratenmenus 0`.
 

@@ -139,7 +139,6 @@ body
     width: 48dp;
     height: 48dp;
     margin-right: 10dp;
-    object-fit: contain;
 }
 
 .legacy-gui-toggle-mark
