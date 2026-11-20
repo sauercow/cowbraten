@@ -144,6 +144,21 @@ legacy no-op and does not disturb the active RmlUi screen. While RmlUi is
 visible, the legacy GUI stack is not rendered, which prevents two menu layers
 from competing while preserving legacy stack state for a later handoff.
 
+## Loading presentation
+
+Blocking engine loads do not pass through the normal UI frame loop. A cached
+`RmlLoading` document is therefore updated and rendered synchronously from
+`renderbackground()` and `renderprogress()`. It owns captions, map metadata,
+package-backed map previews, and determinate or indeterminate progress. The
+document uses the same theme and interface preferences as the other cached
+screens.
+
+The integration is deliberately fail-open: if RmlUi has not initialized, the
+document or theme cannot load, or the renderer is unavailable, the original
+OpenGL loading code runs unchanged. Raw generated lightmap preview textures
+also stay on that path because a GL texture handle is not a safe RML resource
+name. The normal application-shell backdrop remains engine-owned for now.
+
 ## Text utilities model
 
 The legacy `notepad`, `scratchpad`, and `pastebuffer` documents share one

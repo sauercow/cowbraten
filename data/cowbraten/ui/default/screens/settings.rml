@@ -4281,7 +4281,8 @@
                             </div>
                         </div>
 
-                        <div class="settings-section settings-compact-section panel">
+                        <div id="settings-autoignore"
+                            class="settings-section settings-compact-section panel">
                             <div class="settings-display-row">
                                 <div class="settings-control-copy">
                                     <div class="settings-control-title">Auto Ignore</div>

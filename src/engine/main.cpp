@@ -541,6 +541,32 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
     getbackgroundres(w, h);
     gettextres(w, h);
 
+    // The ordinary main-menu backdrop still uses the engine background until
+    // it becomes part of the application shell. Loading and reset screens use
+    // RmlUi now, with this function retained as a startup/GL failure fallback.
+    const bool native_candidate = caption || mapshot || mapname || mapinfo || !restore;
+    if(native_candidate)
+    {
+        const char *mapshotname = mapshot && mapshot != notexture && mapshot->name
+            ? mapshot->name : NULL;
+        bool native_rendered = true;
+        loopi(restore ? 1 : 3)
+        {
+            if(!cowui::renderloadingbackground(
+                    caption, mapshotname, mapname, mapinfo))
+            {
+                native_rendered = false;
+                break;
+            }
+            if(!restore) swapbuffers(false);
+        }
+        if(native_rendered)
+        {
+            if(!restore) setbackgroundinfo(caption, mapshot, mapname, mapinfo);
+            return;
+        }
+    }
+
     static int lastupdate = -1, lastw = -1, lasth = -1;
     static float backgroundu = 0, backgroundv = 0, detailu = 0, detailv = 0;
     static int numdecals = 0;
@@ -702,6 +728,15 @@ void renderprogress(float bar, const char *text, GLuint tex, bool background)   
     if(forceaspect) w = int(ceil(h*forceaspect));
     getbackgroundres(w, h);
     gettextres(w, h);
+
+    // Generated lightmap previews are raw engine GL textures and still need
+    // the compatibility renderer. All file-backed loading progress is native.
+    const bool full_background = background || forcebackground || !renderedframe;
+    if(!tex && cowui::renderloadingprogress(bar, text, full_background))
+    {
+        swapbuffers(false);
+        return;
+    }
 
     hudmatrix.ortho(0, w, h, 0, -1, 1);
     resethudmatrix();

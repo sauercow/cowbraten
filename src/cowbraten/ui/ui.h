@@ -66,6 +66,19 @@ namespace cowui
         int drawable_width,
         int drawable_height);
 
+    // Blocking engine loads cannot wait for the normal frame loop. These
+    // entry points render the cached loading document synchronously and return
+    // false whenever the original OpenGL loading screen must be used.
+    bool renderloadingbackground(
+        const char *caption,
+        const char *mapshot,
+        const char *mapname,
+        const char *mapinfo);
+    bool renderloadingprogress(
+        float value,
+        const char *text,
+        bool full_background);
+
     // Route key/button/text events even while hidden to drain captured releases.
     bool processevent(const SDL_Event &event);
 

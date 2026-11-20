@@ -1,0 +1,39 @@
+<rml>
+<head>
+  <title>Cowbraten loading</title>
+  <link type="text/rcss" href="../styles/loading.rcss" />
+</head>
+<body>
+  <div id="cow-loading-root" class="cow-loading-root">
+    <div class="cow-loading-brand">
+      <span class="cow-loading-wordmark">COWBRATEN</span>
+      <span class="cow-loading-kicker">NATIVE INTERFACE</span>
+    </div>
+
+    <div class="cow-loading-content">
+      <h1 id="cow-loading-caption" class="cow-loading-caption">LOADING</h1>
+
+      <div id="cow-loading-map-card" class="cow-loading-map-card">
+        <div class="cow-loading-map-image">
+          <img id="cow-loading-mapshot" />
+          <div id="cow-loading-mapshot-fallback" class="cow-loading-mapshot-fallback">?</div>
+        </div>
+        <div class="cow-loading-map-copy">
+          <strong id="cow-loading-map-name"></strong>
+          <p id="cow-loading-map-info"></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="cow-loading-progress-card" class="cow-loading-progress-card">
+      <div class="cow-loading-progress-meta">
+        <span id="cow-loading-progress-text">Working...</span>
+        <span class="cow-loading-pulse">●</span>
+      </div>
+      <div class="cow-loading-progress-track">
+        <div id="cow-loading-progress-fill" class="cow-loading-progress-fill"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</rml>

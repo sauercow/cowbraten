@@ -30,6 +30,7 @@ The **1.1.0** stable designation is reserved until every interface path that sti
 - Native Notepad, Scratchpad, and Paste Buffer with guarded relative-file access, clipboard actions, and explicit-buffer execution.
 - Native map editing control center for geometry, brushes, entities, lights, triggers, mapmodels, materials, post-processing, map files, and selected-entity attributes.
 - Compact in-game menu, gameplay chat, full console, responsive HUD/status presentation, and held-key scoreboard.
+- Synchronous RmlUi loading and map presentation, with the original OpenGL path retained for early initialization, UI-load failure, and raw generated lightmap textures.
 
 ### Engine integration and persistence
 
@@ -60,9 +61,18 @@ Windows and macOS packaging paths are retained, but interactive platform-specifi
 
 - The in-engine 3D texture palette is a spatial editing surface owned by the engine, not a CubeScript `newgui` document.
 - Unknown third-party `showgui` names continue through the legacy GUI for mod compatibility.
+- Loading that happens before RmlUi is ready, or while its document cannot be loaded, uses the original OpenGL presentation. Generated lightmap preview textures also remain engine-rendered because they are raw GL handles rather than package resources.
 - HD recordings use optional `.dmohd` companion files; standard `.dmo` recording and playback remain supported.
 
-This list is not an assertion that no other legacy drawing remains. Completing the inventory is an explicit rc.2-to-final task.
+## Remaining migration inventory
+
+- Custom `newgui` documents created by third-party or user `autoexec.cfg` files still hand presentation to the compatibility GUI. Known compatibility aliases should route to typed native screens; genuinely custom documents need a constrained adapter or an explicit opt-in legacy mode.
+- The known `autoignore` Autoexec menu now routes to native Chat settings, where its migrated controls live. Other locally observed custom menus such as `aliases` and `ss` still need behavior-level mapping before they can be routed without losing actions.
+- The ordinary engine main-menu backdrop is still drawn by the engine behind the native application shell.
+- Remaining direct HUD drawing must be audited by gameplay mode. In particular, secondary-ammo/ammo-bar presentation and mode-owned flag, token, capture, and spectator indicators need comparison against the native HUD before the corresponding legacy branches can be disabled.
+- Legacy menu declarations and configuration files must remain available until a runtime switch can skip their UI declarations without skipping gameplay configuration, binds, aliases, map scripts, or mod compatibility.
+
+The target removal step is therefore to stop loading and rendering the legacy *UI* by default while retaining its files and an explicit compatibility switch. It is not to remove CubeScript or the engine configuration layer.
 
 ## Post-1.1 maintenance
 

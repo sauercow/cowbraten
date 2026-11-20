@@ -120,12 +120,12 @@ int main()
           style.find("font-size: 0.875rem") != std::string::npos,
         "QHD viewports scale content without stretching the scoreboard");
     check(rml.find("scoreboard-teams") != std::string::npos &&
-          rml.find("player : evil_rows") != std::string::npos &&
-          rml.find("player : good_rows") != std::string::npos &&
-          model.find("Bind(\"evil_rows\"") != std::string::npos &&
-          model.find("Bind(\"good_rows\"") != std::string::npos &&
+          rml.find("player : left_team_rows") != std::string::npos &&
+          rml.find("player : right_team_rows") != std::string::npos &&
+          model.find("Bind(\"left_team_rows\"") != std::string::npos &&
+          model.find("Bind(\"right_team_rows\"") != std::string::npos &&
           style.find(".scoreboard-team") != std::string::npos,
-        "team matches present red and blue rosters side by side");
+        "team matches present observed and opposing rosters side by side");
     check(rml.find("player : spectator_rows") != std::string::npos &&
           style.find(".scoreboard-spectator-grid") != std::string::npos,
         "spectators use a compact grid below both team columns");

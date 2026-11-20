@@ -2798,6 +2798,11 @@ namespace cowui
                 (!std::strcmp(name, "scoreboard") ? "settings-scoreboard" :
                     "settings-fragmessages")));
         }
+        else if(!std::strcmp(name, "autoignore"))
+        {
+            setcategory(Category::Chat);
+            pending_legacy_anchor = "settings-autoignore";
+        }
         else return false;
         return true;
     }

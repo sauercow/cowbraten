@@ -1,0 +1,224 @@
+body
+{
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: transparent;
+    color: #E8EDF4;
+    font-family: var(--font-interface, Lato);
+    font-size: 16dp;
+}
+
+.cow-loading-root
+{
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 5vh 6vw;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #0C131B;
+}
+
+.cow-loading-brand
+{
+    display: flex;
+    align-items: center;
+    gap: 16dp;
+}
+
+.cow-loading-wordmark
+{
+    color: #F4F7FA;
+    font-size: 1.25rem;
+    letter-spacing: 4dp;
+}
+
+.cow-loading-kicker
+{
+    padding: 5dp 8dp;
+    border-width: 1dp;
+    border-color: #315D84;
+    color: #72B7F2;
+    font-size: 0.5rem;
+    letter-spacing: 2dp;
+}
+
+.cow-loading-content
+{
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 28dp;
+}
+
+.cow-loading-caption
+{
+    margin: 0;
+    color: #F4F7FA;
+    font-size: 2rem;
+    letter-spacing: 3dp;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.cow-loading-map-card
+{
+    box-sizing: border-box;
+    display: flex;
+    width: 720dp;
+    max-width: 82vw;
+    min-height: 230dp;
+    padding: 14dp;
+    align-items: stretch;
+    gap: 22dp;
+    background-color: #111922F2;
+    border-width: 1dp;
+    border-color: #2B3A48;
+}
+
+.cow-loading-map-image
+{
+    display: block;
+    width: 230dp;
+    height: 230dp;
+    flex: none;
+    overflow: hidden;
+    background-color: #080B0F;
+    border-width: 1dp;
+    border-color: #3D5367;
+}
+
+#cow-loading-mapshot
+{
+    width: 100%;
+    height: 100%;
+}
+
+.cow-loading-mapshot-fallback
+{
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: #5B6B79;
+    font-size: 4rem;
+}
+
+.cow-loading-map-copy
+{
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14dp;
+}
+
+#cow-loading-map-name
+{
+    color: #F4F7FA;
+    font-size: 1.5rem;
+    letter-spacing: 2dp;
+    text-transform: uppercase;
+}
+
+#cow-loading-map-info
+{
+    margin: 0;
+    color: #AAB7C3;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+}
+
+.cow-loading-progress-card
+{
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    padding: 14dp 16dp;
+    background-color: #0E151DED;
+    border-width: 1dp;
+    border-color: #293B4B;
+}
+
+.cow-loading-progress-meta
+{
+    display: flex;
+    margin-bottom: 10dp;
+    justify-content: space-between;
+    color: #C8D3DD;
+    font-size: 0.6875rem;
+}
+
+.cow-loading-pulse
+{
+    color: #4EA3FF;
+}
+
+.cow-loading-progress-track
+{
+    display: block;
+    width: 100%;
+    height: 6dp;
+    overflow: hidden;
+    background-color: #26323D;
+}
+
+.cow-loading-progress-fill
+{
+    display: block;
+    width: 0;
+    height: 100%;
+    background-color: #4EA3FF;
+}
+
+.cow-loading-progress-fill.cow-loading-indeterminate
+{
+    width: 18%;
+    background-color: #72B7F2;
+}
+
+.cow-loading-root.cow-loading-compact
+{
+    padding: 22dp;
+    align-items: flex-end;
+    justify-content: flex-start;
+    background-color: transparent;
+    decorator: none;
+}
+
+.cow-loading-compact .cow-loading-brand,
+.cow-loading-compact .cow-loading-content
+{
+    display: none;
+}
+
+.cow-loading-compact .cow-loading-progress-card
+{
+    width: 520dp;
+    max-width: 42vw;
+}
+
+@media (max-width: 900dp)
+{
+    .cow-loading-map-card
+    {
+        width: 92vw;
+    }
+
+    .cow-loading-map-image
+    {
+        width: 180dp;
+        height: 180dp;
+    }
+
+    .cow-loading-compact .cow-loading-progress-card
+    {
+        width: 70vw;
+        max-width: 70vw;
+    }
+}

@@ -10,6 +10,7 @@
 #include "rml_gameplay_hud.h"
 #include "frag_feedback_snapshot.h"
 #include "rml_match_score_hud.h"
+#include "rml_loading.h"
 #include "rml_demo_manager.h"
 #include "rml_demo_player.h"
 #include "rml_editor.h"
@@ -64,6 +65,8 @@ namespace cowui
     static bool gameplay_hud_ready = false;
     static RmlMatchScoreHud match_score_hud_model;
     static bool match_score_hud_ready = false;
+    static RmlLoading loading_model;
+    static bool loading_ready = false;
     static RmlDemoManager demo_manager;
     static RmlDemoPlayer demo_player;
     static RmlGameMenu game_menu_model;
@@ -920,6 +923,18 @@ namespace cowui
 
         action_router.install();
 
+        loading_ready = loading_model.init(context);
+        if(loading_ready)
+        {
+            Rml::ElementDocument *loading_document = loading_model.getdocument();
+            if(!applytheme(loading_document))
+            {
+                loading_model.shutdown();
+                loading_ready = false;
+            }
+            else applyinterfacepreferences(loading_document);
+        }
+
         // Optional module. If its RML is missing, keep vanilla HUD available.
         gameplay_hud_ready = gameplay_hud_model.init(context);
         initialized = true;
@@ -943,6 +958,8 @@ namespace cowui
 
         if(initialized)
         {
+            loading_model.shutdown();
+            loading_ready = false;
             settings_model.shutdown(context);
             profile_model.shutdown(context);
             editor_model.shutdown(context);
@@ -972,6 +989,8 @@ namespace cowui
         }
         else
         {
+            loading_model.shutdown();
+            loading_ready = false;
             context = nullptr;
         }
 
@@ -1098,6 +1117,24 @@ namespace cowui
             if(active_screen && active_screen->id == ScreenId::Settings)
                 settings_model.videochanged();
         }
+    }
+
+    bool renderloadingbackground(const char *caption, const char *mapshot,
+        const char *mapname, const char *mapinfo)
+    {
+        if(!initialized || !context || !loading_ready)
+            return false;
+        return loading_model.background(context, render_interface,
+            caption, mapshot, mapname, mapinfo);
+    }
+
+    bool renderloadingprogress(float value, const char *text,
+        bool full_background)
+    {
+        if(!initialized || !context || !loading_ready)
+            return false;
+        return loading_model.progress(context, render_interface,
+            value, text, full_background);
     }
 
     bool processevent(const SDL_Event &event)
@@ -1632,7 +1669,8 @@ namespace cowui
                 !std::strcmp(name, "gameclock") ||
                 !std::strcmp(name, "hudscore") ||
                 !std::strcmp(name, "scoreboard") ||
-                !std::strcmp(name, "hudfragmessages"))
+                !std::strcmp(name, "hudfragmessages") ||
+                !std::strcmp(name, "autoignore"))
         {
             if(!show(ScreenId::Settings)) return false;
             return settings_model.activatelegacyroute(name);

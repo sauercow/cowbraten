@@ -107,6 +107,12 @@ int main()
     check(bridge.find("migratelegacyautoignore") != std::string::npos &&
           bridge.find("ai_name_%d") != std::string::npos,
         "legacy AutoIgnore aliases migrate into native settings");
+    check(rml.find("id=\"settings-autoignore\"") != std::string::npos &&
+          implementation.find("!std::strcmp(name, \"autoignore\")") !=
+              std::string::npos &&
+          implementation.find("pending_legacy_anchor = \"settings-autoignore\"") !=
+              std::string::npos,
+        "legacy Auto Ignore menu opens native Chat settings");
     check(rml.find("settings.category.autoexec") != std::string::npos &&
           rml.find("select_autoexec_profile(profile.id)") !=
             std::string::npos &&

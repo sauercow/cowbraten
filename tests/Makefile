@@ -2,7 +2,7 @@ CXX ?= clang++
 CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra
 
 .PHONY: all run clean rmlui
-all: demo_library_tests demo_visualization_tests server_browser_ui_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests hud_layout_tests utilities_ui_tests editor_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
+all: demo_library_tests demo_visualization_tests server_browser_ui_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests hud_layout_tests utilities_ui_tests editor_ui_tests chat_ui_tests console_ui_tests console_text_tests legacy_route_tests loading_ui_tests test_frag_feedback_weapon_icons test_match_score_logic ui_update_tests
 
 RMLUI_BUILD ?= ../build/rmlui-x86_64-linux-Release
 
@@ -62,6 +62,18 @@ console_ui_tests: console_ui_tests.cpp ../data/cowbraten/ui/default/screens/cons
 console_text_tests: console_text_tests.cpp ../src/cowbraten/ui/rml_console_text.h
 	$(CXX) $(CXXFLAGS) -I../src/cowbraten/ui -o $@ console_text_tests.cpp
 
+legacy_route_tests: legacy_route_tests.cpp ../data/cowbraten/menus.cfg ../data/cowbraten/master.cfg ../src/cowbraten/ui/ui.cpp
+	$(CXX) $(CXXFLAGS) -o $@ legacy_route_tests.cpp
+
+loading_ui_tests: loading_ui_tests.cpp ../data/cowbraten/ui/default/screens/loading.rml ../data/cowbraten/ui/default/styles/loading.rcss ../src/cowbraten/ui/rml_loading.h ../src/cowbraten/ui/ui.cpp ../src/engine/main.cpp
+	$(CXX) $(CXXFLAGS) -o $@ loading_ui_tests.cpp
+
+test_frag_feedback_weapon_icons: test_frag_feedback_weapon_icons.cpp ../src/cowbraten/ui/frag_feedback_weapon_icons.h
+	$(CXX) $(CXXFLAGS) -o $@ test_frag_feedback_weapon_icons.cpp
+
+test_match_score_logic: test_match_score_logic.cpp ../src/cowbraten/ui/match_score_logic.h
+	$(CXX) $(CXXFLAGS) -o $@ test_match_score_logic.cpp
+
 run: all
 	./demo_library_tests
 	./demo_visualization_tests
@@ -79,8 +91,13 @@ run: all
 	./chat_ui_tests
 	./console_ui_tests
 	./console_text_tests
+	./legacy_route_tests
+	./loading_ui_tests
+	./test_frag_feedback_weapon_icons
+	./test_match_score_logic
 	./ui_update_tests
 	python3 performance_analysis_tests.py
+	python3 session_monitor_tests.py
 
 clean:
-	$(RM) demo_library_tests demo_visualization_tests server_browser_ui_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests hud_layout_tests utilities_ui_tests editor_ui_tests chat_ui_tests console_ui_tests console_text_tests ui_update_tests
+	$(RM) demo_library_tests demo_visualization_tests server_browser_ui_tests settings_ui_tests profile_ui_tests app_shell_tests game_menu_ui_tests game_setup_ui_tests system_ui_tests scoreboard_ui_tests hud_layout_tests utilities_ui_tests editor_ui_tests chat_ui_tests console_ui_tests console_text_tests legacy_route_tests loading_ui_tests test_frag_feedback_weapon_icons test_match_score_logic ui_update_tests
