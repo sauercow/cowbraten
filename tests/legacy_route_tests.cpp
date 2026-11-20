@@ -46,6 +46,9 @@ int main()
     const std::string menus = readfile("../data/cowbraten/menus.cfg");
     const std::string master = readfile("../data/cowbraten/master.cfg");
     const std::string ui = readfile("../src/cowbraten/ui/ui.cpp");
+    const std::string engine_menus = readfile("../src/engine/menus.cpp");
+    const std::string snapshot = readfile(
+        "../src/cowbraten/ui/legacy_gui_snapshot.h");
 
     check(!menus.empty() && !master.empty() && !ui.empty(),
         "load legacy declarations and native route table");
@@ -82,6 +85,14 @@ int main()
         "known Autoexec Auto Ignore menu routes to native Settings");
     check(hasroute(ui, "aliases"),
         "known Autoexec alias selector routes to native Profile");
+    check(snapshot.find("struct LegacyGuiSink") != std::string::npos &&
+          snapshot.find("opaque") != std::string::npos &&
+          snapshot.find("activation indices") != std::string::npos &&
+          engine_menus.find("capturelegacygui") != std::string::npos &&
+          engine_menus.find("LegacyGuiControlType::Checkbox") != std::string::npos &&
+          engine_menus.find("LegacyGuiControlType::Slider") != std::string::npos &&
+          engine_menus.find("LegacyGuiControlType::Field") != std::string::npos,
+        "generic newgui capture exposes typed controls and opaque actions");
     check(hasroute(ui, "ss"),
         "known Autoexec screen preset menu routes to native Settings");
 

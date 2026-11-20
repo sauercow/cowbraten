@@ -66,7 +66,7 @@ Windows and macOS packaging paths are retained, but interactive platform-specifi
 
 ## Remaining migration inventory
 
-- Custom `newgui` documents created by third-party or user `autoexec.cfg` files still hand presentation to the compatibility GUI. Known compatibility aliases should route to typed native screens; genuinely custom documents need a constrained adapter or an explicit opt-in legacy mode.
+- Custom `newgui` documents created by third-party or user `autoexec.cfg` files still hand presentation to the compatibility GUI. Migration is now based on a general recorder for the legacy GUI DSL: it evaluates configured controls into typed snapshots and opaque activation indices, so a compact RmlUi renderer can preserve user-defined menus without exposing CubeScript to RML. Until that renderer covers every used control primitive, the original GUI remains the compatibility fallback.
 - The locally observed `autoignore`, `aliases`, and `ss` Autoexec menus now route to native Chat, Profile, and Graphics screens. Display actions remain user-owned `ss_*` aliases discovered through a typed bridge, so personal resolutions are not copied into product code and RML cannot submit script text.
 - The ordinary engine main-menu backdrop is still drawn by the engine behind the native application shell.
 - Remaining direct HUD drawing must be audited by gameplay mode. The compact secondary-ammo cluster and configurable full ammo bar are now part of the native status snapshot, with the original OpenGL drawing retained only when the native overlay cannot initialize. Mode-owned flag, token, capture, and spectator indicators still need comparison against the native HUD before their legacy branches can be disabled.

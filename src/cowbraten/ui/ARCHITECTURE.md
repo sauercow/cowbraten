@@ -178,6 +178,17 @@ lists, and every full-ammo-bar layout setting through `GameplayHudSnapshot`.
 status and ammo functions remain available only when `cowgameplayhud` is
 disabled or the RmlUi document cannot initialize.
 
+## Compact legacy-menu adapter
+
+User and third-party `newgui` declarations are treated as a declarative input
+format, not as a reason to retain the OpenGL GUI renderer. The engine executes
+the menu body against a recorder implementing `g3d_gui`; the recorder emits
+evaluated text, control state, layout boundaries, and opaque activation
+indices through `LegacyGuiSink`. Script actions and ident names remain in the
+engine-side activation table and never enter RML. The compact RmlUi renderer
+will use this path for arbitrary menus once its control coverage is complete;
+unsupported primitives continue through the original renderer meanwhile.
+
 ## Text utilities model
 
 The legacy `notepad`, `scratchpad`, and `pastebuffer` documents share one

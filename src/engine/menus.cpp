@@ -2,6 +2,8 @@
 
 #include "engine.h"
 #include "ui/ui.h"
+#include "ui/legacy_gui_snapshot.h"
+
 
 #define GUI_TITLE_COLOR  COL_WHITE
 #define GUI_BUTTON_COLOR COL_WHITE
@@ -114,6 +116,90 @@ static hashnameset<menu> guis;
 static vector<menu *> guistack;
 static vector<delayedupdate> updatelater;
 static bool shouldclearmenu = true, clearlater = false;
+
+namespace
+{
+    enum class capturedactiontype
+    {
+        Command,
+        Toggle,
+        Radio,
+        Bitfield,
+        Slider,
+        Field
+    };
+
+    struct capturedaction
+    {
+        capturedactiontype type = capturedactiontype::Command;
+        string command, variable, onchange;
+        float on = 1.0f, off = 0.0f, radio = 0.0f;
+        int mask = 0;
+        bool close = true;
+    };
+
+    static cowui::LegacyGuiSink *capturesink = nullptr;
+    static vector<capturedaction> capturedactions;
+
+    static void capturecontrol(cowui::LegacyGuiControlType type,
+        int activation = -1, const char *label = "", const char *value = "",
+        const char *icon = "", int minimum = 0, int maximum = 0,
+        bool active = false)
+    {
+        if(capturesink) capturesink->control(type, activation,
+            label ? label : "", value ? value : "", icon ? icon : "",
+            minimum, maximum, active);
+    }
+
+    static int captureaction(const capturedaction &action)
+    {
+        capturedactions.add(action);
+        return capturedactions.length() - 1;
+    }
+
+    struct legacyguirecorder final : g3d_gui
+    {
+        void start(int, float, int * = nullptr, bool = true) override {}
+        void end() override {}
+        int text(const char *, int, const char * = nullptr) override { return 0; }
+        int button(const char *, int, const char * = nullptr) override { return 0; }
+        int title(const char *, int, const char * = nullptr) override { return 0; }
+        void background(int, int = 0, int = 0) override {}
+        void pushlist() override
+        {
+            if(capturesink)
+                capturecontrol(cowui::LegacyGuiControlType::ListBegin);
+        }
+        void poplist() override
+        {
+            if(capturesink)
+                capturecontrol(cowui::LegacyGuiControlType::ListEnd);
+        }
+        bool allowautotab(bool) override { return false; }
+        void tab(const char *name = nullptr, int = 0) override
+        {
+            if(capturesink) capturecontrol(cowui::LegacyGuiControlType::Tab,
+                -1, name ? name : "", "", "", 0, 0, true);
+        }
+        void setalign(int, int) override {}
+        void setscale(float) override {}
+        int image(Texture *, float, const char * = nullptr) override { return 0; }
+        int texture(VSlot &, float, bool = true) override { return 0; }
+        void slider(int &, int, int, int, const char * = nullptr) override {}
+        void separator() override {}
+        void progress(float) override {}
+        void strut(float) override {}
+        void space(float) override {}
+        void spring(int = 1) override {}
+        void column(int) override {}
+        char *keyfield(const char *, int, int, int = 0,
+            const char * = nullptr, int = EDITORFOCUSED) override { return nullptr; }
+        char *field(const char *, int, int, int = 0,
+            const char * = nullptr, int = EDITORFOCUSED) override { return nullptr; }
+        void textbox(const char *, int, int, int = 0xFFFFFF) override {}
+        bool mergehits(bool) override { return false; }
+    };
+}
 
 VARP(menudistance,  16, 40,  256);
 VARP(menuautoclose, 32, 120, 4096);
@@ -258,6 +344,16 @@ void guimerge(uint *contents)
 //@DOC name and icon are optional
 void guibutton(char *name, char *action, char *icon)
 {
+    if(capturesink)
+    {
+        capturedaction captured;
+        captured.type = capturedactiontype::Command;
+        copystring(captured.command, action[0] ? action : name);
+        captured.close = shouldclearmenu;
+        capturecontrol(cowui::LegacyGuiControlType::Button,
+            captureaction(captured), name, "", icon);
+        return;
+    }
     if(!cgui) return;
     bool hideicon = !strcmp(icon, "0");
     int ret = cgui->button(name, GUI_BUTTON_COLOR, hideicon ? NULL : (icon[0] ? icon : (strstr(action, "showgui") ? "menu" : "action")));
@@ -275,6 +371,17 @@ void guibutton(char *name, char *action, char *icon)
 
 void guiimage(char *path, char *action, float *scale, int *overlaid, char *alt, char *title)
 {
+    if(capturesink)
+    {
+        capturedaction captured;
+        captured.type = capturedactiontype::Command;
+        copystring(captured.command, action);
+        captured.close = shouldclearmenu;
+        capturecontrol(cowui::LegacyGuiControlType::Image,
+            action[0] ? captureaction(captured) : -1,
+            title[0] ? title : path, path, alt);
+        return;
+    }
     if(!cgui) return;
     Texture *t = textureload(path, 0, true, false);
     if(t==notexture)
@@ -309,11 +416,21 @@ void guicolor(int *color)
 
 void guitextbox(char *text, int *width, int *height, int *color)
 {
+    if(capturesink)
+    {
+        capturecontrol(cowui::LegacyGuiControlType::Text, -1, text);
+        return;
+    }
     if(cgui && text[0]) cgui->textbox(text, *width ? *width : 12, *height ? *height : 1, *color ? *color : COL_WHITE);
 }
 
 void guitext(char *name, char *icon)
 {
+    if(capturesink)
+    {
+        capturecontrol(cowui::LegacyGuiControlType::Text, -1, name, "", icon);
+        return;
+    }
     bool hideicon = !strcmp(icon, "0");
     if(cgui) cgui->text(name, !hideicon && icon[0] ? GUI_BUTTON_COLOR : GUI_TEXT_COLOR, hideicon ? NULL : (icon[0] ? icon : "info"));
 }
@@ -330,6 +447,11 @@ void guiscale(float *k)
 
 void guititle(char *name)
 {
+    if(capturesink)
+    {
+        capturecontrol(cowui::LegacyGuiControlType::Title, -1, name);
+        return;
+    }
     if(cgui) cgui->title(name, GUI_TITLE_COLOR);
 }
 
@@ -340,6 +462,11 @@ void guitab(char *name)
 
 void guibar()
 {
+    if(capturesink)
+    {
+        capturecontrol(cowui::LegacyGuiControlType::Separator);
+        return;
+    }
     if(cgui) cgui->separator();
 }
 
@@ -412,6 +539,20 @@ static const char *getsval(char *var)
 
 void guislider(char *var, int *min, int *max, char *onchange)
 {
+	if(capturesink)
+    {
+        const int vmin = *max > INT_MIN ? *min : getvarmin(var);
+        const int vmax = *max > INT_MIN ? *max : getvarmax(var);
+        capturedaction action;
+        action.type = capturedactiontype::Slider;
+        copystring(action.variable, var);
+        copystring(action.onchange, onchange);
+        action.close = shouldclearmenu;
+        capturecontrol(cowui::LegacyGuiControlType::Slider,
+            captureaction(action), var, intstr(getval(var)), "",
+            vmin, vmax);
+        return;
+    }
 	if(!cgui) return;
     int oldval = getval(var), val = oldval, vmin = *max > INT_MIN ? *min : getvarmin(var), vmax = *max > INT_MIN ? *max : getvarmax(var);
     cgui->slider(val, vmin, vmax, GUI_TITLE_COLOR);
@@ -459,6 +600,19 @@ void guinameslider(char *var, char *names, char *list, char *onchange)
 void guicheckbox(char *name, char *var, float *on, float *off, char *onchange)
 {
     bool enabled = getfval(var)!=*off;
+    if(capturesink)
+    {
+        capturedaction action;
+        action.type = capturedactiontype::Toggle;
+        copystring(action.variable, var);
+        copystring(action.onchange, onchange);
+        action.on = *on;
+        action.off = *off;
+        action.close = shouldclearmenu;
+        capturecontrol(cowui::LegacyGuiControlType::Checkbox,
+            captureaction(action), name, "", "", 0, 0, enabled);
+        return;
+    }
     if(cgui && cgui->button(name, GUI_BUTTON_COLOR, enabled ? "checkbox_on" : "checkbox_off")&G3D_UP)
     {
         updateval(var, enabled ? *off : (*on || *off ? *on : 1.0f), onchange);
@@ -468,6 +622,18 @@ void guicheckbox(char *name, char *var, float *on, float *off, char *onchange)
 void guiradio(char *name, char *var, float *n, char *onchange)
 {
     bool enabled = getfval(var)==*n;
+    if(capturesink)
+    {
+        capturedaction action;
+        action.type = capturedactiontype::Radio;
+        copystring(action.variable, var);
+        copystring(action.onchange, onchange);
+        action.radio = *n;
+        action.close = shouldclearmenu;
+        capturecontrol(cowui::LegacyGuiControlType::Radio,
+            captureaction(action), name, "", "", 0, 0, enabled);
+        return;
+    }
     if(cgui && cgui->button(name, GUI_BUTTON_COLOR, enabled ? "radio_on" : "radio_off")&G3D_UP)
     {
         if(!enabled) updateval(var, *n, onchange);
@@ -478,6 +644,18 @@ void guibitfield(char *name, char *var, int *mask, char *onchange)
 {
     int val = getval(var);
     bool enabled = (val & *mask) != 0;
+    if(capturesink)
+    {
+        capturedaction action;
+        action.type = capturedactiontype::Bitfield;
+        copystring(action.variable, var);
+        copystring(action.onchange, onchange);
+        action.mask = *mask;
+        action.close = shouldclearmenu;
+        capturecontrol(cowui::LegacyGuiControlType::Bitfield,
+            captureaction(action), name, "", "", 0, 0, enabled);
+        return;
+    }
     if(cgui && cgui->button(name, GUI_BUTTON_COLOR, enabled ? "checkbox_on" : "checkbox_off")&G3D_UP)
     {
         updateval(var, enabled ? val & ~*mask : val | *mask, onchange);
@@ -487,6 +665,18 @@ void guibitfield(char *name, char *var, int *mask, char *onchange)
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
 void guifield(char *var, int *maxlength, char *onchange)
 {   
+    if(capturesink)
+    {
+        capturedaction action;
+        action.type = capturedactiontype::Field;
+        copystring(action.variable, var);
+        copystring(action.onchange, onchange);
+        action.close = false;
+        capturecontrol(cowui::LegacyGuiControlType::Field,
+            captureaction(action), var, getsval(var), "", 0,
+            *maxlength ? abs(*maxlength) : 12);
+        return;
+    }
     if(!cgui) return;
     const char *initval = getsval(var);
 	char *result = cgui->field(var, GUI_BUTTON_COLOR, *maxlength ? *maxlength : 12, 0, initval);
@@ -504,6 +694,18 @@ void guieditor(char *name, int *maxlength, int *height, int *mode)
 //-ve length indicates a wrapped text field of any (approx 260 chars) length, |length| is the field width
 void guikeyfield(char *var, int *maxlength, char *onchange)
 {
+    if(capturesink)
+    {
+        capturedaction action;
+        action.type = capturedactiontype::Field;
+        copystring(action.variable, var);
+        copystring(action.onchange, onchange);
+        action.close = false;
+        capturecontrol(cowui::LegacyGuiControlType::KeyField,
+            captureaction(action), var, getsval(var), "", 0,
+            *maxlength ? abs(*maxlength) : 8);
+        return;
+    }
     if(!cgui) return;
     const char *initval = getsval(var);
     char *result = cgui->keyfield(var, GUI_BUTTON_COLOR, *maxlength ? *maxlength : -8, 0, initval);
@@ -753,6 +955,87 @@ static struct applymenu : menu
 VARP(applydialog, 0, 1, 1);
 
 static bool processingmenu = false;
+
+namespace cowui
+{
+    bool capturelegacygui(const char *name, LegacyGuiSink &sink)
+    {
+        if(!name || !name[0] || capturesink)
+            return false;
+
+        menu *m = guis.access(name);
+        if(!m || !m->contents)
+            return false;
+
+        capturedactions.shrink(0);
+        capturesink = &sink;
+        sink.begin(name, m->header && m->header[0] ? m->header : name);
+        legacyguirecorder recorder;
+        m->gui(recorder, false);
+        sink.end();
+        capturesink = nullptr;
+        return true;
+    }
+
+    bool activatelegacygui(int activation, const char *value)
+    {
+        if(activation < 0 || !capturedactions.inrange(activation))
+            return false;
+
+        const capturedaction &action = capturedactions[activation];
+        ident *id = !action.variable[0]
+            ? nullptr : writeident(const_cast<char *>(action.variable));
+        switch(action.type)
+        {
+            case capturedactiontype::Command:
+                if(!action.command[0]) return false;
+                updatelater.add().schedule(action.command);
+                break;
+
+            case capturedactiontype::Toggle:
+            {
+                if(!id) return false;
+                char *variable = const_cast<char *>(action.variable);
+                const bool enabled = getfval(variable) != action.off;
+                const float next = enabled ? action.off :
+                    (action.on || action.off ? action.on : 1.0f);
+                updatelater.add().schedule(id, next);
+                break;
+            }
+
+            case capturedactiontype::Radio:
+                if(!id) return false;
+                updatelater.add().schedule(id, action.radio);
+                break;
+
+            case capturedactiontype::Bitfield:
+            {
+                if(!id) return false;
+                char *variable = const_cast<char *>(action.variable);
+                const int current = getval(variable);
+                updatelater.add().schedule(id, (current & action.mask)
+                    ? current & ~action.mask : current | action.mask);
+                break;
+            }
+
+            case capturedactiontype::Slider:
+                if(!id || !value) return false;
+                updatelater.add().schedule(id, parseint(value));
+                break;
+
+            case capturedactiontype::Field:
+                if(!id || !value) return false;
+                updatelater.add().schedule(id, const_cast<char *>(value));
+                break;
+        }
+
+        if(action.onchange[0])
+            updatelater.add().schedule(action.onchange);
+        if(action.close)
+            close();
+        return true;
+    }
+}
 
 void addchange(const char *desc, int type)
 {
