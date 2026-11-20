@@ -108,7 +108,13 @@ namespace cowui
             map_card->SetProperty("display", !compact && have_map ? "flex" : "none");
             mapshot_element->SetProperty("display", mapshot.empty() ? "none" : "block");
             mapshot_fallback->SetProperty("display", mapshot.empty() ? "flex" : "none");
-            if(!mapshot.empty()) mapshot_element->SetAttribute("src", mapshot);
+            if(!mapshot.empty())
+            {
+                const Rml::String resource = mapshot[0] == '?'
+                    ? mapshot
+                    : Rml::String("?cowbraten-resource:") + mapshot;
+                mapshot_element->SetAttribute("src", resource);
+            }
             settext(map_name_element, map_name);
             settext(map_info_element, map_info);
 

@@ -44,7 +44,7 @@ system_ui_tests: system_ui_tests.cpp ../data/cowbraten/ui/default/screens/system
 scoreboard_ui_tests: scoreboard_ui_tests.cpp ../data/cowbraten/ui/default/screens/scoreboard.rml ../data/cowbraten/ui/default/styles/scoreboard.rcss ../src/cowbraten/ui/rml_scoreboard.cpp ../src/cowbraten/ui/cube_text.h ../src/cowbraten/ui/sauer_scoreboard_bridge.cpp
 	$(CXX) $(CXXFLAGS) -o $@ scoreboard_ui_tests.cpp
 
-hud_layout_tests: hud_layout_tests.cpp ../src/fpsgame/fps.cpp ../src/fpsgame/game.h ../src/fpsgame/ctf.h ../src/fpsgame/collect.h
+hud_layout_tests: hud_layout_tests.cpp ../src/fpsgame/fps.cpp ../src/fpsgame/game.h ../src/fpsgame/ctf.h ../src/fpsgame/collect.h ../src/cowbraten/ui/gameplay_hud_snapshot.h ../src/cowbraten/ui/rml_gameplay_hud.h ../data/cowbraten/ui/default/screens/gameplay_hud.rml
 	$(CXX) $(CXXFLAGS) -o $@ hud_layout_tests.cpp
 
 utilities_ui_tests: utilities_ui_tests.cpp ../data/cowbraten/ui/default/screens/utilities.rml ../data/cowbraten/ui/default/styles/utilities.rcss ../src/cowbraten/ui/rml_utilities.cpp ../src/cowbraten/ui/sauer_utility_bridge.cpp

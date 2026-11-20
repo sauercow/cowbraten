@@ -28,13 +28,35 @@ namespace cowui
             for(int i = 0; i < 8; ++i)
                 weapon_images[i] = document->GetElementById(
                     Rml::CreateString("cow-status-gun-%d", i));
+            secondary_up_group = document->GetElementById(
+                "cow-status-secondary-up");
+            secondary_down_group = document->GetElementById(
+                "cow-status-secondary-down");
+            secondary_cycle_group = document->GetElementById(
+                "cow-status-secondary-cycle");
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryUpSlots; ++i)
+                secondary_up[i] = document->GetElementById(
+                    Rml::CreateString("cow-status-up-%d", i));
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryDownSlots; ++i)
+                secondary_down[i] = document->GetElementById(
+                    Rml::CreateString("cow-status-down-%d", i));
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryCycleSlots; ++i)
+                secondary_cycle[i] = document->GetElementById(
+                    Rml::CreateString("cow-status-cycle-%d", i));
             quad_card = document->GetElementById("cow-status-quad");
             const bool valid = root && health_value && health_max &&
                 armour_value && ammo_value && armour_card && ammo_card &&
-                health_card && quad_card;
+                health_card && quad_card && secondary_up_group &&
+                secondary_down_group && secondary_cycle_group;
             bool all_weapons = true;
             for(int i = 0; i < 8; ++i)
                 all_weapons = all_weapons && weapon_images[i];
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryUpSlots; ++i)
+                all_weapons = all_weapons && secondary_up[i];
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryDownSlots; ++i)
+                all_weapons = all_weapons && secondary_down[i];
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryCycleSlots; ++i)
+                all_weapons = all_weapons && secondary_cycle[i];
             if(!valid || !all_weapons)
             {
                 shutdown(ctx);
@@ -102,6 +124,18 @@ namespace cowui
             for(int i = 0; i < 8; ++i)
                 weapon_images[i]->SetProperty("display",
                     active_gun == i ? "inline-block" : "none");
+
+            const bool secondary = snapshot.alive &&
+                snapshot.show_secondary_ammo;
+            secondary_up_group->SetProperty("display", secondary ? "flex" : "none");
+            secondary_down_group->SetProperty("display", secondary ? "flex" : "none");
+            secondary_cycle_group->SetProperty("display", secondary ? "flex" : "none");
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryUpSlots; ++i)
+                setweapon(secondary_up[i], snapshot.secondary_up[i], secondary);
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryDownSlots; ++i)
+                setweapon(secondary_down[i], snapshot.secondary_down[i], secondary);
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryCycleSlots; ++i)
+                setweapon(secondary_cycle[i], snapshot.secondary_cycle[i], secondary);
         }
 
         bool visible() const { return shown; }
@@ -114,7 +148,15 @@ namespace cowui
             context = nullptr;
             root = health_value = health_max = armour_value = ammo_value = nullptr;
             armour_card = ammo_card = health_card = quad_card = nullptr;
+            secondary_up_group = secondary_down_group =
+                secondary_cycle_group = nullptr;
             for(int i = 0; i < 8; ++i) weapon_images[i] = nullptr;
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryUpSlots; ++i)
+                secondary_up[i] = nullptr;
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryDownSlots; ++i)
+                secondary_down[i] = nullptr;
+            for(int i = 0; i < GameplayHudSnapshot::SecondaryCycleSlots; ++i)
+                secondary_cycle[i] = nullptr;
             shown = false;
             have_snapshot = false;
         }
@@ -126,6 +168,23 @@ namespace cowui
                 element->SetInnerRML(text);
         }
 
+        static void setweapon(Rml::Element *element, int gun, bool enabled)
+        {
+            static const char *resources[] =
+            {
+                "../images/hud/v1/fist.png",
+                "../images/hud/v1/shotgun.png",
+                "../images/hud/v1/chaingun.png",
+                "../images/hud/v1/rocket_launcher.png",
+                "../images/hud/v1/rifle.png",
+                "../images/hud/v1/grenade_launcher.png",
+                "../images/hud/v1/pistol.png"
+            };
+            const bool visible = enabled && gun >= 0 && gun < 7;
+            element->SetProperty("display", visible ? "block" : "none");
+            if(visible) element->SetAttribute("src", resources[gun]);
+        }
+
         Rml::Context *context = nullptr;
         Rml::ElementDocument *document = nullptr;
         Rml::Element *root = nullptr;
@@ -134,9 +193,15 @@ namespace cowui
         Rml::Element *health_card = nullptr, *armour_card = nullptr;
         Rml::Element *ammo_card = nullptr;
         Rml::Element *quad_card = nullptr;
+        Rml::Element *secondary_up_group = nullptr;
+        Rml::Element *secondary_down_group = nullptr;
+        Rml::Element *secondary_cycle_group = nullptr;
         GameplayHudSnapshot snapshot;
         bool have_snapshot = false;
         bool shown = false;
         Rml::Element *weapon_images[8] = {};
+        Rml::Element *secondary_up[GameplayHudSnapshot::SecondaryUpSlots] = {};
+        Rml::Element *secondary_down[GameplayHudSnapshot::SecondaryDownSlots] = {};
+        Rml::Element *secondary_cycle[GameplayHudSnapshot::SecondaryCycleSlots] = {};
     };
 }

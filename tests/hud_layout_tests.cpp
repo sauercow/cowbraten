@@ -28,6 +28,12 @@ int main()
     const std::string game = readfile("../src/fpsgame/game.h");
     const std::string ctf = readfile("../src/fpsgame/ctf.h");
     const std::string collect = readfile("../src/fpsgame/collect.h");
+    const std::string snapshot = readfile(
+        "../src/cowbraten/ui/gameplay_hud_snapshot.h");
+    const std::string native_hud = readfile(
+        "../src/cowbraten/ui/rml_gameplay_hud.h");
+    const std::string native_rml = readfile(
+        "../data/cowbraten/ui/default/screens/gameplay_hud.rml");
 
     check(hud.find("statusdockcenter") != std::string::npos &&
           hud.find("0.46f*virtual_width") != std::string::npos &&
@@ -38,11 +44,14 @@ int main()
           hud.find("HICON_FIST+d->gunselect") != std::string::npos &&
           hud.find("STATUS_BLOCK_WIDTH = 300.0f") != std::string::npos,
         "health armour and active ammo share the stable primary row");
-    check(hud.find("ammohudup[i]") != std::string::npos &&
-          hud.find("ammohuddown[i]") != std::string::npos &&
-          hud.find("ammohudcycle[(i + offset)%7]") != std::string::npos &&
-          hud.find("if(ammohud && !ammobar)") != std::string::npos,
-        "tiny available-weapon icons retain the configurable Cowbraten layout");
+    check(hud.find("status.secondary_up[count++] = gun") != std::string::npos &&
+          hud.find("status.secondary_down[count++] = gun") != std::string::npos &&
+          hud.find("status.secondary_cycle[count++] = gun") != std::string::npos &&
+          hud.find("Keep the legacy secondary ammo HUD") == std::string::npos &&
+          snapshot.find("show_secondary_ammo") != std::string::npos &&
+          native_hud.find("setweapon(secondary_cycle") != std::string::npos &&
+          native_rml.find("cow-status-secondary-cycle") != std::string::npos,
+        "tiny available-weapon icons migrate into the native status dock");
     check(game.find("statushudnextx") != std::string::npos &&
           ctf.find("statushudnextx(w, h, d)") != std::string::npos &&
           collect.find("statushudnextx(w, h, d)") != std::string::npos,

@@ -53,6 +53,41 @@ body {
     border-color: #FFB72E;
     background-color: #302512E9;
 }
+.cow-status-ammo-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    overflow: visible;
+}
+.cow-status-secondary {
+    position: absolute;
+    display: none;
+    gap: 0.08em;
+    pointer-events: none;
+}
+.cow-status-secondary img {
+    display: none;
+    width: 0.82em;
+    height: 0.52em;
+}
+.cow-status-secondary-up {
+    left: 100%;
+    top: 0.10em;
+    flex-direction: column;
+}
+.cow-status-secondary-down {
+    right: 100%;
+    bottom: 0.10em;
+    flex-direction: column-reverse;
+}
+.cow-status-secondary-cycle {
+    left: 0;
+    bottom: 100%;
+    width: 7.25em;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
 .cow-status-icon {
     display: inline-block;
     width: 2.35em;

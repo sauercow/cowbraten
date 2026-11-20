@@ -43,7 +43,8 @@ int main()
     check(style.find("linear-gradient") == std::string::npos,
         "loading presentation stays within the engine renderer feature set");
     check(model.find("StringUtilities::EncodeRml") != std::string::npos &&
-          model.find("SetAttribute(\"src\", mapshot)") != std::string::npos,
+          model.find("?cowbraten-resource:") != std::string::npos &&
+          model.find("SetAttribute(\"src\", resource)") != std::string::npos,
         "loading text is escaped and map previews use package paths");
     check(model.find("document->PullToFront()") != std::string::npos &&
           model.find("ctx->Update(false)") != std::string::npos &&

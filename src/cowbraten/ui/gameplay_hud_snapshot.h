@@ -6,6 +6,13 @@ namespace cowui
 {
     struct GameplayHudSnapshot
     {
+        enum
+        {
+            SecondaryUpSlots = 3,
+            SecondaryDownSlots = 3,
+            SecondaryCycleSlots = 6
+        };
+
         bool enabled = false;
         bool show = false;
         bool alive = false;
@@ -18,6 +25,11 @@ namespace cowui
         int gun = 0;
         int health_tone = 0; // 0 neutral, 1 warning, 2 critical, 3 boosted
         int ammo_tone = 0;   // 0 neutral, 1 warning, 2 empty
+        bool show_secondary_ammo = false;
+        int secondary_up[SecondaryUpSlots] = { -1, -1, -1 };
+        int secondary_down[SecondaryDownSlots] = { -1, -1, -1 };
+        int secondary_cycle[SecondaryCycleSlots] =
+            { -1, -1, -1, -1, -1, -1 };
         float x = 0.5f;     // HUD viewport normalized; matches legacy dock center
         float y = 0.923333f;// legacy STATUS_DOCK_Y / 1800
     };

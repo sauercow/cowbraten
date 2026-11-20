@@ -1655,6 +1655,39 @@ namespace game
                 ? float(status.ammo) / max(itemstats[d->gunselect-GUN_SG].add, 1)
                 : 1.0f;
             status.ammo_tone = status.ammo == 0 ? 2 : (ratio < 0.5f ? 1 : 0);
+            status.show_secondary_ammo = status.alive && ammohud && !ammobar;
+            if(status.show_secondary_ammo)
+            {
+                int count = 0;
+                loopi(3)
+                {
+                    const int gun = ammohudup[i];
+                    if(gun < GUN_FIST || gun > GUN_PISTOL ||
+                       gun == d->gunselect || !d->ammo[gun]) continue;
+                    status.secondary_up[count++] = gun;
+                }
+
+                count = 0;
+                for(int i = 2; i >= 0; --i)
+                {
+                    const int gun = ammohuddown[i];
+                    if(gun < GUN_FIST || gun > GUN_PISTOL ||
+                       gun == d->gunselect || !d->ammo[gun]) continue;
+                    status.secondary_down[count++] = gun;
+                }
+
+                int offset = 0;
+                loopi(7) if(ammohudcycle[i] == d->gunselect) offset = i + 1;
+                count = 0;
+                loopi(7)
+                {
+                    const int gun = ammohudcycle[(i + offset)%7];
+                    if(gun < GUN_FIST || gun > GUN_PISTOL ||
+                       gun == d->gunselect || !d->ammo[gun]) continue;
+                    if(count < cowui::GameplayHudSnapshot::SecondaryCycleSlots)
+                        status.secondary_cycle[count++] = gun;
+                }
+            }
         }
         cowui::syncgameplayhud(status);
         if(d->state!=CS_EDITING)
@@ -1662,14 +1695,6 @@ namespace game
             if(d->state!=CS_SPECTATOR)
             {
                 if(!modern_status) drawhudicons(d, w, h);
-                else if(d->state != CS_DEAD && ammohud && !ammobar)
-                {
-                    // Keep the legacy secondary ammo HUD until its own migration.
-                    const float center = statusdockcenter(w, h);
-                    const float start = center - 1.5f*STATUS_BLOCK_WIDTH;
-                    drawammohud(d, start + 2.0f*STATUS_BLOCK_WIDTH,
-                        STATUS_DOCK_Y, STATUS_ICON_SIZE);
-                }
             }
             if(cmode) cmode->drawhud(d, w, h);
         }
