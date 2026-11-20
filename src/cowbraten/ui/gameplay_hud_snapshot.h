@@ -48,5 +48,43 @@ namespace cowui
         float ammo_bar_label_size = 0.0f;
         float x = 0.5f;     // HUD viewport normalized; matches legacy dock center
         float y = 0.923333f;// legacy STATUS_DOCK_Y / 1800
+
+        bool operator==(const GameplayHudSnapshot &other) const
+        {
+            if(enabled != other.enabled || show != other.show ||
+               alive != other.alive || quad != other.quad ||
+               demo_recording != other.demo_recording ||
+               (demo_recording &&
+                demo_recording_bright != other.demo_recording_bright) ||
+               mode_icon != other.mode_icon || mode_count != other.mode_count ||
+               health != other.health || max_health != other.max_health ||
+               armour != other.armour || armour_type != other.armour_type ||
+               ammo != other.ammo || gun != other.gun ||
+               health_tone != other.health_tone ||
+               ammo_tone != other.ammo_tone ||
+               show_secondary_ammo != other.show_secondary_ammo ||
+               show_ammo_bar != other.show_ammo_bar ||
+               ammo_bar_horizontal != other.ammo_bar_horizontal ||
+               ammo_bar_flip != other.ammo_bar_flip ||
+               ammo_bar_icon_size != other.ammo_bar_icon_size ||
+               ammo_bar_label_gap != other.ammo_bar_label_gap ||
+               ammo_bar_label_size != other.ammo_bar_label_size ||
+               x != other.x || y != other.y)
+                return false;
+            for(int i = 0; i < SecondaryUpSlots; ++i)
+                if(secondary_up[i] != other.secondary_up[i]) return false;
+            for(int i = 0; i < SecondaryDownSlots; ++i)
+                if(secondary_down[i] != other.secondary_down[i]) return false;
+            for(int i = 0; i < SecondaryCycleSlots; ++i)
+                if(secondary_cycle[i] != other.secondary_cycle[i]) return false;
+            for(int i = 0; i < AmmoBarSlots; ++i)
+                if(ammo_bar_visible[i] != other.ammo_bar_visible[i] ||
+                   ammo_bar_count[i] != other.ammo_bar_count[i] ||
+                   ammo_bar_tone[i] != other.ammo_bar_tone[i] ||
+                   ammo_bar_x[i] != other.ammo_bar_x[i] ||
+                   ammo_bar_y[i] != other.ammo_bar_y[i])
+                    return false;
+            return true;
+        }
     };
 }

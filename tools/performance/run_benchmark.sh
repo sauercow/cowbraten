@@ -35,6 +35,12 @@ case "$scenario" in
         load_arg=(-lbase/complex)
         setup="$common; clearconsole; ui_perf_bypass 1"
         ;;
+    gameplay_ffa)
+        setup="$common; sleep 250 [mode 0; map complex]"
+        ;;
+    gameplay_ffa_bypass)
+        setup="$common; ui_perf_bypass 1; sleep 250 [mode 0; map complex]"
+        ;;
     ingame_menu)
         load_arg=(-lbase/complex)
         setup="$common; clearconsole; showgui main"
@@ -101,6 +107,7 @@ script="$setup; sleep $warmup_ms [$capture; $during_capture; sleep $duration_ms 
 
 cd "$root"
 SDL_AUDIODRIVER=dummy "$binary" \
+    -k"$root" \
     -k"$package_dir" \
     -q"$run_home" \
     -gbenchmark.log \

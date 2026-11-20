@@ -46,6 +46,7 @@ namespace cowui
             document->SetProperty("font-family", "Lato");
             document->SetProperty("font-size", "18px");
             root->SetProperty("display", "none");
+            root_visible = false;
             document->Show();
             return true;
         }
@@ -61,11 +62,25 @@ namespace cowui
             if(!document || !root) return;
             if(!allowed || !have_snapshot)
             {
-                root->SetProperty("display", "none");
+                setrootvisible(false);
                 return;
             }
 
-            root->SetProperty("display", "block");
+            const auto mf = fragfeedback::frame(now,
+                snapshot.milestone_timestamp, snapshot.duration_ms,
+                snapshot.fade, snapshot.milestone > 0);
+            bool any_visible = mf.visible;
+            for(int i = 0; !any_visible && i < snapshot.count; ++i)
+                any_visible = fragfeedback::frame(now,
+                    snapshot.rows[i].timestamp, snapshot.duration_ms,
+                    snapshot.fade, true).visible;
+            if(!any_visible)
+            {
+                setrootvisible(false);
+                return;
+            }
+
+            setrootvisible(true);
             // The root spans one viewport width and its children center with flex.
             // Shift its left edge so the middle matches hudfragmessagex.
             // This avoids percentage transforms, which failed to center
@@ -78,9 +93,6 @@ namespace cowui
             const float scale = snapshot.scale > 0.0f ? snapshot.scale : 0.5f;
             root->SetProperty("font-size", Rml::CreateString("%.2fpx", 18.0f * scale / 0.5f));
 
-            const auto mf = fragfeedback::frame(now, snapshot.milestone_timestamp,
-                                               snapshot.duration_ms, snapshot.fade,
-                                               snapshot.milestone > 0);
             if(mf.visible)
             {
                 milestone->SetProperty("display", "flex");
@@ -150,6 +162,7 @@ namespace cowui
             root = milestone = milestone_text = nullptr;
             slots = {};
             have_snapshot = false;
+            root_visible = false;
         }
 
     private:
@@ -203,10 +216,18 @@ namespace cowui
             element->SetClass("cow-tone-neutral", tone == 0);
         }
 
+        void setrootvisible(bool visible)
+        {
+            if(root_visible == visible) return;
+            root_visible = visible;
+            root->SetProperty("display", visible ? "block" : "none");
+        }
+
         Rml::ElementDocument *document = nullptr;
         Rml::Element *root = nullptr, *milestone = nullptr, *milestone_text = nullptr;
         std::array<Slot, MaxFragFeedbackRows> slots{};
         FragFeedbackSnapshot snapshot;
         bool have_snapshot = false;
+        bool root_visible = false;
     };
 }

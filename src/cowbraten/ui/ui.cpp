@@ -81,6 +81,7 @@ namespace cowui
     static Rml::Context *context = nullptr;
     static FrameStats frame_stats;
     static bool profiling_enabled = false;
+    static Uint64 passive_context_update = 0;
 
     static double elapsedmicroseconds(Uint64 begin, Uint64 end)
     {
@@ -748,6 +749,8 @@ namespace cowui
         if(initialized)
             return true;
 
+        passive_context_update = 0;
+
         bool context_changed = false;
         setdimensions(
             window_width,
@@ -954,6 +957,7 @@ namespace cowui
 
     void shutdown()
     {
+        passive_context_update = 0;
         sauermusic::sync(false);
         settings_model.cancelkeycapture();
         captured_keys.fill(false);
@@ -1487,6 +1491,26 @@ namespace cowui
         // Cached menus (especially Settings) contain thousands of elements.
         // Updating a chat message must not walk every menu opened this session.
         // Show() refreshes a hidden document before it receives focus again.
+        // Passive overlays do not need to recalculate layout at uncapped render
+        // rates. Geometry is still rendered every frame; only model/style
+        // reconciliation is capped. Interactive screens and pointer-driven
+        // demo playback remain uncapped.
+        if(!active_screen && !player_input)
+        {
+            const Uint64 now = SDL_GetPerformanceCounter();
+            const Uint64 interval = SDL_GetPerformanceFrequency() / 120;
+            if(passive_context_update &&
+               now - passive_context_update < interval)
+            {
+                if(profiling_enabled)
+                    frame_stats.model_update_us = elapsedmicroseconds(
+                        model_begin, now);
+                return;
+            }
+            passive_context_update = now;
+        }
+        else passive_context_update = 0;
+
         const Uint64 context_begin = profiling_enabled
             ? SDL_GetPerformanceCounter() : 0;
         if(profiling_enabled)

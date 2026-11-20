@@ -96,6 +96,16 @@ namespace cowui
         void update(bool allow_overlay)
         {
             if(!document || !root) return;
+            if(have_applied_snapshot &&
+               applied_had_snapshot == have_snapshot &&
+               applied_allow_overlay == allow_overlay &&
+               applied_snapshot == snapshot)
+                return;
+
+            applied_snapshot = snapshot;
+            applied_had_snapshot = have_snapshot;
+            applied_allow_overlay = allow_overlay;
+            have_applied_snapshot = true;
             const bool status_shown = allow_overlay && have_snapshot &&
                 snapshot.enabled && snapshot.show;
             const bool ammo_bar_shown = status_shown && snapshot.alive &&
@@ -212,6 +222,7 @@ namespace cowui
                 ammo_bar_items[i] = ammo_bar_counts[i] = nullptr;
             shown = false;
             have_snapshot = false;
+            have_applied_snapshot = false;
         }
 
     private:
@@ -305,7 +316,11 @@ namespace cowui
         Rml::Element *secondary_down_group = nullptr;
         Rml::Element *secondary_cycle_group = nullptr;
         GameplayHudSnapshot snapshot;
+        GameplayHudSnapshot applied_snapshot;
         bool have_snapshot = false;
+        bool have_applied_snapshot = false;
+        bool applied_had_snapshot = false;
+        bool applied_allow_overlay = false;
         bool shown = false;
         Rml::Element *weapon_images[8] = {};
         Rml::Element *secondary_up[GameplayHudSnapshot::SecondaryUpSlots] = {};
