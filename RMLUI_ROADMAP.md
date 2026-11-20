@@ -67,7 +67,7 @@ Windows and macOS packaging paths are retained, but interactive platform-specifi
 ## Remaining migration inventory
 
 - Custom `newgui` documents created by third-party or user `autoexec.cfg` files still hand presentation to the compatibility GUI. Known compatibility aliases should route to typed native screens; genuinely custom documents need a constrained adapter or an explicit opt-in legacy mode.
-- The known `autoignore` Autoexec menu now routes to native Chat settings, where its migrated controls live. Other locally observed custom menus such as `aliases` and `ss` still need behavior-level mapping before they can be routed without losing actions.
+- The locally observed `autoignore`, `aliases`, and `ss` Autoexec menus now route to native Chat, Profile, and Graphics screens. Display actions remain user-owned `ss_*` aliases discovered through a typed bridge, so personal resolutions are not copied into product code and RML cannot submit script text.
 - The ordinary engine main-menu backdrop is still drawn by the engine behind the native application shell.
 - Remaining direct HUD drawing must be audited by gameplay mode. In particular, secondary-ammo/ammo-bar presentation and mode-owned flag, token, capture, and spectator indicators need comparison against the native HUD before the corresponding legacy branches can be disabled.
 - Legacy menu declarations and configuration files must remain available until a runtime switch can skip their UI declarations without skipping gameplay configuration, binds, aliases, map scripts, or mod compatibility.

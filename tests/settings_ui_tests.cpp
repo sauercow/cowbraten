@@ -113,6 +113,13 @@ int main()
           implementation.find("pending_legacy_anchor = \"settings-autoignore\"") !=
               std::string::npos,
         "legacy Auto Ignore menu opens native Chat settings");
+    check(rml.find("id=\"settings-display-presets\"") != std::string::npos &&
+          rml.find("run_display_preset(preset.id)") != std::string::npos &&
+          implementation.find("refreshdisplaypresets()") != std::string::npos &&
+          implementation.find("settings::rundisplaypreset") != std::string::npos &&
+          bridge.find("validdisplaypresetid") != std::string::npos &&
+          bridge.find("execident(id);") != std::string::npos,
+        "Autoexec ss aliases remain available through typed display presets");
     check(rml.find("settings.category.autoexec") != std::string::npos &&
           rml.find("select_autoexec_profile(profile.id)") !=
             std::string::npos &&

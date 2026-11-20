@@ -5515,6 +5515,56 @@ namespace cowui
             return loaded;
         }
 
+        static bool validdisplaypresetid(const char *id)
+        {
+            if(!id || std::strncmp(id, "ss_", 3) || !id[3])
+                return false;
+            for(const char *c = id + 3; *c; ++c)
+            {
+                const unsigned char value = static_cast<unsigned char>(*c);
+                if(!std::isalnum(value) && *c != '_')
+                    return false;
+            }
+            return true;
+        }
+
+        bool visitdisplaypresets(
+            DisplayPresetChoiceVisitor visitor,
+            void *data)
+        {
+            if(!visitor)
+                return false;
+            vector<ident *> presets;
+            enumerate(idents, ident, id,
+                if(id.type == ID_ALIAS && validdisplaypresetid(id.name))
+                    presets.add(&id));
+            presets.sortname();
+            loopv(presets)
+            {
+                ident &id = *presets[i];
+                string label;
+                copystring(label, id.name + 3);
+                for(char *c = label; *c; ++c)
+                    if(*c == '_') *c = ' ';
+                if(label[0] >= 'a' && label[0] <= 'z')
+                    label[0] = char(label[0] - 'a' + 'A');
+                DisplayPresetChoice choice = { id.name, label };
+                visitor(choice, data);
+            }
+            return !presets.empty();
+        }
+
+        bool rundisplaypreset(const char *id)
+        {
+            if(!validdisplaypresetid(id))
+                return false;
+            ident *preset = getident(id);
+            if(!preset || preset->type != ID_ALIAS)
+                return false;
+            execident(id);
+            return true;
+        }
+
         bool readtheme(Theme &result)
         {
             ident *id = uithemeident();

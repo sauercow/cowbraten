@@ -320,6 +320,18 @@ namespace cowui
         choices.push_back(row);
     }
 
+    void RmlSettings::appenddisplaypresetchoice(
+        const settings::DisplayPresetChoice &choice,
+        void *data)
+    {
+        std::vector<RmlSettings::DisplayPresetChoice> &choices =
+            *static_cast<std::vector<RmlSettings::DisplayPresetChoice> *>(data);
+        RmlSettings::DisplayPresetChoice row;
+        row.id = choice.id;
+        row.label = choice.display_name;
+        choices.push_back(row);
+    }
+
     bool RmlSettings::init(
         Rml::Context *context,
         RmlActionRouter &router)
@@ -417,6 +429,14 @@ namespace cowui
         }
         else valid = false;
 
+        if(auto choice = constructor.RegisterStruct<DisplayPresetChoice>())
+        {
+            valid = valid &&
+                choice.RegisterMember("id", &DisplayPresetChoice::id) &&
+                choice.RegisterMember("label", &DisplayPresetChoice::label);
+        }
+        else valid = false;
+
         if(valid)
         {
             valid = settings::visitcrosshairs(
@@ -432,6 +452,7 @@ namespace cowui
             constructor.RegisterArray<std::vector<KeyBindingRow>>() &&
             constructor.RegisterArray<std::vector<AutoIgnoreRow>>() &&
             constructor.RegisterArray<std::vector<AutoexecChoice>>() &&
+            constructor.RegisterArray<std::vector<DisplayPresetChoice>>() &&
             constructor.Bind("resolutions", &resolutions) &&
             constructor.Bind("key_capture_id", &key_capture_id) &&
             constructor.Bind("key_capture_status", &key_capture_status) &&
@@ -1333,6 +1354,8 @@ namespace cowui
             constructor.Bind("auto_ignore_status", &auto_ignore_status) &&
             constructor.Bind("autoexec_choices", &autoexec_choices) &&
             constructor.Bind("autoexec_status", &autoexec_status) &&
+            constructor.Bind("display_presets", &display_presets) &&
+            constructor.Bind("display_preset_status", &display_preset_status) &&
             constructor.Bind("theme_available", &theme_available) &&
             constructor.Bind("theme_default", &theme_default) &&
             constructor.Bind(
@@ -1434,6 +1457,11 @@ namespace cowui
             constructor.BindEventCallback(
                 "refresh_autoexec_profiles",
                 &RmlSettings::refreshautoexecprofiles,
+                this
+            ) &&
+            constructor.BindEventCallback(
+                "run_display_preset",
+                &RmlSettings::rundisplaypreset,
                 this
             ) &&
             constructor.Bind("console_available", &console_available) &&
@@ -2802,6 +2830,12 @@ namespace cowui
         {
             setcategory(Category::Chat);
             pending_legacy_anchor = "settings-autoignore";
+        }
+        else if(!std::strcmp(name, "ss"))
+        {
+            setcategory(Category::Graphics);
+            refreshdisplaypresets();
+            pending_legacy_anchor = "settings-display-presets";
         }
         else return false;
         return true;
@@ -4693,6 +4727,19 @@ namespace cowui
         return true;
     }
 
+    bool RmlSettings::refreshdisplaypresets()
+    {
+        std::vector<DisplayPresetChoice> choices;
+        const bool available = settings::visitdisplaypresets(
+            appenddisplaypresetchoice, &choices);
+        if(display_presets != choices)
+        {
+            display_presets.swap(choices);
+            model.DirtyVariable("display_presets");
+        }
+        return available;
+    }
+
     bool RmlSettings::refreshinterface()
     {
         settings::Theme current;
@@ -4973,6 +5020,21 @@ namespace cowui
             ? "Profile list refreshed"
             : "Autoexec profiles are unavailable";
         model.DirtyVariable("autoexec_status");
+    }
+
+    void RmlSettings::rundisplaypreset(
+        Rml::DataModelHandle, Rml::Event &event,
+        const Rml::VariantList &arguments)
+    {
+        event.StopPropagation();
+        if(arguments.size() != 1)
+            return;
+        const Rml::String id = arguments[0].Get<Rml::String>();
+        const bool accepted = settings::rundisplaypreset(id.c_str());
+        display_preset_status = accepted
+            ? "Display preset applied"
+            : "Display preset is no longer available";
+        model.DirtyVariable("display_preset_status");
     }
 
     static Rml::String formatconsoleinteger(int value)

@@ -649,6 +649,17 @@ namespace cowui
             void *data
         );
 
+        struct DisplayPresetChoice
+        {
+            const char *id;
+            const char *display_name;
+        };
+
+        typedef void (*DisplayPresetChoiceVisitor)(
+            const DisplayPresetChoice &choice,
+            void *data
+        );
+
         // Native Settings console tab minus Chat-owned bits.
         // Top-left `confilter` omits CON_CHAT / CON_TEAMCHAT; Chat owns
         // those two bits plus `miniconfilter` and `teamcolorchat`.
@@ -978,6 +989,9 @@ namespace cowui
         bool visitautoexecprofiles(AutoexecChoiceVisitor visitor, void *data);
         bool writeautoexecprofile(const char *id);
         bool runautoexecprofile(const char *id);
+        bool visitdisplaypresets(DisplayPresetChoiceVisitor visitor,
+            void *data);
+        bool rundisplaypreset(const char *id);
 
         bool readtheme(Theme &result);
         bool writetheme(Theme theme, Theme &result);

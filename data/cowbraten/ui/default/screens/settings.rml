@@ -2252,6 +2252,32 @@
                             </div>
                         </div>
 
+                        <div id="settings-display-presets"
+                            class="settings-section settings-compact-section panel">
+                            <div class="settings-control-heading">
+                                <div class="settings-control-copy">
+                                    <div class="settings-control-title">Autoexec Display Presets</div>
+                                    <div class="settings-control-description">
+                                        Presets declared as <code>ss_*</code> aliases remain engine-owned and can be launched here without exposing script evaluation to RML.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-mode-selector">
+                                <button class="button settings-mode-button settings-display-preset-button"
+                                    data-for="preset : display_presets"
+                                    data-event-click="run_display_preset(preset.id)">{{ preset.label }}</button>
+                            </div>
+                            <div class="settings-control-description"
+                                data-if="display_presets.size == 0">
+                                No <code>ss_*</code> display aliases are loaded.
+                            </div>
+                            <div class="settings-control-footer"
+                                data-if="display_preset_status != ''">
+                                <span class="settings-live-indicator"></span>
+                                <span>{{ display_preset_status }}</span>
+                            </div>
+                        </div>
+
                         <div class="settings-section settings-display-section panel">
                             <div class="settings-control-heading">
                                 <div class="settings-control-copy">

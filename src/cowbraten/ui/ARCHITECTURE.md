@@ -144,6 +144,15 @@ legacy no-op and does not disturb the active RmlUi screen. While RmlUi is
 visible, the legacy GUI stack is not rendered, which prevents two menu layers
 from competing while preserving legacy stack state for a later handoff.
 
+Known user-menu compatibility routes are semantic rather than visual copies.
+`aliases` opens Profile with its saved-name selector expanded, `autoignore`
+opens native Chat settings, and `ss` opens Graphics. Graphics enumerates only
+engine aliases whose identifiers match the constrained `ss_*` form and sends
+their selected identifier through the typed Settings bridge. The bridge
+revalidates the identifier and executes the existing engine-owned alias; RML
+never receives or evaluates its CubeScript body. This preserves personal
+resolution/FOV scripts without hard-coding them into Cowbraten.
+
 ## Loading presentation
 
 Blocking engine loads do not pass through the normal UI frame loop. A cached

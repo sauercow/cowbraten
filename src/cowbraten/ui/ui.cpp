@@ -1662,6 +1662,12 @@ namespace cowui
             screen = ScreenId::Settings;
         else if(!std::strcmp(name, "playermodel"))
             screen = ScreenId::Profile;
+        else if(!std::strcmp(name, "aliases"))
+        {
+            if(!show(ScreenId::Profile)) return false;
+            profile_model.activatesavednames();
+            return true;
+        }
         else if(!std::strcmp(name, "crosshair") ||
                 !std::strcmp(name, "soundpacks") ||
                 !std::strcmp(name, "trailcolors") ||
@@ -1670,7 +1676,8 @@ namespace cowui
                 !std::strcmp(name, "hudscore") ||
                 !std::strcmp(name, "scoreboard") ||
                 !std::strcmp(name, "hudfragmessages") ||
-                !std::strcmp(name, "autoignore"))
+                !std::strcmp(name, "autoignore") ||
+                !std::strcmp(name, "ss"))
         {
             if(!show(ScreenId::Settings)) return false;
             return settings_model.activatelegacyroute(name);

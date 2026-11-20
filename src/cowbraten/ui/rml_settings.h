@@ -45,6 +45,7 @@ namespace cowui
         struct HudScore;
         struct ScoreboardColumns;
         struct AutoexecChoice;
+        struct DisplayPresetChoice;
         struct Hud;
         struct Console;
         struct GlassReflectionsState;
@@ -171,6 +172,17 @@ namespace cowui
             {
                 return id == other.id && label == other.label &&
                     selected == other.selected;
+            }
+        };
+
+        struct DisplayPresetChoice
+        {
+            Rml::String id;
+            Rml::String label;
+
+            bool operator==(const DisplayPresetChoice &other) const
+            {
+                return id == other.id && label == other.label;
             }
         };
 
@@ -518,6 +530,11 @@ namespace cowui
             Rml::Event &event, const Rml::VariantList &arguments);
         static void appendautoexecchoice(
             const settings::AutoexecChoice &choice, void *data);
+        bool refreshdisplaypresets();
+        void rundisplaypreset(Rml::DataModelHandle,
+            Rml::Event &event, const Rml::VariantList &arguments);
+        static void appenddisplaypresetchoice(
+            const settings::DisplayPresetChoice &choice, void *data);
         bool refreshconsole();
         void presentconsole(const settings::Console &state,
             bool available,
@@ -1218,6 +1235,8 @@ namespace cowui
         Rml::String auto_ignore_status;
         std::vector<AutoexecChoice> autoexec_choices;
         Rml::String autoexec_status;
+        std::vector<DisplayPresetChoice> display_presets;
+        Rml::String display_preset_status;
         bool theme_available = false;
         bool theme_default = true;
         bool theme_modern_metallic = false;

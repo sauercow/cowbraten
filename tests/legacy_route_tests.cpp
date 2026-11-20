@@ -80,6 +80,10 @@ int main()
 
     check(hasroute(ui, "autoignore"),
         "known Autoexec Auto Ignore menu routes to native Settings");
+    check(hasroute(ui, "aliases"),
+        "known Autoexec alias selector routes to native Profile");
+    check(hasroute(ui, "ss"),
+        "known Autoexec screen preset menu routes to native Settings");
 
     check(ui.find("else\n            return false;") != std::string::npos,
         "unknown third-party GUI names retain an explicit compatibility handoff");

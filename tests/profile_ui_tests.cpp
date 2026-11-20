@@ -121,6 +121,12 @@ int main()
           ui.find("screen = ScreenId::Profile") != std::string::npos &&
           commands.find("ICOMMAND(ui_profile") != std::string::npos,
         "Profile is reachable from legacy and native navigation");
+    check(ui.find("!std::strcmp(name, \"aliases\")") != std::string::npos &&
+          ui.find("profile_model.activatesavednames()") != std::string::npos &&
+          implementation.find("void RmlProfile::activatesavednames()") !=
+              std::string::npos &&
+          implementation.find("saved_names_open = true;") != std::string::npos,
+        "Autoexec alias selector routes to native saved names");
     check(bridge.find("setvarchecked(id, value)") != std::string::npos &&
           bridge.find("game::renderplayerpreview") != std::string::npos,
         "legacy writes and 3D rendering stay behind the bridge");

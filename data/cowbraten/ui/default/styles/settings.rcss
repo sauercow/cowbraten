@@ -562,6 +562,18 @@ body
     color: var(--color-text);
 }
 
+.settings-display-preset-button
+{
+    display: flex;
+    min-width: 0;
+    height: 52dp;
+    padding: 6dp 10dp;
+    align-items: center;
+    justify-content: center;
+    line-height: 18dp;
+    text-align: center;
+}
+
 .settings-display-row
 {
     display: flex;

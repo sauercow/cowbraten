@@ -2896,6 +2896,39 @@ namespace cowui
             return sauersettings::runautoexecprofile(id);
         }
 
+        struct DisplayPresetChoiceAdapter
+        {
+            DisplayPresetChoiceVisitor visitor;
+            void *data;
+        };
+
+        static void visitdisplaypresetchoice(
+            const sauersettings::DisplayPresetChoice &legacy,
+            void *data)
+        {
+            DisplayPresetChoiceAdapter &adapter =
+                *static_cast<DisplayPresetChoiceAdapter *>(data);
+            DisplayPresetChoice choice =
+                { legacy.id, legacy.display_name };
+            adapter.visitor(choice, adapter.data);
+        }
+
+        bool visitdisplaypresets(
+            DisplayPresetChoiceVisitor visitor,
+            void *data)
+        {
+            if(!visitor)
+                return false;
+            DisplayPresetChoiceAdapter adapter = { visitor, data };
+            return sauersettings::visitdisplaypresets(
+                visitdisplaypresetchoice, &adapter);
+        }
+
+        bool rundisplaypreset(const char *id)
+        {
+            return sauersettings::rundisplaypreset(id);
+        }
+
         bool readtheme(Theme &result)
         {
             sauersettings::Theme current;

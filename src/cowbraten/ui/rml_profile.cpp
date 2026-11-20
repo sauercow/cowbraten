@@ -289,6 +289,12 @@ namespace cowui
         dragging = false;
     }
 
+    void RmlProfile::activatesavednames()
+    {
+        saved_names_open = true;
+        model.DirtyVariable("saved_names_open");
+    }
+
     void RmlProfile::update()
     {
         if(!characters_loaded)

@@ -26,6 +26,7 @@ namespace cowui
         void shutdown(Rml::Context *context);
 
         void activate();
+        void activatesavednames();
         void update();
         void renderpreview(
             Rml::ElementDocument *document,
